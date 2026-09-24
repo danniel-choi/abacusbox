@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background: #f5f7fb;
+  --font-sans: "Pretendard Variable", "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #f5f7fb;
+  color: #040713;
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.03em;
+}
+
+.page-shell {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.section-shell {
+  padding-block: 3rem;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 767px) {
+  .section-shell {
+    padding-block: 2.5rem;
+  }
+
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+input[type="range"] {
+  accent-color: #02b585;
+}
+
+@media (max-width: 640px) {
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+::selection {
+  background: rgba(2, 181, 133, 0.18);
+  color: #040713;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

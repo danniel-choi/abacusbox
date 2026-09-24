@@ -1,0 +1,36 @@
+{
+  "name": "calcrule",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack && node scripts/write-pages-routes.mjs",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "npx next typegen && tsc --noEmit",
+    "cf:preview": "npx wrangler pages dev out",
+    "d1:migrate:local": "npx wrangler d1 migrations apply calcrule-prod --local",
+    "d1:migrate:remote": "npx wrangler d1 migrations apply calcrule-prod --remote"
+  },
+  "dependencies": {
+    "@types/three": "^0.186.0",
+    "decimal.js": "^10.4.3",
+    "next": "^16.3.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.52.0",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.9.0",
+    "eslint-config-next": "^16.3.1",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.4",
+    "wrangler": "^4.125.0"
+  }
+}

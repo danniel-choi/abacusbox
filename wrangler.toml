@@ -1,0 +1,13 @@
+ "$schema" = "./node_modules/wrangler/config-schema.json"
+name = "calcrule"
+compatibility_date = "2026-08-20"
+pages_build_output_dir = "out"
+
+[vars]
+ADMIN_API_TOKEN_SHA256 = "25a87fc41cb08efe246c63dfd02ff0d8a91cfeaf53523c35bc2d5ac99b50e8c3"
+
+[[d1_databases]]
+binding = "calcrule"
+database_name = "calcrule-prod"
+database_id = "59326fbf-7206-4a36-903d-1649a49d4308"
+preview_database_id = "054c9250-237e-4e3d-971d-8a636841cf0a"

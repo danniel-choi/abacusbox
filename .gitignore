@@ -1,0 +1,12 @@
+.next
+node_modules
+out
+dist
+tsconfig.tsbuildinfo
+.wrangler
+.env
+.env*.local
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+*.log
