@@ -186,7 +186,7 @@ export function CalculatorDirectoryClient({
       <div className="mt-8">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h3 className="text-xl font-extrabold text-ink">
-            {query.trim() || category !== "전체" || group !== "all" ? `검색 결과 ${filtered.length}개` : `추천 계산기 ${featured.length}개`}
+            {query.trim() || category !== "전체" || group !== "all" ? `검색 결과 ${filtered.length}개` : `전체 계산기 ${filtered.length}개`}
           </h3>
           {!compact && (
             <button
@@ -212,7 +212,7 @@ export function CalculatorDirectoryClient({
         )}
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {(query.trim() || category !== "전체" || group !== "all" ? visible : featured).map((calculator) => (
+          {visible.map((calculator) => (
             <CalculatorCard key={calculator.slug} calculator={calculator} />
           ))}
         </div>

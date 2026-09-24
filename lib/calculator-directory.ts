@@ -124,6 +124,9 @@ export function getCalculatorsByGroup(group: CalculatorGroup) {
 
 export function getFeaturedCalculators() {
   const featuredSlugs: CalculatorSlug[] = [
+    "year-end-tax-settlement",
+    "earned-income-tax",
+    "inheritance-tax",
     "unemployment",
     "loan-dsr",
     "pension-tax",
