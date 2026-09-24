@@ -90,6 +90,7 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "random-number": "life",
   percent: "life",
   "discount-rate": "life",
+  "distance-calculator": "life",
   "lotto-generator": "life",
   vat: "business",
   "car-maintenance": "business",
@@ -157,6 +158,7 @@ export function getPopularCalculators() {
 
 export function getRecentCalculators() {
   const recentSlugs: CalculatorSlug[] = [
+    "distance-calculator",
     "year-end-tax-settlement",
     "inheritance-tax",
     "earned-income-tax",

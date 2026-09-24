@@ -34,6 +34,7 @@ export type CalculatorSlug =
   | "exchange-rate"
   | "vat"
   | "discount-rate"
+  | "distance-calculator"
   | "date-diff"
   | "dday"
   | "date-add"
@@ -65,7 +66,7 @@ export type CalculatorSlug =
   | "three-d-calculator"
   | "web-calculator";
 
-export type CalculatorCategory = "노무" | "금융" | "수학";
+export type CalculatorCategory = "노무" | "금융" | "생활" | "수학";
 
 export type InputField = {
   name: string;
@@ -3139,6 +3140,41 @@ export const calculators: CalculatorConfig[] = [
           { name: "수수료", value: totalFee },
           { name: "총액", value: total }
         ]
+      };
+    }
+  },
+  {
+    slug: "distance-calculator",
+    title: "거리 계산기",
+    description: "현재 위치를 기준으로 검색한 장소까지의 직선거리와 방향을 계산합니다.",
+    category: "생활",
+    keywords: ["거리 계산기", "현재 위치 거리", "장소 거리", "직선거리", "위치 검색", "좌표 거리"],
+    badge: "현재 위치 기반",
+    audience: "주변 목적지까지의 대략적인 거리를 빠르게 확인하는 사용자",
+    fields: [],
+    guideTitle: "거리 계산 기준",
+    guide: [
+      "브라우저 위치 권한을 허용하면 현재 위도·경도를 가져오고, 장소 검색 결과의 좌표와 비교해 직선거리를 계산합니다.",
+      "거리 계산에는 지구 반지름을 이용한 하버사인 공식을 사용합니다. 실제 이동거리, 도로 경로, 대중교통 시간과는 다를 수 있습니다.",
+      "장소 검색은 OpenStreetMap Nominatim 검색 API를 사용하며, 자동완성처럼 매 글자마다 요청하지 않고 검색 버튼을 눌렀을 때만 요청합니다."
+    ],
+    checkpoints: [
+      "현재 위치 권한을 허용해야 내 위치 기준 계산이 가능합니다.",
+      "검색 결과가 여러 개이면 주소를 확인하고 원하는 장소를 선택하세요.",
+      "결과는 직선거리 기준이므로 실제 길찾기 거리보다 짧게 나올 수 있습니다."
+    ],
+    faqs: [
+      { question: "실제 도로 이동거리인가요?", answer: "아니요. 현재 버전은 두 좌표 사이의 직선거리입니다. 도보·자동차 경로 거리는 도로망과 교통 정보를 별도로 반영해야 합니다." },
+      { question: "내 위치 정보가 서버에 저장되나요?", answer: "아니요. 현재 위치 좌표는 브라우저 화면 안에서 거리 계산에만 사용합니다. 장소 검색어는 검색 API 요청에 사용됩니다." }
+    ],
+    calculate() {
+      return {
+        headline: "현재 위치 기준 거리",
+        subline: "전용 거리 계산기에서 위치를 설정하고 장소를 검색하세요.",
+        rows: [
+          { label: "지원", value: "현재 위치 가져오기, 장소 검색, 좌표 직접 입력, 직선거리, 방향각", tone: "strong" }
+        ],
+        chart: []
       };
     }
   },

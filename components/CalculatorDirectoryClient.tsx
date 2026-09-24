@@ -274,6 +274,7 @@ function FilterControls({
         <option value="전체">전체 분야</option>
         <option value="노무">노무</option>
         <option value="금융">금융</option>
+        <option value="생활">생활</option>
         <option value="수학">수학</option>
       </select>
       <select
@@ -477,5 +478,5 @@ function DirectoryHighlight({
 }
 
 function isCalculatorCategory(value: string | null): value is CalculatorCategory {
-  return value === "노무" || value === "금융" || value === "수학";
+  return value === "노무" || value === "금융" || value === "생활" || value === "수학";
 }

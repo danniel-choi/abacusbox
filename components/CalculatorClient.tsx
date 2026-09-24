@@ -234,6 +234,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     );
   }
 
+  if (activeCalculator.slug === "distance-calculator") {
+    return <DistanceCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
       <form className="min-w-0 overflow-hidden rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
@@ -434,6 +438,323 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
       </section>
     </div>
   );
+}
+
+type PlaceSearchResult = {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+  type?: string;
+};
+
+function DistanceCalculator({ title, checkpoints }: { title: string; checkpoints: string[] }) {
+  const [originLat, setOriginLat] = useState("");
+  const [originLon, setOriginLon] = useState("");
+  const [targetLat, setTargetLat] = useState("");
+  const [targetLon, setTargetLon] = useState("");
+  const [targetName, setTargetName] = useState("");
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<PlaceSearchResult[]>([]);
+  const [status, setStatus] = useState("");
+  const [isLocating, setIsLocating] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const origin = parseCoordinatePair(originLat, originLon);
+  const target = parseCoordinatePair(targetLat, targetLon);
+  const distance = origin && target ? haversineDistanceKm(origin.lat, origin.lon, target.lat, target.lon) : null;
+  const bearing = origin && target ? bearingDegrees(origin.lat, origin.lon, target.lat, target.lon) : null;
+  const direction = bearing === null ? "-" : bearingToKoreanDirection(bearing);
+
+  function useCurrentLocation() {
+    if (!("geolocation" in navigator)) {
+      setStatus("이 브라우저에서는 현재 위치를 가져올 수 없습니다.");
+      return;
+    }
+
+    setIsLocating(true);
+    setStatus("현재 위치를 확인하는 중입니다.");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setOriginLat(position.coords.latitude.toFixed(6));
+        setOriginLon(position.coords.longitude.toFixed(6));
+        setStatus("현재 위치를 기준점으로 설정했습니다.");
+        setIsLocating(false);
+      },
+      () => {
+        setStatus("현재 위치 권한이 거부되었거나 위치를 확인하지 못했습니다.");
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  }
+
+  async function searchPlace() {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setStatus("찾을 장소명을 입력하세요.");
+      return;
+    }
+
+    setIsSearching(true);
+    setStatus("장소를 검색하는 중입니다.");
+    setResults([]);
+
+    try {
+      const params = new URLSearchParams({
+        q: trimmed,
+        format: "jsonv2",
+        limit: "5",
+        addressdetails: "1",
+        "accept-language": "ko"
+      });
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`);
+      if (!response.ok) throw new Error("장소 검색에 실패했습니다.");
+      const nextResults = (await response.json()) as PlaceSearchResult[];
+      setResults(nextResults);
+      setStatus(nextResults.length ? "검색 결과에서 목적지를 선택하세요." : "검색 결과가 없습니다. 더 구체적인 장소명으로 다시 검색하세요.");
+    } catch {
+      setStatus("장소 검색 중 오류가 발생했습니다. 잠시 후 다시 시도하세요.");
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  function selectPlace(place: PlaceSearchResult) {
+    setTargetName(place.display_name);
+    setTargetLat(Number(place.lat).toFixed(6));
+    setTargetLon(Number(place.lon).toFixed(6));
+    setStatus("목적지를 설정했습니다.");
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+      <section className="min-w-0 overflow-hidden rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
+        <div className="mb-6">
+          <p className="text-sm font-extrabold text-brand">위치 설정</p>
+          <h2 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">{title}</h2>
+        </div>
+
+        <div className="grid gap-5">
+          <div className="rounded-[18px] border border-line bg-paper p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-extrabold text-ink">현재 위치</p>
+                <p className="mt-1 text-xs font-semibold text-slate-500">브라우저 위치 권한을 허용하거나 좌표를 직접 입력하세요.</p>
+              </div>
+              <button
+                type="button"
+                onClick={useCurrentLocation}
+                disabled={isLocating}
+                className="rounded-full bg-brand px-4 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72] disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
+                {isLocating ? "확인 중" : "현재 위치 사용"}
+              </button>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <CoordinateInput label="위도" value={originLat} onChange={setOriginLat} placeholder="37.566500" />
+              <CoordinateInput label="경도" value={originLon} onChange={setOriginLon} placeholder="126.978000" />
+            </div>
+          </div>
+
+          <div className="rounded-[18px] border border-line bg-white p-4">
+            <p className="text-sm font-extrabold text-ink">목적지 검색</p>
+            <form
+              className="mt-3 flex flex-col gap-3 sm:flex-row"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void searchPlace();
+              }}
+            >
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="예: 서울역, 부산시청, 제주공항"
+                className="h-12 min-w-0 flex-1 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
+              />
+              <button
+                type="submit"
+                disabled={isSearching}
+                className="h-12 rounded-2xl bg-ink px-5 text-sm font-extrabold text-white transition hover:bg-brand disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
+                {isSearching ? "검색 중" : "검색"}
+              </button>
+            </form>
+
+            {results.length > 0 && (
+              <div className="mt-4 grid gap-2">
+                {results.map((place) => (
+                  <button
+                    key={place.place_id}
+                    type="button"
+                    onClick={() => selectPlace(place)}
+                    className="rounded-2xl border border-line bg-paper px-4 py-3 text-left transition hover:border-brand hover:bg-white"
+                  >
+                    <span className="block text-sm font-extrabold text-ink">{place.display_name}</span>
+                    <span className="mt-1 block text-xs font-semibold text-slate-500">
+                      {Number(place.lat).toFixed(5)}, {Number(place.lon).toFixed(5)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <CoordinateInput label="목적지 위도" value={targetLat} onChange={setTargetLat} placeholder="37.554700" />
+              <CoordinateInput label="목적지 경도" value={targetLon} onChange={setTargetLon} placeholder="126.970600" />
+            </div>
+            {targetName && <p className="mt-3 text-xs font-semibold leading-5 text-slate-500">{targetName}</p>}
+          </div>
+
+          {status && <p className="rounded-2xl bg-paper px-4 py-3 text-sm font-bold text-slate-600">{status}</p>}
+        </div>
+      </section>
+
+      <section className="min-w-0 overflow-hidden rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
+        <div className="rounded-[18px] bg-ink p-5 text-white">
+          <p className="text-sm font-extrabold text-brand">계산 결과</p>
+          <h2 className="mt-2 text-3xl font-extrabold leading-tight sm:text-4xl">
+            {distance === null ? "위치를 설정하세요" : formatDistanceKm(distance)}
+          </h2>
+          <p className="mt-3 text-sm font-semibold text-white/62">
+            {distance === null ? "현재 위치와 목적지 좌표가 모두 필요합니다." : `직선거리 기준 · 방향 ${direction}`}
+          </p>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <ResultTile label="직선거리" value={distance === null ? "-" : formatDistanceKm(distance)} />
+          <ResultTile label="방향" value={bearing === null ? "-" : `${direction} ${bearing.toFixed(0)}도`} />
+        </div>
+
+        <div className="mt-5 overflow-hidden rounded-[18px] border border-line">
+          <ResultLine label="현재 위치" value={origin ? `${origin.lat.toFixed(6)}, ${origin.lon.toFixed(6)}` : "-"} />
+          <ResultLine label="목적지" value={target ? `${target.lat.toFixed(6)}, ${target.lon.toFixed(6)}` : "-"} />
+          <ResultLine label="킬로미터" value={distance === null ? "-" : `${distance.toFixed(3)} km`} />
+          <ResultLine label="미터" value={distance === null ? "-" : `${Math.round(distance * 1000).toLocaleString("ko-KR")} m`} />
+        </div>
+
+        {target && (
+          <a
+            href={`https://www.openstreetmap.org/?mlat=${target.lat}&mlon=${target.lon}#map=16/${target.lat}/${target.lon}`}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-5 inline-flex rounded-full border border-brand px-5 py-3 text-sm font-extrabold text-brand transition hover:bg-brand hover:text-white"
+          >
+            목적지 지도 열기
+          </a>
+        )}
+
+        <div className="mt-5 rounded-[18px] border border-line bg-white p-5">
+          <p className="text-sm font-extrabold text-ink">해석 포인트</p>
+          <div className="mt-4 grid gap-3">
+            {checkpoints.map((item) => (
+              <div key={item} className="flex gap-3 rounded-2xl bg-paper px-4 py-4">
+                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-brand" />
+                <p className="text-sm font-medium leading-6 text-slate-700">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="mt-4 text-xs font-semibold leading-6 text-slate-500">
+          장소 검색은 OpenStreetMap Nominatim 데이터를 사용합니다. 결과는 직선거리 추정치이며 실제 이동 경로와 다를 수 있습니다.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+function CoordinateInput({
+  label,
+  value,
+  onChange,
+  placeholder
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <label className="grid gap-2">
+      <span className="text-sm font-extrabold text-ink">{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        inputMode="decimal"
+        placeholder={placeholder}
+        className="h-12 min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
+      />
+    </label>
+  );
+}
+
+function ResultTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[18px] border border-line bg-paper p-4">
+      <p className="text-sm font-bold text-slate-500">{label}</p>
+      <p className="mt-2 text-2xl font-extrabold text-ink">{value}</p>
+    </div>
+  );
+}
+
+function ResultLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid grid-cols-1 gap-1 border-b border-line p-3 text-sm last:border-0 sm:grid-cols-[0.9fr_1.1fr] sm:gap-0">
+      <div className="bg-paper px-4 py-4 font-extrabold text-slate-600">{label}</div>
+      <div className="min-w-0 px-4 py-4 text-left text-xs font-extrabold text-ink sm:text-right sm:text-sm">
+        <span className="break-words">{value}</span>
+      </div>
+    </div>
+  );
+}
+
+function parseCoordinatePair(latValue: string, lonValue: string) {
+  const lat = Number(latValue);
+  const lon = Number(lonValue);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+  return { lat, lon };
+}
+
+function haversineDistanceKm(fromLat: number, fromLon: number, toLat: number, toLon: number) {
+  const earthRadiusKm = 6371.0088;
+  const fromLatRad = toRadians(fromLat);
+  const toLatRad = toRadians(toLat);
+  const deltaLat = toRadians(toLat - fromLat);
+  const deltaLon = toRadians(toLon - fromLon);
+  const halfChord =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(fromLatRad) * Math.cos(toLatRad) * Math.sin(deltaLon / 2) ** 2;
+
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(halfChord), Math.sqrt(1 - halfChord));
+}
+
+function bearingDegrees(fromLat: number, fromLon: number, toLat: number, toLon: number) {
+  const fromLatRad = toRadians(fromLat);
+  const toLatRad = toRadians(toLat);
+  const deltaLon = toRadians(toLon - fromLon);
+  const y = Math.sin(deltaLon) * Math.cos(toLatRad);
+  const x = Math.cos(fromLatRad) * Math.sin(toLatRad) - Math.sin(fromLatRad) * Math.cos(toLatRad) * Math.cos(deltaLon);
+  return (toDegrees(Math.atan2(y, x)) + 360) % 360;
+}
+
+function toRadians(value: number) {
+  return value * Math.PI / 180;
+}
+
+function toDegrees(value: number) {
+  return value * 180 / Math.PI;
+}
+
+function formatDistanceKm(value: number) {
+  if (value < 1) return `${Math.round(value * 1000).toLocaleString("ko-KR")} m`;
+  return `${value.toLocaleString("ko-KR", { maximumFractionDigits: value < 10 ? 2 : 1 })} km`;
+}
+
+function bearingToKoreanDirection(value: number) {
+  const directions = ["북", "북동", "동", "남동", "남", "남서", "서", "북서"];
+  return directions[Math.round(value / 45) % directions.length];
 }
 
 function ExpressionCalculator({
