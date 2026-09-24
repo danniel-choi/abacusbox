@@ -994,7 +994,7 @@ function ExpressionCalculator({
   );
 }
 
-type MathNoteKind = "expression" | "graph" | "text" | "slider" | "table" | "folder" | "button";
+type MathNoteKind = "expression" | "graph" | "text" | "slider" | "table" | "folder" | "button" | "image";
 
 type MathNoteRow = {
   id: string;
@@ -1017,27 +1017,45 @@ const mathNoteTemplates: { label: string; kind: MathNoteKind; content: string }[
   { label: "슬라이더", kind: "slider", content: "a" },
   { label: "표", kind: "table", content: "0,0\n1,1\n2,4" },
   { label: "폴더", kind: "folder", content: "새 폴더" },
-  { label: "버튼", kind: "button", content: "a=random(-5,5)" }
+  { label: "버튼", kind: "button", content: "a=random(-5,5)" },
+  { label: "이미지", kind: "image", content: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=1200&q=80" }
+];
+
+const defaultMathNoteRows: MathNoteRow[] = [
+  { id: "n1", kind: "text", title: "h2", content: "이차함수 탐구" },
+  { id: "n1b", kind: "text", title: "p", content: "현재 a={{a}}, b={{b}}일 때 꼭짓점은 {{vertex}}입니다." },
+  { id: "n2", kind: "slider", content: "a", value: 1, min: -5, max: 5, step: 0.1 },
+  { id: "n3", kind: "slider", content: "b", value: 0, min: -8, max: 8, step: 0.5 },
+  { id: "n4", kind: "expression", content: "vertex=-b/(2a)", locked: false },
+  { id: "n5", kind: "graph", content: "y=a*x^2+b*x-4\ny=vertex", width: "full" },
+  { id: "n6", kind: "table", content: "-2,4\n-1,1\n0,0\n1,1\n2,4", width: "left" }
+];
+
+const conicMathNoteRows: MathNoteRow[] = [
+  { id: "c1", kind: "text", title: "h2", content: "원의 방정식 활동지" },
+  { id: "c2", kind: "text", title: "p", content: "중심이 ({{h}}, {{k}}), 반지름이 {{r}}인 원을 관찰합니다." },
+  { id: "c3", kind: "slider", content: "h", value: 1, min: -5, max: 5, step: 0.5 },
+  { id: "c4", kind: "slider", content: "k", value: -1, min: -5, max: 5, step: 0.5 },
+  { id: "c5", kind: "slider", content: "r", value: 3, min: 0.5, max: 8, step: 0.5 },
+  { id: "c6", kind: "expression", content: "area=pi*r^2", locked: false },
+  { id: "c7", kind: "text", title: "callout", content: "원의 넓이는 {{area}}입니다. h, k, r을 바꾸며 그래프 변화를 확인하세요." },
+  { id: "c8", kind: "graph", content: "y=k+sqrt(r^2-(x-h)^2)\ny=k-sqrt(r^2-(x-h)^2)", width: "full" },
+  { id: "c9", kind: "table", content: "1,2\n4,-1\n-2,-1", width: "left" }
 ];
 
 function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[] }) {
-  const [rows, setRows] = useState<MathNoteRow[]>([
-    { id: "n1", kind: "text", title: "h2", content: "이차함수 탐구" },
-    { id: "n1b", kind: "text", title: "p", content: "현재 a={{a}}, b={{b}}일 때 꼭짓점은 {{vertex}}입니다." },
-    { id: "n2", kind: "slider", content: "a", value: 1, min: -5, max: 5, step: 0.1 },
-    { id: "n3", kind: "slider", content: "b", value: 0, min: -8, max: 8, step: 0.5 },
-    { id: "n4", kind: "expression", content: "vertex=-b/(2a)", locked: false },
-    { id: "n5", kind: "graph", content: "y=a*x^2+b*x-4\ny=vertex", width: "full" },
-    { id: "n6", kind: "table", content: "-2,4\n-1,1\n0,0\n1,1\n2,4", width: "left" }
-  ]);
+  const [rows, setRows] = useState<MathNoteRow[]>(defaultMathNoteRows);
   const [notebookTitle, setNotebookTitle] = useState("새 수학 노트");
   const [angleMode, setAngleMode] = useState<"deg" | "rad">("rad");
   const [selectedId, setSelectedId] = useState("n1");
   const [previewMode, setPreviewMode] = useState(false);
+  const [history, setHistory] = useState<MathNoteRow[][]>([]);
+  const [future, setFuture] = useState<MathNoteRow[][]>([]);
   const [xMin, setXMin] = useState(-10);
   const [xMax, setXMax] = useState(10);
   const [yMin, setYMin] = useState(-10);
   const [yMax, setYMax] = useState(10);
+  const importInputRef = useRef<HTMLInputElement>(null);
   const nextRowIdRef = useRef(7);
   const view = useMemo(() => normalizeGraphView(xMin, xMax, yMin, yMax), [xMin, xMax, yMin, yMax]);
   const evaluated = useMemo(() => evaluateMathNoteRows(rows, angleMode), [angleMode, rows]);
@@ -1052,7 +1070,7 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
       }))),
     [rows]
   );
-  const tablePoints = useMemo(() => buildNotebookTablePoints(rows, view), [rows, view]);
+  const tablePoints = useMemo(() => buildNotebookTablePoints(rows, view, angleMode, variables), [angleMode, rows, variables, view]);
   const graph = useMemo(() => buildGraph(graphRows, view, angleMode, 0, variables), [angleMode, graphRows, variables, view]);
   const visibleRows = useMemo(() => visibleNotebookRows(rows), [rows]);
 
@@ -1064,7 +1082,7 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
       const parsed = JSON.parse(stored) as MathNoteRow[];
       if (Array.isArray(parsed) && parsed.length > 0) {
         window.setTimeout(() => {
-          const safeRows = parsed.filter((row) => ["expression", "graph", "text", "slider", "table", "folder", "button"].includes(row.kind));
+          const safeRows = parsed.filter((row) => ["expression", "graph", "text", "slider", "table", "folder", "button", "image"].includes(row.kind));
           setRows(safeRows);
           setSelectedId(safeRows[0]?.id ?? "n1");
           nextRowIdRef.current = safeRows.length + 1;
@@ -1081,7 +1099,31 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
   }, [rows]);
 
   function updateRow(id: string, next: Partial<MathNoteRow>) {
-    setRows((current) => current.map((row) => (row.id === id ? { ...row, ...next } : row)));
+    commitRows(rows.map((row) => (row.id === id ? { ...row, ...next } : row)));
+  }
+
+  function commitRows(nextRows: MathNoteRow[]) {
+    setHistory((current) => [rows, ...current].slice(0, 40));
+    setFuture([]);
+    setRows(nextRows);
+  }
+
+  function undoRows() {
+    const previous = history[0];
+    if (!previous) return;
+    setFuture((current) => [rows, ...current].slice(0, 40));
+    setRows(previous);
+    setHistory((current) => current.slice(1));
+    setSelectedId(previous[0]?.id ?? "");
+  }
+
+  function redoRows() {
+    const next = future[0];
+    if (!next) return;
+    setHistory((current) => [rows, ...current].slice(0, 40));
+    setRows(next);
+    setFuture((current) => current.slice(1));
+    setSelectedId(next[0]?.id ?? "");
   }
 
   function addRow(kind: MathNoteKind, content = "") {
@@ -1098,27 +1140,78 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
       step: kind === "slider" ? 0.1 : undefined,
       collapsed: false
     };
-    setRows((current) => [...current, next]);
+    commitRows([...rows, next]);
     setSelectedId(next.id);
   }
 
   function removeRow(id: string) {
     if (rows.length === 1) return;
     const next = rows.filter((row) => row.id !== id);
-    setRows(next);
+    commitRows(next);
     if (selectedId === id) setSelectedId(next[0]?.id ?? "");
   }
 
+  function duplicateRow(id: string) {
+    const index = rows.findIndex((row) => row.id === id);
+    if (index < 0) return;
+    const copy = { ...rows[index], id: `note-${nextRowIdRef.current++}` };
+    commitRows([...rows.slice(0, index + 1), copy, ...rows.slice(index + 1)]);
+    setSelectedId(copy.id);
+  }
+
+  function moveRow(id: string, direction: -1 | 1) {
+    const index = rows.findIndex((row) => row.id === id);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= rows.length) return;
+    const next = [...rows];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    commitRows(next);
+  }
+
   function resetRows() {
-    const next = [
-      { id: "n1", kind: "text" as const, title: "h2", content: "새 수학 노트" },
-      { id: "n2", kind: "slider" as const, content: "m", value: 1, min: -5, max: 5, step: 0.1 },
-      { id: "n3", kind: "expression" as const, content: "m^2+2m+1", locked: false },
-      { id: "n4", kind: "graph" as const, content: "y=m*x+1\ny=x^2" },
-      { id: "n5", kind: "table" as const, content: "0,1\n1,2\n2,5", width: "left" as const }
-    ];
-    setRows(next);
-    setSelectedId(next[0].id);
+    loadNotebookRows(defaultMathNoteRows, "새 수학 노트");
+  }
+
+  function loadNotebookRows(nextRows: MathNoteRow[], nextTitle = notebookTitle) {
+    commitRows(nextRows.map((row) => ({ ...row })));
+    setNotebookTitle(nextTitle);
+    setSelectedId(nextRows[0]?.id ?? "");
+    nextRowIdRef.current = nextRows.length + 1;
+  }
+
+  function exportNotebook() {
+    const payload = JSON.stringify({ title: notebookTitle, rows, angleMode, graphView: { xMin, xMax, yMin, yMax } }, null, 2);
+    const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${notebookTitle.trim() || "math-notes"}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importNotebook(file: File | null) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result)) as { title?: string; rows?: MathNoteRow[]; angleMode?: "deg" | "rad"; graphView?: { xMin?: number; xMax?: number; yMin?: number; yMax?: number } };
+        const safeRows = Array.isArray(parsed.rows)
+          ? parsed.rows.filter((row) => ["expression", "graph", "text", "slider", "table", "folder", "button", "image"].includes(row.kind))
+          : [];
+        if (safeRows.length === 0) return;
+        loadNotebookRows(safeRows, parsed.title ?? "불러온 노트");
+        if (parsed.angleMode === "deg" || parsed.angleMode === "rad") setAngleMode(parsed.angleMode);
+        if (parsed.graphView) {
+          if (Number.isFinite(parsed.graphView.xMin)) setXMin(Number(parsed.graphView.xMin));
+          if (Number.isFinite(parsed.graphView.xMax)) setXMax(Number(parsed.graphView.xMax));
+          if (Number.isFinite(parsed.graphView.yMin)) setYMin(Number(parsed.graphView.yMin));
+          if (Number.isFinite(parsed.graphView.yMax)) setYMax(Number(parsed.graphView.yMax));
+        }
+      } catch {
+        window.alert("노트 파일을 읽지 못했습니다.");
+      }
+    };
+    reader.readAsText(file);
   }
 
   const selected = rows.find((row) => row.id === selectedId) ?? rows[0];
@@ -1128,8 +1221,24 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
       <section className="min-w-0 overflow-hidden rounded-[20px] border border-line bg-white shadow-float">
         <div className="border-b border-line bg-paper px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" aria-label="되돌리기" className="h-9 w-9 rounded-full border border-line bg-white text-sm font-extrabold text-slate-600">↶</button>
-            <button type="button" aria-label="다시 실행" className="h-9 w-9 rounded-full border border-line bg-white text-sm font-extrabold text-slate-600">↷</button>
+            <button
+              type="button"
+              onClick={undoRows}
+              disabled={history.length === 0}
+              aria-label="되돌리기"
+              className="h-9 w-9 rounded-full border border-line bg-white text-sm font-extrabold text-slate-600 disabled:opacity-35"
+            >
+              ↶
+            </button>
+            <button
+              type="button"
+              onClick={redoRows}
+              disabled={future.length === 0}
+              aria-label="다시 실행"
+              className="h-9 w-9 rounded-full border border-line bg-white text-sm font-extrabold text-slate-600 disabled:opacity-35"
+            >
+              ↷
+            </button>
             <span className="rounded-full bg-white px-3 py-2 text-xs font-extrabold text-brand">{title}</span>
             <select
               aria-label="텍스트 스타일"
@@ -1141,8 +1250,22 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
               <option value="h2">제목</option>
               <option value="callout">강조</option>
             </select>
-            <button type="button" aria-label="굵게" className="h-9 w-9 rounded-full border border-line bg-white text-sm font-extrabold text-ink">B</button>
-            <button type="button" aria-label="기울임" className="h-9 w-9 rounded-full border border-line bg-white text-sm font-extrabold italic text-ink">I</button>
+            <button
+              type="button"
+              onClick={() => selected?.kind === "text" && updateRow(selected.id, { content: `${selected.content} **굵은 글씨**` })}
+              aria-label="굵게"
+              className="h-9 w-9 rounded-full border border-line bg-white text-sm font-extrabold text-ink"
+            >
+              B
+            </button>
+            <button
+              type="button"
+              onClick={() => selected?.kind === "text" && updateRow(selected.id, { content: `${selected.content} _기울임_` })}
+              aria-label="기울임"
+              className="h-9 w-9 rounded-full border border-line bg-white text-sm font-extrabold italic text-ink"
+            >
+              I
+            </button>
             <button
               type="button"
               onClick={() => setAngleMode((current) => (current === "rad" ? "deg" : "rad"))}
@@ -1153,10 +1276,38 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
             <button
               type="button"
               onClick={() => setPreviewMode((current) => !current)}
-              className="ml-auto h-9 rounded-full bg-ink px-4 text-xs font-extrabold text-white"
+              className="h-9 rounded-full bg-ink px-4 text-xs font-extrabold text-white md:ml-auto"
             >
               {previewMode ? "편집" : "미리보기"}
             </button>
+            <button
+              type="button"
+              onClick={() => loadNotebookRows(conicMathNoteRows, "원의 방정식 활동지")}
+              className="h-9 rounded-full border border-line bg-white px-3 text-xs font-extrabold text-slate-600"
+            >
+              예제
+            </button>
+            <button
+              type="button"
+              onClick={exportNotebook}
+              className="h-9 rounded-full border border-line bg-white px-3 text-xs font-extrabold text-slate-600"
+            >
+              저장
+            </button>
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              className="h-9 rounded-full border border-line bg-white px-3 text-xs font-extrabold text-slate-600"
+            >
+              불러오기
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={(event) => importNotebook(event.target.files?.[0] ?? null)}
+            />
             <button
               type="button"
               onClick={resetRows}
@@ -1240,6 +1391,29 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
                       {row.locked ? "잠금" : "편집 가능"}
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => moveRow(row.id, -1)}
+                    className="h-10 rounded-2xl border border-line px-3 text-xs font-extrabold text-slate-500 transition hover:border-brand hover:text-brand disabled:opacity-35"
+                    disabled={index === 0}
+                  >
+                    위
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveRow(row.id, 1)}
+                    className="h-10 rounded-2xl border border-line px-3 text-xs font-extrabold text-slate-500 transition hover:border-brand hover:text-brand disabled:opacity-35"
+                    disabled={index === rows.length - 1}
+                  >
+                    아래
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => duplicateRow(row.id)}
+                    className="h-10 rounded-2xl border border-line px-3 text-xs font-extrabold text-slate-500 transition hover:border-brand hover:text-brand"
+                  >
+                    복제
+                  </button>
                   <button
                     type="button"
                     onClick={() => removeRow(row.id)}
@@ -1343,6 +1517,28 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
                     />
                     <p className="rounded-2xl bg-white px-4 py-3 text-sm font-extrabold text-brand">좌표 {tablePoints.filter((point) => point.rowId === row.id).length}개</p>
                   </div>
+                ) : row.kind === "image" ? (
+                  <div className="grid gap-3 rounded-2xl bg-white p-4">
+                    {!previewMode && (
+                      <input
+                        value={row.content}
+                        onChange={(event) => updateRow(row.id, { content: event.target.value })}
+                        onFocus={() => setSelectedId(row.id)}
+                        className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-extrabold text-ink outline-none transition focus:border-brand"
+                        placeholder="이미지 URL"
+                      />
+                    )}
+                    {row.content ? (
+                      <div
+                        role="img"
+                        aria-label="노트 이미지"
+                        className="min-h-[220px] w-full rounded-2xl border border-line bg-cover bg-center"
+                        style={{ backgroundImage: `url(${row.content})` }}
+                      />
+                    ) : (
+                      <p className="rounded-2xl bg-paper px-4 py-6 text-sm font-bold text-slate-500">이미지 URL을 입력하세요.</p>
+                    )}
+                  </div>
                 ) : row.kind === "button" ? (
                   <div className="grid gap-3 rounded-2xl bg-white p-4">
                     <input
@@ -1355,7 +1551,7 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
                     />
                     <button
                       type="button"
-                      onClick={() => setRows((current) => runNotebookAction(current, row.content))}
+                      onClick={() => commitRows(runNotebookAction(rows, row.content))}
                       className="h-11 rounded-2xl bg-brand px-4 text-sm font-extrabold text-white"
                     >
                       실행
@@ -1366,12 +1562,12 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
                     value={row.content}
                     onChange={(event) => updateRow(row.id, { content: event.target.value })}
                     onFocus={() => setSelectedId(row.id)}
-                    readOnly={previewMode}
+                    readOnly={previewMode || Boolean(row.locked)}
                     className="h-12 w-full min-w-0 rounded-2xl border border-line bg-white px-4 font-extrabold text-ink outline-none transition focus:border-brand"
                     placeholder="예: a=5 또는 sqrt(16)+2"
                   />
                 )}
-                {row.kind !== "text" && row.kind !== "folder" && row.kind !== "slider" && row.kind !== "table" && row.kind !== "button" && row.kind !== "graph" && (
+                {row.kind !== "text" && row.kind !== "folder" && row.kind !== "slider" && row.kind !== "table" && row.kind !== "button" && row.kind !== "graph" && row.kind !== "image" && (
                   <div className="rounded-2xl bg-white px-4 py-3">
                     <p className={`text-sm font-extrabold ${result?.error ? "text-red-600" : "text-brand"}`}>
                       {result?.error ? result.error : result?.output ?? "입력 대기"}
@@ -1463,7 +1659,7 @@ function MathNotes({ title, checkpoints }: { title: string; checkpoints: string[
             <p className="text-sm font-extrabold text-ink">변수</p>
             <button
               type="button"
-              onClick={() => setRows((current) => randomizeNotebookSliders(current))}
+              onClick={() => commitRows(randomizeNotebookSliders(rows))}
               className="rounded-full border border-line px-3 py-2 text-xs font-extrabold text-slate-500 hover:border-brand hover:text-brand"
             >
               랜덤
@@ -1528,7 +1724,7 @@ function evaluateMathNoteRows(rows: MathNoteRow[], angleMode: "deg" | "rad") {
       if (name) variables[name] = Number(row.value ?? 0);
       return { id: row.id, output: name ? `${name} = ${formatCalculatorResult(Number(row.value ?? 0))}` : "", error: "" };
     }
-    if (row.kind === "text" || row.kind === "table" || row.kind === "folder" || row.kind === "button") return { id: row.id, output: "", error: "" };
+    if (row.kind === "text" || row.kind === "table" || row.kind === "folder" || row.kind === "button" || row.kind === "image") return { id: row.id, output: "", error: "" };
     const content = row.content.trim();
     if (!content) return { id: row.id, output: "입력 대기", error: "" };
     if (row.kind === "graph") return { id: row.id, output: "그래프에 표시됨", error: "" };
@@ -1577,6 +1773,7 @@ function notebookKindLabel(kind: MathNoteKind | undefined) {
   if (kind === "table") return "표";
   if (kind === "folder") return "폴더";
   if (kind === "button") return "버튼";
+  if (kind === "image") return "이미지";
   return "수식";
 }
 
@@ -1589,7 +1786,7 @@ function renderNotebookText(content: string, variables: Record<string, number>) 
   const pieces = content.split(/(\{\{[a-zA-Z][a-zA-Z]*\}\})/g);
   return pieces.map((piece, index) => {
     const match = piece.match(/^\{\{([a-zA-Z][a-zA-Z]*)\}\}$/);
-    if (!match) return <span key={`${piece}-${index}`}>{piece}</span>;
+    if (!match) return <span key={`${piece}-${index}`}>{renderNotebookInlineStyle(piece)}</span>;
     const name = match[1].toLowerCase();
     const value = variables[name];
     return (
@@ -1597,6 +1794,18 @@ function renderNotebookText(content: string, variables: Record<string, number>) 
         {Number.isFinite(value) ? formatCalculatorResult(value) : name}
       </span>
     );
+  });
+}
+
+function renderNotebookInlineStyle(content: string) {
+  return content.split(/(\*\*[^*]+\*\*|_[^_]+_)/g).map((piece, index) => {
+    if (/^\*\*[^*]+\*\*$/.test(piece)) {
+      return <strong key={`${piece}-${index}`}>{piece.slice(2, -2)}</strong>;
+    }
+    if (/^_[^_]+_$/.test(piece)) {
+      return <em key={`${piece}-${index}`}>{piece.slice(1, -1)}</em>;
+    }
+    return <span key={`${piece}-${index}`}>{piece}</span>;
   });
 }
 
@@ -1612,16 +1821,32 @@ function visibleNotebookRows(rows: MathNoteRow[]) {
   });
 }
 
-function buildNotebookTablePoints(rows: MathNoteRow[], view: ReturnType<typeof normalizeGraphView>) {
+function buildNotebookTablePoints(
+  rows: MathNoteRow[],
+  view: ReturnType<typeof normalizeGraphView>,
+  angleMode: "deg" | "rad",
+  variables: Record<string, number>
+) {
   return rows.flatMap((row) => {
     if (row.kind !== "table") return [];
     return row.content.split(/\n+/).flatMap((line) => {
-      const [rawX, rawY] = line.split(/,|\t/).map((value) => Number(value.trim()));
+      const [rawX, rawY] = line.split(/,|\t/).map((value) => evaluateNotebookTableCell(value.trim(), angleMode, variables));
       if (!Number.isFinite(rawX) || !Number.isFinite(rawY)) return [];
       if (rawX < view.xMin || rawX > view.xMax || rawY < view.yMin || rawY > view.yMax) return [];
       return [{ rowId: row.id, x: rawX, y: rawY }];
     });
   });
+}
+
+function evaluateNotebookTableCell(value: string, angleMode: "deg" | "rad", variables: Record<string, number>) {
+  if (!value) return Number.NaN;
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) return numeric;
+  try {
+    return evaluateExpression(normalizeGraphExpression(value), { angleMode, ans: 0, memory: 0, variables });
+  } catch {
+    return Number.NaN;
+  }
 }
 
 function randomizeNotebookSliders(rows: MathNoteRow[]) {
@@ -3953,6 +4178,18 @@ function buildGraph(
     ...yTicks.map((tick) => ({ key: `hy-${tick.value}`, x1: padding, y1: tick.y, x2: width - padding, y2: tick.y, axis: Math.abs(tick.value) < 1e-9 }))
   ];
   const series = expressions.map((row) => {
+    const verticalMatch = row.expression.trim().match(/^x\s*=\s*(.+)$/i);
+    if (verticalMatch) {
+      try {
+        const x = evaluateExpression(normalizeGraphExpression(verticalMatch[1]), { angleMode, ans: 0, memory: 0, variables });
+        const paths = Number.isFinite(x) && x >= view.xMin && x <= view.xMax
+          ? [`M ${toX(x).toFixed(2)} ${toY(view.yMin).toFixed(2)} L ${toX(x).toFixed(2)} ${toY(view.yMax).toFixed(2)}`]
+          : [];
+        return { id: row.id, color: row.color, paths, error: paths.length === 0 ? "그래프 범위 안에서 그릴 수 있는 점이 없습니다." : "" };
+      } catch {
+        return { id: row.id, color: row.color, paths: [], error: "수식을 확인해 주세요." };
+      }
+    }
     const sampled = Array.from({ length: 260 }, (_, index) => {
       const x = view.xMin + (index / 259) * (view.xMax - view.xMin);
       try {
