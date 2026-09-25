@@ -84,24 +84,15 @@ export function Header() {
 
       <div
         id="mobile-menu-drawer"
-        className={`fixed inset-0 z-60 md:hidden transition-opacity duration-250 ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-60 bg-ink md:hidden transition-opacity duration-250 ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
       >
-        <div
-          className="absolute inset-0 bg-black/25"
-          style={{
-            WebkitBackdropFilter: "blur(14px)",
-            backdropFilter: "blur(14px)"
-          }}
-          onClick={() => setOpen(false)}
-        />
-
         <aside
-          className={`fixed right-0 top-0 h-full w-[78vw] max-w-[320px] bg-ink/95 shadow-2xl ring-1 ring-white/10 transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
+          className={`fixed inset-0 h-full w-full bg-ink transition-transform duration-300 ${open ? "translate-y-0" : "-translate-y-full"}`}
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="flex h-full flex-col gap-4 px-4 py-5">
-            <div className="flex justify-between">
-              <span className="text-sm font-bold text-white/80">메뉴</span>
+          <div className="mx-auto flex h-full max-w-6xl flex-col gap-8 px-4 py-5 sm:px-6">
+            <div className="flex items-center justify-between">
+              <Logo inverted />
 
               <button
                 type="button"
@@ -116,13 +107,13 @@ export function Header() {
               </button>
             </div>
 
-            <nav className="grid gap-2">
+            <nav className="grid gap-3 overflow-y-auto pb-8">
               {navItems.map((item, index) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-2xl border border-brand/40 bg-white px-4 py-3.5 text-base font-extrabold leading-tight text-ink shadow-[0_12px_28px_rgba(255,255,255,0.12)] transition hover:border-brand hover:bg-brand hover:text-white"
+                  className="rounded-2xl border border-white/12 bg-white px-5 py-4 text-lg font-extrabold leading-tight text-ink shadow-[0_12px_28px_rgba(255,255,255,0.12)] transition hover:border-brand hover:bg-brand hover:text-white"
                   style={{ transitionDelay: `${open ? 55 + index * 35 : 0}ms` }}
                 >
                   {item.label}
