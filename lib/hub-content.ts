@@ -149,7 +149,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     title: "판매 수익과 사업 비용 계산기",
     description: "부가세, 판매수익, 손익분기점, 구독 매출, 물류비처럼 소규모 사업자가 자주 보는 숫자를 정리했습니다.",
     featuredSlugs: ["vat", "seller-profit", "break-even", "subscription-revenue", "cbm-freight", "mobile-plan"],
-    blogSlugs: ["calcrule-content-hub-launch"],
+    blogSlugs: ["break-even-checklist-20260926-00-hourly", "calcrule-content-hub-launch"],
     sections: [
       {
         title: "사업 계산은 매출보다 마진 구조가 먼저입니다.",
