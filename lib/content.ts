@@ -197,34 +197,138 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     audience: "주택 매수 예정자, 부동산 비용 확인 사용자",
     description: "주택 취득가액을 기준으로 취득세와 지방교육세를 계산합니다.",
     tags: ["취득세", "부동산", "주택"]
+  },
+  "jeonse-vs-monthly-rent": {
+    title: "전세 vs 월세 비교 계산기",
+    category: "생활 가이드",
+    audience: "이사 예정자, 임대차 비교 사용자",
+    description: "전세보증금과 월세 조건을 이자 기회비용 기준으로 비교합니다.",
+    tags: ["전월세", "주거비", "이사"]
+  },
+  "card-installment": {
+    title: "카드 할부 계산기",
+    category: "금융 가이드",
+    audience: "고액 결제 사용자, 카드 비용 비교 사용자",
+    description: "결제금액, 개월 수, 할부 수수료율을 기준으로 월 납부액과 총 수수료를 계산합니다.",
+    tags: ["카드할부", "수수료", "결제"]
+  },
+  "exchange-rate": {
+    title: "환율 계산기",
+    category: "금융 가이드",
+    audience: "해외결제 사용자, 여행자, 해외구매 사용자",
+    description: "환율과 금액을 입력해 원화와 외화 환산 금액을 계산합니다.",
+    tags: ["환율", "해외결제", "여행"]
+  },
+  savings: {
+    title: "예금·적금 실수령액 계산기",
+    category: "금융 가이드",
+    audience: "저축 계획 사용자, 금융상품 비교 사용자",
+    description: "납입액, 기간, 금리, 과세 유형을 입력해 만기 원리금과 세후 이자를 계산합니다.",
+    tags: ["예금", "적금", "세후이자"]
+  },
+  "lump-sum-deposit": {
+    title: "예금 단리 계산기",
+    category: "금융 가이드",
+    audience: "예금 가입 사용자, 자금 운용 비교 사용자",
+    description: "목돈 예치금, 기간, 금리, 과세 유형을 기준으로 만기 원리금과 세후 이자를 계산합니다.",
+    tags: ["예금", "단리", "만기수령액"]
+  },
+  "compound-interest": {
+    title: "복리 투자 수익 계산기",
+    category: "금융 가이드",
+    audience: "장기 투자자, 적립식 투자 사용자",
+    description: "초기 투자금, 월 추가 투자금, 수익률, 투자 기간을 기준으로 복리 수익을 계산합니다.",
+    tags: ["복리", "투자", "장기수익률"]
+  },
+  "pension-tax": {
+    title: "IRP·연금저축 절세액 계산기",
+    category: "세금 가이드",
+    audience: "직장인, 연말정산 준비 사용자",
+    description: "연금계좌 납입액과 총급여 구간에 따라 세액공제 예상액을 계산합니다.",
+    tags: ["IRP", "연금저축", "세액공제"]
+  },
+  "isa-tax": {
+    title: "ISA 절세 계산기",
+    category: "세금 가이드",
+    audience: "투자자, 절세 상품 비교 사용자",
+    description: "ISA 계좌 이익과 소득구간에 따라 비과세 한도와 분리과세 효과를 계산합니다.",
+    tags: ["ISA", "절세", "비과세"]
+  },
+  "youth-leap-account": {
+    title: "청년도약계좌 계산기",
+    category: "금융 가이드",
+    audience: "기존 청년도약계좌 가입자, 정책상품 비교 사용자",
+    description: "월 납입액과 소득구간을 기준으로 정부기여금과 만기 누적 납입액을 계산합니다.",
+    tags: ["청년도약계좌", "정책금융", "정부기여금"]
+  },
+  "comprehensive-income-tax": {
+    title: "종합소득세 계산기",
+    category: "세금 가이드",
+    audience: "프리랜서, 사업자, 종합소득세 신고 전 사용자",
+    description: "과세표준을 기준으로 종합소득세 산출세액과 지방소득세를 계산합니다.",
+    tags: ["종합소득세", "과세표준", "신고"]
+  },
+  "retirement-income-tax": {
+    title: "퇴직소득세 계산기",
+    category: "세금 가이드",
+    audience: "퇴직 예정자, 인사 담당자",
+    description: "퇴직급여액과 근속연수를 기준으로 퇴직소득세 산출세액을 계산합니다.",
+    tags: ["퇴직소득세", "퇴직급여", "근속연수"]
+  },
+  vat: {
+    title: "부가세 계산기",
+    category: "세금 가이드",
+    audience: "사업자, 프리랜서, 견적서 작성 사용자",
+    description: "공급가액 또는 합계금액을 기준으로 부가세와 총액을 계산합니다.",
+    tags: ["부가세", "공급가액", "사업자"]
+  },
+  "seller-profit": {
+    title: "판매자 수익 계산기",
+    category: "사업 가이드",
+    audience: "온라인 셀러, 자사몰 운영자, 마켓 판매자",
+    description: "판매가, 원가, 수수료율, 광고비, 배송비를 기준으로 판매 수익과 마진율을 계산합니다.",
+    tags: ["판매수익", "마진율", "온라인셀러"]
   }
 };
 
-const hourlyAutoBlogSlugs = [
-  "break-even-checklist-20260926-00-hourly",
-  "car-maintenance-mistakes-20260926-01-hourly",
-  "moving-cost-comparison-20260926-02-hourly",
-  "mobile-plan-scenario-20260926-03-hourly",
-  "bmi-guide-20260926-04-hourly",
-  "korean-age-checklist-20260926-05-hourly",
-  "date-diff-mistakes-20260926-06-hourly",
-  "unit-converter-comparison-20260926-07-hourly",
-  "percent-scenario-20260926-08-hourly",
-  "discount-rate-guide-20260926-09-hourly",
-  "gpa-checklist-20260926-10-hourly",
-  "unemployment-mistakes-20260926-11-hourly",
-  "severance-comparison-20260926-12-hourly",
-  "weekly-holiday-scenario-20260926-13-hourly",
-  "hourly-wage-guide-20260926-14-hourly",
-  "annual-leave-checklist-20260926-15-hourly",
-  "annual-leave-grant-mistakes-20260926-16-hourly",
-  "parental-leave-comparison-20260926-17-hourly",
-  "net-salary-scenario-20260926-18-hourly",
-  "military-discharge-date-guide-20260926-19-hourly",
-  "loan-interest-checklist-20260926-20-hourly",
-  "loan-dsr-mistakes-20260926-21-hourly",
-  "loan-amortization-comparison-20260926-22-hourly",
-  "real-estate-acquisition-tax-scenario-20260926-23-hourly"
+const hourlyAutoBlogCalculatorOrder = [
+  "unemployment",
+  "severance",
+  "weekly-holiday",
+  "hourly-wage",
+  "annual-leave",
+  "annual-leave-grant",
+  "parental-leave",
+  "net-salary",
+  "military-discharge-date",
+  "loan-interest",
+  "loan-dsr",
+  "loan-amortization",
+  "real-estate-acquisition-tax",
+  "jeonse-vs-monthly-rent",
+  "card-installment",
+  "exchange-rate",
+  "savings",
+  "lump-sum-deposit",
+  "compound-interest",
+  "pension-tax",
+  "isa-tax",
+  "youth-leap-account",
+  "comprehensive-income-tax",
+  "retirement-income-tax",
+  "vat",
+  "seller-profit",
+  "break-even",
+  "car-maintenance",
+  "moving-cost",
+  "mobile-plan",
+  "bmi",
+  "korean-age",
+  "date-diff",
+  "unit-converter",
+  "percent",
+  "discount-rate",
+  "gpa"
 ];
 
 const hourlyTemplateMeta = {
@@ -234,6 +338,22 @@ const hourlyTemplateMeta = {
   comparison: { suffix: "비교할 때 봐야 할 기준", focus: "여러 조건을 비교하는 기준" },
   scenario: { suffix: "상황별 활용 방법", focus: "실제 상황별 계산 흐름" }
 } as const;
+
+const hourlyAutoBlogTemplateOrder = Object.keys(hourlyTemplateMeta) as (keyof typeof hourlyTemplateMeta)[];
+const hourlyAutoBlogDateCodes = Array.from({ length: 26 }, (_, index) => `202609${String(index + 1).padStart(2, "0")}`);
+
+function buildHourlyAutoBlogSlug(dateCode: string, hour: number) {
+  const dayNumber = Number(dateCode.slice(-2));
+  const calculatorSlug = hourlyAutoBlogCalculatorOrder[(dayNumber + hour) % hourlyAutoBlogCalculatorOrder.length];
+  const templateKey = hourlyAutoBlogTemplateOrder[(dayNumber + hour) % hourlyAutoBlogTemplateOrder.length];
+  const hourCode = String(hour).padStart(2, "0");
+
+  return `${calculatorSlug}-${templateKey}-${dateCode}-${hourCode}-hourly`;
+}
+
+const hourlyAutoBlogSlugs = hourlyAutoBlogDateCodes.flatMap((dateCode) =>
+  Array.from({ length: 24 }, (_, hour) => buildHourlyAutoBlogSlug(dateCode, hour))
+);
 
 function buildHourlyAutoBlogPost(slug: string): BlogPost {
   const match = slug.match(/^(.+)-(guide|checklist|mistakes|comparison|scenario)-(\d{8})-(\d{2})-hourly$/);
