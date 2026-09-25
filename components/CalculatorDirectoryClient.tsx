@@ -30,12 +30,17 @@ function getInitialGroup(initialGroup: Props["initialGroup"]) {
   return nextGroup && nextGroup in CALCULATOR_GROUP_META ? (nextGroup as CalculatorGroup) : (initialGroup ?? "all");
 }
 
+function getInitialQuery() {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("q") || "";
+}
+
 export function CalculatorDirectoryClient({
   initialCategory = "전체",
   initialGroup = "all",
   compact = false
 }: Props) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => getInitialQuery());
   const [category, setCategory] = useState<"전체" | CalculatorCategory>(() => getInitialCategory(initialCategory));
   const [group, setGroup] = useState<CalculatorGroup | "all">(() => getInitialGroup(initialGroup));
   const [sort, setSort] = useState<"recommended" | "name" | "group">("recommended");
