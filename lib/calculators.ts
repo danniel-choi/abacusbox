@@ -52,6 +52,9 @@ export type CalculatorSlug =
   | "retirement-income-tax"
   | "savings"
   | "pension-tax"
+  | "stock-return"
+  | "stock-average-price"
+  | "stock-valuation"
   | "lotto-generator"
   | "cbm-freight"
   | "subscription-revenue"
@@ -3631,6 +3634,189 @@ export const calculators: CalculatorConfig[] = [
           { name: "재산세", value: propertyTax },
           { name: "교육세", value: localEducationTax },
           { name: "종부세", value: compTax }
+        ]
+      };
+    }
+  },
+  {
+    slug: "stock-return",
+    title: "주식 수익률 계산기",
+    description: "매수단가, 매도단가, 수량, 수수료와 거래세를 반영해 주식 투자 수익금과 수익률을 계산합니다.",
+    category: "금융",
+    keywords: ["주식 수익률 계산기", "주식 수익 계산", "매도 수익", "주식 수익금", "거래세"],
+    badge: "수수료·거래세 반영",
+    audience: "국내주식 매매 전후 손익을 빠르게 확인하려는 투자자",
+    fields: [
+      { name: "buyPrice", label: "매수단가", type: "number", unit: "원", min: 0, max: 10000000, step: 10, defaultValue: 50000 },
+      { name: "sellPrice", label: "매도단가", type: "number", unit: "원", min: 0, max: 10000000, step: 10, defaultValue: 58000 },
+      { name: "quantity", label: "수량", type: "number", unit: "주", min: 1, max: 1000000, step: 1, defaultValue: 100 },
+      { name: "buyFeeRate", label: "매수 수수료율", type: "number", unit: "%", min: 0, max: 1, step: 0.001, defaultValue: 0.015 },
+      { name: "sellFeeRate", label: "매도 수수료율", type: "number", unit: "%", min: 0, max: 1, step: 0.001, defaultValue: 0.015 },
+      { name: "taxRate", label: "거래세율", type: "number", unit: "%", min: 0, max: 1, step: 0.001, defaultValue: 0.18 }
+    ],
+    guideTitle: "주식 수익률 계산 기준",
+    guide: [
+      "주식 수익률은 매도금액에서 매수금액, 수수료, 거래세를 뺀 실제 손익을 매수 총비용으로 나누어 계산합니다.",
+      "국내주식은 매도 시 증권거래세 등 매도 관련 비용이 붙을 수 있고, 증권사별 수수료율도 다릅니다. 이 계산기는 입력한 수수료율과 거래세율을 기준으로 단순 추정합니다.",
+      "배당금, 환율, 양도소득세, 금융투자소득 과세 여부, 해외주식 세금은 반영하지 않습니다. 실제 세금은 계좌 유형과 종목, 거래시장, 투자자 상황에 따라 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "수익률은 매수금액이 아니라 매수 수수료까지 포함한 총비용 기준으로 계산합니다.",
+      "거래세는 일반적으로 매도금액 기준으로 입력합니다.",
+      "해외주식은 환율과 양도소득세를 별도로 고려해야 합니다."
+    ],
+    faqs: [
+      { question: "수수료율은 어디서 확인하나요?", answer: "사용 중인 증권사 앱의 국내주식 수수료 안내나 거래 내역에서 확인할 수 있습니다." },
+      { question: "배당금도 포함되나요?", answer: "아니요. 이 계산기는 매수·매도 차익 중심입니다. 배당 수익은 별도로 더해 총수익률을 판단하세요." }
+    ],
+    calculate(values) {
+      const quantity = Math.max(Math.floor(values.quantity), 0);
+      const buyAmount = values.buyPrice * quantity;
+      const sellAmount = values.sellPrice * quantity;
+      const buyFee = buyAmount * (values.buyFeeRate / 100);
+      const sellFee = sellAmount * (values.sellFeeRate / 100);
+      const transactionTax = sellAmount * (values.taxRate / 100);
+      const totalCost = buyAmount + buyFee;
+      const netProceeds = sellAmount - sellFee - transactionTax;
+      const profit = netProceeds - totalCost;
+      const returnRate = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+
+      return {
+        headline: `${formatWon(profit)} (${formatPercent(returnRate, 2)})`,
+        subline: `매수 총비용 ${formatWon(totalCost)} · 매도 실수령 ${formatWon(netProceeds)}`,
+        rows: [
+          { label: "매수금액", value: formatWon(buyAmount) },
+          { label: "매도금액", value: formatWon(sellAmount) },
+          { label: "매수 수수료", value: formatWon(buyFee) },
+          { label: "매도 수수료", value: formatWon(sellFee) },
+          { label: "거래세", value: formatWon(transactionTax) },
+          { label: "순손익", value: formatWon(profit), tone: "strong" },
+          { label: "수익률", value: formatPercent(returnRate, 2), tone: "strong" }
+        ],
+        chart: [
+          { name: "매수비용", value: totalCost },
+          { name: "매도실수령", value: netProceeds },
+          { name: profit >= 0 ? "수익" : "손실", value: Math.abs(profit) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "stock-average-price",
+    title: "주식 물타기 계산기",
+    description: "현재 보유 수량과 평균단가에 추가 매수 수량·가격을 더해 새로운 평균 매입단가를 계산합니다.",
+    category: "금융",
+    keywords: ["주식 물타기 계산기", "평단가 계산기", "평균 매입단가", "추가매수", "주식 평단"],
+    badge: "평균단가 재계산",
+    audience: "추가 매수 전 평균단가와 손익분기 가격을 확인하려는 투자자",
+    fields: [
+      { name: "currentShares", label: "현재 보유 수량", type: "number", unit: "주", min: 0, max: 1000000, step: 1, defaultValue: 100 },
+      { name: "currentAveragePrice", label: "현재 평균단가", type: "number", unit: "원", min: 0, max: 10000000, step: 10, defaultValue: 50000 },
+      { name: "addShares", label: "추가 매수 수량", type: "number", unit: "주", min: 0, max: 1000000, step: 1, defaultValue: 50 },
+      { name: "addPrice", label: "추가 매수 단가", type: "number", unit: "원", min: 0, max: 10000000, step: 10, defaultValue: 42000 },
+      { name: "feeRate", label: "매수 수수료율", type: "number", unit: "%", min: 0, max: 1, step: 0.001, defaultValue: 0.015 }
+    ],
+    guideTitle: "물타기 평균단가 계산 기준",
+    guide: [
+      "물타기 평균단가는 기존 보유금액과 추가 매수금액을 합산한 뒤 총 보유 수량으로 나누어 계산합니다.",
+      "추가 매수 단가가 현재 평균단가보다 낮으면 평균단가는 내려가고, 높으면 올라갑니다. 평균단가가 내려가도 투자 위험 자체가 줄어드는 것은 아닙니다.",
+      "이 계산기는 매수 수수료를 추가 매수 비용에 반영합니다. 세금, 배당, 환율, 신용융자 이자, 예탁금 이용료 등은 포함하지 않습니다."
+    ],
+    checkpoints: [
+      "평균단가 하락보다 총 투자금 증가를 함께 봐야 합니다.",
+      "추가 매수 후 손익분기 가격은 새 평균단가와 수수료 구조에 따라 달라집니다.",
+      "하락 이유가 기업가치 훼손이라면 단순 물타기는 손실을 키울 수 있습니다."
+    ],
+    faqs: [
+      { question: "물타기와 분할매수는 같은가요?", answer: "계산식은 비슷하지만 목적이 다릅니다. 분할매수는 계획된 진입이고, 물타기는 하락 후 평균단가를 낮추는 경우가 많습니다." },
+      { question: "평단이 낮아지면 좋은 건가요?", answer: "평균단가만 보면 좋아 보일 수 있지만 총 투자금과 종목 리스크가 같이 커질 수 있습니다." }
+    ],
+    calculate(values) {
+      const currentShares = Math.max(Math.floor(values.currentShares), 0);
+      const addShares = Math.max(Math.floor(values.addShares), 0);
+      const currentAmount = currentShares * values.currentAveragePrice;
+      const addAmount = addShares * values.addPrice;
+      const buyFee = addAmount * (values.feeRate / 100);
+      const totalShares = currentShares + addShares;
+      const totalCost = currentAmount + addAmount + buyFee;
+      const newAverage = totalShares > 0 ? totalCost / totalShares : 0;
+      const averageChange = newAverage - values.currentAveragePrice;
+      const breakEvenRise = newAverage > 0 ? ((newAverage - values.addPrice) / newAverage) * 100 : 0;
+
+      return {
+        headline: `${formatWon(newAverage)} / 주`,
+        subline: `총 ${formatNumber(totalShares)}주 · 총 투자금 ${formatWon(totalCost)}`,
+        rows: [
+          { label: "기존 투자금", value: formatWon(currentAmount) },
+          { label: "추가 매수금", value: formatWon(addAmount) },
+          { label: "추가 매수 수수료", value: formatWon(buyFee) },
+          { label: "총 보유 수량", value: `${formatNumber(totalShares)}주` },
+          { label: "새 평균단가", value: formatWon(newAverage), tone: "strong" },
+          { label: "평균단가 변화", value: `${averageChange >= 0 ? "+" : ""}${formatWon(averageChange)}`, tone: "strong" },
+          { label: "추가 매수가 대비 회복률", value: formatPercent(breakEvenRise, 2) }
+        ],
+        chart: [
+          { name: "기존금액", value: currentAmount },
+          { name: "추가금액", value: addAmount + buyFee },
+          { name: "평균단가", value: newAverage * totalShares }
+        ]
+      };
+    }
+  },
+  {
+    slug: "stock-valuation",
+    title: "PER/PBR 주식 가치평가 계산기",
+    description: "현재 주가, EPS, BPS와 비교 PER·PBR을 입력해 현재 배수와 적정주가 범위를 추정합니다.",
+    category: "금융",
+    keywords: ["PER 계산기", "PBR 계산기", "주식 가치평가", "적정주가 계산기", "EPS BPS"],
+    badge: "PER·PBR 배수 비교",
+    audience: "종목의 현재 주가가 이익·순자산 대비 어느 정도인지 비교하려는 투자자",
+    fields: [
+      { name: "currentPrice", label: "현재 주가", type: "number", unit: "원", min: 0, max: 10000000, step: 10, defaultValue: 70000 },
+      { name: "eps", label: "EPS", type: "number", unit: "원", min: -1000000, max: 1000000, step: 10, defaultValue: 5000 },
+      { name: "bps", label: "BPS", type: "number", unit: "원", min: 0, max: 10000000, step: 10, defaultValue: 50000 },
+      { name: "targetPer", label: "비교 PER", type: "number", unit: "배", min: 0, max: 200, step: 0.1, defaultValue: 12 },
+      { name: "targetPbr", label: "비교 PBR", type: "number", unit: "배", min: 0, max: 20, step: 0.1, defaultValue: 1.4 }
+    ],
+    guideTitle: "PER/PBR 가치평가 기준",
+    guide: [
+      "PER은 주가를 주당순이익(EPS)으로 나눈 값이고, PBR은 주가를 주당순자산(BPS)으로 나눈 값입니다. 각각 이익과 순자산 대비 현재 주가 수준을 보는 배수입니다.",
+      "비교 PER과 비교 PBR은 같은 업종, 비슷한 성장률·수익성·재무구조를 가진 기업의 평균이나 본인이 가정한 목표 배수를 입력합니다.",
+      "적정주가는 EPS에 비교 PER을 곱한 값, BPS에 비교 PBR을 곱한 값을 각각 계산하고 단순 평균으로 참고 범위를 보여줍니다. 성장률, 부채, 일회성 이익, 경기 사이클은 별도로 판단해야 합니다."
+    ],
+    checkpoints: [
+      "EPS가 0 이하이면 PER 기반 평가는 의미가 제한됩니다.",
+      "PBR은 자산가치가 중요한 금융·제조·지주사 분석에 더 유용할 수 있습니다.",
+      "업종 평균 배수를 그대로 적용하면 성장률과 재무위험 차이를 놓칠 수 있습니다."
+    ],
+    faqs: [
+      { question: "PER이 낮으면 무조건 저평가인가요?", answer: "아니요. 이익이 일시적으로 높거나 성장성이 낮거나 리스크가 큰 기업은 낮은 PER이 정당화될 수 있습니다." },
+      { question: "적정주가는 목표가인가요?", answer: "아니요. 입력한 가정으로 계산한 참고값입니다. 실제 투자 판단은 실적, 산업, 금리, 리스크를 함께 봐야 합니다." }
+    ],
+    calculate(values) {
+      const per = values.eps > 0 ? values.currentPrice / values.eps : 0;
+      const pbr = values.bps > 0 ? values.currentPrice / values.bps : 0;
+      const fairByPer = values.eps > 0 ? values.eps * values.targetPer : 0;
+      const fairByPbr = values.bps > 0 ? values.bps * values.targetPbr : 0;
+      const fairValues = [fairByPer, fairByPbr].filter((value) => value > 0);
+      const blendedFair = fairValues.length ? fairValues.reduce((sum, value) => sum + value, 0) / fairValues.length : 0;
+      const upside = values.currentPrice > 0 ? ((blendedFair - values.currentPrice) / values.currentPrice) * 100 : 0;
+
+      return {
+        headline: `${formatWon(blendedFair)} (${formatPercent(upside, 1)})`,
+        subline: `현재 PER ${per > 0 ? `${formatNumber(per, 2)}배` : "산정 제한"} · 현재 PBR ${pbr > 0 ? `${formatNumber(pbr, 2)}배` : "산정 제한"}`,
+        rows: [
+          { label: "현재 PER", value: per > 0 ? `${formatNumber(per, 2)}배` : "EPS 0 이하로 산정 제한" },
+          { label: "현재 PBR", value: pbr > 0 ? `${formatNumber(pbr, 2)}배` : "BPS 0 이하로 산정 제한" },
+          { label: "PER 기준 적정주가", value: fairByPer > 0 ? formatWon(fairByPer) : "산정 제한", tone: "strong" },
+          { label: "PBR 기준 적정주가", value: fairByPbr > 0 ? formatWon(fairByPbr) : "산정 제한", tone: "strong" },
+          { label: "단순 평균 적정주가", value: formatWon(blendedFair), tone: "strong" },
+          { label: "현재가 대비 차이", value: formatPercent(upside, 1), tone: "strong" }
+        ],
+        chart: [
+          { name: "현재가", value: values.currentPrice },
+          { name: "PER기준", value: fairByPer },
+          { name: "PBR기준", value: fairByPbr }
         ]
       };
     }

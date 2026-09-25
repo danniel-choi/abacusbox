@@ -1,6 +1,6 @@
 import { calculators, type CalculatorConfig, type CalculatorSlug } from "@/lib/calculators";
 
-export type CalculatorGroup = "labor" | "loan" | "tax" | "life" | "business" | "math";
+export type CalculatorGroup = "labor" | "loan" | "tax" | "investment" | "life" | "business" | "math";
 
 export const CALCULATOR_GROUP_META: Record<
   CalculatorGroup,
@@ -22,10 +22,17 @@ export const CALCULATOR_GROUP_META: Record<
   },
   tax: {
     label: "절세·저축",
-    description: "세금, 연금, ISA, 적금, 예금, 투자 수익 계산기",
+    description: "세금, 연금, ISA, 적금, 예금 계산기",
     icon: "📊",
     accentClass: "text-[#7c3aed]",
     softClass: "bg-[#efe7ff]"
+  },
+  investment: {
+    label: "투자·주식",
+    description: "주식 수익률, 물타기, PER/PBR 가치평가 계산기",
+    icon: "↗",
+    accentClass: "text-[#047857]",
+    softClass: "bg-[#dcfce7]"
   },
   life: {
     label: "생활·도구",
@@ -78,6 +85,9 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "isa-tax": "tax",
   "youth-leap-account": "tax",
   "retirement-income-tax": "tax",
+  "stock-return": "investment",
+  "stock-average-price": "investment",
+  "stock-valuation": "investment",
   bmi: "life",
   "korean-age": "life",
   "unit-converter": "life",
@@ -131,6 +141,7 @@ export function getFeaturedCalculators() {
     "unemployment",
     "loan-dsr",
     "pension-tax",
+    "stock-return",
     "seller-profit",
     "date-diff",
     "vat"
@@ -148,6 +159,7 @@ export function getPopularCalculators() {
     "loan-dsr",
     "vat",
     "exchange-rate",
+    "stock-average-price",
     "seller-profit"
   ];
 
@@ -166,7 +178,10 @@ export function getRecentCalculators() {
     "youth-leap-account",
     "isa-tax",
     "card-installment",
-    "retirement-income-tax"
+    "retirement-income-tax",
+    "stock-return",
+    "stock-average-price",
+    "stock-valuation"
   ];
 
   return recentSlugs

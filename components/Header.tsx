@@ -7,6 +7,7 @@ import { Logo } from "@/components/Logo";
 const navItems = [
   { href: "/calculators", label: "계산기" },
   { href: "/tax", label: "세금" },
+  { href: "/stock", label: "주식" },
   { href: "/blog", label: "블로그" },
   { href: "/#sources", label: "출처" },
   { href: "/about", label: "소개" },

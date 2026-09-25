@@ -1,6 +1,6 @@
 import type { CalculatorGroup } from "@/lib/calculator-directory";
 
-export type HubKey = "tax" | "labor" | "loan" | "life" | "business" | "math";
+export type HubKey = "tax" | "labor" | "loan" | "stock" | "life" | "business" | "math";
 
 export type HubContent = {
   key: HubKey;
@@ -91,6 +91,31 @@ export const hubContents: Record<HubKey, HubContent> = {
     ],
     checklist: ["상환방식별 총이자 비교", "DSR과 LTV를 분리해 확인", "중도상환수수료와 대환 비용 반영", "취득세와 보유세를 함께 점검"]
   },
+  stock: {
+    key: "stock",
+    group: "investment",
+    path: "/stock",
+    eyebrow: "투자·주식 허브",
+    title: "주식 수익률, 물타기, 가치평가 계산기",
+    description: "매수·매도 손익, 추가 매수 후 평균단가, PER/PBR 기준 적정주가를 한곳에서 비교할 수 있습니다.",
+    featuredSlugs: ["stock-return", "stock-average-price", "stock-valuation", "compound-interest", "isa-tax", "exchange-rate"],
+    blogSlugs: ["stock-calculator-before-trading", "irp-tax-credit-strategy-2026", "dsr-ltv-practical-difference"],
+    sections: [
+      {
+        title: "주식 계산은 수익률보다 실제 손익이 먼저입니다.",
+        body: "수익률은 보기 쉬운 숫자지만, 실제 판단에는 매수 총비용, 매도 실수령액, 수수료, 거래세가 함께 필요합니다. 특히 단기 매매는 작은 비용 차이도 반복되면 누적 손익에 영향을 줍니다."
+      },
+      {
+        title: "물타기는 평균단가와 투자금 증가를 같이 봐야 합니다.",
+        body: "추가 매수로 평균단가가 내려가도 총 투자금과 종목 비중은 커집니다. 평균단가 개선만 보지 말고 손익분기 가격, 추가 하락 시 손실 규모, 포트폴리오 비중까지 함께 확인해야 합니다."
+      },
+      {
+        title: "PER/PBR은 참고 배수이지 정답이 아닙니다.",
+        body: "PER과 PBR은 종목을 빠르게 비교하는 데 유용하지만 성장률, 이익 안정성, 부채, 업종 사이클을 모두 설명하지는 못합니다. 계산값은 후보를 좁히는 출발점으로 쓰는 것이 좋습니다."
+      }
+    ],
+    checklist: ["수수료와 거래세를 함께 반영", "평균단가보다 총 투자금 변화 확인", "EPS가 0 이하이면 PER 해석 제한", "업종 평균 배수와 성장률 차이 비교"]
+  },
   life: {
     key: "life",
     group: "life",
@@ -168,4 +193,4 @@ export const hubContents: Record<HubKey, HubContent> = {
   }
 };
 
-export const hubOrder: HubKey[] = ["tax", "labor", "loan", "life", "business", "math"];
+export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "life", "business", "math"];
