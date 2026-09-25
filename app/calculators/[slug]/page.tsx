@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { CalculatorClient } from "@/components/CalculatorClient";
 import { calculators, getCalculator } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getRelatedCalculators } from "@/lib/calculator-directory";
+import { calculatorSeoContent } from "@/lib/calculator-seo";
 import { blogPosts } from "@/lib/content";
 import { legalStandards, officialSources, SITE_URL } from "@/lib/constants";
 
@@ -38,25 +39,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const calculator = getCalculator(slug);
   if (!calculator) return {};
+  const seoContent = calculatorSeoContent[calculator.slug];
 
   return {
-    title: buildSeoTitle(calculator.title),
-    description: buildSeoDescription(calculator),
-    keywords: [...calculator.keywords, calculator.title, `${calculator.title} ${legalStandards.year}`, `${calculator.category} 계산기`],
+    title: seoContent?.title || buildSeoTitle(calculator.title),
+    description: seoContent?.description || buildSeoDescription(calculator),
+    keywords: [
+      ...calculator.keywords,
+      ...(seoContent?.keywords || []),
+      calculator.title,
+      `${calculator.title} ${legalStandards.year}`,
+      `${calculator.category} 계산기`
+    ],
     alternates: {
       canonical: `${SITE_URL}/calculators/${calculator.slug}`
     },
     openGraph: {
-      title: buildSeoTitle(calculator.title),
-      description: buildSeoDescription(calculator),
+      title: seoContent?.title || buildSeoTitle(calculator.title),
+      description: seoContent?.description || buildSeoDescription(calculator),
       url: `${SITE_URL}/calculators/${calculator.slug}`,
       type: "article",
       locale: "ko_KR"
     },
     twitter: {
       card: "summary_large_image",
-      title: buildSeoTitle(calculator.title),
-      description: buildSeoDescription(calculator)
+      title: seoContent?.title || buildSeoTitle(calculator.title),
+      description: seoContent?.description || buildSeoDescription(calculator)
     }
   };
 }
@@ -68,6 +76,7 @@ export default async function CalculatorPage({ params }: Props) {
   const relatedCalculators = getRelatedCalculators(calculator.slug, 4);
   const relatedBlogPosts = getRelatedBlogPosts(calculator);
   const groupMeta = CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)];
+  const seoContent = calculatorSeoContent[calculator.slug];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -76,7 +85,8 @@ export default async function CalculatorPage({ params }: Props) {
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
     url: `${SITE_URL}/calculators/${calculator.slug}`,
-    description: calculator.description,
+    description: seoContent?.description || calculator.description,
+    keywords: [...calculator.keywords, ...(seoContent?.keywords || [])].join(", "),
     offers: {
       "@type": "Offer",
       price: "0",
@@ -165,6 +175,15 @@ export default async function CalculatorPage({ params }: Props) {
                 <p className="mt-2 text-sm font-medium leading-6 text-white/74">빠른 계산, 기준 설명, FAQ, 관련 계산기까지 한 번에 확인</p>
               </div>
             </div>
+            {seoContent && (
+              <div className="mt-6 flex flex-wrap gap-2 text-sm font-bold text-white/72">
+                {seoContent.searchIntents.map((intent) => (
+                  <span key={intent} className="rounded-full border border-brand/20 bg-brand/10 px-4 py-2 text-brand">
+                    {intent}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -198,6 +217,33 @@ export default async function CalculatorPage({ params }: Props) {
             </div>
           </div>
         </section>
+
+        {seoContent && (
+          <section className="rounded-[20px] border border-line bg-white p-6 shadow-panel">
+            <p className="text-sm font-extrabold text-brand">검색 많이 하는 질문</p>
+            <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink md:text-3xl">{calculator.title}를 찾는 분들이 확인하는 핵심 기준</h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {seoContent.sections.map((section) => (
+                <article key={section.title} className="rounded-[18px] bg-paper p-5">
+                  <h3 className="text-lg font-extrabold leading-7 text-ink">{section.title}</h3>
+                  <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{section.body}</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
+              {seoContent.internalLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-[18px] border border-line bg-white p-5 transition hover:border-brand hover:bg-paper"
+                >
+                  <p className="text-sm font-extrabold text-brand">{item.label}</p>
+                  <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{item.text}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section>
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">

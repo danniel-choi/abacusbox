@@ -69,7 +69,7 @@ export type CalculatorSlug =
   | "three-d-calculator"
   | "web-calculator";
 
-export type CalculatorCategory = "노무" | "금융" | "생활" | "수학";
+export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학";
 
 export type InputField = {
   name: string;
@@ -1222,8 +1222,8 @@ export const calculators: CalculatorConfig[] = [
     slug: "comprehensive-income-tax",
     title: "종합소득세 계산기",
     description: "과세표준을 기준으로 종합소득세 산출세액과 지방소득세를 계산합니다.",
-    category: "금융",
-    keywords: ["종합소득세 계산기", "과세표준", "지방소득세"],
+    category: "세금",
+    keywords: ["종합소득세 계산기", "종소세 계산기", "종합소득세율", "과세표준", "지방소득세"],
     badge: "소득세법 제55조 세율 반영",
     audience: "프리랜서, 사업자, 종합소득세 신고 전 사용자",
     fields: [
@@ -1269,8 +1269,8 @@ export const calculators: CalculatorConfig[] = [
     slug: "earned-income-tax",
     title: "근로소득세 계산기",
     description: "연간 총급여, 비과세, 부양가족, 추가 공제액으로 근로소득세와 지방소득세를 추정합니다.",
-    category: "금융",
-    keywords: ["근로소득세 계산기", "소득세 계산기", "월급 세금", "급여 소득세"],
+    category: "세금",
+    keywords: ["근로소득세 계산기", "소득세 계산기", "월급 세금", "급여 소득세", "연봉 소득세", "근로소득공제"],
     badge: "근로소득공제·기본세율 반영",
     audience: "직장인, 급여 담당자, 연봉 협상 전 사용자",
     fields: [
@@ -1334,8 +1334,8 @@ export const calculators: CalculatorConfig[] = [
     slug: "year-end-tax-settlement",
     title: "연말정산 환급액 계산기",
     description: "총급여, 카드 사용액, 의료·교육·기부·연금계좌, 기납부세액으로 연말정산 환급·추가납부액을 추정합니다.",
-    category: "금융",
-    keywords: ["연말정산 계산기", "연말정산 환급", "소득공제", "세액공제", "13월의 월급"],
+    category: "세금",
+    keywords: ["연말정산 계산기", "연말정산 환급액 계산기", "연말정산 환급", "연말정산 미리보기", "소득공제", "세액공제", "13월의 월급"],
     badge: "주요 소득·세액공제 반영",
     audience: "직장인, 연말정산 준비 사용자",
     fields: [
@@ -1412,8 +1412,8 @@ export const calculators: CalculatorConfig[] = [
     slug: "inheritance-tax",
     title: "상속세 계산기",
     description: "상속재산, 채무·장례비, 사전증여, 일괄공제·배우자공제로 상속세와 신고세액공제를 추정합니다.",
-    category: "금융",
-    keywords: ["상속세 계산기", "상속세율", "상속공제", "배우자공제", "일괄공제"],
+    category: "세금",
+    keywords: ["상속세 계산기", "상속세율", "상속공제", "배우자공제", "일괄공제", "상속세 과세표준"],
     badge: "상속세 누진세율 반영",
     audience: "상속 준비 가족, 세무 상담 전 사용자",
     fields: [

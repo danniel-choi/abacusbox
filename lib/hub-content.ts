@@ -21,22 +21,22 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "tax",
     path: "/tax",
     eyebrow: "세금·절세 허브",
-    title: "세금 계산기와 절세 가이드",
-    description: "근로소득세, 연말정산, 상속세, 종합소득세, 연금 세액공제처럼 자주 헷갈리는 세금 계산을 한 흐름으로 정리했습니다.",
-    featuredSlugs: ["earned-income-tax", "year-end-tax-settlement", "inheritance-tax", "comprehensive-income-tax", "pension-tax", "retirement-income-tax"],
+    title: "연말정산·소득세·상속세 세금 계산기",
+    description: "연말정산 환급액, 근로소득세, 종합소득세, 상속세, 연금 세액공제처럼 자주 찾는 세금 계산기를 한곳에 모았습니다.",
+    featuredSlugs: ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "inheritance-tax", "pension-tax", "retirement-income-tax"],
     blogSlugs: ["year-end-tax-refund-checklist-2026", "earned-income-tax-vs-net-salary", "inheritance-tax-basic-deductions", "property-tax-holding-cost-guide"],
     sections: [
       {
-        title: "세금 계산은 입력 기준을 먼저 맞춰야 합니다.",
-        body: "세금 계산에서 가장 흔한 오차는 세율이 아니라 입력 기준에서 생깁니다. 총급여와 과세급여, 기납부세액과 결정세액, 상속재산과 과세표준을 구분하지 않으면 계산 결과가 실제 신고 흐름과 다르게 보일 수 있습니다."
+        title: "연말정산과 소득세는 결정세액 흐름을 함께 봐야 합니다.",
+        body: "연말정산 환급액은 이미 낸 세금과 최종 결정세액의 차이로 정해집니다. 근로소득세, 종합소득세, 연말정산 계산기를 이어서 보면 총급여, 과세표준, 산출세액, 세액공제가 어떤 순서로 작동하는지 이해하기 쉽습니다."
       },
       {
-        title: "예상세액과 실제 신고세액은 다를 수 있습니다.",
+        title: "세금 계산기는 검색 전환용이 아니라 신고 전 점검 도구입니다.",
         body: "계산기는 빠른 판단을 돕는 추정 도구입니다. 공제 요건, 한도, 가족관계, 사전증여, 회사 제출자료, 국세청 간소화 자료 같은 세부 조건은 실제 신고 과정에서 다시 확인해야 합니다."
       },
       {
-        title: "관련 계산기를 함께 비교하면 판단이 쉬워집니다.",
-        body: "근로소득세를 본 뒤 실수령액과 연말정산 환급액을 이어서 확인하면 월급에서 빠지는 금액과 연말에 정산되는 금액의 차이를 이해하기 쉽습니다. 상속세도 재산가액, 공제, 채무를 나누어 보는 습관이 중요합니다."
+        title: "상속세와 연금 절세까지 함께 비교할 수 있습니다.",
+        body: "상속세는 상속재산가액보다 공제 구조가 결과를 크게 바꿉니다. 연금저축·IRP 세액공제는 연말정산 환급 가능성에 영향을 줄 수 있어 세금 계산기 모음에서 함께 확인하는 것이 좋습니다."
       }
     ],
     checklist: ["총액과 과세대상 금액을 분리했는지 확인", "공제 항목의 적용 요건과 한도 확인", "월별 원천징수와 연간 정산의 차이 이해", "결과가 크거나 복잡하면 전문가 상담 병행"]
