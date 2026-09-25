@@ -96,25 +96,25 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "investment",
     path: "/stock",
     eyebrow: "투자·주식 허브",
-    title: "주식 수익률, 물타기, 가치평가 계산기",
-    description: "매수·매도 손익, 추가 매수 후 평균단가, PER/PBR 기준 적정주가를 한곳에서 비교할 수 있습니다.",
-    featuredSlugs: ["stock-return", "stock-average-price", "stock-valuation", "compound-interest", "isa-tax", "exchange-rate"],
+    title: "주식·암호화폐 투자 계산기",
+    description: "주식 매매 손익, 추가 매수 후 평균단가, PER/PBR 가치평가, 암호화폐 적립식 투자 성장 시나리오를 한곳에서 비교할 수 있습니다.",
+    featuredSlugs: ["stock-return", "crypto-investment-growth", "stock-average-price", "stock-valuation", "compound-interest", "exchange-rate"],
     blogSlugs: ["stock-calculator-before-trading", "irp-tax-credit-strategy-2026", "dsr-ltv-practical-difference"],
     sections: [
       {
-        title: "주식 계산은 수익률보다 실제 손익이 먼저입니다.",
-        body: "수익률은 보기 쉬운 숫자지만, 실제 판단에는 매수 총비용, 매도 실수령액, 수수료, 거래세가 함께 필요합니다. 특히 단기 매매는 작은 비용 차이도 반복되면 누적 손익에 영향을 줍니다."
+        title: "투자 계산은 수익률보다 실제 손익이 먼저입니다.",
+        body: "수익률은 보기 쉬운 숫자지만, 실제 판단에는 매수 총비용, 매도 실수령액, 수수료, 거래세, 환율, 투자 기간이 함께 필요합니다. 특히 단기 매매와 변동성이 큰 자산은 작은 비용 차이도 누적 손익에 영향을 줍니다."
       },
       {
-        title: "물타기는 평균단가와 투자금 증가를 같이 봐야 합니다.",
-        body: "추가 매수로 평균단가가 내려가도 총 투자금과 종목 비중은 커집니다. 평균단가 개선만 보지 말고 손익분기 가격, 추가 하락 시 손실 규모, 포트폴리오 비중까지 함께 확인해야 합니다."
+        title: "암호화폐 적립식 투자는 여러 시나리오를 함께 봐야 합니다.",
+        body: "비트코인과 알트코인은 장기 성장 기대가 있어도 중간 낙폭이 클 수 있습니다. 기준 수익률만 보지 말고 보수·낙관 시나리오를 함께 비교해 투자금 규모와 기간을 조정하는 것이 좋습니다."
       },
       {
         title: "PER/PBR은 참고 배수이지 정답이 아닙니다.",
         body: "PER과 PBR은 종목을 빠르게 비교하는 데 유용하지만 성장률, 이익 안정성, 부채, 업종 사이클을 모두 설명하지는 못합니다. 계산값은 후보를 좁히는 출발점으로 쓰는 것이 좋습니다."
       }
     ],
-    checklist: ["수수료와 거래세를 함께 반영", "평균단가보다 총 투자금 변화 확인", "EPS가 0 이하이면 PER 해석 제한", "업종 평균 배수와 성장률 차이 비교"]
+    checklist: ["수수료와 거래세를 함께 반영", "평균단가보다 총 투자금 변화 확인", "암호화폐는 손실 시나리오도 함께 확인", "업종 평균 배수와 성장률 차이 비교"]
   },
   life: {
     key: "life",

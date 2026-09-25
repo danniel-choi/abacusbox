@@ -29,7 +29,7 @@ export const CALCULATOR_GROUP_META: Record<
   },
   investment: {
     label: "투자·주식",
-    description: "주식 수익률, 물타기, PER/PBR 가치평가 계산기",
+    description: "주식 수익률, 암호화폐 투자 성장, 물타기, PER/PBR 가치평가 계산기",
     icon: "↗",
     accentClass: "text-[#047857]",
     softClass: "bg-[#dcfce7]"
@@ -88,6 +88,7 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "stock-return": "investment",
   "stock-average-price": "investment",
   "stock-valuation": "investment",
+  "crypto-investment-growth": "investment",
   bmi: "life",
   "korean-age": "life",
   "unit-converter": "life",
@@ -141,6 +142,7 @@ export function getFeaturedCalculators() {
     "unemployment",
     "loan-dsr",
     "pension-tax",
+    "crypto-investment-growth",
     "stock-return",
     "seller-profit",
     "date-diff",
@@ -159,6 +161,7 @@ export function getPopularCalculators() {
     "loan-dsr",
     "vat",
     "exchange-rate",
+    "crypto-investment-growth",
     "stock-average-price",
     "seller-profit"
   ];
@@ -180,6 +183,7 @@ export function getRecentCalculators() {
     "card-installment",
     "retirement-income-tax",
     "stock-return",
+    "crypto-investment-growth",
     "stock-average-price",
     "stock-valuation"
   ];

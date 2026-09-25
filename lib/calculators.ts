@@ -55,6 +55,7 @@ export type CalculatorSlug =
   | "stock-return"
   | "stock-average-price"
   | "stock-valuation"
+  | "crypto-investment-growth"
   | "lotto-generator"
   | "cbm-freight"
   | "subscription-revenue"
@@ -3817,6 +3818,83 @@ export const calculators: CalculatorConfig[] = [
           { name: "현재가", value: values.currentPrice },
           { name: "PER기준", value: fairByPer },
           { name: "PBR기준", value: fairByPbr }
+        ]
+      };
+    }
+  },
+  {
+    slug: "crypto-investment-growth",
+    title: "암호화폐 투자 성장 계산기",
+    description: "초기 투자금, 월 추가 투자금, 투자 기간, 예상 수익률을 입력해 암호화폐 포트폴리오의 성장 시나리오를 계산합니다.",
+    category: "금융",
+    keywords: ["암호화폐 투자 계산기", "코인 투자 계산기", "비트코인 투자 계산기", "적립식 코인 투자", "암호화폐 수익률"],
+    badge: "적립식·시나리오 비교",
+    audience: "비트코인·이더리움 등 암호화폐 장기 투자 계획을 점검하려는 투자자",
+    fields: [
+      { name: "initialInvestment", label: "초기 투자금", type: "number", unit: "원", min: 0, max: 10000000000, step: 100000, defaultValue: 5000000 },
+      { name: "monthlyContribution", label: "월 추가 투자금", type: "number", unit: "원", min: 0, max: 1000000000, step: 10000, defaultValue: 300000 },
+      { name: "years", label: "투자 기간", type: "number", unit: "년", min: 1, max: 30, step: 1, defaultValue: 5 },
+      { name: "expectedAnnualReturn", label: "기준 연수익률", type: "number", unit: "%", min: -95, max: 300, step: 0.5, defaultValue: 12 },
+      { name: "conservativeAnnualReturn", label: "보수 시나리오", type: "number", unit: "%", min: -95, max: 300, step: 0.5, defaultValue: -10 },
+      { name: "optimisticAnnualReturn", label: "낙관 시나리오", type: "number", unit: "%", min: -95, max: 300, step: 0.5, defaultValue: 35 },
+      { name: "annualFeeRate", label: "연간 비용률", type: "number", unit: "%", min: 0, max: 20, step: 0.1, defaultValue: 0.5 }
+    ],
+    guideTitle: "암호화폐 투자 성장 계산 기준",
+    guide: [
+      "이 계산기는 초기 투자금과 매월 말 추가 투자금을 기준으로, 입력한 연수익률이 월복리로 적용된다고 가정해 미래 평가액을 추정합니다.",
+      "참조한 투자 성장 계산기처럼 한 가지 평균값만 보지 않도록 보수·기준·낙관 시나리오를 함께 보여줍니다. 다만 특정 서비스나 전략의 과거 성과를 사용하지 않고 사용자가 직접 입력한 가정을 계산합니다.",
+      "암호화폐는 변동성과 낙폭이 매우 큰 자산입니다. 거래 수수료, 슬리피지, 세금, 환율, 스테이킹 보상, 디파이·거래소 리스크는 별도로 확인해야 합니다."
+    ],
+    checkpoints: [
+      "월 추가 투자금은 매월 말에 납입한다고 가정합니다.",
+      "연간 비용률은 예상 연수익률에서 차감해 단순 반영합니다.",
+      "과거 수익률이나 목표 수익률은 미래 수익을 보장하지 않습니다.",
+      "손실 시나리오에서 얼마나 오래 버틸 수 있는지 투자금 규모를 함께 보세요."
+    ],
+    faqs: [
+      { question: "비트코인과 알트코인 모두 계산할 수 있나요?", answer: "네. 계산식은 특정 코인 가격을 직접 가져오지 않고 투자금과 수익률 가정을 사용하므로 비트코인, 이더리움, 알트코인 포트폴리오 모두에 적용할 수 있습니다." },
+      { question: "연수익률은 어떻게 입력해야 하나요?", answer: "본인이 가정하는 연평균 수익률을 입력하세요. 변동성이 큰 자산이므로 기준 수익률만 보지 말고 보수 시나리오를 반드시 함께 확인하는 것이 좋습니다." },
+      { question: "실제 세금도 반영되나요?", answer: "아니요. 이 계산기는 투자 성장 시뮬레이션이며 세금, 거래 수수료, 환율, 출금 수수료는 별도로 반영해야 합니다." }
+    ],
+    calculate(values) {
+      const years = Math.max(Math.floor(values.years), 1);
+      const months = years * 12;
+      const initialInvestment = Math.max(values.initialInvestment, 0);
+      const monthlyContribution = Math.max(values.monthlyContribution, 0);
+      const totalContributions = initialInvestment + monthlyContribution * months;
+
+      const futureValue = (annualReturn: number) => {
+        const netAnnualRate = annualReturn - values.annualFeeRate;
+        return compoundFutureValue(initialInvestment, monthlyContribution, netAnnualRate, years);
+      };
+
+      const conservativeValue = futureValue(values.conservativeAnnualReturn);
+      const expectedValue = futureValue(values.expectedAnnualReturn);
+      const optimisticValue = futureValue(values.optimisticAnnualReturn);
+      const profit = expectedValue - totalContributions;
+      const returnRate = totalContributions > 0 ? (profit / totalContributions) * 100 : 0;
+      const conservativeProfit = conservativeValue - totalContributions;
+      const optimisticProfit = optimisticValue - totalContributions;
+
+      return {
+        headline: `${formatWon(expectedValue)} (${formatPercent(returnRate, 1)})`,
+        subline: `총 납입 ${formatWon(totalContributions)} · 예상 수익 ${formatWon(profit)}`,
+        rows: [
+          { label: "총 납입액", value: formatWon(totalContributions), tone: "strong" },
+          { label: "초기 투자금", value: formatWon(initialInvestment) },
+          { label: "월 추가 투자금 합계", value: formatWon(monthlyContribution * months) },
+          { label: "순 기준 연수익률", value: formatPercent(values.expectedAnnualReturn - values.annualFeeRate, 1) },
+          { label: "기준 예상 평가액", value: formatWon(expectedValue), tone: "strong" },
+          { label: "기준 예상 수익", value: `${profit >= 0 ? "+" : ""}${formatWon(profit)}`, tone: "strong" },
+          { label: "기준 수익률", value: formatPercent(returnRate, 1), tone: "strong" },
+          { label: "보수 시나리오 손익", value: `${conservativeProfit >= 0 ? "+" : ""}${formatWon(conservativeProfit)}` },
+          { label: "낙관 시나리오 손익", value: `${optimisticProfit >= 0 ? "+" : ""}${formatWon(optimisticProfit)}` }
+        ],
+        chart: [
+          { name: "총납입", value: totalContributions },
+          { name: "보수", value: conservativeValue },
+          { name: "기준", value: expectedValue },
+          { name: "낙관", value: optimisticValue }
         ]
       };
     }
