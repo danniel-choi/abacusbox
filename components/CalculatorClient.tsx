@@ -5,7 +5,7 @@ import type { PointerEvent, ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import * as THREE from "three";
-import { getCalculatorBySlug, type CalculatorSlug } from "@/lib/calculators";
+import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type ResultRow } from "@/lib/calculators";
 
 type FormValues = Record<string, number>;
 
@@ -27,7 +27,6 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const resultRef = useRef<HTMLDivElement>(null);
-  const [copyState, setCopyState] = useState<"idle" | "done">("idle");
   const [resultNonce, setResultNonce] = useState(0);
   const defaults = useMemo(() => {
     return Object.fromEntries(
@@ -120,53 +119,6 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     window.localStorage.setItem(RECENT_CALCULATORS_STORAGE_KEY, JSON.stringify(next));
     window.dispatchEvent(new CustomEvent("calcrule:recent-calculators"));
   }, [slug]);
-
-  async function copyLink() {
-    await navigator.clipboard.writeText(window.location.href);
-    setCopyState("done");
-    window.setTimeout(() => setCopyState("idle"), 1800);
-  }
-
-  function downloadImage() {
-    const canvas = document.createElement("canvas");
-    const width = 900;
-    const height = 520;
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-
-    context.fillStyle = "#f7f9fb";
-    context.fillRect(0, 0, width, height);
-    context.fillStyle = "#17212b";
-    context.font = "bold 34px sans-serif";
-    context.fillText(activeCalculator.title, 48, 70);
-    context.font = "bold 42px sans-serif";
-    context.fillText(result.headline, 48, 140);
-    context.font = "22px sans-serif";
-    context.fillStyle = "#52606d";
-    context.fillText(result.subline, 48, 178);
-
-    context.font = "24px sans-serif";
-    result.rows.forEach((row, index) => {
-      const y = 245 + index * 48;
-      context.fillStyle = "#52606d";
-      context.fillText(row.label, 48, y);
-      context.fillStyle = row.tone === "strong" ? "#0f766e" : "#17212b";
-      context.textAlign = "right";
-      context.fillText(row.value, 820, y);
-      context.textAlign = "left";
-    });
-
-    context.fillStyle = "#0f766e";
-    context.font = "18px sans-serif";
-    context.fillText("계산의정석", 48, 485);
-
-    const link = document.createElement("a");
-    link.download = `${activeCalculator.slug}-result.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  }
 
   function resetToDefaults() {
     reset(Object.fromEntries(activeCalculator.fields.map((field) => [field.name, field.defaultValue])));
@@ -417,20 +369,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
               {activeCalculator.actionLabel}
             </button>
           )}
-          <button
-            type="button"
-            onClick={copyLink}
-            className="w-full rounded-full border border-brand px-5 py-3 text-sm font-extrabold text-brand transition hover:bg-brand hover:text-white sm:w-auto"
-          >
-            {copyState === "done" ? "링크 복사 완료" : "링크 복사"}
-          </button>
-          <button
-            type="button"
-            onClick={downloadImage}
-            className="w-full rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72] sm:w-auto"
-          >
-            결과 이미지 다운로드
-          </button>
+          <ShareActions title={activeCalculator.title} result={result} fileName={`${activeCalculator.slug}-result.png`} />
         </div>
         <p className="mt-4 text-xs font-semibold leading-6 text-slate-500">
           계산 결과는 입력값과 현재 반영 기준에 따른 추정치입니다. 실제 심사·지급·대출 승인 결과는 기관 판단에 따라 달라질 수 있습니다.
@@ -447,6 +386,245 @@ type PlaceSearchResult = {
   lon: string;
   type?: string;
 };
+
+function ShareActions({
+  title,
+  result,
+  fileName
+}: {
+  title: string;
+  result: Pick<CalculatorResult, "headline" | "subline" | "rows">;
+  fileName: string;
+}) {
+  const [notice, setNotice] = useState("");
+
+  function showNotice(message: string) {
+    setNotice(message);
+    window.setTimeout(() => setNotice(""), 1800);
+  }
+
+  async function copyLink() {
+    await navigator.clipboard.writeText(window.location.href);
+    showNotice("링크를 복사했습니다.");
+  }
+
+  async function copyResultText() {
+    await navigator.clipboard.writeText(buildShareText(title, result, window.location.href));
+    showNotice("결과 요약을 복사했습니다.");
+  }
+
+  async function shareResult() {
+    const text = buildShareText(title, result, window.location.href);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${title} 결과`,
+          text,
+          url: window.location.href
+        });
+        showNotice("공유창을 열었습니다.");
+        return;
+      } catch {
+        return;
+      }
+    }
+
+    await navigator.clipboard.writeText(text);
+    showNotice("공유 문구를 복사했습니다.");
+  }
+
+  function downloadImage() {
+    downloadResultCard({
+      title,
+      headline: result.headline,
+      subline: result.subline,
+      rows: result.rows,
+      url: window.location.href,
+      fileName
+    });
+    showNotice("결과 이미지를 저장했습니다.");
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={shareResult}
+        className="w-full rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72] sm:w-auto"
+      >
+        카카오/앱 공유
+      </button>
+      <button
+        type="button"
+        onClick={copyResultText}
+        className="w-full rounded-full border border-brand px-5 py-3 text-sm font-extrabold text-brand transition hover:bg-brand hover:text-white sm:w-auto"
+      >
+        결과 문구 복사
+      </button>
+      <button
+        type="button"
+        onClick={copyLink}
+        className="w-full rounded-full border border-line px-5 py-3 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand sm:w-auto"
+      >
+        링크 복사
+      </button>
+      <button
+        type="button"
+        onClick={downloadImage}
+        className="w-full rounded-full border border-line px-5 py-3 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand sm:w-auto"
+      >
+        결과 카드 저장
+      </button>
+      {notice && <p className="w-full text-xs font-extrabold text-brand">{notice}</p>}
+    </>
+  );
+}
+
+function buildShareText(title: string, result: Pick<CalculatorResult, "headline" | "subline" | "rows">, url: string) {
+  const rows = result.rows
+    .slice(0, 5)
+    .map((row) => `${row.label}: ${row.value}`)
+    .join("\n");
+
+  return [`[계산의정석] ${title}`, `결과: ${result.headline}`, result.subline, rows, url].filter(Boolean).join("\n");
+}
+
+function downloadResultCard({
+  title,
+  headline,
+  subline,
+  rows,
+  url,
+  fileName
+}: {
+  title: string;
+  headline: string;
+  subline: string;
+  rows: ResultRow[];
+  url: string;
+  fileName: string;
+}) {
+  const canvas = document.createElement("canvas");
+  const scale = 2;
+  const width = 1080;
+  const height = 1350;
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  const context = canvas.getContext("2d");
+  if (!context) return;
+  context.scale(scale, scale);
+
+  context.fillStyle = "#f7f9fb";
+  context.fillRect(0, 0, width, height);
+  drawRoundedRect(context, 54, 54, width - 108, height - 108, 38, "#ffffff");
+  drawRoundedRect(context, 90, 90, width - 180, 310, 28, "#07111f");
+
+  context.fillStyle = "#02b585";
+  context.font = "800 34px sans-serif";
+  context.fillText("계산의정석", 128, 150);
+  context.fillStyle = "#ffffff";
+  context.font = "800 54px sans-serif";
+  wrapCanvasText(context, title, 128, 225, width - 256, 62, 2);
+
+  context.fillStyle = "#02b585";
+  context.font = "800 64px sans-serif";
+  wrapCanvasText(context, headline, 128, 430, width - 256, 74, 2);
+
+  context.fillStyle = "#52606d";
+  context.font = "600 30px sans-serif";
+  wrapCanvasText(context, subline, 128, 615, width - 256, 42, 2);
+
+  const visibleRows = rows.slice(0, 6);
+  visibleRows.forEach((row, index) => {
+    const y = 735 + index * 86;
+    drawRoundedRect(context, 128, y - 48, width - 256, 66, 18, row.tone === "strong" ? "#e6fbf5" : "#f3f6f9");
+    context.fillStyle = "#52606d";
+    context.font = "700 28px sans-serif";
+    context.fillText(truncateCanvasText(context, row.label, 310), 158, y - 7);
+    context.fillStyle = row.tone === "strong" ? "#008e6b" : "#17212b";
+    context.font = "800 30px sans-serif";
+    context.textAlign = "right";
+    context.fillText(truncateCanvasText(context, row.value, 430), width - 158, y - 7);
+    context.textAlign = "left";
+  });
+
+  context.fillStyle = "#17212b";
+  context.font = "800 28px sans-serif";
+  context.fillText("abacusbox.com", 128, 1216);
+  context.fillStyle = "#7a8794";
+  context.font = "600 22px sans-serif";
+  wrapCanvasText(context, url, 128, 1254, width - 256, 30, 2);
+
+  const link = document.createElement("a");
+  link.download = fileName;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+
+function drawRoundedRect(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+  fillStyle: string
+) {
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.lineTo(x + width - radius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + radius);
+  context.lineTo(x + width, y + height - radius);
+  context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  context.lineTo(x + radius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - radius);
+  context.lineTo(x, y + radius);
+  context.quadraticCurveTo(x, y, x + radius, y);
+  context.closePath();
+  context.fillStyle = fillStyle;
+  context.fill();
+}
+
+function wrapCanvasText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines: number
+) {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let line = "";
+
+  words.forEach((word) => {
+    const nextLine = line ? `${line} ${word}` : word;
+    if (context.measureText(nextLine).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+      return;
+    }
+    line = nextLine;
+  });
+  if (line) lines.push(line);
+
+  lines.slice(0, maxLines).forEach((item, index) => {
+    const lineText = index === maxLines - 1 && lines.length > maxLines ? truncateCanvasText(context, item, maxWidth) : item;
+    context.fillText(lineText, x, y + index * lineHeight);
+  });
+}
+
+function truncateCanvasText(context: CanvasRenderingContext2D, text: string, maxWidth: number) {
+  if (context.measureText(text).width <= maxWidth) return text;
+  let next = text;
+  while (next.length > 1 && context.measureText(`${next}...`).width > maxWidth) {
+    next = next.slice(0, -1);
+  }
+  return `${next}...`;
+}
 
 function DistanceCalculator({ title, checkpoints }: { title: string; checkpoints: string[] }) {
   const [originLat, setOriginLat] = useState("");
@@ -526,6 +704,17 @@ function DistanceCalculator({ title, checkpoints }: { title: string; checkpoints
     setTargetLon(Number(place.lon).toFixed(6));
     setStatus("목적지를 설정했습니다.");
   }
+
+  const distanceShareResult: Pick<CalculatorResult, "headline" | "subline" | "rows"> = {
+    headline: distance === null ? "위치를 설정하세요" : formatDistanceKm(distance),
+    subline: distance === null ? "현재 위치와 목적지 좌표가 모두 필요합니다." : `직선거리 기준 · 방향 ${direction}`,
+    rows: [
+      { label: "직선거리", value: distance === null ? "-" : formatDistanceKm(distance), tone: "strong" },
+      { label: "방향", value: bearing === null ? "-" : `${direction} ${bearing.toFixed(0)}도` },
+      { label: "현재 위치", value: origin ? `${origin.lat.toFixed(6)}, ${origin.lon.toFixed(6)}` : "-" },
+      { label: "목적지", value: targetName || (target ? `${target.lat.toFixed(6)}, ${target.lon.toFixed(6)}` : "-") }
+    ]
+  };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
@@ -643,6 +832,10 @@ function DistanceCalculator({ title, checkpoints }: { title: string; checkpoints
             목적지 지도 열기
           </a>
         )}
+
+        <div className="mt-5 flex flex-wrap gap-3">
+          <ShareActions title={title} result={distanceShareResult} fileName="distance-calculator-result.png" />
+        </div>
 
         <div className="mt-5 rounded-[18px] border border-line bg-white p-5">
           <p className="text-sm font-extrabold text-ink">해석 포인트</p>
