@@ -5,7 +5,11 @@ import { blogPosts } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "블로그 글",
-  description: "계산의정석 블로그 상세 페이지"
+  description: "계산의정석 블로그 상세 페이지",
+  robots: {
+    index: false,
+    follow: true
+  }
 };
 
 export default function BlogPostClientPage() {

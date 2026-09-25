@@ -26,9 +26,10 @@ type Props = {
   badge?: string;
   meta?: "blog" | "community";
   pageSize?: number;
+  detailMode?: "query" | "path";
 };
 
-export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badge, meta = "blog", pageSize }: Props) {
+export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badge, meta = "blog", pageSize, detailMode = "query" }: Props) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -163,7 +164,7 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
             {items.map((item) => (
               <Link
                 key={item.slug}
-                href={`${detailBasePath}?slug=${encodeURIComponent(item.slug)}`}
+                href={detailMode === "path" ? `${detailBasePath}/${encodeURIComponent(item.slug)}` : `${detailBasePath}?slug=${encodeURIComponent(item.slug)}`}
                 className="rounded-[24px] border border-line bg-white p-6 shadow-panel transition hover:-translate-y-1 hover:border-brand hover:shadow-float"
               >
                 <div className="flex flex-wrap items-center gap-2 text-sm font-extrabold">

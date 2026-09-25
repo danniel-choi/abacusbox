@@ -301,7 +301,7 @@ export default async function CalculatorPage({ params }: Props) {
               {relatedBlogPosts.map((post) => (
                 <Link
                   key={post.slug}
-                  href={`/blog/post?slug=${encodeURIComponent(post.slug)}`}
+                  href={`/blog/${encodeURIComponent(post.slug)}`}
                   className="rounded-[20px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white"
                 >
                   <p className="text-xs font-extrabold text-brand">{post.category}</p>

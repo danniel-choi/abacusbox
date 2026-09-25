@@ -35,7 +35,7 @@ export default function BlogPage() {
       </section>
 
       <Suspense fallback={<section className="mt-8 text-sm font-semibold text-slate-500">콘텐츠를 불러오는 중입니다.</section>}>
-        <ContentListClient apiPath="/api/blog" detailBasePath="/blog/post" fallbackItems={fallbackItems} meta="blog" pageSize={10} />
+        <ContentListClient apiPath="/api/blog" detailBasePath="/blog" fallbackItems={fallbackItems} meta="blog" pageSize={10} detailMode="path" />
       </Suspense>
     </main>
   );

@@ -91,7 +91,7 @@ export function HubPage({ hub }: { hub: HubContent }) {
           {posts.map((post) => (
             <Link
               key={post.slug}
-              href={`/blog/post?slug=${post.slug}`}
+              href={`/blog/${post.slug}`}
               className="rounded-[22px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white"
             >
               <p className="text-xs font-extrabold text-brand">{post.category}</p>

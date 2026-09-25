@@ -60,7 +60,7 @@ export function HomeBlogRoller({ posts }: Props) {
           </div>
           <div className="mt-8 flex items-center justify-between gap-4">
             <Link
-              href={`/blog/post?slug=${encodeURIComponent(activePost.slug)}`}
+              href={`/blog/${encodeURIComponent(activePost.slug)}`}
               className="text-sm font-extrabold text-brand transition hover:text-white"
             >
               글 보러 가기 <span aria-hidden="true">↗</span>
@@ -111,7 +111,7 @@ export function HomeBlogRoller({ posts }: Props) {
         {posts.map((post, index) => (
           <Link
             key={post.slug}
-            href={`/blog/post?slug=${encodeURIComponent(post.slug)}`}
+            href={`/blog/${encodeURIComponent(post.slug)}`}
             className={`rounded-[22px] border px-5 py-4 transition ${
               currentIndex === index
                 ? "border-brand bg-brand/5 shadow-panel"

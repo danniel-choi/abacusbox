@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date()
     })),
     ...blogPosts.map((post) => ({
-      url: `${SITE_URL}/blog/post?slug=${post.slug}`,
+      url: `${SITE_URL}/blog/${post.slug}`,
       lastModified: new Date(post.publishedAt)
     })),
     ...hubOrder.map((key) => ({
