@@ -71,9 +71,9 @@ export default async function BlogPostPage({ params }: Props) {
   };
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:py-12">
+    <main className="mx-auto w-full max-w-4xl min-w-0 px-4 py-8 sm:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <article className="rounded-[28px] border border-line bg-white p-5 shadow-panel sm:p-7">
+      <article className="readable-content w-full max-w-full min-w-0 overflow-hidden rounded-[28px] border border-line bg-white p-5 shadow-panel sm:p-7">
         <Link href="/blog" className="text-sm font-extrabold text-brand">
           ← 블로그 목록
         </Link>
@@ -85,10 +85,10 @@ export default async function BlogPostPage({ params }: Props) {
           <span className="rounded-full bg-paper px-3 py-1 text-slate-500">계산의정석</span>
         </div>
 
-        <h1 className="mt-5 text-3xl font-extrabold leading-tight text-ink sm:text-4xl">{post.title}</h1>
-        <p className="mt-4 text-base font-medium leading-7 text-slate-600">{post.excerpt}</p>
+        <h1 className="mt-5 break-words text-3xl font-extrabold leading-tight text-ink [word-break:normal] sm:text-4xl">{post.title}</h1>
+        <p className="mt-4 break-words text-base font-medium leading-7 text-slate-600 [word-break:normal]">{post.excerpt}</p>
 
-        <div className="mt-8 grid gap-5 text-base font-medium leading-8 text-slate-700">
+        <div className="mt-8 grid min-w-0 gap-5 break-words text-base font-medium leading-8 text-slate-700 [word-break:normal]">
           {post.content.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
@@ -104,7 +104,7 @@ export default async function BlogPostPage({ params }: Props) {
       </article>
 
       {relatedPosts.length > 0 && (
-        <section className="mt-8 rounded-[28px] border border-line bg-white p-6 shadow-panel">
+        <section className="readable-content mt-8 w-full max-w-full min-w-0 overflow-hidden rounded-[28px] border border-line bg-white p-6 shadow-panel">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm font-extrabold text-brand">관련 글</p>
@@ -116,10 +116,10 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {relatedPosts.map((item) => (
-              <Link key={item.slug} href={`/blog/${item.slug}`} className="rounded-[20px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white">
+              <Link key={item.slug} href={`/blog/${item.slug}`} className="min-w-0 rounded-[20px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white">
                 <p className="text-xs font-extrabold text-brand">{item.category}</p>
-                <h3 className="mt-3 text-base font-extrabold leading-6 text-ink">{item.title}</h3>
-                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{item.excerpt}</p>
+                <h3 className="mt-3 break-words text-base font-extrabold leading-6 text-ink [word-break:normal]">{item.title}</h3>
+                <p className="mt-2 break-words text-sm font-medium leading-6 text-slate-600 [word-break:normal]">{item.excerpt}</p>
               </Link>
             ))}
           </div>

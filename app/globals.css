@@ -107,3 +107,14 @@ input[type="range"] {
   white-space: nowrap;
   border: 0;
 }
+
+.readable-content {
+  overflow-wrap: anywhere !important;
+  word-break: break-all !important;
+}
+
+.readable-content * {
+  min-width: 0;
+  overflow-wrap: anywhere !important;
+  word-break: break-all !important;
+}

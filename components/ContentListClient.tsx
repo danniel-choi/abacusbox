@@ -171,15 +171,15 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
               <Link
                 key={item.slug}
                 href={detailMode === "path" ? `${detailBasePath}/${encodeURIComponent(item.slug)}` : `${detailBasePath}?slug=${encodeURIComponent(item.slug)}`}
-                className="rounded-[24px] border border-line bg-white p-6 shadow-panel transition hover:-translate-y-1 hover:border-brand hover:shadow-float"
+                className="readable-content w-full max-w-full min-w-0 overflow-hidden rounded-[24px] border border-line bg-white p-6 shadow-panel transition hover:-translate-y-1 hover:border-brand hover:shadow-float"
               >
                 <div className="flex flex-wrap items-center gap-2 text-sm font-extrabold">
                   <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{labelForItem(item, meta)}</span>
                   {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at)}</span>}
                   {item.author_name && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{item.author_name}</span>}
                 </div>
-                <h2 className="mt-4 text-xl font-extrabold text-ink sm:text-2xl">{item.title}</h2>
-                <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{item.excerpt || ""}</p>
+                <h2 className="mt-4 break-words text-xl font-extrabold text-ink [word-break:normal] sm:text-2xl">{item.title}</h2>
+                <p className="mt-3 break-words text-sm font-medium leading-7 text-slate-600 [word-break:normal]">{item.excerpt || ""}</p>
                 {meta === "community" && (
                   <div className="mt-4 flex gap-4 text-sm font-bold text-slate-500">
                     <span>댓글 {item.comment_count}</span>

@@ -238,8 +238,8 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:py-12">
-      <article className="rounded-[28px] border border-line bg-white p-5 shadow-panel sm:p-7">
+    <main className="mx-auto w-full max-w-4xl min-w-0 px-4 py-8 sm:py-12">
+      <article className="readable-content w-full max-w-full min-w-0 overflow-hidden rounded-[28px] border border-line bg-white p-5 shadow-panel sm:p-7">
         <Link href={listPath} className="text-sm font-extrabold text-brand">
           ← {title} 목록
         </Link>
@@ -255,8 +255,8 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
               {item.author_name && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{item.author_name}</span>}
             </div>
 
-            <h1 className="mt-5 text-3xl font-extrabold leading-tight text-ink sm:text-4xl">{item.title}</h1>
-            {item.excerpt && <p className="mt-4 text-base font-medium leading-7 text-slate-600">{item.excerpt}</p>}
+            <h1 className="mt-5 break-words text-3xl font-extrabold leading-tight text-ink [word-break:normal] sm:text-4xl">{item.title}</h1>
+            {item.excerpt && <p className="mt-4 break-words text-base font-medium leading-7 text-slate-600 [word-break:normal]">{item.excerpt}</p>}
 
             {mode === "community" && (
               <>
@@ -296,7 +296,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
               </div>
             )}
 
-            <div className="mt-8 grid gap-5 text-base font-medium leading-8 text-slate-700">
+            <div className="mt-8 grid min-w-0 gap-5 break-words text-base font-medium leading-8 text-slate-700 [word-break:normal]">
               {markdownToParagraphs(item.body_md).map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
