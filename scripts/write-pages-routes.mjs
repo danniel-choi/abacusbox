@@ -9,7 +9,7 @@ const textSitemap = path.join(outputDir, "sitemap.txt");
 
 const routes = {
   version: 1,
-  include: ["/api/*", "/admin/*"],
+  include: ["/api/*", "/admin/*", "/naverae46c8baa59bdc23ffed2d8151b1cdef.html"],
   exclude: []
 };
 
