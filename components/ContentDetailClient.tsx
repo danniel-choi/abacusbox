@@ -82,7 +82,8 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
         if (!response.ok) throw new Error(`Request failed: ${response.status}`);
         const data = await response.json();
         if (!active) return;
-        setItem(data);
+        const fallback = findFallback(fallbackItems, slug);
+        setItem(preferCompleteFallback(data, fallback));
         setError(null);
       } catch (cause) {
         if (!active) return;
@@ -396,6 +397,11 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
 
 function findFallback(items: DetailItem[], slug: string) {
   return items.find((item) => item.slug === slug) || null;
+}
+
+function preferCompleteFallback(item: DetailItem & { source?: string }, fallback: DetailItem | null) {
+  if (item.source !== "fallback" || !fallback) return item;
+  return fallback.body_md.length >= item.body_md.length ? fallback : item;
 }
 
 function markdownToParagraphs(markdown: string) {

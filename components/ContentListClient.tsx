@@ -67,6 +67,12 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
         if (!response.ok) throw new Error(`Request failed: ${response.status}`);
         const data = await response.json();
         if (!active) return;
+        if (data?.source === "fallback") {
+          setItems(fallbackSlice);
+          setTotal(paginationEnabled ? fallbackItems.length : fallbackSlice.length);
+          setError(data.warning || "실시간 데이터 연결이 없어서 기본 콘텐츠를 표시합니다.");
+          return;
+        }
         if (Array.isArray(data.items)) {
           setItems(data.items);
         }
