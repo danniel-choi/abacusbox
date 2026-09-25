@@ -10,6 +10,7 @@ import {
 import { getLatestBlogPosts } from "@/lib/content";
 import { legalStandards } from "@/lib/constants";
 import { formatWon } from "@/lib/format";
+import { hubContents, hubOrder } from "@/lib/hub-content";
 import { CalculatorDirectoryClient } from "@/components/CalculatorDirectoryClient";
 import { HomeBlogRoller } from "@/components/HomeBlogRoller";
 import { Logo } from "@/components/Logo";
@@ -119,6 +120,31 @@ export default function HomePage() {
       </section>
 
       <RecentCalculatorsSection />
+
+      <section className="page-shell section-shell">
+        <div className="section-heading mb-6">
+          <div>
+            <p className="text-sm font-extrabold text-brand">주제별 가이드</p>
+            <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink md:text-3xl">계산기와 해설을 분야별로 묶었습니다.</h2>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {hubOrder.map((key) => {
+            const hub = hubContents[key];
+            return (
+              <Link
+                key={hub.key}
+                href={hub.path}
+                className="rounded-[24px] border border-line bg-white p-6 shadow-panel transition hover:-translate-y-1 hover:border-brand hover:shadow-float"
+              >
+                <p className="text-sm font-extrabold text-brand">{hub.eyebrow}</p>
+                <h3 className="mt-3 text-xl font-extrabold text-ink">{hub.title}</h3>
+                <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{hub.description}</p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       <section id="directory" className="page-shell section-shell">
         <CalculatorDirectoryClient compact />

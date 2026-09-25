@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { calculators } from "@/lib/calculators";
-import { blogPosts, communityPosts } from "@/lib/content";
+import { blogPosts } from "@/lib/content";
 import { SITE_URL } from "@/lib/constants";
+import { hubContents, hubOrder } from "@/lib/hub-content";
 
 export const dynamic = "force-static";
 
@@ -19,11 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${SITE_URL}/blog/post?slug=${post.slug}`,
       lastModified: new Date(post.publishedAt)
     })),
-    ...communityPosts.map((post) => ({
-      url: `${SITE_URL}/community/post?slug=${post.slug}`,
-      lastModified: new Date(post.publishedAt)
+    ...hubOrder.map((key) => ({
+      url: `${SITE_URL}${hubContents[key].path}`,
+      lastModified: new Date()
     })),
-    ...["about", "editorial-policy", "privacy", "terms", "contact", "contact/post", "blog", "community", "blog/post", "community/post"].map((path) => ({
+    ...["calculators", "about", "editorial-policy", "privacy", "terms", "contact", "blog", "community"].map((path) => ({
       url: `${SITE_URL}/${path}`,
       lastModified: new Date()
     }))
