@@ -35,6 +35,7 @@ export default function PrivacyPage() {
             <div className="mt-3 grid gap-3 text-base font-medium leading-8">
               <p>계산의정석은 Google AdSense 등 제3자 광고 서비스를 사용할 수 있으며, 이 과정에서 광고 게재·측정·사기 방지 목적의 기술이 적용될 수 있습니다.</p>
               <p>광고 게재 방식과 개인화 여부는 Google 및 관련 사업자의 정책, 사용자 브라우저 설정, 지역별 규제에 따라 달라질 수 있습니다.</p>
+              <p>Google을 포함한 제3자 사업자는 사용자의 이전 방문 기록 또는 관심사를 바탕으로 광고를 제공하기 위해 쿠키를 사용할 수 있습니다. 사용자는 브라우저 설정 또는 Google 광고 설정에서 개인화 광고 관련 선택을 조정할 수 있습니다.</p>
             </div>
           </section>
 
@@ -47,9 +48,18 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-extrabold text-ink">6. 문의 방법</h2>
+            <h2 className="text-lg font-extrabold text-ink">6. 보관 및 삭제</h2>
+            <div className="mt-3 grid gap-3 text-base font-medium leading-8">
+              <p>문의 게시물과 댓글은 서비스 운영과 답변 관리를 위해 필요한 기간 동안 보관될 수 있습니다. 개인정보가 포함된 게시물은 요청 또는 운영 판단에 따라 비공개 처리될 수 있습니다.</p>
+              <p>브라우저 로컬 저장소에 저장된 계산 입력값, 최근 사용 계산기, 방문자 식별값은 사용자가 브라우저 설정에서 직접 삭제할 수 있습니다.</p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-extrabold text-ink">7. 문의 방법</h2>
             <div className="mt-3 grid gap-3 text-base font-medium leading-8">
               <p>개인정보 처리나 콘텐츠 오류와 관련한 문의는 사이트의 문의 페이지를 통해 접수할 수 있습니다.</p>
+              <p>시행일: 2026년 9월 25일</p>
             </div>
           </section>
         </div>

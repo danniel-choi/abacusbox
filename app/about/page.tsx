@@ -17,6 +17,14 @@ export default function AboutPage() {
           </section>
 
           <section>
+            <h2 className="text-lg font-extrabold text-ink">운영자와 서비스 범위</h2>
+            <div className="mt-3 grid gap-3 text-base font-medium leading-8">
+              <p>계산의정석은 한국 사용자를 대상으로 한 웹 기반 계산기와 해설 콘텐츠를 제공합니다. 회원가입 없이 주요 계산기를 사용할 수 있으며, 운영 문의는 사이트 문의 게시판을 통해 접수합니다.</p>
+              <p>현재 제공 범위는 노무, 급여, 세금, 금융, 부동산, 생활 계산, 수학 도구입니다. 새 계산기는 실제 검색 수요와 사용자 제보, 제도 변경 여부를 기준으로 추가합니다.</p>
+            </div>
+          </section>
+
+          <section>
             <h2 className="text-lg font-extrabold text-ink">무엇을 중요하게 보나</h2>
             <div className="mt-3 grid gap-3 text-base font-medium leading-8">
               <p>서비스는 신속성과 정확성을 함께 지향합니다. 필요한 값을 즉시 확인할 수 있도록 인터페이스를 단순하게 유지하면서도, 실제 판단에 영향을 주는 기준값은 공식 자료를 우선 반영합니다.</p>
@@ -37,6 +45,14 @@ export default function AboutPage() {
             <div className="mt-3 grid gap-3 text-base font-medium leading-8">
               <p>계산 결과는 참고용 추정치이며, 실제 신고, 계약, 대출 승인, 세무, 법률 판단은 관할 기관 또는 전문가 확인이 필요합니다.</p>
               <p>계산의정석의 역할은 확정 판단을 대신하는 것이 아니라, 그 전 단계에서 가장 빠르게 기준을 잡고 비교할 수 있도록 돕는 것입니다.</p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-extrabold text-ink">광고와 독립성</h2>
+            <div className="mt-3 grid gap-3 text-base font-medium leading-8">
+              <p>서비스 운영을 위해 광고가 게재될 수 있지만, 계산식과 해설의 기준은 광고주가 아니라 공식 자료와 사용자에게 필요한 정보성을 기준으로 관리합니다.</p>
+              <p>광고가 표시되더라도 계산 결과, 공식 출처, 주의사항, 문의 경로를 가리지 않도록 화면 구성을 유지합니다.</p>
             </div>
           </section>
         </div>

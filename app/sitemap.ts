@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${SITE_URL}/community/post?slug=${post.slug}`,
       lastModified: new Date(post.publishedAt)
     })),
-    ...["about", "privacy", "contact", "contact/post", "blog", "community", "blog/post", "community/post"].map((path) => ({
+    ...["about", "editorial-policy", "privacy", "terms", "contact", "contact/post", "blog", "community", "blog/post", "community/post"].map((path) => ({
       url: `${SITE_URL}/${path}`,
       lastModified: new Date()
     }))

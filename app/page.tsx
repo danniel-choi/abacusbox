@@ -145,6 +145,37 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="page-shell section-shell">
+        <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel">
+          <div className="section-heading mb-5">
+            <div>
+              <p className="text-sm font-extrabold text-brand">사이트 안내</p>
+              <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink md:text-3xl">계산 도구와 해설 콘텐츠를 함께 제공합니다.</h2>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              { title: "고유 콘텐츠", text: "각 계산기마다 입력 기준, 결과 해석, FAQ, 관련 계산기를 함께 제공합니다." },
+              { title: "명확한 탐색", text: "상단 메뉴, 계산기 디렉토리, 그룹 필터, 사이트맵으로 주요 페이지를 찾을 수 있습니다." },
+              { title: "정책 공개", text: "소개, 운영 원칙, 개인정보처리방침, 이용약관, 문의 페이지를 공개합니다." },
+              { title: "지속 갱신", text: "제도 변경과 사용자 제보를 반영해 계산식과 설명을 점검합니다." }
+            ].map((item) => (
+              <div key={item.title} className="rounded-[20px] bg-paper p-5">
+                <h3 className="text-base font-extrabold text-ink">{item.title}</h3>
+                <p className="mt-3 text-sm font-medium leading-6 text-slate-600">{item.text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/about" className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand">서비스 소개</Link>
+            <Link href="/editorial-policy" className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand">운영 원칙</Link>
+            <Link href="/privacy" className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand">개인정보처리방침</Link>
+            <Link href="/terms" className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand">이용약관</Link>
+            <Link href="/contact" className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand">문의</Link>
+          </div>
+        </div>
+      </section>
+
       <section id="sources" className="page-shell pb-16">
         <div className="rounded-[28px] bg-navy p-6 text-white shadow-panel">
           <p className="text-sm font-extrabold text-brand">신뢰 기준</p>

@@ -8,7 +8,8 @@ const navItems = [
   { href: "/calculators", label: "계산기" },
   { href: "/blog", label: "블로그" },
   { href: "/#sources", label: "출처" },
-  { href: "/about", label: "소개" }
+  { href: "/about", label: "소개" },
+  { href: "/editorial-policy", label: "운영원칙" }
 ];
 
 export function Header() {

@@ -34,6 +34,7 @@ export default function EditorialPolicyPage() {
             <div className="mt-3 grid gap-3 text-base font-medium leading-8">
               <p>사용자 제보, 제도 개정, 기준연도 변경, 공식 문서 갱신이 확인되면 관련 계산기와 해설 콘텐츠를 함께 점검합니다.</p>
               <p>오류 가능성이 있는 표현은 그대로 두지 않고, 계산식보다 먼저 입력 전제와 적용 범위를 수정하는 것을 원칙으로 합니다.</p>
+              <p>새 기능을 배포할 때는 계산기 동작, 모바일 표시, 주요 URL 응답, sitemap 반영 여부를 함께 확인합니다.</p>
             </div>
           </section>
 
@@ -46,7 +47,15 @@ export default function EditorialPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-extrabold text-ink">5. 문의 및 정정 요청</h2>
+            <h2 className="text-lg font-extrabold text-ink">5. 광고 친화성과 사용자 경험</h2>
+            <div className="mt-3 grid gap-3 text-base font-medium leading-8">
+              <p>광고는 콘텐츠를 가리거나 기능 사용을 방해하지 않는 위치에 배치하는 것을 원칙으로 합니다. 계산 결과와 입력 폼, 공식 출처 링크가 광고보다 먼저 이해되도록 화면을 구성합니다.</p>
+              <p>빈 페이지, 제작 중인 페이지, 내용이 부족한 자동 생성 페이지, 사용자에게 가치가 낮은 중복 페이지에는 광고 노출을 보수적으로 적용합니다.</p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-extrabold text-ink">6. 문의 및 정정 요청</h2>
             <div className="mt-3 grid gap-3 text-base font-medium leading-8">
               <p>계산 기준 오류, 표현상 오해, 제휴 문의는 <Link href="/contact" className="font-extrabold text-brand">문의 페이지</Link>를 통해 접수할 수 있습니다.</p>
               <p>정정이 필요한 경우 관련 계산기 설명, 블로그 글, 연결 문구까지 함께 조정해 사용자 해석 오류를 줄이는 방향으로 반영합니다.</p>

@@ -44,13 +44,26 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <div className="mb-4">
               <VisitorCounter />
             </div>
-            <div className="grid gap-4 text-sm text-white/60 md:grid-cols-[1fr_auto]">
-              <p>계산 결과는 참고용 추정치이며, 실제 법률·세무·금융 판단은 관할 기관 또는 전문가 확인이 필요합니다.</p>
-              <div className="flex flex-wrap gap-3 text-white/82">
-                <Link href="/blog">블로그</Link>
-                <Link href="/editorial-policy">운영 원칙</Link>
-                <Link href="/privacy">개인정보처리방침</Link>
-                <Link href="/contact">문의</Link>
+            <div className="grid gap-6 text-sm text-white/60 md:grid-cols-[1.2fr_0.8fr]">
+              <div>
+                <p className="font-extrabold text-white">계산의정석</p>
+                <p className="mt-2 leading-6">
+                  노무, 금융, 세금, 생활 계산을 빠르게 비교하고 공식 기준과 해설을 함께 확인하는 계산기 디렉토리입니다.
+                  계산 결과는 참고용 추정치이며, 실제 법률·세무·금융 판단은 관할 기관 또는 전문가 확인이 필요합니다.
+                </p>
+                <p className="mt-2 text-xs font-semibold text-white/45">운영 문의: 사이트 문의 게시판을 통해 접수합니다.</p>
+              </div>
+              <div className="grid gap-3">
+                <p className="font-extrabold text-white">사이트 정보</p>
+                <div className="flex flex-wrap gap-3 text-white/82">
+                  <Link href="/about">소개</Link>
+                  <Link href="/blog">블로그</Link>
+                  <Link href="/editorial-policy">운영 원칙</Link>
+                  <Link href="/privacy">개인정보처리방침</Link>
+                  <Link href="/terms">이용약관</Link>
+                  <Link href="/contact">문의</Link>
+                  <Link href="/sitemap.xml">사이트맵</Link>
+                </div>
               </div>
             </div>
           </div>
