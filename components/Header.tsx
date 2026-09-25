@@ -173,7 +173,14 @@ function CalculatorHeaderSearch({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div
+      className={`relative ${className}`}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setFocused(false);
+        }
+      }}
+    >
       <form
         role="search"
         onSubmit={(event) => {
