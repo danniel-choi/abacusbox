@@ -124,7 +124,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     title: "날짜, 단위, 거리, 퍼센트 생활 계산기",
     description: "날짜 차이, D-Day, 단위변환, 거리계산, 할인율, 퍼센트처럼 매일 쓰는 계산을 빠르게 처리합니다.",
     featuredSlugs: ["distance-calculator", "date-diff", "dday", "unit-converter", "percent", "discount-rate"],
-    blogSlugs: ["distance-calculator-how-to-use"],
+    blogSlugs: ["moving-cost-comparison-20260926-02-hourly", "distance-calculator-how-to-use", "car-maintenance-mistakes-20260926-01-hourly"],
     sections: [
       {
         title: "생활 계산기는 빠른 판단을 줄여줍니다.",
@@ -149,7 +149,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     title: "판매 수익과 사업 비용 계산기",
     description: "부가세, 판매수익, 손익분기점, 구독 매출, 물류비처럼 소규모 사업자가 자주 보는 숫자를 정리했습니다.",
     featuredSlugs: ["vat", "seller-profit", "break-even", "subscription-revenue", "cbm-freight", "mobile-plan"],
-    blogSlugs: ["break-even-checklist-20260926-00-hourly", "calcrule-content-hub-launch"],
+    blogSlugs: ["break-even-checklist-20260926-00-hourly", "moving-cost-comparison-20260926-02-hourly", "mobile-plan-scenario-20260926-03-hourly", "calcrule-content-hub-launch"],
     sections: [
       {
         title: "사업 계산은 매출보다 마진 구조가 먼저입니다.",

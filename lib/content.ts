@@ -21,24 +21,253 @@ export type CommunityPost = {
   content: string[];
 };
 
-export const blogPosts: BlogPost[] = [
-  {
-    slug: "break-even-checklist-20260926-00-hourly",
-    title: "손익분기점 계산 전에 확인해야 할 고정비와 원가 체크리스트",
-    excerpt: "판매가, 변동원가, 월 고정비를 나누어 손익분기 판매수량과 목표 매출을 점검하는 방법입니다.",
+type AutoBlogMeta = {
+  title: string;
+  category: BlogPost["category"];
+  audience: string;
+  description: string;
+  tags: string[];
+};
+
+const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
+  "break-even": {
+    title: "원가율·손익분기점 계산기",
     category: "사업 가이드",
-    publishedAt: "2026-09-26",
-    readTime: "6분",
-    tags: ["손익분기점", "원가율", "판매수익"],
-    content: [
-      "손익분기점은 매출이 얼마인지보다 한 건을 팔 때 실제로 얼마가 남는지를 먼저 보는 계산입니다. 판매가에서 매입원가, 포장비, 결제수수료, 플랫폼 수수료, 배송비처럼 판매량에 따라 움직이는 변동원가를 빼야 공헌이익이 나옵니다.",
-      "월 고정비는 판매량과 상관없이 계속 나가는 비용입니다. 임대료, 인건비, 구독료, 창고비, 장비 렌탈료, 기본 광고비처럼 매월 반복되는 비용을 따로 모아야 손익분기 판매수량을 계산할 수 있습니다.",
-      "원가율만 낮다고 해서 바로 이익이 나는 것은 아닙니다. 공헌이익이 충분해도 고정비가 크면 손익분기점은 높아집니다. 반대로 고정비가 낮으면 작은 판매량에서도 흑자 전환이 가능할 수 있습니다.",
-      "계산할 때는 판매가를 정상가와 할인 판매가로 나누어 보는 것이 좋습니다. 할인 이벤트나 쿠폰을 자주 쓰는 상품은 평균 판매가가 낮아지고, 그만큼 손익분기 수량이 올라갑니다.",
-      "계산의정석 원가율·손익분기점 계산기는 판매가, 변동원가, 월 고정비를 입력하면 공헌이익, 원가율, 손익분기 판매수량과 손익분기 매출을 빠르게 보여줍니다. 신상품 출시 전 가격을 정하거나 광고비를 늘리기 전에 먼저 확인하기 좋습니다.",
-      "실무에서는 기준 시나리오 하나만 보지 말고 원가 상승, 광고비 증가, 할인율 확대 같은 조건을 따로 넣어 비교하세요. 손익분기점이 조금만 변해도 재고 계획과 현금흐름이 크게 달라질 수 있습니다."
-    ]
+    audience: "셀러, 자영업자, 소규모 사업 운영자",
+    description: "판매가, 원가, 월 고정비를 기준으로 원가율과 손익분기 판매수량을 계산합니다.",
+    tags: ["손익분기점", "원가율", "판매수익"]
   },
+  "car-maintenance": {
+    title: "자동차 유지비 계산기",
+    category: "생활 가이드",
+    audience: "차량 보유자, 구매 검토자",
+    description: "주행거리, 연비, 유류비, 보험료, 세금, 주차비를 기준으로 월 자동차 유지비를 계산합니다.",
+    tags: ["자동차유지비", "생활비", "월예산"]
+  },
+  "moving-cost": {
+    title: "이사 비용 계산기",
+    category: "생활 가이드",
+    audience: "이사 예정자, 포장이사 비교 사용자",
+    description: "집 크기, 거리, 엘리베이터 여부, 사다리차 여부를 기준으로 이사 비용을 추정합니다.",
+    tags: ["이사비용", "포장이사", "견적비교"]
+  },
+  "mobile-plan": {
+    title: "휴대폰 요금 계산기",
+    category: "생활 가이드",
+    audience: "요금제 변경 사용자, 통신비 절감 사용자",
+    description: "기본요금, 데이터 옵션, 선택약정 할인, 가족결합을 반영해 월 통신비를 계산합니다.",
+    tags: ["휴대폰요금", "통신비", "요금제"]
+  },
+  bmi: {
+    title: "BMI 계산기",
+    category: "생활 가이드",
+    audience: "체중 관리 사용자, 건강 정보 확인 사용자",
+    description: "키와 몸무게를 기준으로 BMI 지수와 비만도 구간을 계산합니다.",
+    tags: ["BMI", "건강", "체중관리"]
+  },
+  "korean-age": {
+    title: "만나이 계산기",
+    category: "생활 가이드",
+    audience: "연령 확인 사용자, 서류 작성 사용자",
+    description: "생년월일과 기준일을 입력해 현재 만나이와 다음 생일까지 남은 기간을 계산합니다.",
+    tags: ["만나이", "생년월일", "기준일"]
+  },
+  "date-diff": {
+    title: "날짜 차이 계산기",
+    category: "생활 가이드",
+    audience: "일정 관리 사용자, 계약 기간 확인 사용자",
+    description: "시작일과 종료일 기준으로 날짜 차이와 주·개월 환산값을 계산합니다.",
+    tags: ["날짜계산", "기간계산", "일정관리"]
+  },
+  "unit-converter": {
+    title: "단위변환 계산기",
+    category: "생활 가이드",
+    audience: "생활 계산 사용자, 부동산·쇼핑·해외 단위 확인 사용자",
+    description: "길이, 무게, 면적 단위를 빠르게 변환합니다.",
+    tags: ["단위변환", "생활계산", "면적"]
+  },
+  percent: {
+    title: "퍼센트 계산기",
+    category: "생활 가이드",
+    audience: "쇼핑, 업무, 공부, 보고서 작성 사용자",
+    description: "비율, 증가율, 감소율, 일부 값 계산을 한 번에 할 수 있는 퍼센트 계산기입니다.",
+    tags: ["퍼센트", "비율", "증가율"]
+  },
+  "discount-rate": {
+    title: "할인율 계산기",
+    category: "생활 가이드",
+    audience: "쇼핑 사용자, 판매자, 가격 비교 사용자",
+    description: "정가와 판매가를 기준으로 할인금액과 할인율을 계산합니다.",
+    tags: ["할인율", "쇼핑", "가격비교"]
+  },
+  gpa: {
+    title: "학점 계산기",
+    category: "생활 가이드",
+    audience: "대학생, 성적 관리 사용자",
+    description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.",
+    tags: ["학점", "성적", "GPA"]
+  },
+  unemployment: {
+    title: "실업급여 모의계산기",
+    category: "노무 가이드",
+    audience: "퇴사 예정자, 이직자",
+    description: "평균임금, 연령, 고용보험 가입기간을 입력해 구직급여 1일액과 예상 총액을 계산합니다.",
+    tags: ["실업급여", "고용보험", "퇴사"]
+  },
+  severance: {
+    title: "퇴직금 계산기",
+    category: "노무 가이드",
+    audience: "퇴직 예정 근로자, 인사 담당자",
+    description: "최근 3개월 임금과 계속근로기간으로 법정 퇴직금 예상액을 계산합니다.",
+    tags: ["퇴직금", "평균임금", "근속기간"]
+  },
+  "weekly-holiday": {
+    title: "주휴수당 계산기",
+    category: "노무 가이드",
+    audience: "아르바이트, 단시간 근로자",
+    description: "주 근무시간과 시급을 입력해 예상 주휴수당과 주급을 계산합니다.",
+    tags: ["주휴수당", "아르바이트", "근로시간"]
+  },
+  "hourly-wage": {
+    title: "시급 계산기",
+    category: "노무 가이드",
+    audience: "아르바이트, 단시간 근로자, 급여 비교 사용자",
+    description: "시급을 기준으로 일급, 주급, 월급, 연봉과 수당 포함 예상 급여를 계산합니다.",
+    tags: ["시급", "월급", "급여계산"]
+  },
+  "annual-leave": {
+    title: "연차수당 계산기",
+    category: "노무 가이드",
+    audience: "퇴직 예정자, 인사 담당자, 급여 확인 사용자",
+    description: "통상임금과 1일 근로시간, 미사용 연차일수를 기준으로 연차수당 예상액을 계산합니다.",
+    tags: ["연차수당", "통상임금", "휴가"]
+  },
+  "annual-leave-grant": {
+    title: "연차 발생일수 계산기",
+    category: "노무 가이드",
+    audience: "근로자, 인사 담당자, 휴가 정산 사용자",
+    description: "근속연수, 출근율, 개근 개월 수를 기준으로 법정 연차 발생일수를 계산합니다.",
+    tags: ["연차", "휴가", "근속연수"]
+  },
+  "parental-leave": {
+    title: "육아휴직 급여 계산기",
+    category: "노무 가이드",
+    audience: "육아휴직 예정자, 인사 담당자",
+    description: "월 통상임금과 육아휴직 사용 개월 수를 기준으로 육아휴직 급여 예상액을 계산합니다.",
+    tags: ["육아휴직", "급여", "고용보험"]
+  },
+  "net-salary": {
+    title: "4대 보험 실수령액 계산기",
+    category: "노무 가이드",
+    audience: "직장인, 급여 담당자",
+    description: "월 급여에서 국민연금, 건강보험, 장기요양, 고용보험 근로자 부담분을 계산합니다.",
+    tags: ["실수령액", "4대보험", "급여명세서"]
+  },
+  "military-discharge-date": {
+    title: "군 전역일 계산기",
+    category: "생활 가이드",
+    audience: "입대 예정자, 군 복무자, 가족",
+    description: "입대일과 복무 개월 수를 기준으로 예상 전역일을 계산합니다.",
+    tags: ["전역일", "군복무", "날짜계산"]
+  },
+  "loan-interest": {
+    title: "대출 이자 계산기",
+    category: "금융 가이드",
+    audience: "대출 검토자, 주담대·신용대출 사용자",
+    description: "대출금액, 금리, 기간, 상환방식에 따라 월 상환액과 총 이자를 계산합니다.",
+    tags: ["대출이자", "금리", "상환"]
+  },
+  "loan-dsr": {
+    title: "대출 DSR/LTV 계산기",
+    category: "금융 가이드",
+    audience: "주택 구매 예정자, 대출 상담 전 사용자",
+    description: "연소득, 주택가격, 금리, 만기로 대출 가능성과 원리금 균등상환액을 시뮬레이션합니다.",
+    tags: ["DSR", "LTV", "대출한도"]
+  },
+  "loan-amortization": {
+    title: "대출 상환 스케줄 계산기",
+    category: "금융 가이드",
+    audience: "대출 실행 전 사용자, 상환 계획 검토 사용자",
+    description: "대출금액, 금리, 기간을 기준으로 월 상환액과 총 이자, 초반·후반 상환 구조를 계산합니다.",
+    tags: ["대출상환", "상환스케줄", "총이자"]
+  },
+  "real-estate-acquisition-tax": {
+    title: "부동산 취득세 계산기",
+    category: "세금 가이드",
+    audience: "주택 매수 예정자, 부동산 비용 확인 사용자",
+    description: "주택 취득가액을 기준으로 취득세와 지방교육세를 계산합니다.",
+    tags: ["취득세", "부동산", "주택"]
+  }
+};
+
+const hourlyAutoBlogSlugs = [
+  "break-even-checklist-20260926-00-hourly",
+  "car-maintenance-mistakes-20260926-01-hourly",
+  "moving-cost-comparison-20260926-02-hourly",
+  "mobile-plan-scenario-20260926-03-hourly",
+  "bmi-guide-20260926-04-hourly",
+  "korean-age-checklist-20260926-05-hourly",
+  "date-diff-mistakes-20260926-06-hourly",
+  "unit-converter-comparison-20260926-07-hourly",
+  "percent-scenario-20260926-08-hourly",
+  "discount-rate-guide-20260926-09-hourly",
+  "gpa-checklist-20260926-10-hourly",
+  "unemployment-mistakes-20260926-11-hourly",
+  "severance-comparison-20260926-12-hourly",
+  "weekly-holiday-scenario-20260926-13-hourly",
+  "hourly-wage-guide-20260926-14-hourly",
+  "annual-leave-checklist-20260926-15-hourly",
+  "annual-leave-grant-mistakes-20260926-16-hourly",
+  "parental-leave-comparison-20260926-17-hourly",
+  "net-salary-scenario-20260926-18-hourly",
+  "military-discharge-date-guide-20260926-19-hourly",
+  "loan-interest-checklist-20260926-20-hourly",
+  "loan-dsr-mistakes-20260926-21-hourly",
+  "loan-amortization-comparison-20260926-22-hourly",
+  "real-estate-acquisition-tax-scenario-20260926-23-hourly"
+];
+
+const hourlyTemplateMeta = {
+  guide: { suffix: "핵심 정리", focus: "기준 구조와 입력 흐름" },
+  checklist: { suffix: "입력 전 체크리스트", focus: "계산 전에 확인할 항목" },
+  mistakes: { suffix: "자주 틀리는 포인트", focus: "반복되는 입력 실수와 해석 오류" },
+  comparison: { suffix: "비교할 때 봐야 할 기준", focus: "여러 조건을 비교하는 기준" },
+  scenario: { suffix: "상황별 활용 방법", focus: "실제 상황별 계산 흐름" }
+} as const;
+
+function buildHourlyAutoBlogPost(slug: string): BlogPost {
+  const match = slug.match(/^(.+)-(guide|checklist|mistakes|comparison|scenario)-(\d{8})-(\d{2})-hourly$/);
+  const calculatorSlug = match?.[1] || "";
+  const templateKey = (match?.[2] || "guide") as keyof typeof hourlyTemplateMeta;
+  const dateCode = match?.[3] || "20260926";
+  const meta = hourlyAutoBlogMeta[calculatorSlug] || hourlyAutoBlogMeta.percent;
+  const template = hourlyTemplateMeta[templateKey];
+  const publishedAt = `${dateCode.slice(0, 4)}-${dateCode.slice(4, 6)}-${dateCode.slice(6, 8)}`;
+  const plainTitle = meta.title.replace(" 계산기", "");
+
+  return {
+    slug,
+    title: `${plainTitle} ${template.suffix}`,
+    excerpt: `${meta.title}를 쓰기 전에 ${template.focus}을 정리해 실제 판단에 필요한 숫자를 놓치지 않도록 돕습니다.`,
+    category: meta.category,
+    publishedAt,
+    readTime: "5분",
+    tags: meta.tags,
+    content: [
+      `${meta.title}는 ${meta.audience}가 빠르게 기준값을 확인할 때 유용한 도구입니다. ${meta.description}`,
+      `계산 전에는 입력값의 기준을 먼저 맞춰야 합니다. 세전과 세후, 월 단위와 연 단위, 총액과 일부 금액이 섞이면 같은 계산기라도 결과 해석이 달라질 수 있습니다.`,
+      `${template.focus}을 볼 때는 기준 시나리오 하나만 두지 말고 보수적인 경우와 여유 있는 경우를 함께 비교하는 편이 좋습니다. 작은 입력 차이가 월 비용이나 예상 금액에서는 크게 벌어질 수 있습니다.`,
+      `계산 결과는 의사결정을 돕는 참고값입니다. 실제 계약, 신고, 구매, 급여 정산, 비용 집행 전에는 견적서, 명세서, 약정서, 공식 안내문처럼 원자료를 함께 확인해야 합니다.`,
+      `계산의정석의 ${meta.title}는 복잡한 표를 보기 전에 대략적인 범위를 잡는 데 맞춰져 있습니다. 결과가 예상과 다르면 입력 단위, 기간, 포함 항목을 다시 점검해 보세요.`,
+      `마지막으로 결과값 하나보다 항목별 구조를 보는 습관이 중요합니다. 어떤 항목이 결과를 크게 움직이는지 알면 절감, 협상, 계획 수정의 우선순위를 더 쉽게 정할 수 있습니다.`
+    ]
+  };
+}
+
+const hourlyAutoBlogPosts = hourlyAutoBlogSlugs.map(buildHourlyAutoBlogPost);
+
+export const blogPosts: BlogPost[] = [
+  ...hourlyAutoBlogPosts,
   {
     slug: "irp-tax-credit-strategy-2026",
     title: "IRP와 연금저축, 세액공제 한도를 어떻게 나눠 넣는 게 유리할까",
