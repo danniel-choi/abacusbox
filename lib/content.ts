@@ -340,7 +340,29 @@ const hourlyTemplateMeta = {
 } as const;
 
 const hourlyAutoBlogTemplateOrder = Object.keys(hourlyTemplateMeta) as (keyof typeof hourlyTemplateMeta)[];
-const hourlyAutoBlogDateCodes = Array.from({ length: 26 }, (_, index) => `202609${String(index + 1).padStart(2, "0")}`);
+
+function toDateCode(date: Date) {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+
+  return `${year}${month}${day}`;
+}
+
+function buildHourlyAutoBlogDateCodes() {
+  const start = Date.UTC(2026, 8, 1);
+  const today = new Date();
+  const end = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 90);
+  const dateCodes: string[] = [];
+
+  for (let time = start; time <= end; time += 24 * 60 * 60 * 1000) {
+    dateCodes.push(toDateCode(new Date(time)));
+  }
+
+  return dateCodes;
+}
+
+const hourlyAutoBlogDateCodes = buildHourlyAutoBlogDateCodes();
 
 function buildHourlyAutoBlogSlug(dateCode: string, hour: number) {
   const dayNumber = Number(dateCode.slice(-2));
