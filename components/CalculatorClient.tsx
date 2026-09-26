@@ -446,7 +446,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           <ShareActions title={activeCalculator.title} result={result} fileName={`${activeCalculator.slug}-result.png`} />
         </div>
 
-        <SavedResultsPanel items={savedResults} onDelete={deleteSavedResult} />
+        <SavedResultsPanel currentSlug={activeCalculator.slug} items={savedResults} onDelete={deleteSavedResult} />
 
         {relatedCalculators.length > 0 && (
           <div className="mt-5 rounded-[18px] border border-line bg-paper p-5">
@@ -483,12 +483,19 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
 }
 
 function SavedResultsPanel({
+  currentSlug,
   items,
   onDelete
 }: {
+  currentSlug: CalculatorSlug;
   items: SavedCalculatorResult[];
   onDelete: (id: string) => void;
 }) {
+  const comparableItems = items.filter((item) => item.slug === currentSlug).slice(0, 3);
+  const comparisonRows = Array.from(
+    new Set(comparableItems.flatMap((item) => item.rows.slice(0, 5).map((row) => row.label)))
+  ).slice(0, 5);
+
   if (items.length === 0) {
     return (
       <div className="mt-5 rounded-[18px] border border-dashed border-line bg-paper p-5">
@@ -544,6 +551,53 @@ function SavedResultsPanel({
           </div>
         ))}
       </div>
+
+      {comparableItems.length >= 2 && (
+        <div className="mt-5 overflow-hidden rounded-2xl border border-line bg-white">
+          <div className="border-b border-line bg-ink px-4 py-3">
+            <p className="text-sm font-extrabold text-white">저장 결과 비교</p>
+            <p className="mt-1 text-xs font-semibold text-white/60">같은 계산기의 최근 저장값을 나란히 봅니다.</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px] text-left text-xs">
+              <thead>
+                <tr className="border-b border-line bg-paper">
+                  <th className="px-4 py-3 font-extrabold text-slate-600">항목</th>
+                  {comparableItems.map((item, index) => (
+                    <th key={item.id} className="px-4 py-3 font-extrabold text-ink">
+                      저장 {index + 1}
+                      <span className="mt-1 block font-semibold text-slate-500">{formatSavedAt(item.savedAt)}</span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-line">
+                  <td className="px-4 py-3 font-extrabold text-slate-600">대표 결과</td>
+                  {comparableItems.map((item) => (
+                    <td key={`${item.id}-headline`} className="px-4 py-3 font-extrabold text-brand">
+                      {item.headline}
+                    </td>
+                  ))}
+                </tr>
+                {comparisonRows.map((label) => (
+                  <tr key={label} className="border-b border-line last:border-b-0">
+                    <td className="px-4 py-3 font-extrabold text-slate-600">{label}</td>
+                    {comparableItems.map((item) => {
+                      const row = item.rows.find((candidate) => candidate.label === label);
+                      return (
+                        <td key={`${item.id}-${label}`} className="px-4 py-3 font-bold text-ink">
+                          {row?.value || "-"}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
