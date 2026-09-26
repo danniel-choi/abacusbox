@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import * as THREE from "three";
 import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type ResultRow } from "@/lib/calculators";
+import { CALCULATOR_GROUP_META, getCalculatorGroup, getRelatedCalculators } from "@/lib/calculator-directory";
 
 type FormValues = Record<string, number>;
 
@@ -17,9 +18,51 @@ const SCIENTIFIC_CALCULATOR_MEMORY_STORAGE_KEY = "calcrule:scientific-calculator
 const FOUR_FUNCTION_HISTORY_STORAGE_KEY = "calcrule:four-function-calculator-history";
 const MATH_NOTES_STORAGE_KEY = "calcrule:math-notes";
 const MATRIX_CALCULATOR_STORAGE_KEY = "calcrule:matrix-calculator";
+const SAVED_RESULTS_STORAGE_KEY = "calcrule:saved-calculator-results";
+
+type SavedCalculatorResult = {
+  id: string;
+  slug: CalculatorSlug;
+  title: string;
+  headline: string;
+  subline: string;
+  rows: ResultRow[];
+  savedAt: string;
+  query: string;
+};
 
 function formStorageKey(slug: CalculatorSlug) {
   return `calcrule:calculator-form:${slug}`;
+}
+
+function buildCalculatorQuery(fields: { name: string; defaultValue: number }[], values: FormValues) {
+  const params = new URLSearchParams();
+  fields.forEach((field) => {
+    const value = values[field.name];
+    if (Number.isFinite(value) && value !== field.defaultValue) {
+      params.set(field.name, String(value));
+    }
+  });
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
+function readSavedResults() {
+  if (typeof window === "undefined") return [];
+  const raw = window.localStorage.getItem(SAVED_RESULTS_STORAGE_KEY);
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw) as SavedCalculatorResult[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    window.localStorage.removeItem(SAVED_RESULTS_STORAGE_KEY);
+    return [];
+  }
+}
+
+function writeSavedResults(items: SavedCalculatorResult[]) {
+  window.localStorage.setItem(SAVED_RESULTS_STORAGE_KEY, JSON.stringify(items.slice(0, 12)));
 }
 
 export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
@@ -28,6 +71,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const searchParams = useSearchParams();
   const resultRef = useRef<HTMLDivElement>(null);
   const [resultNonce, setResultNonce] = useState(0);
+  const [savedResults, setSavedResults] = useState<SavedCalculatorResult[]>(() => readSavedResults());
   const defaults = useMemo(() => {
     return Object.fromEntries(
       calculator.fields.map((field) => {
@@ -79,6 +123,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   );
   const chartMax = Math.max(...result.chart.map((point) => point.value), 1);
   const highlightedRows = result.rows.filter((row) => row.tone === "strong");
+  const relatedCalculators = useMemo(() => getRelatedCalculators(activeCalculator.slug, 4), [activeCalculator.slug]);
   const inputSummary = activeCalculator.fields.map((field) => ({
     label: field.label,
     value: formatInputValue(field, Number(values[field.name] ?? field.defaultValue))
@@ -122,6 +167,28 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
 
   function resetToDefaults() {
     reset(Object.fromEntries(activeCalculator.fields.map((field) => [field.name, field.defaultValue])));
+  }
+
+  function saveCurrentResult() {
+    const snapshot: SavedCalculatorResult = {
+      id: `${activeCalculator.slug}-${Date.now()}`,
+      slug: activeCalculator.slug,
+      title: activeCalculator.title,
+      headline: result.headline,
+      subline: result.subline,
+      rows: result.rows.slice(0, 6),
+      savedAt: new Date().toISOString(),
+      query: buildCalculatorQuery(activeCalculator.fields, values as FormValues)
+    };
+    const next = [snapshot, ...savedResults.filter((item) => item.slug !== snapshot.slug || item.headline !== snapshot.headline)].slice(0, 12);
+    writeSavedResults(next);
+    setSavedResults(next);
+  }
+
+  function deleteSavedResult(id: string) {
+    const next = savedResults.filter((item) => item.id !== id);
+    writeSavedResults(next);
+    setSavedResults(next);
   }
 
   if (activeCalculator.slug === "graphing-calculator") {
@@ -360,6 +427,13 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         </div>
 
         <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={saveCurrentResult}
+            className="w-full rounded-full bg-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand sm:w-auto"
+          >
+            결과 저장
+          </button>
           {activeCalculator.actionLabel && (
             <button
               type="button"
@@ -371,10 +445,105 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           )}
           <ShareActions title={activeCalculator.title} result={result} fileName={`${activeCalculator.slug}-result.png`} />
         </div>
+
+        <SavedResultsPanel items={savedResults} onDelete={deleteSavedResult} />
+
+        {relatedCalculators.length > 0 && (
+          <div className="mt-5 rounded-[18px] border border-line bg-paper p-5">
+            <p className="text-sm font-extrabold text-ink">다음에 이어서 볼 계산기</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {relatedCalculators.map((item) => {
+                const groupMeta = CALCULATOR_GROUP_META[getCalculatorGroup(item.slug)];
+                return (
+                  <a
+                    key={item.slug}
+                    href={`/calculators/${item.slug}`}
+                    className="flex min-w-0 items-center gap-3 rounded-2xl bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-sm"
+                  >
+                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-base ${groupMeta.softClass} ${groupMeta.accentClass}`}>
+                      {groupMeta.icon}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-extrabold text-ink">{item.title}</span>
+                      <span className="mt-1 block truncate text-xs font-semibold text-slate-500">{item.badge}</span>
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <p className="mt-4 text-xs font-semibold leading-6 text-slate-500">
           계산 결과는 입력값과 현재 반영 기준에 따른 추정치입니다. 실제 심사·지급·대출 승인 결과는 기관 판단에 따라 달라질 수 있습니다.
         </p>
       </section>
+    </div>
+  );
+}
+
+function SavedResultsPanel({
+  items,
+  onDelete
+}: {
+  items: SavedCalculatorResult[];
+  onDelete: (id: string) => void;
+}) {
+  if (items.length === 0) {
+    return (
+      <div className="mt-5 rounded-[18px] border border-dashed border-line bg-paper p-5">
+        <p className="text-sm font-extrabold text-ink">저장한 계산 결과</p>
+        <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
+          결과를 저장하면 여러 조건을 비교하거나 나중에 이어서 계산할 수 있습니다.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-5 rounded-[18px] border border-line bg-paper p-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-extrabold text-ink">저장한 계산 결과</p>
+          <p className="mt-1 text-xs font-semibold text-slate-500">이 기기에 최대 12개까지 저장됩니다.</p>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-3">
+        {items.slice(0, 4).map((item) => (
+          <div key={item.id} className="rounded-2xl bg-white p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-extrabold text-ink">{item.title}</p>
+                <p className="mt-1 text-lg font-extrabold text-brand">{item.headline}</p>
+                <p className="mt-1 text-xs font-semibold text-slate-500">{formatSavedAt(item.savedAt)}</p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <a
+                  href={`/calculators/${item.slug}${item.query}`}
+                  className="rounded-full bg-ink px-3 py-2 text-xs font-extrabold text-white transition hover:bg-brand"
+                >
+                  이어보기
+                </a>
+                <button
+                  type="button"
+                  onClick={() => onDelete(item.id)}
+                  className="rounded-full border border-line px-3 py-2 text-xs font-extrabold text-slate-500 transition hover:border-brand hover:text-brand"
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {item.rows.slice(0, 4).map((row) => (
+                <div key={`${item.id}-${row.label}`} className="rounded-xl bg-paper px-3 py-2">
+                  <p className="text-[11px] font-bold text-slate-500">{row.label}</p>
+                  <p className="mt-1 truncate text-xs font-extrabold text-ink">{row.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -4690,4 +4859,16 @@ function formatInputValue(
     : value.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
 
   return field.unit ? `${formatted}${field.unit}` : formatted;
+}
+
+function formatSavedAt(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "저장 시간 알 수 없음";
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
 }
