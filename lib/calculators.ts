@@ -26,6 +26,7 @@ export type CalculatorSlug =
   | "moving-cost"
   | "mobile-plan"
   | "seller-profit"
+  | "adsense-revenue"
   | "military-discharge-date"
   | "lump-sum-deposit"
   | "break-even"
@@ -2054,6 +2055,80 @@ export const calculators: CalculatorConfig[] = [
           { name: "원가", value: values.costPrice },
           { name: "비용", value: fee + values.adCost + values.shippingCost },
           { name: "이익", value: Math.max(profit, 0) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "adsense-revenue",
+    title: "구글 애드센스 수익 계산기",
+    description: "페이지뷰, CTR, CPC, RPM을 입력해 애드센스 예상 클릭수와 일·월·연 수익을 계산합니다.",
+    category: "금융",
+    keywords: ["애드센스 수익 계산기", "구글 애드센스 계산기", "RPM 계산기", "CPC 계산기", "블로그 수익"],
+    badge: "광고 수익 시뮬레이션",
+    audience: "블로그 운영자, 콘텐츠 사이트 운영자, 애드센스 수익을 추정하려는 사용자",
+    fields: [
+      { name: "dailyPageViews", label: "일 페이지뷰", type: "number", unit: "PV", min: 0, max: 100000000, step: 100, defaultValue: 3000 },
+      { name: "ctr", label: "광고 CTR", type: "number", unit: "%", min: 0, max: 30, step: 0.1, defaultValue: 1.2 },
+      { name: "cpc", label: "평균 CPC", type: "number", unit: "원", min: 0, max: 100000, step: 10, defaultValue: 180 },
+      { name: "rpm", label: "페이지 RPM", type: "number", unit: "원", min: 0, max: 1000000, step: 10, defaultValue: 2160 },
+      {
+        name: "calculationMode",
+        label: "계산 기준",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "CTR×CPC 기준", value: 0 },
+          { label: "RPM 기준", value: 1 }
+        ]
+      }
+    ],
+    guideTitle: "애드센스 수익 계산 기준",
+    guide: [
+      "애드센스 수익은 보통 페이지뷰, 광고 클릭률(CTR), 클릭당 수익(CPC), 페이지 RPM을 함께 봅니다. CTR×CPC 방식은 예상 클릭수에서 수익을 추정하고, RPM 방식은 1,000 페이지뷰당 수익으로 추정합니다.",
+      "CTR×CPC 기준 예상 수익은 페이지뷰×CTR×CPC로 계산합니다. RPM 기준 예상 수익은 페이지뷰÷1,000×RPM으로 계산합니다.",
+      "실제 애드센스 수익은 광고 위치, 국가, 기기, 광고 단가, 콘텐츠 주제, 무효 트래픽, 계절성, 정책 제한에 따라 달라집니다. 이 계산기는 수익 보장이 아니라 시나리오 비교용입니다."
+    ],
+    checkpoints: [
+      "CTR이 높아 보여도 무효 클릭이나 정책 위반 가능성을 만들면 안 됩니다.",
+      "RPM은 국가와 콘텐츠 주제에 따라 크게 달라집니다.",
+      "일 페이지뷰가 같아도 모바일 비중, 체류시간, 광고 배치에 따라 수익이 달라질 수 있습니다.",
+      "예상 수익은 세금, 환율, 지급 보류, 무효 트래픽 차감을 반영하지 않습니다."
+    ],
+    faqs: [
+      { question: "CTR과 CPC 기준, RPM 기준 중 무엇을 써야 하나요?", answer: "광고 클릭수와 평균 CPC를 알고 있으면 CTR×CPC 기준을, 애드센스 보고서의 페이지 RPM을 알고 있으면 RPM 기준을 쓰는 편이 편합니다." },
+      { question: "월 수익은 어떻게 계산하나요?", answer: "일 예상 수익에 30일을 곱해 단순 추정합니다. 요일, 시즌, 검색 유입 변화는 별도로 감안해야 합니다." },
+      { question: "애드센스 승인 전에도 사용할 수 있나요?", answer: "네. 예상 페이지뷰와 보수적인 RPM을 넣어 목표 트래픽과 수익 규모를 가늠하는 용도로 사용할 수 있습니다." }
+    ],
+    calculate(values) {
+      const dailyPageViews = Math.max(values.dailyPageViews, 0);
+      const expectedClicks = dailyPageViews * (values.ctr / 100);
+      const ctrCpcDailyRevenue = expectedClicks * values.cpc;
+      const rpmDailyRevenue = dailyPageViews / 1000 * values.rpm;
+      const dailyRevenue = values.calculationMode === 1 ? rpmDailyRevenue : ctrCpcDailyRevenue;
+      const monthlyRevenue = dailyRevenue * 30;
+      const annualRevenue = dailyRevenue * 365;
+      const effectiveRpm = dailyPageViews > 0 ? dailyRevenue / dailyPageViews * 1000 : 0;
+      const effectiveCpc = expectedClicks > 0 ? dailyRevenue / expectedClicks : 0;
+
+      return {
+        headline: formatWon(monthlyRevenue),
+        subline: `일 예상 ${formatWon(dailyRevenue)} · 연 예상 ${formatWon(annualRevenue)}`,
+        rows: [
+          { label: "일 페이지뷰", value: `${formatNumber(dailyPageViews)} PV` },
+          { label: "예상 클릭수", value: `${formatNumber(expectedClicks, 1)}회` },
+          { label: "일 예상 수익", value: formatWon(dailyRevenue), tone: "strong" },
+          { label: "월 예상 수익", value: formatWon(monthlyRevenue), tone: "strong" },
+          { label: "연 예상 수익", value: formatWon(annualRevenue), tone: "strong" },
+          { label: "유효 RPM", value: `${formatNumber(effectiveRpm, 0)}원` },
+          { label: "유효 CPC", value: `${formatNumber(effectiveCpc, 0)}원` },
+          { label: "CTR×CPC 기준 일수익", value: formatWon(ctrCpcDailyRevenue) },
+          { label: "RPM 기준 일수익", value: formatWon(rpmDailyRevenue) }
+        ],
+        chart: [
+          { name: "일수익", value: dailyRevenue },
+          { name: "월수익", value: monthlyRevenue },
+          { name: "연수익", value: annualRevenue / 12 }
         ]
       };
     }

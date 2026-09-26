@@ -147,8 +147,8 @@ export const hubContents: Record<HubKey, HubContent> = {
     path: "/business",
     eyebrow: "사업·판매 허브",
     title: "판매 수익과 사업 비용 계산기",
-    description: "부가세, 판매수익, 손익분기점, 구독 매출, 물류비처럼 소규모 사업자가 자주 보는 숫자를 정리했습니다.",
-    featuredSlugs: ["vat", "seller-profit", "break-even", "subscription-revenue", "cbm-freight", "mobile-plan"],
+    description: "부가세, 판매수익, 애드센스 수익, 손익분기점, 구독 매출, 물류비처럼 소규모 사업자가 자주 보는 숫자를 정리했습니다.",
+    featuredSlugs: ["vat", "seller-profit", "adsense-revenue", "break-even", "subscription-revenue", "cbm-freight"],
     blogSlugs: ["break-even-checklist-20260926-00-hourly", "moving-cost-comparison-20260926-02-hourly", "mobile-plan-scenario-20260926-03-hourly", "calcrule-content-hub-launch"],
     sections: [
       {

@@ -108,6 +108,7 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "moving-cost": "business",
   "mobile-plan": "business",
   "seller-profit": "business",
+  "adsense-revenue": "business",
   "break-even": "business",
   "subscription-revenue": "business",
   "cbm-freight": "business",
@@ -145,6 +146,7 @@ export function getFeaturedCalculators() {
     "crypto-investment-growth",
     "stock-return",
     "seller-profit",
+    "adsense-revenue",
     "date-diff",
     "vat"
   ];
@@ -184,6 +186,7 @@ export function getRecentCalculators() {
     "retirement-income-tax",
     "stock-return",
     "crypto-investment-growth",
+    "adsense-revenue",
     "stock-average-price",
     "stock-valuation"
   ];
