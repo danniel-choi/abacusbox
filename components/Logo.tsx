@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function Logo({ inverted = false }: { inverted?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2.5" aria-label="계산의정석 홈">
+    <Link href="/" className="flex items-center gap-2.5" aria-label="계산의정석 계산의 정석 홈">
       <span className={`grid h-9 w-9 place-items-center rounded-[10px] ${inverted ? "bg-white" : "bg-ink"}`}>
         <svg width="23" height="23" viewBox="0 0 23 23" fill="none" aria-hidden="true">
           <rect x="3" y="3" width="17" height="17" rx="5" fill={inverted ? "#02B585" : "#02B585"} />
@@ -13,6 +13,7 @@ export function Logo({ inverted = false }: { inverted?: boolean }) {
       <span className={`text-xl font-extrabold tracking-normal ${inverted ? "text-white" : "text-ink"}`}>
         계산의정석
       </span>
+      <span className="sr-only">계산의 정석</span>
     </Link>
   );
 }

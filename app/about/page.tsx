@@ -3,11 +3,11 @@ export default function AboutPage() {
     <main className="mx-auto max-w-4xl px-4 py-12">
       <div className="rounded-[24px] border border-line bg-white p-7 shadow-panel">
         <p className="text-sm font-extrabold text-brand">About Calcrule</p>
-        <h1 className="mt-2 text-2xl font-extrabold leading-tight text-ink sm:text-3xl">계산의정석 소개</h1>
+        <h1 className="mt-2 text-2xl font-extrabold leading-tight text-ink sm:text-3xl">계산의정석(계산의 정석) 소개</h1>
         <div className="mt-6 grid gap-6 text-slate-700">
           <section className="grid gap-3 text-base font-medium leading-8">
             <p>
-              계산의정석은 복잡한 기준과 숫자를 더 빠르게 이해하고 판단할 수 있도록 만든 실전형 계산기 서비스입니다.
+              계산의정석은 사용자가 계산의 정석이라는 검색어로도 찾을 수 있는, 복잡한 기준과 숫자를 더 빠르게 이해하고 판단할 수 있도록 만든 실전형 계산기 서비스입니다.
               급여, 퇴직금, 대출, 세금, 생활 계산까지 자주 필요한 계산을 한곳에 모아 바로 실행할 수 있게 구성했습니다.
             </p>
             <p>
