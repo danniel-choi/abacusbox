@@ -27,6 +27,7 @@ export type CalculatorSlug =
   | "mobile-plan"
   | "seller-profit"
   | "adsense-revenue"
+  | "youtube-ad-revenue"
   | "military-discharge-date"
   | "lump-sum-deposit"
   | "break-even"
@@ -2129,6 +2130,80 @@ export const calculators: CalculatorConfig[] = [
           { name: "일수익", value: dailyRevenue },
           { name: "월수익", value: monthlyRevenue },
           { name: "연수익", value: annualRevenue / 12 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "youtube-ad-revenue",
+    title: "YouTube 광고 수익 계산기",
+    description: "조회수, 광고 노출률, RPM, CPM, 수익 배분율을 입력해 유튜브 예상 광고 수익을 계산합니다.",
+    category: "금융",
+    keywords: ["유튜브 수익 계산기", "YouTube 광고 수익", "유튜브 RPM", "유튜브 CPM", "크리에이터 수익"],
+    badge: "유튜브 수익 시뮬레이션",
+    audience: "유튜브 채널 운영자, 크리에이터, 영상 수익을 추정하려는 사용자",
+    fields: [
+      { name: "dailyViews", label: "일 조회수", type: "number", unit: "회", min: 0, max: 1000000000, step: 1000, defaultValue: 50000 },
+      { name: "rpm", label: "조회수 RPM", type: "number", unit: "원", min: 0, max: 1000000, step: 10, defaultValue: 2500 },
+      { name: "adFillRate", label: "광고 노출률", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 65 },
+      { name: "cpm", label: "광고 CPM", type: "number", unit: "원", min: 0, max: 1000000, step: 10, defaultValue: 6000 },
+      { name: "creatorShareRate", label: "크리에이터 수익 배분율", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 55 },
+      {
+        name: "calculationMode",
+        label: "계산 기준",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "RPM 기준", value: 0 },
+          { label: "광고노출×CPM 기준", value: 1 }
+        ]
+      }
+    ],
+    guideTitle: "YouTube 광고 수익 계산 기준",
+    guide: [
+      "유튜브 광고 수익은 조회수만으로 정해지지 않습니다. 국가, 콘텐츠 주제, 시청 지속시간, 광고 노출률, 광고 단가, 쇼츠와 롱폼 비중에 따라 실제 수익이 달라집니다.",
+      "RPM 기준은 조회수 1,000회당 크리에이터가 받는 수익을 직접 입력해 계산합니다. 광고노출×CPM 기준은 조회수 중 광고가 노출되는 비율과 광고 CPM, 수익 배분율을 반영해 추정합니다.",
+      "이 계산기는 광고 수익 시나리오를 비교하기 위한 도구입니다. 멤버십, 슈퍼챗, 브랜드 광고, 제휴 수익, 쇼츠 보너스, 세금, 환율, 무효 트래픽 조정은 별도로 확인해야 합니다."
+    ],
+    checkpoints: [
+      "RPM은 크리에이터가 실제로 체감하는 1,000 조회수당 수익에 가깝습니다.",
+      "CPM은 광고주가 보는 광고 노출 1,000회당 단가라 크리에이터 수익과 다를 수 있습니다.",
+      "광고 노출률이 낮으면 조회수가 높아도 수익이 기대보다 낮을 수 있습니다.",
+      "쇼츠, 롱폼, 라이브는 수익 구조가 다르므로 같은 기준으로 섞어 해석하지 않는 편이 좋습니다."
+    ],
+    faqs: [
+      { question: "RPM 기준과 CPM 기준 중 무엇을 써야 하나요?", answer: "유튜브 스튜디오에서 RPM을 알고 있다면 RPM 기준이 간단합니다. 광고 노출률과 CPM을 따로 가정하고 싶다면 광고노출×CPM 기준을 쓰세요." },
+      { question: "월 수익은 어떻게 계산하나요?", answer: "일 예상 광고 수익에 30일을 곱해 단순 추정합니다. 실제 월 수익은 업로드 빈도와 영상별 조회수 편차에 따라 달라집니다." },
+      { question: "쇼츠 수익도 계산되나요?", answer: "직접 입력한 RPM이나 CPM 가정으로 시뮬레이션할 수는 있지만, 쇼츠는 수익 배분 구조가 다르므로 별도 보정이 필요합니다." }
+    ],
+    calculate(values) {
+      const dailyViews = Math.max(values.dailyViews, 0);
+      const monetizedViews = dailyViews * (values.adFillRate / 100);
+      const rpmDailyRevenue = dailyViews / 1000 * values.rpm;
+      const cpmDailyRevenue = monetizedViews / 1000 * values.cpm * (values.creatorShareRate / 100);
+      const dailyRevenue = values.calculationMode === 1 ? cpmDailyRevenue : rpmDailyRevenue;
+      const monthlyRevenue = dailyRevenue * 30;
+      const annualRevenue = dailyRevenue * 365;
+      const effectiveRpm = dailyViews > 0 ? dailyRevenue / dailyViews * 1000 : 0;
+      const monthlyViews = dailyViews * 30;
+
+      return {
+        headline: formatWon(monthlyRevenue),
+        subline: `일 예상 ${formatWon(dailyRevenue)} · 월 조회수 ${formatNumber(monthlyViews)}회 기준`,
+        rows: [
+          { label: "일 조회수", value: `${formatNumber(dailyViews)}회` },
+          { label: "수익화 광고 노출", value: `${formatNumber(monetizedViews)}회` },
+          { label: "일 예상 광고 수익", value: formatWon(dailyRevenue), tone: "strong" },
+          { label: "월 예상 광고 수익", value: formatWon(monthlyRevenue), tone: "strong" },
+          { label: "연 예상 광고 수익", value: formatWon(annualRevenue), tone: "strong" },
+          { label: "유효 RPM", value: `${formatNumber(effectiveRpm, 0)}원` },
+          { label: "RPM 기준 일수익", value: formatWon(rpmDailyRevenue) },
+          { label: "CPM 기준 일수익", value: formatWon(cpmDailyRevenue) }
+        ],
+        chart: [
+          { name: "일수익", value: dailyRevenue },
+          { name: "월수익", value: monthlyRevenue },
+          { name: "연평균월", value: annualRevenue / 12 }
         ]
       };
     }
