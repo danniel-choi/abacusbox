@@ -90,6 +90,7 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "stock-valuation": "investment",
   "crypto-investment-growth": "investment",
   bmi: "life",
+  "calorie-calculator": "life",
   "daily-intake": "life",
   "korean-age": "life",
   "unit-converter": "life",
@@ -151,6 +152,7 @@ export function getFeaturedCalculators() {
     "seller-profit",
     "adsense-revenue",
     "youtube-ad-revenue",
+    "calorie-calculator",
     "daily-intake",
     "date-diff",
     "vat"
@@ -168,6 +170,7 @@ export function getPopularCalculators() {
     "loan-dsr",
     "vat",
     "exchange-rate",
+    "calorie-calculator",
     "daily-intake",
     "lotto-generator",
     "crypto-investment-growth",
@@ -183,6 +186,7 @@ export function getPopularCalculators() {
 export function getRecentCalculators() {
   const recentSlugs: CalculatorSlug[] = [
     "distance-calculator",
+    "calorie-calculator",
     "daily-intake",
     "lotto-generator",
     "year-end-tax-settlement",

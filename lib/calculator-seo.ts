@@ -215,5 +215,38 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/calculators/percent", label: "퍼센트 계산기", text: "칼로리 비율과 식단 비중을 빠르게 계산할 수 있습니다." },
       { href: "/life", label: "생활 계산기 모음", text: "건강, 날짜, 단위 변환 같은 생활 도구를 함께 제공합니다." }
     ]
+  },
+  "calorie-calculator": {
+    title: `칼로리 계산기 | ${legalStandards.year}년 BMR·TDEE·BMI·매크로 계산`,
+    description:
+      "칼로리 계산기로 성별, 나이, 키, 체중, 활동 수준, 목표 체중을 입력해 BMR, TDEE, BMI, 다이어트 목표 칼로리와 매크로 영양소를 계산하세요.",
+    keywords: ["칼로리 계산기", "다이어트 칼로리 계산기", "TDEE 계산기", "BMR 계산기", "BMI 계산기", "매크로 계산기", "칼로리 적자 계산"],
+    searchIntents: [
+      "체중 감량을 위해 하루 몇 kcal를 먹어야 하는지 알고 싶을 때",
+      "BMR, TDEE, BMI를 한 번에 확인하고 싶을 때",
+      "탄수화물, 단백질, 지방 매크로를 g 단위로 나눠 식단을 만들 때"
+    ],
+    sections: [
+      {
+        title: "칼로리 계산기는 BMR에서 TDEE로 확장해 봅니다.",
+        body:
+          "BMR은 안정 상태에서 필요한 최소 에너지이고, TDEE는 여기에 활동 수준을 반영한 하루 유지 칼로리입니다. 이 계산기는 Mifflin-St Jeor 공식으로 BMR을 계산한 뒤 활동 계수 1.2~1.9를 곱해 TDEE를 추정합니다."
+      },
+      {
+        title: "다이어트 목표는 칼로리 적자를 안전 하한과 함께 봅니다.",
+        body:
+          "체중 감량은 TDEE에서 500kcal를 줄이는 방식을 기본으로 하되, 여성 1,200kcal·남성 1,500kcal 아래로 내려가지 않도록 하한을 적용합니다. 체중 증가는 TDEE에 300kcal를 더해 시작점을 제시합니다."
+      },
+      {
+        title: "매크로 계산은 식단 기록의 출발점입니다.",
+        body:
+          "총 칼로리만큼 탄수화물, 단백질, 지방의 비율도 식단 지속성과 운동 회복에 영향을 줍니다. 균형형, 고탄수, 고단백 비율 중 하나를 선택해 g 단위 참고량을 확인할 수 있습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/daily-intake", label: "일일 섭취 권장량 계산기", text: "RDI 기준의 하루 권장량도 함께 비교할 수 있습니다." },
+      { href: "/calculators/bmi", label: "BMI 계산기", text: "현재 체중 상태와 표준체중을 더 간단히 확인할 수 있습니다." },
+      { href: "/life", label: "생활 계산기 모음", text: "건강, 날짜, 단위 변환 같은 생활 도구를 함께 제공합니다." }
+    ]
   }
 };

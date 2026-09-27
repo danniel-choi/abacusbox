@@ -19,6 +19,7 @@ export type CalculatorSlug =
   | "inheritance-tax"
   | "compound-interest"
   | "bmi"
+  | "calorie-calculator"
   | "daily-intake"
   | "korean-age"
   | "unit-converter"
@@ -453,6 +454,14 @@ function lotteryTax(prizeAmount: number) {
 
 function formatKcal(value: number) {
   return `${Math.round(value).toLocaleString("ko-KR")} kcal`;
+}
+
+function bmiStatus(bmi: number) {
+  if (bmi < 18.5) return "저체중";
+  if (bmi < 23) return "정상";
+  if (bmi < 25) return "과체중";
+  if (bmi < 30) return "비만";
+  return "고도비만";
 }
 
 export const calculators: CalculatorConfig[] = [
@@ -1640,6 +1649,141 @@ export const calculators: CalculatorConfig[] = [
           { name: "현재체중", value: values.weightKg },
           { name: "표준체중", value: standardWeight },
           { name: "BMI×2", value: bmi * 2 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "calorie-calculator",
+    title: "칼로리 계산기",
+    description: "성별, 나이, 키, 체중, 활동 수준, 체중 목표를 입력해 BMR, TDEE, BMI, 목표 칼로리와 매크로 영양소를 계산합니다.",
+    category: "생활",
+    keywords: ["칼로리 계산기", "다이어트 칼로리 계산기", "TDEE 계산기", "BMR 계산기", "BMI 계산기", "매크로 계산기", "칼로리 적자 계산"],
+    badge: "BMR·TDEE·매크로",
+    audience: "다이어트 칼로리 목표를 정하려는 사용자, 체중 감량·유지·증량 식단을 기록하는 사용자",
+    fields: [
+      {
+        name: "gender",
+        label: "성별",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "남성", value: 1 },
+          { label: "여성", value: 0 }
+        ]
+      },
+      { name: "age", label: "나이", type: "number", unit: "세", min: 10, max: 100, step: 1, defaultValue: 35 },
+      { name: "heightCm", label: "키", type: "number", unit: "cm", min: 100, max: 230, step: 1, defaultValue: 175 },
+      { name: "weightKg", label: "현재 체중", type: "number", unit: "kg", min: 25, max: 250, step: 0.1, defaultValue: 75 },
+      { name: "targetWeightKg", label: "목표 체중", type: "number", unit: "kg", min: 25, max: 250, step: 0.1, defaultValue: 70 },
+      {
+        name: "activityLevel",
+        label: "활동 수준",
+        type: "select",
+        defaultValue: 2,
+        options: [
+          { label: "비활동적 - 운동 거의 없음", value: 0 },
+          { label: "가벼운 활동 - 주 1~3일", value: 1 },
+          { label: "보통 활동 - 주 3~5일", value: 2 },
+          { label: "높은 활동 - 주 6~7일", value: 3 },
+          { label: "매우 높은 활동 - 육체노동·고강도", value: 4 }
+        ],
+        help: "참고 페이지처럼 활동 계수 1.2~1.9 범위로 TDEE를 계산합니다."
+      },
+      {
+        name: "goal",
+        label: "목표",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "체중 감량", value: 0 },
+          { label: "체중 유지", value: 1 },
+          { label: "체중 증가", value: 2 }
+        ]
+      },
+      {
+        name: "macroPlan",
+        label: "매크로 비율",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "균형형 40/30/30", value: 0 },
+          { label: "고탄수 50/25/25", value: 1 },
+          { label: "고단백 35/35/30", value: 2 }
+        ],
+        help: "탄수화물/단백질/지방 순서입니다."
+      }
+    ],
+    guideTitle: "칼로리 계산기 사용 기준",
+    guide: [
+      "이 계산기는 참고한 CalZen 페이지처럼 Mifflin-St Jeor 공식으로 기초대사량(BMR)을 추정하고, 활동 계수를 곱해 총 일일 에너지 소비량(TDEE)을 계산합니다.",
+      "목표가 체중 감량이면 TDEE에서 기본 500kcal를 뺀 값을 제시하되, 여성 1,200kcal·남성 1,500kcal 아래로 내려가지 않도록 안전 하한을 반영합니다. 체중 증가는 TDEE에 300kcal를 더해 계산합니다.",
+      "BMI와 목표 체중 차이, 목표 칼로리의 탄수화물·단백질·지방 g 환산값을 함께 보여주므로 식단 기록 앱이나 식단표를 만들 때 출발점으로 쓸 수 있습니다."
+    ],
+    checkpoints: [
+      "BMR은 안정 시 필요한 최소 에너지, TDEE는 활동량까지 반영한 유지 칼로리입니다.",
+      "감량 목표는 하루 500kcal 적자를 기본으로 하며 너무 낮은 섭취량은 피해야 합니다.",
+      "계산값은 출발점이므로 2~3주간 체중 변화에 맞춰 조정하는 것이 좋습니다."
+    ],
+    faqs: [
+      { question: "칼로리 계산기는 어떤 공식을 쓰나요?", answer: "Mifflin-St Jeor 공식을 사용해 BMR을 계산하고, 활동 수준별 계수를 곱해 TDEE를 추정합니다." },
+      { question: "BMR과 TDEE는 무엇이 다른가요?", answer: "BMR은 완전한 안정 상태에서 필요한 최소 칼로리이고, TDEE는 활동량까지 반영한 하루 유지 칼로리입니다." },
+      { question: "감량 칼로리는 어떻게 계산하나요?", answer: "기본적으로 TDEE에서 500kcal를 뺍니다. 단, 여성 1,200kcal·남성 1,500kcal 아래로 내려가지 않도록 하한을 적용합니다." },
+      { question: "매크로 영양소도 기록해야 하나요?", answer: "총 칼로리가 체중 변화를 좌우하고, 탄수화물·단백질·지방 비율은 포만감, 운동 회복, 체성분 관리에 도움을 줍니다." }
+    ],
+    calculate(values) {
+      const age = Math.max(values.age, 0);
+      const heightCm = Math.max(values.heightCm, 0);
+      const weightKg = Math.max(values.weightKg, 0);
+      const targetWeightKg = Math.max(values.targetWeightKg, 0);
+      const heightM = heightCm / 100;
+      const bmr = values.gender === 1
+        ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
+        : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+      const activityMultipliers = [1.2, 1.375, 1.55, 1.725, 1.9];
+      const activityMultiplier = activityMultipliers[Math.min(Math.max(Math.floor(values.activityLevel), 0), activityMultipliers.length - 1)];
+      const tdee = Math.max(bmr * activityMultiplier, 0);
+      const safeMinimum = values.gender === 1 ? 1500 : 1200;
+      const targetCalories = values.goal === 0
+        ? Math.max(tdee - 500, safeMinimum)
+        : values.goal === 2
+          ? tdee + 300
+          : tdee;
+      const dailyChange = targetCalories - tdee;
+      const weeklyChangeKg = dailyChange * 7 / 7700;
+      const bmi = heightM > 0 ? weightKg / (heightM * heightM) : 0;
+      const targetBmi = heightM > 0 ? targetWeightKg / (heightM * heightM) : 0;
+      const macroRatios =
+        values.macroPlan === 1 ? { carbs: 0.5, protein: 0.25, fat: 0.25 } :
+        values.macroPlan === 2 ? { carbs: 0.35, protein: 0.35, fat: 0.3 } :
+        { carbs: 0.4, protein: 0.3, fat: 0.3 };
+      const carbsCalories = targetCalories * macroRatios.carbs;
+      const proteinCalories = targetCalories * macroRatios.protein;
+      const fatCalories = targetCalories * macroRatios.fat;
+      const carbsGram = carbsCalories / 4;
+      const proteinGram = proteinCalories / 4;
+      const fatGram = fatCalories / 9;
+      const goalLabel = values.goal === 0 ? "체중 감량" : values.goal === 2 ? "체중 증가" : "체중 유지";
+
+      return {
+        headline: formatKcal(targetCalories),
+        subline: `${goalLabel} 목표 · TDEE ${formatKcal(tdee)} · BMI ${bmi.toFixed(1)}(${bmiStatus(bmi)})`,
+        rows: [
+          { label: "목표 칼로리", value: formatKcal(targetCalories), tone: "strong" },
+          { label: "유지 칼로리(TDEE)", value: formatKcal(tdee), tone: "strong" },
+          { label: "기초대사량(BMR)", value: formatKcal(bmr) },
+          { label: "칼로리 조정폭", value: `${dailyChange >= 0 ? "+" : ""}${formatKcal(dailyChange)}` },
+          { label: "예상 주간 체중 변화", value: `${weeklyChangeKg >= 0 ? "+" : ""}${weeklyChangeKg.toFixed(2)}kg` },
+          { label: "현재 BMI", value: `${bmi.toFixed(1)} · ${bmiStatus(bmi)}`, tone: "strong" },
+          { label: "목표 BMI", value: `${targetBmi.toFixed(1)} · ${bmiStatus(targetBmi)}` },
+          { label: "탄수화물", value: `${Math.round(carbsGram).toLocaleString("ko-KR")}g (${formatPercent(macroRatios.carbs * 100, 0)})` },
+          { label: "단백질", value: `${Math.round(proteinGram).toLocaleString("ko-KR")}g (${formatPercent(macroRatios.protein * 100, 0)})` },
+          { label: "지방", value: `${Math.round(fatGram).toLocaleString("ko-KR")}g (${formatPercent(macroRatios.fat * 100, 0)})` }
+        ],
+        chart: [
+          { name: "BMR", value: bmr },
+          { name: "TDEE", value: tdee },
+          { name: "목표", value: targetCalories }
         ]
       };
     }
