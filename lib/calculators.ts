@@ -19,6 +19,7 @@ export type CalculatorSlug =
   | "inheritance-tax"
   | "compound-interest"
   | "bmi"
+  | "daily-intake"
   | "korean-age"
   | "unit-converter"
   | "real-estate-acquisition-tax"
@@ -448,6 +449,10 @@ function lotteryTax(prizeAmount: number) {
     totalTax,
     netPrize: Math.max(prize - totalTax, 0)
   };
+}
+
+function formatKcal(value: number) {
+  return `${Math.round(value).toLocaleString("ko-KR")} kcal`;
 }
 
 export const calculators: CalculatorConfig[] = [
@@ -1635,6 +1640,109 @@ export const calculators: CalculatorConfig[] = [
           { name: "현재체중", value: values.weightKg },
           { name: "표준체중", value: standardWeight },
           { name: "BMI×2", value: bmi * 2 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "daily-intake",
+    title: "일일 섭취 권장량 계산기",
+    description: "나이, 성별, 키, 체중, 활동 수준, 체중 목표를 바탕으로 하루 권장 칼로리와 탄수화물·단백질·지방 섭취량을 계산합니다.",
+    category: "생활",
+    keywords: ["일일 섭취 권장량 계산기", "일일 권장 칼로리", "RDI 계산기", "하루 칼로리 계산", "기초대사량 계산", "탄단지 계산"],
+    badge: "칼로리·탄단지",
+    audience: "체중 관리 사용자, 식단 기록 사용자, 하루 칼로리 목표를 정하려는 사용자",
+    fields: [
+      { name: "age", label: "나이", type: "number", unit: "세", min: 10, max: 100, step: 1, defaultValue: 35 },
+      {
+        name: "gender",
+        label: "성별",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "여성", value: 0 },
+          { label: "남성", value: 1 }
+        ]
+      },
+      { name: "heightCm", label: "신장", type: "number", unit: "cm", min: 100, max: 230, step: 1, defaultValue: 170 },
+      { name: "weightKg", label: "체중", type: "number", unit: "kg", min: 25, max: 250, step: 0.1, defaultValue: 65 },
+      {
+        name: "activityLevel",
+        label: "활동 수준",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "정주 - 주로 앉아서 생활", value: 0 },
+          { label: "낮은 활동 - 가벼운 걷기·가사", value: 1 },
+          { label: "활동적 - 규칙적 운동", value: 2 },
+          { label: "매우 활동적 - 고강도 활동", value: 3 }
+        ],
+        help: "FatSecret의 RDI 입력 흐름처럼 활동 수준을 네 단계로 나누어 반영합니다."
+      },
+      {
+        name: "goal",
+        label: "목표",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "감량", value: 0 },
+          { label: "유지", value: 1 },
+          { label: "증량", value: 2 }
+        ]
+      }
+    ],
+    guideTitle: "일일 섭취 권장량 계산 기준",
+    guide: [
+      "이 계산기는 나이, 체중, 신장, 성별, 활동 수준, 체중 목표를 입력해 하루 권장 칼로리를 추정합니다. 참고한 FatSecret의 일일권장 계산 흐름도 같은 핵심 입력값을 사용합니다.",
+      "기초대사량은 Mifflin-St Jeor 방식으로 계산하고, 활동 수준별 계수를 곱해 유지 칼로리(TDEE)를 추정합니다. 목표가 감량이면 약 15%를 줄이고, 증량이면 약 10%를 더해 하루 목표 칼로리를 제시합니다.",
+      "탄수화물·지방·단백질은 일반적인 식단 기록에 쓰기 쉬운 48%·32%·20% 비율로 나눠 참고량을 보여줍니다. 질환, 임신, 성장기, 운동 목적이 뚜렷한 경우에는 전문가 기준을 우선하세요."
+    ],
+    checkpoints: [
+      "활동 수준을 낮게 잡으면 권장 칼로리가 과소 추정될 수 있습니다.",
+      "감량 목표는 무리한 절식 대신 유지 칼로리에서 완만하게 조정하는 편이 안전합니다.",
+      "탄단지 비율은 참고값이며 건강 상태와 운동 목적에 따라 달라질 수 있습니다."
+    ],
+    faqs: [
+      { question: "일일 섭취 권장량은 정확한 값인가요?", answer: "아니요. 나이, 체중, 신장, 성별, 활동 수준으로 추정한 참고값입니다. 실제 필요량은 체성분, 수면, 운동량, 질환 여부에 따라 달라질 수 있습니다." },
+      { question: "감량 목표는 얼마나 줄여 계산하나요?", answer: "이 계산기는 유지 칼로리에서 약 15%를 줄여 완만한 감량 목표를 보여줍니다." },
+      { question: "탄수화물, 단백질, 지방은 어떻게 계산하나요?", answer: "목표 칼로리를 탄수화물 48%, 지방 32%, 단백질 20%로 나눈 뒤 g 단위로 환산합니다. 탄수화물과 단백질은 1g당 4kcal, 지방은 1g당 9kcal로 계산합니다." }
+    ],
+    calculate(values) {
+      const age = Math.max(values.age, 0);
+      const heightCm = Math.max(values.heightCm, 0);
+      const weightKg = Math.max(values.weightKg, 0);
+      const bmr = values.gender === 1
+        ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
+        : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+      const activityMultipliers = [1.2, 1.375, 1.55, 1.725];
+      const activityMultiplier = activityMultipliers[Math.min(Math.max(Math.floor(values.activityLevel), 0), activityMultipliers.length - 1)];
+      const maintenanceCalories = Math.max(bmr * activityMultiplier, 0);
+      const goalMultiplier = values.goal === 0 ? 0.85 : values.goal === 2 ? 1.1 : 1;
+      const targetCalories = maintenanceCalories * goalMultiplier;
+      const carbsCalories = targetCalories * 0.48;
+      const fatCalories = targetCalories * 0.32;
+      const proteinCalories = targetCalories * 0.2;
+      const carbsGram = carbsCalories / 4;
+      const fatGram = fatCalories / 9;
+      const proteinGram = proteinCalories / 4;
+      const goalLabel = values.goal === 0 ? "감량" : values.goal === 2 ? "증량" : "유지";
+
+      return {
+        headline: formatKcal(targetCalories),
+        subline: `${goalLabel} 목표 · 유지 칼로리 ${formatKcal(maintenanceCalories)}`,
+        rows: [
+          { label: "목표 일일 권장 칼로리", value: formatKcal(targetCalories), tone: "strong" },
+          { label: "유지 칼로리(TDEE)", value: formatKcal(maintenanceCalories), tone: "strong" },
+          { label: "기초대사량(BMR)", value: formatKcal(bmr) },
+          { label: "활동 계수", value: `${activityMultiplier.toFixed(3)}배` },
+          { label: "탄수화물 48%", value: `${Math.round(carbsGram).toLocaleString("ko-KR")}g (${formatKcal(carbsCalories)})` },
+          { label: "지방 32%", value: `${Math.round(fatGram).toLocaleString("ko-KR")}g (${formatKcal(fatCalories)})` },
+          { label: "단백질 20%", value: `${Math.round(proteinGram).toLocaleString("ko-KR")}g (${formatKcal(proteinCalories)})` }
+        ],
+        chart: [
+          { name: "탄수화물", value: carbsCalories },
+          { name: "지방", value: fatCalories },
+          { name: "단백질", value: proteinCalories }
         ]
       };
     }
