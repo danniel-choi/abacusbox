@@ -418,29 +418,6 @@ function calculateComprehensiveRealEstateTax(taxBase: number, homeCount: number)
   return progressiveTax(taxBase, rates);
 }
 
-function generateLottoSets(setCount: number, seed: number) {
-  const random = createSeededRandom(seed);
-  return Array.from({ length: setCount }, () => {
-    const pool = Array.from({ length: 45 }, (_, index) => index + 1);
-    for (let i = pool.length - 1; i > 0; i -= 1) {
-      const swapIndex = Math.floor(random() * (i + 1));
-      [pool[i], pool[swapIndex]] = [pool[swapIndex], pool[i]];
-    }
-    return {
-      main: pool.slice(0, 6).sort((a, b) => a - b),
-      bonus: pool[6]
-    };
-  });
-}
-
-function generatePensionLotterySets(setCount: number, seed: number) {
-  const random = createSeededRandom(seed);
-  return Array.from({ length: setCount }, () => ({
-    group: Math.floor(random() * 5) + 1,
-    digits: Array.from({ length: 6 }, () => Math.floor(random() * 10)).join("")
-  }));
-}
-
 function lotteryTax(prizeAmount: number) {
   const prize = Math.max(prizeAmount, 0);
   if (prize <= 50000) {
@@ -3489,12 +3466,11 @@ export const calculators: CalculatorConfig[] = [
   {
     slug: "lotto-generator",
     title: "로또 세금 계산기",
-    description: "로또 당첨금의 기타소득세와 지방소득세를 계산하고, 로또 6/45 번호 세트도 간단히 생성합니다.",
+    description: "로또 당첨금의 기타소득세와 지방소득세를 계산해 예상 실수령액을 확인합니다.",
     category: "세금",
-    keywords: ["로또 세금 계산기", "로또 실수령액", "로또 당첨금 세금", "로또 번호 생성기", "로또 번호 추천"],
-    badge: "당첨금 세금·번호 생성",
-    audience: "로또 당첨금 실수령액이 궁금한 사용자, 로또 번호를 빠르게 만들고 싶은 사용자",
-    actionLabel: "번호 다시 생성",
+    keywords: ["로또 세금 계산기", "로또 실수령액", "로또 당첨금 세금", "로또 1등 세금", "복권 당첨금 세금"],
+    badge: "당첨금 세금",
+    audience: "로또 당첨금 실수령액이 궁금한 사용자, 고액 당첨금 세후 금액을 확인하려는 사용자",
     fields: [
       {
         name: "prizeAmount",
@@ -3505,74 +3481,30 @@ export const calculators: CalculatorConfig[] = [
         step: 10000,
         defaultValue: 1000000000,
         help: "로또 6/45 당첨금 총액을 입력하세요. 5만원 이하는 비과세로 계산합니다."
-      },
-      {
-        name: "gameType",
-        label: "게임 종류",
-        type: "select",
-        defaultValue: 0,
-        options: [
-          { label: "로또 6/45", value: 0 },
-          { label: "연금복권 720+", value: 1 }
-        ]
-      },
-      { name: "setCount", label: "생성 세트 수", type: "number", unit: "세트", min: 1, max: 5, step: 1, defaultValue: 3 }
+      }
     ],
-    guideTitle: "로또 당첨금 세금과 번호 생성 기준",
+    guideTitle: "로또 당첨금 세금 계산 기준",
     guide: [
       "로또 당첨금은 기타소득으로 보며, 5만원 이하는 비과세로 계산합니다. 5만원을 초과하면 3억원 이하 구간은 기타소득세 20%와 지방소득세 2%, 3억원 초과분은 기타소득세 30%와 지방소득세 3%를 적용해 실수령액을 추정합니다.",
       "예를 들어 10억원 당첨금은 3억원까지 22%, 초과 7억원은 33%를 적용하는 방식으로 세금을 나누어 계산합니다. 실제 원천징수와 지급 조건은 회차, 지급 기관, 법령 해석에 따라 달라질 수 있습니다.",
-      "번호 생성은 예측이나 당첨 확률 향상이 아니라, 중복 없는 조합을 빠르게 만들어 보는 편의 기능입니다. 로또 6/45는 1부터 45까지 중복 없는 6개 숫자와 보너스 숫자를 함께 생성합니다.",
-      "연금복권 720+는 조 번호 1~5와 여섯 자리 숫자를 생성합니다. 복권 구매 전 실제 발매 규칙과 회차 정보를 반드시 다시 확인하세요."
+      "실제 지급 단계에서는 당첨금 수령 방식, 관련 법령, 원천징수 처리 기준에 따라 최종 금액이 달라질 수 있으므로 계산 결과는 참고값으로 활용하세요."
     ],
     checkpoints: [
       "5만원 이하는 비과세, 5만원 초과 당첨금은 기타소득세와 지방소득세를 함께 봅니다.",
       "3억원 초과분은 더 높은 세율이 적용되므로 고액 당첨금은 구간별 계산이 중요합니다.",
-      "번호 생성은 무작위 편의 기능이며 당첨 확률을 높여주지는 않습니다."
+      "세후 실수령액은 입력한 당첨금에서 예상 세금 합계를 차감해 계산합니다."
     ],
     faqs: [
       { question: "로또 당첨금 세금은 어떻게 계산하나요?", answer: "5만원 초과 당첨금에 대해 3억원 이하 구간은 기타소득세 20%와 지방소득세 2%, 3억원 초과 구간은 기타소득세 30%와 지방소득세 3%를 적용해 추정합니다." },
       { question: "로또 5만원 당첨도 세금이 있나요?", answer: "5만원 이하는 비과세로 보아 세금을 0원으로 계산합니다. 5만원을 초과하면 당첨금 전체를 기준으로 원천징수 세액을 추정합니다." },
-      { question: "같은 번호가 다시 나올 수 있나요?", answer: "네. 새로 생성할 때마다 독립적인 무작위 조합이 만들어지므로 이전 세트와 같아질 수도 있습니다." },
-      { question: "번호를 고정해 저장할 수 있나요?", answer: "현재는 링크 공유와 결과 이미지 다운로드를 통해 저장할 수 있습니다." }
+      { question: "로또 1등 실수령액도 계산할 수 있나요?", answer: "네. 발표된 당첨금 총액을 입력하면 구간별 세금과 예상 실수령액을 계산할 수 있습니다." },
+      { question: "실제 수령액과 차이가 날 수 있나요?", answer: "네. 지급 기관의 원천징수 처리, 법령 변경, 개별 상황에 따라 실제 수령액은 달라질 수 있으므로 참고용으로 확인하세요." }
     ],
-    calculate(values, context) {
+    calculate(values) {
       const tax = lotteryTax(values.prizeAmount || 0);
-      const setCount = Math.min(Math.max(Math.floor(values.setCount || 1), 1), 5);
-      const seed = 20260828 + (context?.refreshKey || 0) * 7919 + setCount * 97 + values.gameType * 271 + Math.floor((values.prizeAmount || 0) / 10000);
-
-      if (values.gameType === 1) {
-        const sets = generatePensionLotterySets(setCount, seed);
-        return {
-          headline: formatWon(tax.netPrize),
-          subline: `예상 세금 ${formatWon(tax.totalTax)} · 연금복권 번호 ${setCount}세트 생성`,
-          rows: [
-            { label: "입력 당첨금", value: formatWon(values.prizeAmount || 0), tone: "strong" },
-            { label: "과세 대상 금액", value: formatWon(tax.taxable) },
-            { label: "3억원 이하 과세 구간", value: formatWon(tax.lowBase) },
-            { label: "3억원 초과 과세 구간", value: formatWon(tax.highBase) },
-            { label: "기타소득세", value: formatWon(tax.incomeTax), tone: "strong" },
-            { label: "지방소득세", value: formatWon(tax.localTax) },
-            { label: "예상 세금 합계", value: formatWon(tax.totalTax), tone: "strong" },
-            { label: "예상 실수령액", value: formatWon(tax.netPrize), tone: "strong" },
-            ...sets.map((set, index) => ({
-              label: `생성 번호 ${index + 1}`,
-              value: `${set.group}조 ${set.digits}`,
-              tone: index === 0 ? ("strong" as const) : ("muted" as const)
-            }))
-          ],
-          chart: [
-            { name: "실수령", value: tax.netPrize },
-            { name: "기타소득세", value: tax.incomeTax },
-            { name: "지방소득세", value: tax.localTax }
-          ]
-        };
-      }
-
-      const sets = generateLottoSets(setCount, seed);
       return {
         headline: formatWon(tax.netPrize),
-        subline: `예상 세금 ${formatWon(tax.totalTax)} · 로또 6/45 번호 ${setCount}세트 생성`,
+        subline: `입력 당첨금 ${formatWon(values.prizeAmount || 0)} · 예상 세금 ${formatWon(tax.totalTax)}`,
         rows: [
           { label: "입력 당첨금", value: formatWon(values.prizeAmount || 0), tone: "strong" },
           { label: "과세 대상 금액", value: formatWon(tax.taxable) },
@@ -3581,12 +3513,7 @@ export const calculators: CalculatorConfig[] = [
           { label: "기타소득세", value: formatWon(tax.incomeTax), tone: "strong" },
           { label: "지방소득세", value: formatWon(tax.localTax) },
           { label: "예상 세금 합계", value: formatWon(tax.totalTax), tone: "strong" },
-          { label: "예상 실수령액", value: formatWon(tax.netPrize), tone: "strong" },
-          ...sets.map((set, index) => ({
-            label: `생성 번호 ${index + 1}`,
-            value: `${set.main.join(", ")} · 보너스 ${set.bonus}`,
-            tone: index === 0 ? ("strong" as const) : ("muted" as const)
-          }))
+          { label: "예상 실수령액", value: formatWon(tax.netPrize), tone: "strong" }
         ],
         chart: [
           { name: "실수령", value: tax.netPrize },
