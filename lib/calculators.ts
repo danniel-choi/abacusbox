@@ -86,6 +86,9 @@ export type CalculatorSlug =
   | "derivative-calculator"
   | "integral-calculator"
   | "quadratic-formula"
+  | "factoring-calculator"
+  | "logarithm-calculator"
+  | "inequality-calculator"
   | "geometry-tool"
   | "three-d-calculator"
   | "web-calculator";
@@ -862,6 +865,249 @@ export const calculators: CalculatorConfig[] = [
           { name: "b", value: Math.abs(b) },
           { name: "c", value: Math.abs(c) },
           { name: "D", value: Math.abs(discriminant) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "factoring-calculator",
+    title: "인수분해 계산기",
+    description: "2차식 ax²+bx+c의 근과 판별식을 이용해 실수 범위 인수분해 형태를 계산합니다.",
+    category: "수학",
+    keywords: ["인수분해 계산기", "2차식 인수분해", "다항식 인수분해", "근과 계수", "이차식 분해"],
+    badge: "대수 인수분해",
+    audience: "대수식 전개와 인수분해를 학습하는 사용자",
+    fields: [
+      { name: "a", label: "a 계수", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: 1 },
+      { name: "b", label: "b 계수", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: -5 },
+      { name: "c", label: "c 계수", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: 6 }
+    ],
+    guideTitle: "인수분해 계산 기준",
+    guide: [
+      "2차식 ax²+bx+c를 기준으로 판별식과 근을 계산해 a(x-r₁)(x-r₂) 형태로 표시합니다.",
+      "판별식이 음수이면 실수 범위에서는 1차식 곱으로 인수분해되지 않는다고 안내합니다.",
+      "계수가 소수이거나 근이 무리수이면 결과는 소수 근사값으로 표시됩니다."
+    ],
+    checkpoints: [
+      "정확한 정수 인수분해가 필요한 경우 계수 a, b, c를 정수로 입력하세요.",
+      "a가 0이면 2차식이 아니므로 bx+c 형태의 1차식으로 안내합니다.",
+      "실수 범위 인수분해와 복소수 범위 인수분해는 결과가 다릅니다."
+    ],
+    faqs: [
+      { question: "x²-5x+6도 계산되나요?", answer: "네. a=1, b=-5, c=6을 입력하면 (x-2)(x-3) 형태로 볼 수 있습니다." },
+      { question: "무리수 근도 표시되나요?", answer: "네. 소수 근사값으로 a(x-r₁)(x-r₂) 형태를 보여줍니다." }
+    ],
+    calculate(values) {
+      const a = values.a;
+      const b = values.b;
+      const c = values.c;
+      if (Math.abs(a) < 1e-12) {
+        if (Math.abs(b) < 1e-12) {
+          return {
+            headline: formatNumber(c, 6),
+            subline: "상수식입니다. 인수분해할 x 항이 없습니다.",
+            rows: [
+              { label: "식", value: `${formatNumber(c, 6)}` },
+              { label: "판정", value: "상수식", tone: "strong" }
+            ],
+            chart: []
+          };
+        }
+        const root = -c / b;
+        return {
+          headline: `${formatNumber(b, 6)}(x ${root >= 0 ? "-" : "+"} ${formatNumber(Math.abs(root), 6)})`,
+          subline: "a=0이라 1차식 기준으로 정리했습니다.",
+          rows: [
+            { label: "인수 형태", value: `${formatNumber(b, 6)}(x ${root >= 0 ? "-" : "+"} ${formatNumber(Math.abs(root), 6)})`, tone: "strong" },
+            { label: "근", value: `x=${formatNumber(root, 6)}` }
+          ],
+          chart: [
+            { name: "b", value: Math.abs(b) },
+            { name: "c", value: Math.abs(c) }
+          ]
+        };
+      }
+
+      const discriminant = b * b - 4 * a * c;
+      if (discriminant < 0) {
+        return {
+          headline: "실수 인수분해 불가",
+          subline: `판별식 D=${formatNumber(discriminant, 6)} < 0`,
+          rows: [
+            { label: "판별식", value: formatNumber(discriminant, 6), tone: "strong" },
+            { label: "실수 범위", value: "1차식 곱으로 분해되지 않음", tone: "strong" },
+            { label: "복소근", value: "2차 방정식 계산기에서 확인하세요." }
+          ],
+          chart: [
+            { name: "a", value: Math.abs(a) },
+            { name: "b", value: Math.abs(b) },
+            { name: "c", value: Math.abs(c) }
+          ]
+        };
+      }
+
+      const sqrtD = Math.sqrt(discriminant);
+      const root1 = (-b + sqrtD) / (2 * a);
+      const root2 = (-b - sqrtD) / (2 * a);
+      const factor = `${formatNumber(a, 6)}(x ${root1 >= 0 ? "-" : "+"} ${formatNumber(Math.abs(root1), 6)})(x ${root2 >= 0 ? "-" : "+"} ${formatNumber(Math.abs(root2), 6)})`;
+      return {
+        headline: factor,
+        subline: `근 x=${formatNumber(root1, 6)}, ${formatNumber(root2, 6)}`,
+        rows: [
+          { label: "인수분해", value: factor, tone: "strong" },
+          { label: "판별식", value: formatNumber(discriminant, 6) },
+          { label: "첫 번째 근", value: formatNumber(root1, 6) },
+          { label: "두 번째 근", value: formatNumber(root2, 6) }
+        ],
+        chart: [
+          { name: "a", value: Math.abs(a) },
+          { name: "D", value: discriminant },
+          { name: "r1", value: Math.abs(root1) },
+          { name: "r2", value: Math.abs(root2) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "logarithm-calculator",
+    title: "로그 계산기",
+    description: "진수와 밑을 입력해 logₐ(x), 자연로그, 상용로그, 지수식 검산 값을 계산합니다.",
+    category: "수학",
+    keywords: ["로그 계산기", "log 계산기", "자연로그", "상용로그", "로그 밑 변환"],
+    badge: "로그·지수",
+    audience: "로그 값과 밑 변환 공식을 확인하는 학습자",
+    fields: [
+      { name: "value", label: "진수 x", type: "number", min: 0.000001, max: 1000000000, step: 0.1, defaultValue: 100 },
+      { name: "base", label: "밑 a", type: "number", min: 0.000001, max: 1000000, step: 0.1, defaultValue: 10 }
+    ],
+    guideTitle: "로그 계산 기준",
+    guide: [
+      "logₐ(x)는 ln(x)/ln(a) 밑 변환 공식으로 계산합니다.",
+      "진수 x는 0보다 커야 하며, 밑 a는 0보다 크고 1이 아니어야 합니다.",
+      "자연로그 ln(x), 상용로그 log₁₀(x), 지수식 aʸ 검산값을 함께 표시합니다."
+    ],
+    checkpoints: [
+      "밑이 1에 가까우면 값이 매우 커지거나 불안정할 수 있습니다.",
+      "로그는 곱셈을 덧셈으로 바꾸는 지수의 역연산입니다.",
+      "공학용 계산기의 log는 보통 상용로그, ln은 자연로그입니다."
+    ],
+    faqs: [
+      { question: "ln과 log는 무엇이 다른가요?", answer: "ln은 밑이 e인 자연로그이고, log는 문맥에 따라 보통 밑 10인 상용로그를 뜻합니다." },
+      { question: "밑이 2인 로그도 계산되나요?", answer: "네. 밑 a에 2를 입력하면 log₂(x)를 계산합니다." }
+    ],
+    calculate(values) {
+      const x = values.value;
+      const base = values.base;
+      if (x <= 0 || base <= 0 || Math.abs(base - 1) < 1e-12) {
+        return {
+          headline: "계산 불가",
+          subline: "진수는 0보다 크고, 밑은 0보다 크며 1이 아니어야 합니다.",
+          rows: [
+            { label: "진수 조건", value: "x > 0" },
+            { label: "밑 조건", value: "a > 0, a ≠ 1" }
+          ],
+          chart: []
+        };
+      }
+      const result = Math.log(x) / Math.log(base);
+      const natural = Math.log(x);
+      const common = Math.log10(x);
+      const check = Math.pow(base, result);
+      return {
+        headline: formatNumber(result, 8),
+        subline: `log_${formatNumber(base, 4)}(${formatNumber(x, 4)}) = ${formatNumber(result, 8)}`,
+        rows: [
+          { label: "로그값", value: formatNumber(result, 8), tone: "strong" },
+          { label: "자연로그 ln(x)", value: formatNumber(natural, 8) },
+          { label: "상용로그 log10(x)", value: formatNumber(common, 8) },
+          { label: "밑 변환식", value: `ln(${formatNumber(x, 4)}) / ln(${formatNumber(base, 4)})` },
+          { label: "검산 a^y", value: formatNumber(check, 8) }
+        ],
+        chart: [
+          { name: "log_a(x)", value: Math.abs(result) },
+          { name: "ln(x)", value: Math.abs(natural) },
+          { name: "log10(x)", value: Math.abs(common) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "inequality-calculator",
+    title: "부등식 계산기",
+    description: "1차 부등식 ax+b ? c를 입력해 이항, 나눗셈, 부등호 방향을 반영한 해 범위를 계산합니다.",
+    category: "수학",
+    keywords: ["부등식 계산기", "일차부등식", "부등호 계산", "해 범위", "inequality calculator"],
+    badge: "1차 부등식",
+    audience: "부등식 풀이와 해 범위를 확인하는 학습자",
+    fields: [
+      { name: "a", label: "a 계수", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: 2 },
+      { name: "b", label: "b 상수", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: 3 },
+      {
+        name: "operator",
+        label: "부등호",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "<", value: 0 },
+          { label: "≤", value: 1 },
+          { label: ">", value: 2 },
+          { label: "≥", value: 3 }
+        ]
+      },
+      { name: "c", label: "오른쪽 값 c", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: 11 }
+    ],
+    guideTitle: "부등식 계산 기준",
+    guide: [
+      "ax+b ? c 형태의 1차 부등식을 ax ? c-b로 이항한 뒤 a로 나누어 해를 구합니다.",
+      "음수로 나눌 때는 부등호 방향이 반대로 바뀝니다.",
+      "a가 0이면 x에 관계없는 참/거짓 명제로 판정합니다."
+    ],
+    checkpoints: [
+      "현재 계산기는 1차 부등식 ax+b ? c 형태를 지원합니다.",
+      "음수 계수로 나눌 때 부등호가 바뀌는지 확인하는 학습용으로 좋습니다.",
+      "연립부등식이나 2차 부등식은 별도 확장이 필요합니다."
+    ],
+    faqs: [
+      { question: "음수로 나누면 자동으로 부등호가 바뀌나요?", answer: "네. a가 음수이면 해 표시에서 부등호 방향을 반대로 바꿉니다." },
+      { question: "항이 양쪽에 있는 부등식도 가능한가요?", answer: "현재는 ax+b ? c 형태입니다. 양쪽 x항은 한쪽으로 정리한 뒤 입력하세요." }
+    ],
+    calculate(values) {
+      const labels = ["<", "≤", ">", "≥"];
+      const operator = Math.max(0, Math.min(3, Math.round(values.operator)));
+      const rhs = values.c - values.b;
+      const original = `${formatNumber(values.a, 4)}x + ${formatNumber(values.b, 4)} ${labels[operator]} ${formatNumber(values.c, 4)}`;
+      if (Math.abs(values.a) < 1e-12) {
+        const left = values.b;
+        const truth = operator === 0 ? left < values.c : operator === 1 ? left <= values.c : operator === 2 ? left > values.c : left >= values.c;
+        return {
+          headline: truth ? "모든 실수" : "해 없음",
+          subline: `x항이 없어 ${formatNumber(left, 4)} ${labels[operator]} ${formatNumber(values.c, 4)}를 판정했습니다.`,
+          rows: [
+            { label: "원래 부등식", value: original },
+            { label: "판정", value: truth ? "항상 참" : "항상 거짓", tone: "strong" }
+          ],
+          chart: []
+        };
+      }
+      const boundary = rhs / values.a;
+      const flips = values.a < 0;
+      const solvedOperator = flips
+        ? operator === 0 ? ">" : operator === 1 ? "≥" : operator === 2 ? "<" : "≤"
+        : labels[operator];
+      return {
+        headline: `x ${solvedOperator} ${formatNumber(boundary, 6)}`,
+        subline: flips ? "음수로 나누어 부등호 방향을 바꿨습니다." : "양수로 나누어 부등호 방향을 유지했습니다.",
+        rows: [
+          { label: "원래 부등식", value: original },
+          { label: "이항 후", value: `${formatNumber(values.a, 4)}x ${labels[operator]} ${formatNumber(rhs, 4)}` },
+          { label: "계수 a", value: formatNumber(values.a, 4) },
+          { label: "부등호 변화", value: flips ? "반전" : "유지" },
+          { label: "해", value: `x ${solvedOperator} ${formatNumber(boundary, 6)}`, tone: "strong" }
+        ],
+        chart: [
+          { name: "경계값", value: Math.abs(boundary) },
+          { name: "a", value: Math.abs(values.a) },
+          { name: "c-b", value: Math.abs(rhs) }
         ]
       };
     }
