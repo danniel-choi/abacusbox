@@ -102,7 +102,7 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   percent: "life",
   "discount-rate": "life",
   "distance-calculator": "life",
-  "lotto-generator": "life",
+  "lotto-generator": "tax",
   vat: "business",
   "car-maintenance": "business",
   "moving-cost": "business",
@@ -144,6 +144,7 @@ export function getFeaturedCalculators() {
     "unemployment",
     "loan-dsr",
     "pension-tax",
+    "lotto-generator",
     "crypto-investment-growth",
     "stock-return",
     "seller-profit",
@@ -165,6 +166,7 @@ export function getPopularCalculators() {
     "loan-dsr",
     "vat",
     "exchange-rate",
+    "lotto-generator",
     "crypto-investment-growth",
     "stock-average-price",
     "seller-profit"
@@ -178,6 +180,7 @@ export function getPopularCalculators() {
 export function getRecentCalculators() {
   const recentSlugs: CalculatorSlug[] = [
     "distance-calculator",
+    "lotto-generator",
     "year-end-tax-settlement",
     "inheritance-tax",
     "earned-income-tax",
