@@ -58,6 +58,9 @@ export type CalculatorSlug =
   | "ideal-weight"
   | "loan-prepayment"
   | "refinance-calculator"
+  | "credit-card-payoff"
+  | "retirement-savings"
+  | "rental-property-roi"
   | "percent"
   | "loan-amortization"
   | "youth-leap-account"
@@ -3797,6 +3800,202 @@ export const calculators: CalculatorConfig[] = [
           { name: "기존총액", value: oldTotal },
           { name: "신규총액", value: newTotal },
           { name: "절감", value: Math.max(saving, 0) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "credit-card-payoff",
+    title: "신용카드 상환 계산기",
+    description: "카드 잔액, 연 이자율, 월 상환액을 입력해 완납까지 걸리는 기간과 총 이자를 계산합니다.",
+    category: "금융",
+    keywords: ["신용카드 상환 계산기", "카드 리볼빙 이자", "카드값 갚기", "부채 상환 계획", "월 상환액 계산"],
+    badge: "카드 부채 상환",
+    audience: "카드 잔액과 리볼빙 상환 계획을 세우는 사용자",
+    fields: [
+      { name: "balance", label: "현재 카드 잔액", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 3000000 },
+      { name: "apr", label: "연 이자율", type: "number", unit: "%", min: 0, max: 50, step: 0.1, defaultValue: 16.5 },
+      { name: "monthlyPayment", label: "월 기본 상환액", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 250000 },
+      { name: "extraPayment", label: "추가 상환액", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 50000 }
+    ],
+    guideTitle: "카드 상환 계산 기준",
+    guide: [
+      "매월 잔액에 월 이자를 더한 뒤 입력한 상환액을 차감하는 방식으로 완납 기간을 추정합니다.",
+      "월 상환액은 기본 상환액과 추가 상환액을 합산해 반영합니다.",
+      "실제 카드사는 일별 이자, 수수료, 결제일, 최소결제금액 기준이 다를 수 있습니다."
+    ],
+    checkpoints: [
+      "월 상환액이 월 이자보다 작거나 같으면 잔액이 줄지 않을 수 있습니다.",
+      "리볼빙은 기간이 길어질수록 총 이자 부담이 커집니다.",
+      "추가 상환액을 바꿔 총 이자가 얼마나 줄어드는지 비교하세요."
+    ],
+    faqs: [
+      { question: "리볼빙 수수료도 포함되나요?", answer: "입력한 연 이자율에 리볼빙 수수료율을 넣으면 유사하게 추정할 수 있습니다." },
+      { question: "일시불 추가 납부는 어떻게 보나요?", answer: "일시불로 먼저 갚을 금액을 현재 카드 잔액에서 빼고 다시 계산하세요." }
+    ],
+    calculate(values) {
+      let balance = Math.max(0, values.balance);
+      const monthlyRate = Math.max(0, values.apr) / 100 / 12;
+      const payment = Math.max(0, values.monthlyPayment + values.extraPayment);
+      let totalInterest = 0;
+      let months = 0;
+      const firstInterest = balance * monthlyRate;
+      const canPayoff = balance === 0 || payment > firstInterest;
+
+      while (balance > 0 && months < 600 && canPayoff) {
+        const interest = balance * monthlyRate;
+        totalInterest += interest;
+        balance = Math.max(0, balance + interest - payment);
+        months += 1;
+      }
+
+      const years = Math.floor(months / 12);
+      const restMonths = months % 12;
+      const payoffLabel = canPayoff ? `${years > 0 ? `${years}년 ` : ""}${restMonths}개월` : "상환액 부족";
+
+      return {
+        headline: payoffLabel,
+        subline: canPayoff ? `총 이자 ${formatWon(totalInterest)} · 총 납입 ${formatWon(values.balance + totalInterest)}` : "월 상환액이 월 이자보다 커야 잔액이 줄어듭니다.",
+        rows: [
+          { label: "월 상환액 합계", value: formatWon(payment), tone: "strong" },
+          { label: "첫 달 예상 이자", value: formatWon(firstInterest) },
+          { label: "완납 예상 기간", value: payoffLabel, tone: "strong" },
+          { label: "총 이자", value: canPayoff ? formatWon(totalInterest) : "계산 불가", tone: "strong" },
+          { label: "총 납입액", value: canPayoff ? formatWon(values.balance + totalInterest) : "계산 불가" }
+        ],
+        chart: [
+          { name: "원금", value: values.balance },
+          { name: "이자", value: canPayoff ? totalInterest : firstInterest },
+          { name: "월상환", value: payment }
+        ]
+      };
+    }
+  },
+  {
+    slug: "retirement-savings",
+    title: "은퇴자금 계산기",
+    description: "현재 나이, 은퇴 시점, 월 저축액, 기대수익률, 물가상승률을 입력해 은퇴 목표자금과 부족액을 계산합니다.",
+    category: "금융",
+    keywords: ["은퇴자금 계산기", "노후자금 계산", "은퇴 준비", "월 저축액", "노후 생활비"],
+    badge: "노후 준비",
+    audience: "은퇴 전까지 필요한 저축 규모를 점검하는 사용자",
+    fields: [
+      { name: "currentAge", label: "현재 나이", type: "number", unit: "세", min: 18, max: 80, step: 1, defaultValue: 35 },
+      { name: "retirementAge", label: "은퇴 나이", type: "number", unit: "세", min: 40, max: 90, step: 1, defaultValue: 65 },
+      { name: "currentSavings", label: "현재 은퇴자금", type: "number", unit: "원", min: 0, step: 1000000, defaultValue: 50000000 },
+      { name: "monthlySaving", label: "월 저축액", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 800000 },
+      { name: "annualReturn", label: "연 기대수익률", type: "number", unit: "%", min: 0, max: 20, step: 0.1, defaultValue: 5 },
+      { name: "inflation", label: "연 물가상승률", type: "number", unit: "%", min: 0, max: 10, step: 0.1, defaultValue: 2.5 },
+      { name: "targetMonthlyIncome", label: "현재 가치 월 생활비", type: "number", unit: "원", min: 0, step: 100000, defaultValue: 3000000 },
+      { name: "retirementYears", label: "은퇴 후 기간", type: "number", unit: "년", min: 1, max: 50, step: 1, defaultValue: 25 }
+    ],
+    guideTitle: "은퇴자금 계산 기준",
+    guide: [
+      "현재 보유 은퇴자금과 매월 저축액이 은퇴 시점까지 복리로 성장한다고 가정합니다.",
+      "목표 월 생활비는 현재 가치로 입력하고, 은퇴 시점까지 물가상승률을 반영해 미래 필요 생활비로 환산합니다.",
+      "은퇴 후 자금 운용수익, 국민연금, 퇴직연금, 세금은 단순화해 별도 반영하지 않습니다."
+    ],
+    checkpoints: [
+      "물가상승률을 반영하면 필요한 은퇴자금이 크게 늘어날 수 있습니다.",
+      "기대수익률은 보수적인 값으로 여러 번 비교하는 것이 좋습니다.",
+      "국민연금 등 확정 소득이 있다면 목표 월 생활비에서 차감해 시나리오를 다시 보세요."
+    ],
+    faqs: [
+      { question: "국민연금도 포함되나요?", answer: "아니요. 국민연금 예상 수령액은 목표 월 생활비에서 직접 빼고 계산하면 됩니다." },
+      { question: "은퇴 후에도 투자수익이 나면 어떻게 하나요?", answer: "현재 계산은 보수적으로 단순 필요자금을 봅니다. 은퇴 후 운용수익을 넣으면 필요자금은 줄어들 수 있습니다." }
+    ],
+    calculate(values) {
+      const yearsToRetire = Math.max(0, values.retirementAge - values.currentAge);
+      const months = yearsToRetire * 12;
+      const monthlyReturn = values.annualReturn / 100 / 12;
+      let futureSavings = values.currentSavings * Math.pow(1 + monthlyReturn, months);
+      if (monthlyReturn > 0) {
+        futureSavings += values.monthlySaving * ((Math.pow(1 + monthlyReturn, months) - 1) / monthlyReturn);
+      } else {
+        futureSavings += values.monthlySaving * months;
+      }
+      const futureMonthlyNeed = values.targetMonthlyIncome * Math.pow(1 + values.inflation / 100, yearsToRetire);
+      const targetFund = futureMonthlyNeed * 12 * values.retirementYears;
+      const gap = futureSavings - targetFund;
+      return {
+        headline: gap >= 0 ? `여유 ${formatWon(gap)}` : `부족 ${formatWon(Math.abs(gap))}`,
+        subline: `은퇴 예상자금 ${formatWon(futureSavings)} · 목표 ${formatWon(targetFund)}`,
+        rows: [
+          { label: "은퇴까지 남은 기간", value: `${yearsToRetire.toLocaleString("ko-KR")}년` },
+          { label: "은퇴 시점 월 생활비", value: formatWon(futureMonthlyNeed), tone: "strong" },
+          { label: "은퇴 예상자금", value: formatWon(futureSavings), tone: "strong" },
+          { label: "목표 은퇴자금", value: formatWon(targetFund), tone: "strong" },
+          { label: gap >= 0 ? "예상 여유자금" : "예상 부족자금", value: formatWon(Math.abs(gap)), tone: "strong" }
+        ],
+        chart: [
+          { name: "예상자금", value: futureSavings },
+          { name: "목표자금", value: targetFund },
+          { name: gap >= 0 ? "여유" : "부족", value: Math.abs(gap) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "rental-property-roi",
+    title: "임대수익률 계산기",
+    description: "매입가, 보증금, 월세, 공실률, 운영비, 대출이자를 입력해 임대 부동산의 순수익률을 계산합니다.",
+    category: "금융",
+    keywords: ["임대수익률 계산기", "부동산 수익률", "월세 수익률", "캡레이트", "현금수익률"],
+    badge: "임대 투자",
+    audience: "월세 부동산 투자 수익성을 점검하는 사용자",
+    fields: [
+      { name: "purchasePrice", label: "매입가", type: "number", unit: "원", min: 0, step: 1000000, defaultValue: 500000000 },
+      { name: "acquisitionCosts", label: "취득 부대비용", type: "number", unit: "원", min: 0, step: 100000, defaultValue: 15000000 },
+      { name: "deposit", label: "임대보증금", type: "number", unit: "원", min: 0, step: 1000000, defaultValue: 50000000 },
+      { name: "monthlyRent", label: "월세", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 1800000 },
+      { name: "vacancyRate", label: "공실률", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 5 },
+      { name: "annualCosts", label: "연 운영비", type: "number", unit: "원", min: 0, step: 100000, defaultValue: 4000000 },
+      { name: "loanAmount", label: "대출금", type: "number", unit: "원", min: 0, step: 1000000, defaultValue: 250000000 },
+      { name: "loanRate", label: "대출 연 이자율", type: "number", unit: "%", min: 0, max: 20, step: 0.1, defaultValue: 4.5 }
+    ],
+    guideTitle: "임대수익률 계산 기준",
+    guide: [
+      "연 임대수입은 월세에 12개월을 곱한 뒤 공실률을 차감해 계산합니다.",
+      "순영업수익은 임대수입에서 운영비를 뺀 값이고, 현금흐름은 여기에 대출이자를 추가로 차감합니다.",
+      "현금투입액은 매입가와 취득비용에서 보증금과 대출금을 뺀 금액으로 단순 추정합니다."
+    ],
+    checkpoints: [
+      "취득세, 중개보수, 수선비, 재산세, 종합부동산세를 빠뜨리면 수익률이 과대평가될 수 있습니다.",
+      "대출 원금상환은 별도 반영하지 않고 이자 비용만 반영합니다.",
+      "보증금 운용수익이나 월세 세금은 투자자 상황에 따라 따로 확인하세요."
+    ],
+    faqs: [
+      { question: "캡레이트와 현금수익률은 무엇이 다른가요?", answer: "캡레이트는 부동산 가격 대비 순영업수익이고, 현금수익률은 실제 투입한 현금 대비 이자 차감 후 현금흐름입니다." },
+      { question: "대출 원리금 상환도 포함되나요?", answer: "현재는 빠른 비교를 위해 대출 이자만 반영합니다. 원금상환은 자산 이전 성격이 있어 별도 현금흐름 분석이 필요합니다." }
+    ],
+    calculate(values) {
+      const annualRent = values.monthlyRent * 12 * (1 - Math.min(100, Math.max(0, values.vacancyRate)) / 100);
+      const netOperatingIncome = annualRent - values.annualCosts;
+      const annualInterest = values.loanAmount * values.loanRate / 100;
+      const cashFlow = netOperatingIncome - annualInterest;
+      const totalPrice = values.purchasePrice + values.acquisitionCosts;
+      const cashInvested = Math.max(1, totalPrice - values.deposit - values.loanAmount);
+      const grossYield = values.purchasePrice > 0 ? annualRent / values.purchasePrice * 100 : 0;
+      const capRate = totalPrice > 0 ? netOperatingIncome / totalPrice * 100 : 0;
+      const cashOnCash = cashFlow / cashInvested * 100;
+      return {
+        headline: formatPercent(cashOnCash),
+        subline: `연 현금흐름 ${formatWon(cashFlow)} · 캡레이트 ${formatPercent(capRate)}`,
+        rows: [
+          { label: "공실 반영 연 임대수입", value: formatWon(annualRent), tone: "strong" },
+          { label: "순영업수익", value: formatWon(netOperatingIncome), tone: "strong" },
+          { label: "연 대출이자", value: formatWon(annualInterest) },
+          { label: "연 현금흐름", value: formatWon(cashFlow), tone: "strong" },
+          { label: "현금투입액", value: formatWon(cashInvested) },
+          { label: "총수익률", value: formatPercent(grossYield) },
+          { label: "캡레이트", value: formatPercent(capRate), tone: "strong" },
+          { label: "현금수익률", value: formatPercent(cashOnCash), tone: "strong" }
+        ],
+        chart: [
+          { name: "임대수입", value: annualRent },
+          { name: "운영비", value: values.annualCosts },
+          { name: "이자", value: annualInterest },
+          { name: "현금흐름", value: Math.max(cashFlow, 0) }
         ]
       };
     }
