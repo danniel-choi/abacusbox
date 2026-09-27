@@ -257,6 +257,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     return <DistanceCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
+  if (activeCalculator.slug === "text-counter") {
+    return <TextCounter title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
       <form className="min-w-0 overflow-hidden rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
@@ -3076,6 +3080,60 @@ function DateAddCalculator({ title, checkpoints }: { title: string; checkpoints:
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <GeometryMetric label="결과 ISO 날짜" value={getLocalDateInputValue(resultDate)} />
           <GeometryMetric label="총 이동 일수" value={`${totalDays.toLocaleString("ko-KR")}일`} />
+        </div>
+      </section>
+    </LifeToolShell>
+  );
+}
+
+function TextCounter({ title, checkpoints }: { title: string; checkpoints: string[] }) {
+  const sampleText = "계산의 정석에서 글자수와 바이트를 바로 확인해 보세요.\n자기소개서, 블로그 원고, 과제 분량 점검에 사용할 수 있습니다.";
+  const [text, setText] = useState(sampleText);
+  const charsWithSpaces = Array.from(text).length;
+  const charsNoSpaces = Array.from(text.replace(/\s/g, "")).length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const lines = text.length ? text.split(/\r\n|\r|\n/).length : 0;
+  const bytes = typeof TextEncoder === "undefined" ? charsWithSpaces : new TextEncoder().encode(text).length;
+  const manuscriptPages = charsWithSpaces / 200;
+  const readingMinutes = words / 250;
+
+  return (
+    <LifeToolShell title={title} heading="문장을 붙여 넣고 분량을 확인하세요" checkpoints={checkpoints}>
+      <section className="rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
+        <label className="grid gap-3">
+          <span className="text-sm font-extrabold text-ink">텍스트</span>
+          <textarea
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            rows={12}
+            className="min-h-72 w-full resize-y rounded-[18px] border border-line bg-paper px-4 py-4 text-sm font-medium leading-7 text-ink outline-none transition focus:border-brand focus:bg-white"
+            placeholder="글자수를 계산할 내용을 입력하세요."
+          />
+        </label>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button type="button" onClick={() => setText("")} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 hover:border-brand hover:text-brand">
+            전체 지우기
+          </button>
+          <button type="button" onClick={() => setText(sampleText)} className="rounded-full bg-brand px-4 py-2 text-sm font-extrabold text-white">
+            예문 넣기
+          </button>
+        </div>
+      </section>
+
+      <section className="rounded-[20px] border border-line bg-white p-5 shadow-panel sm:p-6">
+        <p className="text-sm font-extrabold text-brand">결과</p>
+        <h2 className="mt-2 text-4xl font-black text-ink sm:text-5xl">{charsWithSpaces.toLocaleString("ko-KR")}자</h2>
+        <p className="mt-2 text-sm font-bold text-slate-500">공백 포함 기준 · UTF-8 {bytes.toLocaleString("ko-KR")}바이트</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <GeometryMetric label="공백 포함" value={`${charsWithSpaces.toLocaleString("ko-KR")}자`} />
+          <GeometryMetric label="공백 제외" value={`${charsNoSpaces.toLocaleString("ko-KR")}자`} />
+          <GeometryMetric label="단어 수" value={`${words.toLocaleString("ko-KR")}개`} />
+          <GeometryMetric label="줄 수" value={`${lines.toLocaleString("ko-KR")}줄`} />
+          <GeometryMetric label="UTF-8 바이트" value={`${bytes.toLocaleString("ko-KR")}B`} />
+          <GeometryMetric label="원고지 환산" value={`${manuscriptPages.toFixed(1)}매`} />
+        </div>
+        <div className="mt-4 rounded-2xl bg-paper px-4 py-3 text-sm font-bold text-slate-600">
+          예상 읽기 시간 {readingMinutes < 1 && words > 0 ? "1분 미만" : `${Math.ceil(readingMinutes).toLocaleString("ko-KR")}분`}
         </div>
       </section>
     </LifeToolShell>

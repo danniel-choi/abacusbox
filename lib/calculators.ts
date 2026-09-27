@@ -50,6 +50,8 @@ export type CalculatorSlug =
   | "internet-speed-test"
   | "pyeong-converter"
   | "random-number"
+  | "text-counter"
+  | "tip-calculator"
   | "password-generator"
   | "standard-deviation"
   | "bmr-calculator"
@@ -3587,6 +3589,110 @@ export const calculators: CalculatorConfig[] = [
           { label: "중복", value: values.unique === 0 ? "없음" : "허용" }
         ],
         chart: generated.map((value, index) => ({ name: `${index + 1}`, value: Math.abs(value) }))
+      };
+    }
+  },
+  {
+    slug: "text-counter",
+    title: "글자수 계산기",
+    description: "텍스트를 입력해 공백 포함/제외 글자수, 단어 수, 줄 수, UTF-8 바이트, 원고지 매수를 계산합니다.",
+    category: "생활",
+    keywords: ["글자수 계산기", "문자수 세기", "바이트 계산기", "공백 제외 글자수", "원고지 매수"],
+    badge: "문서 분량",
+    audience: "자기소개서, 블로그, 과제, 원고 분량을 확인하는 사용자",
+    fields: [],
+    guideTitle: "글자수 계산 기준",
+    guide: [
+      "공백 포함 글자수는 줄바꿈과 띄어쓰기를 포함한 전체 문자를 기준으로 계산합니다.",
+      "공백 제외 글자수는 띄어쓰기, 탭, 줄바꿈을 제거한 문자 수입니다.",
+      "바이트는 UTF-8 인코딩 기준이라 한글, 영문, 숫자, 특수문자에 따라 길이가 달라집니다."
+    ],
+    checkpoints: [
+      "자기소개서나 지원서 제한이 공백 포함인지 제외인지 먼저 확인하세요.",
+      "사이트마다 줄바꿈과 특수문자 처리 기준이 다를 수 있습니다.",
+      "원고지 매수는 200자 원고지를 기준으로 한 대략값입니다."
+    ],
+    faqs: [
+      { question: "한글은 몇 바이트로 계산되나요?", answer: "UTF-8 기준 한글 한 글자는 보통 3바이트로 계산됩니다." },
+      { question: "공백 제외 글자수에는 줄바꿈도 빠지나요?", answer: "네. 띄어쓰기, 탭, 줄바꿈 같은 공백 문자를 제외합니다." }
+    ],
+    calculate() {
+      return {
+        headline: "텍스트 입력",
+        subline: "전용 입력창에 문장을 붙여 넣으면 즉시 계산합니다.",
+        rows: [{ label: "지원", value: "공백 포함/제외, 단어, 줄, 바이트, 원고지", tone: "strong" }],
+        chart: []
+      };
+    }
+  },
+  {
+    slug: "tip-calculator",
+    title: "팁 계산기",
+    description: "결제금액, 팁 비율, 인원 수를 입력해 총 팁, 총 결제액, 1인당 부담액을 계산합니다.",
+    category: "생활",
+    keywords: ["팁 계산기", "팁 비율 계산", "1인당 계산", "더치페이 계산", "서비스 팁"],
+    badge: "팁·더치페이",
+    audience: "식당, 여행, 단체 결제 비용을 나누려는 사용자",
+    fields: [
+      { name: "billAmount", label: "결제금액", type: "number", unit: "원", min: 0, step: 1000, defaultValue: 80000 },
+      { name: "tipRate", label: "팁 비율", type: "number", unit: "%", min: 0, max: 50, step: 0.5, defaultValue: 10 },
+      { name: "people", label: "인원 수", type: "number", unit: "명", min: 1, max: 50, step: 1, defaultValue: 2 },
+      {
+        name: "roundUnit",
+        label: "1인당 올림 단위",
+        type: "select",
+        defaultValue: 1000,
+        options: [
+          { label: "정확히 나누기", value: 0 },
+          { label: "100원 단위", value: 100 },
+          { label: "500원 단위", value: 500 },
+          { label: "1,000원 단위", value: 1000 }
+        ]
+      }
+    ],
+    guideTitle: "팁 계산 기준",
+    guide: [
+      "팁은 결제금액에 입력한 팁 비율을 곱해 계산합니다.",
+      "1인당 부담액은 팁 포함 총액을 인원 수로 나눈 뒤 선택한 단위로 올림 처리합니다.",
+      "올림 단위를 적용하면 실제 모이는 금액이 팁 포함 총액보다 조금 커질 수 있습니다."
+    ],
+    checkpoints: [
+      "카드 수수료나 세금이 별도인 해외 영수증은 최종 결제금액 기준으로 다시 계산하세요.",
+      "인원 수는 최소 1명으로 계산합니다.",
+      "올림 차액은 더치페이를 편하게 하기 위한 여유 금액입니다."
+    ],
+    faqs: [
+      { question: "팁 비율은 몇 퍼센트를 넣으면 되나요?", answer: "국가와 상황에 따라 다르지만 10%, 15%, 20%처럼 자주 쓰는 비율을 입력하면 됩니다." },
+      { question: "1인당 금액을 천원 단위로 맞출 수 있나요?", answer: "네. 1,000원 단위 올림을 선택하면 각자 내기 쉬운 금액으로 계산합니다." }
+    ],
+    calculate(values) {
+      const billAmount = Math.max(0, values.billAmount);
+      const tipRate = Math.max(0, values.tipRate);
+      const people = Math.max(1, Math.floor(values.people));
+      const roundUnit = Math.max(0, values.roundUnit);
+      const tip = billAmount * tipRate / 100;
+      const total = billAmount + tip;
+      const perPersonRaw = total / people;
+      const perPerson = roundUnit > 0 ? Math.ceil(perPersonRaw / roundUnit) * roundUnit : perPersonRaw;
+      const roundedTotal = perPerson * people;
+      const extraFromRounding = Math.max(0, roundedTotal - total);
+
+      return {
+        headline: formatWon(perPerson),
+        subline: `총 팁 ${formatWon(tip)} · 총 결제액 ${formatWon(total)}`,
+        rows: [
+          { label: "결제금액", value: formatWon(billAmount) },
+          { label: "팁 금액", value: formatWon(tip), tone: "strong" },
+          { label: "팁 포함 총액", value: formatWon(total), tone: "strong" },
+          { label: "인원 수", value: `${people.toLocaleString("ko-KR")}명` },
+          { label: "1인당 부담액", value: formatWon(perPerson), tone: "strong" },
+          { label: "올림 차액", value: formatWon(extraFromRounding) }
+        ],
+        chart: [
+          { name: "결제금액", value: billAmount },
+          { name: "팁", value: tip },
+          { name: "올림차액", value: extraFromRounding }
+        ]
       };
     }
   },
