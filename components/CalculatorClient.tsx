@@ -234,6 +234,14 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     return <MatrixCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
+  if (activeCalculator.slug === "derivative-calculator") {
+    return <CalculusCalculator mode="derivative" title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+  }
+
+  if (activeCalculator.slug === "integral-calculator") {
+    return <CalculusCalculator mode="integral" title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+  }
+
   if (activeCalculator.slug === "geometry-tool") {
     return <GeometryTool title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
@@ -3140,6 +3148,123 @@ function TextCounter({ title, checkpoints }: { title: string; checkpoints: strin
   );
 }
 
+function CalculusCalculator({ mode, title, checkpoints }: { mode: "derivative" | "integral"; title: string; checkpoints: string[] }) {
+  const [expression, setExpression] = useState(mode === "derivative" ? "x^3-2x+1" : "sin(x)");
+  const [xValue, setXValue] = useState(mode === "derivative" ? 2 : 0);
+  const [from, setFrom] = useState(0);
+  const [to, setTo] = useState(Math.PI);
+  const [samples, setSamples] = useState(120);
+  const [angleMode, setAngleMode] = useState<"rad" | "deg">("rad");
+
+  const result = useMemo(() => {
+    const normalized = normalizeGraphExpression(expression || "0");
+    try {
+      if (mode === "derivative") {
+        const value = evaluateExpression(normalized, { angleMode, ans: 0, memory: 0, variables: { x: xValue } });
+        const derivative = numericalDerivative(normalized, xValue, angleMode);
+        const leftDerivative = numericalDerivative(normalized, xValue - 0.001, angleMode);
+        const rightDerivative = numericalDerivative(normalized, xValue + 0.001, angleMode);
+        const intercept = value - derivative * xValue;
+        return {
+          error: "",
+          headline: formatCalculatorResult(derivative),
+          subline: `f(${formatCalculatorResult(xValue)})=${formatCalculatorResult(value)}`,
+          rows: [
+            { label: "입력 함수", value: `f(x)=${expression || "0"}` },
+            { label: "x 값", value: formatCalculatorResult(xValue) },
+            { label: "함수값", value: formatCalculatorResult(value) },
+            { label: "도함수 근사값", value: formatCalculatorResult(derivative) },
+            { label: "접선식", value: `y=${formatCalculatorResult(derivative)}x ${intercept >= 0 ? "+" : "-"} ${formatCalculatorResult(Math.abs(intercept))}` },
+            { label: "좌/우 기울기", value: `${formatCalculatorResult(leftDerivative)} / ${formatCalculatorResult(rightDerivative)}` }
+          ]
+        };
+      }
+
+      const integral = numericalIntegral(normalized, from, to, samples, angleMode, false);
+      const absoluteArea = numericalIntegral(normalized, from, to, samples, angleMode, true);
+      const average = Math.abs(to - from) < 1e-12 ? Number.NaN : integral / (to - from);
+      return {
+        error: "",
+        headline: formatCalculatorResult(integral),
+        subline: `절대면적 ${formatCalculatorResult(absoluteArea)} · 평균값 ${formatCalculatorResult(average)}`,
+        rows: [
+          { label: "입력 함수", value: `f(x)=${expression || "0"}` },
+          { label: "구간", value: `[${formatCalculatorResult(from)}, ${formatCalculatorResult(to)}]` },
+          { label: "정적분", value: formatCalculatorResult(integral) },
+          { label: "절대면적", value: formatCalculatorResult(absoluteArea) },
+          { label: "평균값", value: formatCalculatorResult(average) },
+          { label: "샘플 수", value: `${normalizeEvenSampleCount(samples).toLocaleString("ko-KR")}개` }
+        ]
+      };
+    } catch (caught) {
+      return {
+        error: caught instanceof Error ? caught.message : "수식을 확인해 주세요.",
+        headline: "계산 불가",
+        subline: "정의역, 괄호, 연산자를 확인하세요.",
+        rows: []
+      };
+    }
+  }, [angleMode, expression, from, mode, samples, to, xValue]);
+
+  const examples = mode === "derivative" ? ["x^2", "sin(x)", "ln(x)", "x^3-3x"] : ["sin(x)", "x^2", "1/x", "sqrt(x)"];
+
+  return (
+    <LifeToolShell title={title} heading={mode === "derivative" ? "함수의 순간 기울기를 확인하세요" : "구간 아래 면적을 계산하세요"} checkpoints={checkpoints}>
+      <section className="rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-extrabold text-brand">수식 입력</p>
+            <h2 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">f(x)를 입력하세요</h2>
+          </div>
+          <button type="button" onClick={() => setAngleMode((current) => (current === "rad" ? "deg" : "rad"))} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 hover:border-brand hover:text-brand">
+            {angleMode === "rad" ? "Rad" : "Deg"}
+          </button>
+        </div>
+        <input
+          value={expression}
+          onChange={(event) => setExpression(event.target.value)}
+          className="mt-5 h-12 w-full rounded-2xl border border-line bg-paper px-4 font-mono text-sm font-extrabold text-ink outline-none focus:border-brand focus:bg-white"
+          placeholder="예: x^2+2x-1"
+        />
+        <div className="mt-3 flex flex-wrap gap-2">
+          {examples.map((example) => (
+            <button key={example} type="button" onClick={() => setExpression(example)} className="rounded-full border border-line px-4 py-2 text-xs font-extrabold text-slate-600 hover:border-brand hover:text-brand">
+              {example}
+            </button>
+          ))}
+        </div>
+
+        {mode === "derivative" ? (
+          <div className="mt-5">
+            <LifeNumberInput label="계산할 x 값" value={xValue} onChange={setXValue} />
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <LifeNumberInput label="시작 a" value={from} onChange={setFrom} />
+            <LifeNumberInput label="끝 b" value={to} onChange={setTo} />
+            <LifeNumberInput label="샘플 수" value={samples} onChange={setSamples} />
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-[20px] border border-line bg-white p-5 shadow-panel sm:p-6">
+        <p className="text-sm font-extrabold text-brand">{mode === "derivative" ? "도함수 근사값" : "정적분 근사값"}</p>
+        <h2 className="mt-2 break-words font-mono text-4xl font-black text-ink sm:text-5xl">{result.headline}</h2>
+        <p className="mt-2 text-sm font-bold text-slate-500">{result.subline}</p>
+        {result.error ? (
+          <div className="mt-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-extrabold text-red-700">{result.error}</div>
+        ) : (
+          <div className="mt-5 grid gap-3">
+            {result.rows.map((row) => (
+              <ResultLine key={row.label} label={row.label} value={row.value} />
+            ))}
+          </div>
+        )}
+      </section>
+    </LifeToolShell>
+  );
+}
+
 function StopwatchTool({ title, checkpoints }: { title: string; checkpoints: string[] }) {
   const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -4749,6 +4874,34 @@ function normalizeGraphExpression(expression: string) {
     .replace(new RegExp(`(\\d|\\)|x|y|pi|e)(?=(${functions})\\()`, "gi"), "$1*")
     .replace(/(\d|\)|x|y|pi|e)(?=(x|y|pi|e|\())/gi, "$1*");
   return normalized;
+}
+
+function numericalDerivative(expression: string, x: number, angleMode: "deg" | "rad") {
+  const h = Math.max(1e-5, Math.abs(x) * 1e-5);
+  const left = evaluateExpression(expression, { angleMode, ans: 0, memory: 0, variables: { x: x - h } });
+  const right = evaluateExpression(expression, { angleMode, ans: 0, memory: 0, variables: { x: x + h } });
+  return (right - left) / (2 * h);
+}
+
+function normalizeEvenSampleCount(value: number) {
+  const rounded = Math.max(10, Math.min(2000, Math.round(value || 120)));
+  return rounded % 2 === 0 ? rounded : rounded + 1;
+}
+
+function numericalIntegral(expression: string, from: number, to: number, samples: number, angleMode: "deg" | "rad", absoluteArea: boolean) {
+  const n = normalizeEvenSampleCount(samples);
+  const width = (to - from) / n;
+  if (!Number.isFinite(width) || Math.abs(width) < 1e-12) return 0;
+  let sum = 0;
+  for (let index = 0; index <= n; index += 1) {
+    const x = from + width * index;
+    const raw = evaluateExpression(expression, { angleMode, ans: 0, memory: 0, variables: { x } });
+    const value = absoluteArea ? Math.abs(raw) : raw;
+    if (!Number.isFinite(value)) throw new Error("구간 안에서 계산할 수 없는 값이 있습니다.");
+    const weight = index === 0 || index === n ? 1 : index % 2 === 0 ? 2 : 4;
+    sum += weight * value;
+  }
+  return (width / 3) * sum;
 }
 
 type ExpressionContext = {

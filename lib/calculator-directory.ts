@@ -137,6 +137,9 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "four-function-calculator": "math",
   "math-notes": "math",
   "matrix-calculator": "math",
+  "derivative-calculator": "math",
+  "integral-calculator": "math",
+  "quadratic-formula": "math",
   "standard-deviation": "math",
   "geometry-tool": "math",
   "three-d-calculator": "math",
@@ -158,6 +161,9 @@ export function getFeaturedCalculators() {
     "inheritance-tax",
     "unemployment",
     "loan-dsr",
+    "derivative-calculator",
+    "integral-calculator",
+    "quadratic-formula",
     "apr-calculator",
     "credit-card-payoff",
     "retirement-savings",
@@ -191,6 +197,8 @@ export function getPopularCalculators() {
   const popularSlugs: CalculatorSlug[] = [
     "unemployment",
     "severance",
+    "derivative-calculator",
+    "integral-calculator",
     "loan-dsr",
     "credit-card-payoff",
     "inflation-calculator",
@@ -216,6 +224,9 @@ export function getPopularCalculators() {
 export function getRecentCalculators() {
   const recentSlugs: CalculatorSlug[] = [
     "distance-calculator",
+    "derivative-calculator",
+    "integral-calculator",
+    "quadratic-formula",
     "password-generator",
     "standard-deviation",
     "bmr-calculator",

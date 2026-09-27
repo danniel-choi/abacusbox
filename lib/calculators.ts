@@ -83,6 +83,9 @@ export type CalculatorSlug =
   | "four-function-calculator"
   | "math-notes"
   | "matrix-calculator"
+  | "derivative-calculator"
+  | "integral-calculator"
+  | "quadratic-formula"
   | "geometry-tool"
   | "three-d-calculator"
   | "web-calculator";
@@ -699,6 +702,167 @@ export const calculators: CalculatorConfig[] = [
           { label: "지원", value: "A/B/C 행렬 편집, 크기 변경, det, inv, transpose, rref, +, -, *, 스칼라 연산, 결과 저장", tone: "strong" }
         ],
         chart: []
+      };
+    }
+  },
+  {
+    slug: "derivative-calculator",
+    title: "도함수 계산기",
+    description: "함수 f(x)와 x 값을 입력해 해당 지점의 수치 미분값과 접선 기울기를 계산합니다.",
+    category: "수학",
+    keywords: ["도함수 계산기", "미분 계산기", "접선 기울기", "수치 미분", "함수 미분"],
+    badge: "미분·접선",
+    audience: "미적분 학습자, 함수 변화율을 확인하는 사용자",
+    fields: [],
+    guideTitle: "도함수 계산 기준",
+    guide: [
+      "입력한 함수 f(x)를 중심차분 방식으로 계산해 x 지점의 기울기를 추정합니다.",
+      "수식에는 x, pi, e, sin, cos, tan, log, ln, sqrt, abs 같은 기본 함수와 상수를 사용할 수 있습니다.",
+      "심볼릭 전개식이 아니라 수치 미분값이므로 불연속점이나 뾰족점에서는 결과가 불안정할 수 있습니다."
+    ],
+    checkpoints: [
+      "x^2, sin(x), log(x), sqrt(x)처럼 x를 포함한 식을 입력하세요.",
+      "분모가 0이 되는 지점이나 정의역 밖에서는 계산이 실패할 수 있습니다.",
+      "접선식은 계산 지점 근처에서만 근사적으로 의미가 있습니다."
+    ],
+    faqs: [
+      { question: "단계별 풀이도 나오나요?", answer: "현재는 수치 미분값과 접선식을 빠르게 확인하는 계산기입니다." },
+      { question: "삼각함수 각도는 어떤 단위인가요?", answer: "기본은 라디안이며 화면에서 도/라디안을 바꿀 수 있습니다." }
+    ],
+    calculate() {
+      return {
+        headline: "함수 입력",
+        subline: "전용 미분 패널에서 f(x), x 값, 각도 단위를 설정하세요.",
+        rows: [{ label: "지원", value: "수치 미분, 접선 기울기, 접선식, 좌우 기울기 비교", tone: "strong" }],
+        chart: []
+      };
+    }
+  },
+  {
+    slug: "integral-calculator",
+    title: "정적분 계산기",
+    description: "함수 f(x)와 구간 [a, b]를 입력해 Simpson 방식으로 정적분 면적을 근사 계산합니다.",
+    category: "수학",
+    keywords: ["정적분 계산기", "적분 계산기", "면적 계산", "수치 적분", "Simpson 적분"],
+    badge: "정적분·면적",
+    audience: "미적분 학습자, 함수 아래 면적을 빠르게 추정하는 사용자",
+    fields: [],
+    guideTitle: "정적분 계산 기준",
+    guide: [
+      "입력한 함수 f(x)를 구간 [a, b]에서 Simpson 규칙으로 근사 적분합니다.",
+      "양의 면적과 음의 면적을 부호 포함 순면적으로 계산하며, 절대면적도 함께 보여줍니다.",
+      "불연속점, 급격한 진동, 정의역 오류가 있는 구간에서는 실제 적분값과 차이가 커질 수 있습니다."
+    ],
+    checkpoints: [
+      "구간 안에서 함수가 정의되는지 먼저 확인하세요.",
+      "샘플 수가 많을수록 보통 정확도가 좋아지지만 계산이 조금 무거워질 수 있습니다.",
+      "면적을 양수로만 보고 싶다면 절대면적 값을 함께 확인하세요."
+    ],
+    faqs: [
+      { question: "부정적분 공식도 보여주나요?", answer: "아니요. 현재는 지정 구간의 수치 정적분 값을 계산합니다." },
+      { question: "sin(x)는 라디안 기준인가요?", answer: "기본은 라디안이며 화면에서 도/라디안을 전환할 수 있습니다." }
+    ],
+    calculate() {
+      return {
+        headline: "구간 입력",
+        subline: "전용 적분 패널에서 f(x), 시작값, 끝값, 샘플 수를 설정하세요.",
+        rows: [{ label: "지원", value: "정적분, 절대면적, 평균값, Simpson 근사", tone: "strong" }],
+        chart: []
+      };
+    }
+  },
+  {
+    slug: "quadratic-formula",
+    title: "2차 방정식 계산기",
+    description: "ax²+bx+c=0의 계수 a, b, c를 입력해 판별식, 실근 또는 복소근, 꼭짓점과 축을 계산합니다.",
+    category: "수학",
+    keywords: ["2차 방정식 계산기", "근의 공식", "판별식 계산기", "이차함수 꼭짓점", "quadratic formula"],
+    badge: "근의 공식",
+    audience: "대수, 방정식, 이차함수 학습자",
+    fields: [
+      { name: "a", label: "a 계수", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: 1 },
+      { name: "b", label: "b 계수", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: -3 },
+      { name: "c", label: "c 계수", type: "number", min: -100000, max: 100000, step: 0.1, defaultValue: 2 }
+    ],
+    guideTitle: "2차 방정식 계산 기준",
+    guide: [
+      "판별식 D=b²-4ac를 계산하고 D의 부호에 따라 서로 다른 두 실근, 중근, 복소근을 구분합니다.",
+      "a가 0이면 2차 방정식이 아니므로 bx+c=0의 1차 방정식으로 안내합니다.",
+      "꼭짓점은 x=-b/2a, y=f(x) 기준으로 계산합니다."
+    ],
+    checkpoints: [
+      "근의 공식은 a가 0이 아닌 ax²+bx+c=0 형태에서 사용합니다.",
+      "D가 0보다 작으면 실수 범위에서 그래프가 x축과 만나지 않습니다.",
+      "계수가 소수이면 표시값은 반올림되어 보일 수 있습니다."
+    ],
+    faqs: [
+      { question: "복소근도 계산되나요?", answer: "네. 판별식이 음수일 때 실수부와 허수부 형태로 표시합니다." },
+      { question: "이차함수 꼭짓점도 볼 수 있나요?", answer: "네. 축 x=-b/2a와 꼭짓점 좌표를 함께 보여줍니다." }
+    ],
+    calculate(values) {
+      const a = values.a;
+      const b = values.b;
+      const c = values.c;
+      if (Math.abs(a) < 1e-12) {
+        if (Math.abs(b) < 1e-12) {
+          const message = Math.abs(c) < 1e-12 ? "모든 x가 해" : "해 없음";
+          return {
+            headline: message,
+            subline: "a와 b가 0이라 2차 방정식 또는 1차 방정식이 아닙니다.",
+            rows: [
+              { label: "방정식", value: `${formatNumber(c, 4)} = 0` },
+              { label: "판정", value: message, tone: "strong" }
+            ],
+            chart: []
+          };
+        }
+        const root = -c / b;
+        return {
+          headline: `x = ${formatNumber(root, 6)}`,
+          subline: "a=0이라 1차 방정식 bx+c=0으로 계산했습니다.",
+          rows: [
+            { label: "1차 해", value: `x = ${formatNumber(root, 6)}`, tone: "strong" },
+            { label: "계수 b", value: formatNumber(b, 4) },
+            { label: "계수 c", value: formatNumber(c, 4) }
+          ],
+          chart: [
+            { name: "b", value: Math.abs(b) },
+            { name: "c", value: Math.abs(c) }
+          ]
+        };
+      }
+
+      const discriminant = b * b - 4 * a * c;
+      const axis = -b / (2 * a);
+      const vertexY = a * axis * axis + b * axis + c;
+      let roots = "";
+      if (discriminant > 0) {
+        const sqrtD = Math.sqrt(discriminant);
+        roots = `x₁=${formatNumber((-b + sqrtD) / (2 * a), 6)}, x₂=${formatNumber((-b - sqrtD) / (2 * a), 6)}`;
+      } else if (Math.abs(discriminant) < 1e-12) {
+        roots = `x=${formatNumber(axis, 6)} (중근)`;
+      } else {
+        const real = -b / (2 * a);
+        const imag = Math.sqrt(Math.abs(discriminant)) / Math.abs(2 * a);
+        roots = `x=${formatNumber(real, 6)} ± ${formatNumber(imag, 6)}i`;
+      }
+
+      return {
+        headline: roots,
+        subline: `판별식 D=${formatNumber(discriminant, 4)} · 꼭짓점 (${formatNumber(axis, 4)}, ${formatNumber(vertexY, 4)})`,
+        rows: [
+          { label: "판별식", value: formatNumber(discriminant, 6), tone: "strong" },
+          { label: "근", value: roots, tone: "strong" },
+          { label: "대칭축", value: `x=${formatNumber(axis, 6)}` },
+          { label: "꼭짓점", value: `(${formatNumber(axis, 6)}, ${formatNumber(vertexY, 6)})` },
+          { label: "그래프 방향", value: a > 0 ? "위로 열린 포물선" : "아래로 열린 포물선" }
+        ],
+        chart: [
+          { name: "a", value: Math.abs(a) },
+          { name: "b", value: Math.abs(b) },
+          { name: "c", value: Math.abs(c) },
+          { name: "D", value: Math.abs(discriminant) }
+        ]
       };
     }
   },
