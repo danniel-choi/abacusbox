@@ -13,11 +13,15 @@ export type CalculatorSlug =
   | "net-salary"
   | "loan-interest"
   | "loan-dsr"
+  | "apr-calculator"
   | "comprehensive-income-tax"
   | "earned-income-tax"
   | "year-end-tax-settlement"
   | "inheritance-tax"
   | "compound-interest"
+  | "inflation-calculator"
+  | "roi-calculator"
+  | "present-value"
   | "bmi"
   | "calorie-calculator"
   | "daily-intake"
@@ -164,6 +168,25 @@ function equalPrincipalFirstPayment(principal: number, annualRate: number, years
 function equalPrincipalAveragePayment(principal: number, annualRate: number, years: number) {
   const months = years * 12;
   return (equalPrincipalFirstPayment(principal, annualRate, years) + principal / months) / 2;
+}
+
+function estimateApr(principal: number, monthlyPayment: number, months: number, fees: number) {
+  const netProceeds = Math.max(principal - fees, 0);
+  if (netProceeds <= 0 || monthlyPayment <= 0 || months <= 0) return 0;
+
+  let low = 0;
+  let high = 1;
+  for (let i = 0; i < 80; i += 1) {
+    const mid = (low + high) / 2;
+    const presentValue = monthlyPayment * (1 - (1 + mid) ** -months) / mid;
+    if (presentValue > netProceeds) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  return ((low + high) / 2) * 12 * 100;
 }
 
 function compoundFutureValue(initial: number, monthlyContribution: number, annualRate: number, years: number) {
@@ -1547,6 +1570,226 @@ export const calculators: CalculatorConfig[] = [
           { name: "희망대출", value: values.loan },
           { name: "LTV한도", value: ltvCap },
           { name: "DSR한도", value: dsrCap }
+        ]
+      };
+    }
+  },
+  {
+    slug: "apr-calculator",
+    title: "APR 계산기",
+    description: "대출금, 명목금리, 기간, 수수료를 입력해 월 상환액과 실질 연이율(APR)을 추정합니다.",
+    category: "금융",
+    keywords: ["APR 계산기", "실질 연이율 계산", "대출 수수료 포함 금리", "연간 퍼센트율", "대출 실제 비용"],
+    badge: "실질 금리",
+    audience: "대출 조건을 비교하는 사용자, 수수료 포함 실제 금리를 확인하려는 사용자",
+    fields: [
+      { name: "principal", label: "대출금", type: "number", unit: "원", min: 1000000, max: 2000000000, step: 1000000, defaultValue: 50000000 },
+      { name: "annualRate", label: "명목 연금리", type: "number", unit: "%", min: 0, max: 30, step: 0.1, defaultValue: 5.5 },
+      { name: "years", label: "대출 기간", type: "number", unit: "년", min: 1, max: 40, step: 1, defaultValue: 5 },
+      { name: "originationFee", label: "취급·중개 수수료", type: "number", unit: "원", min: 0, max: 100000000, step: 10000, defaultValue: 500000 },
+      { name: "otherFees", label: "기타 비용", type: "number", unit: "원", min: 0, max: 100000000, step: 10000, defaultValue: 100000 }
+    ],
+    guideTitle: "APR 계산 기준",
+    guide: [
+      "APR은 명목 이자율뿐 아니라 대출 실행 시 부담하는 수수료와 기타 비용까지 반영한 실질 연이율입니다.",
+      "이 계산기는 원리금균등 상환액을 먼저 계산한 뒤, 실제 수령액(대출금에서 수수료를 차감한 금액)을 기준으로 월 내부수익률을 역산해 APR을 추정합니다.",
+      "금융기관의 APR 산정 방식은 비용 포함 범위와 일수 계산 방식에 따라 달라질 수 있으므로, 여러 대출 조건을 비교하는 참고값으로 활용하세요."
+    ],
+    checkpoints: [
+      "수수료가 높을수록 명목금리보다 APR이 높게 나옵니다.",
+      "대출 기간이 짧으면 같은 수수료도 APR에 더 크게 반영됩니다.",
+      "금융기관 공시 APR과는 비용 포함 기준이 다를 수 있습니다."
+    ],
+    faqs: [
+      { question: "APR과 명목금리는 무엇이 다른가요?", answer: "명목금리는 이자율만 보는 값이고, APR은 수수료와 기타 비용까지 포함해 실제 부담률을 연율로 환산한 값입니다." },
+      { question: "수수료가 0원이면 APR은 어떻게 되나요?", answer: "수수료가 없고 원리금균등 상환 기준이라면 APR은 명목금리와 거의 비슷하게 계산됩니다." }
+    ],
+    calculate(values) {
+      const months = Math.max(values.years * 12, 1);
+      const monthlyPayment = monthlyLoanPayment(values.principal, values.annualRate, values.years);
+      const fees = Math.max(values.originationFee + values.otherFees, 0);
+      const totalPayment = monthlyPayment * months;
+      const totalInterest = totalPayment - values.principal;
+      const apr = estimateApr(values.principal, monthlyPayment, months, fees);
+
+      return {
+        headline: formatPercent(apr, 2),
+        subline: `월 상환액 ${formatWon(monthlyPayment)} · 총 비용 ${formatWon(totalInterest + fees)}`,
+        rows: [
+          { label: "실질 연이율(APR)", value: formatPercent(apr, 2), tone: "strong" },
+          { label: "명목 연금리", value: formatPercent(values.annualRate, 2) },
+          { label: "월 상환액", value: formatWon(monthlyPayment), tone: "strong" },
+          { label: "총 이자", value: formatWon(totalInterest) },
+          { label: "수수료 합계", value: formatWon(fees), tone: "strong" },
+          { label: "총 대출 비용", value: formatWon(totalInterest + fees), tone: "strong" }
+        ],
+        chart: [
+          { name: "원금", value: values.principal },
+          { name: "이자", value: totalInterest },
+          { name: "수수료", value: fees }
+        ]
+      };
+    }
+  },
+  {
+    slug: "inflation-calculator",
+    title: "인플레이션 계산기",
+    description: "현재 금액, 물가상승률, 기간을 입력해 미래 필요 금액과 구매력 변화를 계산합니다.",
+    category: "금융",
+    keywords: ["인플레이션 계산기", "물가상승률 계산", "화폐 가치 계산", "구매력 계산", "미래 가격 계산"],
+    badge: "구매력 변화",
+    audience: "생활비와 목표자금을 장기 계획하는 사용자, 물가 상승 영향을 확인하려는 사용자",
+    fields: [
+      { name: "currentAmount", label: "현재 금액", type: "number", unit: "원", min: 1000, max: 10000000000, step: 10000, defaultValue: 1000000 },
+      { name: "inflationRate", label: "연 물가상승률", type: "number", unit: "%", min: -10, max: 30, step: 0.1, defaultValue: 3 },
+      { name: "years", label: "기간", type: "number", unit: "년", min: 1, max: 100, step: 1, defaultValue: 10 }
+    ],
+    guideTitle: "인플레이션 계산 기준",
+    guide: [
+      "인플레이션은 시간이 지나며 같은 돈으로 살 수 있는 상품과 서비스의 양이 줄어드는 현상입니다.",
+      "이 계산기는 현재 금액에 연 물가상승률을 복리로 적용해 미래에 같은 구매력을 유지하려면 얼마가 필요한지 추정합니다.",
+      "실제 물가상승률은 품목, 지역, 기간에 따라 달라지므로 장기 예산과 목표자금 계획의 민감도 분석용으로 활용하세요."
+    ],
+    checkpoints: [
+      "장기 계획에서는 작은 물가상승률 차이도 미래 금액을 크게 바꿉니다.",
+      "교육비, 의료비, 주거비처럼 특정 품목은 평균 물가보다 빠르게 오를 수 있습니다.",
+      "마이너스 물가상승률을 입력하면 디플레이션 상황도 가정할 수 있습니다."
+    ],
+    faqs: [
+      { question: "현재 100만원이 10년 뒤 얼마의 가치가 되나요?", answer: "물가상승률에 따라 달라집니다. 예를 들어 연 3%라면 10년 뒤 같은 구매력에는 약 134만원이 필요합니다." },
+      { question: "미래 구매력은 어떻게 계산하나요?", answer: "현재 금액을 물가상승률로 할인해 미래 시점의 실질 구매력으로 환산합니다." }
+    ],
+    calculate(values) {
+      const factor = (1 + values.inflationRate / 100) ** values.years;
+      const futureCost = values.currentAmount * factor;
+      const purchasingPower = factor === 0 ? 0 : values.currentAmount / factor;
+      const lostPower = values.currentAmount - purchasingPower;
+
+      return {
+        headline: formatWon(futureCost),
+        subline: `${values.years.toLocaleString("ko-KR")}년 뒤 같은 구매력에 필요한 금액`,
+        rows: [
+          { label: "현재 금액", value: formatWon(values.currentAmount) },
+          { label: "연 물가상승률", value: formatPercent(values.inflationRate, 1), tone: "strong" },
+          { label: "미래 필요 금액", value: formatWon(futureCost), tone: "strong" },
+          { label: "미래 시점 구매력", value: formatWon(purchasingPower), tone: "strong" },
+          { label: "구매력 감소분", value: formatWon(lostPower) }
+        ],
+        chart: [
+          { name: "현재금액", value: values.currentAmount },
+          { name: "미래필요", value: futureCost },
+          { name: "실질구매력", value: purchasingPower }
+        ]
+      };
+    }
+  },
+  {
+    slug: "roi-calculator",
+    title: "ROI 계산기",
+    description: "투자금, 회수금, 추가 수익과 비용을 입력해 투자수익률과 연환산 수익률을 계산합니다.",
+    category: "금융",
+    keywords: ["ROI 계산기", "투자수익률 계산기", "수익률 계산", "연환산 수익률", "투자 성과 분석"],
+    badge: "투자수익률",
+    audience: "투자 성과를 비교하는 사용자, 프로젝트 수익성을 빠르게 확인하려는 사용자",
+    fields: [
+      { name: "initialInvestment", label: "초기 투자금", type: "number", unit: "원", min: 0, max: 10000000000, step: 100000, defaultValue: 10000000 },
+      { name: "endingValue", label: "최종 평가액", type: "number", unit: "원", min: 0, max: 10000000000, step: 100000, defaultValue: 13000000 },
+      { name: "additionalIncome", label: "배당·임대 등 추가 수익", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 500000 },
+      { name: "totalCosts", label: "수수료·세금·유지비", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 200000 },
+      { name: "years", label: "투자 기간", type: "number", unit: "년", min: 0.1, max: 50, step: 0.1, defaultValue: 2 }
+    ],
+    guideTitle: "ROI 계산 기준",
+    guide: [
+      "ROI는 투자금 대비 순이익 비율을 뜻합니다. 최종 평가액과 추가 수익을 더하고, 초기 투자금과 비용을 뺀 순이익을 초기 투자금으로 나눠 계산합니다.",
+      "투자 기간이 서로 다르면 단순 ROI만으로 비교하기 어렵기 때문에, 이 계산기는 연환산 수익률도 함께 보여줍니다.",
+      "주식, 부동산, 사업 프로젝트처럼 성격이 다른 투자도 같은 틀로 비교할 수 있지만 위험도와 현금흐름 시점은 별도로 봐야 합니다."
+    ],
+    checkpoints: [
+      "세금과 수수료를 빼야 실제 ROI에 가까워집니다.",
+      "기간이 다른 투자는 연환산 수익률을 함께 비교하세요.",
+      "ROI가 높아도 변동성·유동성·손실 가능성은 별도 판단이 필요합니다."
+    ],
+    faqs: [
+      { question: "ROI는 어떻게 계산하나요?", answer: "순이익을 초기 투자금으로 나눈 뒤 100을 곱해 계산합니다." },
+      { question: "연환산 수익률은 왜 필요한가요?", answer: "투자 기간이 서로 다를 때 1년 기준 성과로 바꿔 비교하기 위해 필요합니다." }
+    ],
+    calculate(values) {
+      const proceeds = values.endingValue + values.additionalIncome;
+      const netProfit = proceeds - values.initialInvestment - values.totalCosts;
+      const roi = values.initialInvestment > 0 ? netProfit / values.initialInvestment * 100 : 0;
+      const finalMultiple = values.initialInvestment > 0 ? (values.initialInvestment + netProfit) / values.initialInvestment : 0;
+      const annualized = finalMultiple > 0 ? (finalMultiple ** (1 / values.years) - 1) * 100 : -100;
+
+      return {
+        headline: formatPercent(roi, 2),
+        subline: `순이익 ${formatWon(netProfit)} · 연환산 ${formatPercent(annualized, 2)}`,
+        rows: [
+          { label: "투자수익률(ROI)", value: formatPercent(roi, 2), tone: "strong" },
+          { label: "연환산 수익률", value: formatPercent(annualized, 2), tone: "strong" },
+          { label: "총 회수금", value: formatWon(proceeds) },
+          { label: "비용 합계", value: formatWon(values.totalCosts) },
+          { label: "순이익", value: formatWon(netProfit), tone: "strong" }
+        ],
+        chart: [
+          { name: "투자금", value: values.initialInvestment },
+          { name: "순이익", value: Math.max(netProfit, 0) },
+          { name: "비용", value: values.totalCosts }
+        ]
+      };
+    }
+  },
+  {
+    slug: "present-value",
+    title: "현재가치 계산기",
+    description: "미래 금액과 매년 받을 현금흐름을 할인율로 환산해 현재가치를 계산합니다.",
+    category: "금융",
+    keywords: ["현재가치 계산기", "PV 계산기", "할인율 계산", "미래 현금흐름 현재가치", "투자 타당성"],
+    badge: "PV 할인",
+    audience: "미래 현금흐름의 현재 가치를 비교하는 사용자, 투자 타당성을 검토하는 사용자",
+    fields: [
+      { name: "futureValue", label: "미래 일시금", type: "number", unit: "원", min: 0, max: 10000000000, step: 100000, defaultValue: 100000000 },
+      { name: "annualCashFlow", label: "연 현금흐름", type: "number", unit: "원", min: 0, max: 1000000000, step: 10000, defaultValue: 5000000 },
+      { name: "discountRate", label: "할인율", type: "number", unit: "%", min: 0, max: 50, step: 0.1, defaultValue: 5 },
+      { name: "years", label: "기간", type: "number", unit: "년", min: 1, max: 100, step: 1, defaultValue: 10 }
+    ],
+    guideTitle: "현재가치 계산 기준",
+    guide: [
+      "현재가치는 미래에 받을 돈을 오늘의 가치로 환산한 금액입니다. 같은 1억원이라도 10년 뒤의 1억원은 할인율을 적용하면 현재 가치가 더 낮습니다.",
+      "이 계산기는 미래 일시금의 현재가치와 매년 동일하게 받는 현금흐름의 현재가치를 합산합니다.",
+      "할인율은 요구수익률, 자본비용, 인플레이션 기대 등을 반영해 사용자가 직접 정해야 하며, 할인율이 높을수록 현재가치는 낮아집니다."
+    ],
+    checkpoints: [
+      "할인율은 투자 판단에서 가장 민감한 입력값입니다.",
+      "매년 받는 현금흐름은 연말 수령을 가정합니다.",
+      "위험이 큰 현금흐름일수록 더 높은 할인율을 적용해 보수적으로 볼 수 있습니다."
+    ],
+    faqs: [
+      { question: "현재가치는 어디에 쓰나요?", answer: "투자안 비교, 임대수익 평가, 미래 수령액의 현재 가치 판단 등에 활용합니다." },
+      { question: "할인율은 어떻게 정하나요?", answer: "예상 수익률, 대체 투자 수익률, 자본비용, 위험 수준을 고려해 정합니다." }
+    ],
+    calculate(values) {
+      const rate = values.discountRate / 100;
+      const lumpSumPv = rate === 0 ? values.futureValue : values.futureValue / ((1 + rate) ** values.years);
+      const annuityPv = rate === 0
+        ? values.annualCashFlow * values.years
+        : values.annualCashFlow * (1 - (1 + rate) ** -values.years) / rate;
+      const totalPv = lumpSumPv + annuityPv;
+      const nominalTotal = values.futureValue + values.annualCashFlow * values.years;
+
+      return {
+        headline: formatWon(totalPv),
+        subline: `명목 합계 ${formatWon(nominalTotal)} · 할인율 ${formatPercent(values.discountRate, 1)}`,
+        rows: [
+          { label: "현재가치 합계", value: formatWon(totalPv), tone: "strong" },
+          { label: "미래 일시금 현재가치", value: formatWon(lumpSumPv), tone: "strong" },
+          { label: "연 현금흐름 현재가치", value: formatWon(annuityPv), tone: "strong" },
+          { label: "명목 수령 합계", value: formatWon(nominalTotal) },
+          { label: "할인 효과", value: formatWon(nominalTotal - totalPv) }
+        ],
+        chart: [
+          { name: "일시금PV", value: lumpSumPv },
+          { name: "현금흐름PV", value: annuityPv },
+          { name: "할인효과", value: Math.max(nominalTotal - totalPv, 0) }
         ]
       };
     }
