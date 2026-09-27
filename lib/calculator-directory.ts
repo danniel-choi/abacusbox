@@ -94,6 +94,8 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "roi-calculator": "investment",
   "present-value": "investment",
   bmi: "life",
+  "bmr-calculator": "life",
+  "ideal-weight": "life",
   "calorie-calculator": "life",
   "daily-intake": "life",
   "korean-age": "life",
@@ -105,6 +107,7 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "internet-speed-test": "life",
   "pyeong-converter": "life",
   "random-number": "life",
+  "password-generator": "life",
   percent: "life",
   "discount-rate": "life",
   "distance-calculator": "life",
@@ -129,6 +132,7 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "four-function-calculator": "math",
   "math-notes": "math",
   "matrix-calculator": "math",
+  "standard-deviation": "math",
   "geometry-tool": "math",
   "three-d-calculator": "math",
   "web-calculator": "math"
@@ -160,7 +164,10 @@ export function getFeaturedCalculators() {
     "adsense-revenue",
     "youtube-ad-revenue",
     "calorie-calculator",
+    "bmr-calculator",
+    "ideal-weight",
     "daily-intake",
+    "password-generator",
     "date-diff",
     "vat"
   ];
@@ -179,7 +186,9 @@ export function getPopularCalculators() {
     "vat",
     "exchange-rate",
     "calorie-calculator",
+    "bmr-calculator",
     "daily-intake",
+    "password-generator",
     "lotto-generator",
     "crypto-investment-growth",
     "stock-average-price",
@@ -194,6 +203,10 @@ export function getPopularCalculators() {
 export function getRecentCalculators() {
   const recentSlugs: CalculatorSlug[] = [
     "distance-calculator",
+    "password-generator",
+    "standard-deviation",
+    "bmr-calculator",
+    "ideal-weight",
     "calorie-calculator",
     "daily-intake",
     "lotto-generator",

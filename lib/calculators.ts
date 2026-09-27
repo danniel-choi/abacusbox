@@ -50,6 +50,10 @@ export type CalculatorSlug =
   | "internet-speed-test"
   | "pyeong-converter"
   | "random-number"
+  | "password-generator"
+  | "standard-deviation"
+  | "bmr-calculator"
+  | "ideal-weight"
   | "loan-prepayment"
   | "refinance-calculator"
   | "percent"
@@ -372,6 +376,38 @@ function generateRandomIntegers(min: number, max: number, count: number, unique:
   }
 
   return Array.from({ length: count }, () => min + Math.floor(random() * range));
+}
+
+function generatePassword(length: number, includeUpper: boolean, includeLower: boolean, includeNumbers: boolean, includeSymbols: boolean, seed: number) {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghijkmnopqrstuvwxyz";
+  const numbers = "23456789";
+  const symbols = "!@#$%^&*_-+=?";
+  const pools = [
+    includeUpper ? upper : "",
+    includeLower ? lower : "",
+    includeNumbers ? numbers : "",
+    includeSymbols ? symbols : ""
+  ].filter(Boolean);
+  const fallbackPools = pools.length ? pools : [upper, lower, numbers];
+  const all = fallbackPools.join("");
+  const random = createSeededRandom(seed);
+  const chars: string[] = [];
+
+  fallbackPools.forEach((pool) => {
+    chars.push(pool[Math.floor(random() * pool.length)]);
+  });
+
+  while (chars.length < length) {
+    chars.push(all[Math.floor(random() * all.length)]);
+  }
+
+  for (let index = chars.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [chars[index], chars[swapIndex]] = [chars[swapIndex], chars[index]];
+  }
+
+  return chars.slice(0, length).join("");
 }
 
 function progressiveTax(value: number, brackets: { limit: number; rate: number }[]) {
@@ -1892,6 +1928,138 @@ export const calculators: CalculatorConfig[] = [
           { name: "현재체중", value: values.weightKg },
           { name: "표준체중", value: standardWeight },
           { name: "BMI×2", value: bmi * 2 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "bmr-calculator",
+    title: "BMR 기초대사량 계산기",
+    description: "성별, 나이, 키, 체중으로 기초대사량(BMR)과 활동 수준별 유지 칼로리를 계산합니다.",
+    category: "생활",
+    keywords: ["BMR 계산기", "기초대사량 계산기", "유지 칼로리", "활동대사량", "하루 필요 칼로리"],
+    badge: "기초대사량",
+    audience: "식단 관리 사용자, 운동 계획 사용자, 하루 유지 칼로리가 궁금한 사용자",
+    fields: [
+      {
+        name: "gender",
+        label: "성별",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "남성", value: 1 },
+          { label: "여성", value: 0 }
+        ]
+      },
+      { name: "age", label: "나이", type: "number", unit: "세", min: 10, max: 100, step: 1, defaultValue: 35 },
+      { name: "heightCm", label: "키", type: "number", unit: "cm", min: 100, max: 230, step: 1, defaultValue: 170 },
+      { name: "weightKg", label: "체중", type: "number", unit: "kg", min: 25, max: 250, step: 0.1, defaultValue: 70 }
+    ],
+    guideTitle: "BMR 계산 기준",
+    guide: [
+      "BMR은 완전한 안정 상태에서 생명 유지에 필요한 최소 에너지입니다.",
+      "이 계산기는 Mifflin-St Jeor 공식을 사용해 성별, 나이, 키, 체중 기준의 기초대사량을 추정합니다.",
+      "실제 하루 필요 칼로리는 BMR에 활동 수준을 곱해 추정해야 하므로 정주, 가벼운 활동, 보통 활동, 높은 활동 기준의 유지 칼로리를 함께 보여줍니다."
+    ],
+    checkpoints: [
+      "BMR은 하루 섭취 목표가 아니라 최소 필요 에너지에 가까운 참고값입니다.",
+      "운동량이 많을수록 유지 칼로리는 BMR보다 크게 높아집니다.",
+      "체성분, 질환, 약물, 수면 상태에 따라 실제 에너지 소비는 달라질 수 있습니다."
+    ],
+    faqs: [
+      { question: "BMR과 TDEE는 무엇이 다른가요?", answer: "BMR은 안정 상태의 최소 에너지이고, TDEE는 활동량까지 반영한 하루 유지 칼로리입니다." },
+      { question: "다이어트할 때 BMR만큼 먹으면 되나요?", answer: "일반적으로 BMR은 최소 기준에 가깝기 때문에 장기간 BMR 이하로 섭취하는 방식은 권장하기 어렵습니다." }
+    ],
+    calculate(values) {
+      const bmr = values.gender === 1
+        ? 10 * values.weightKg + 6.25 * values.heightCm - 5 * values.age + 5
+        : 10 * values.weightKg + 6.25 * values.heightCm - 5 * values.age - 161;
+      const sedentary = bmr * 1.2;
+      const light = bmr * 1.375;
+      const moderate = bmr * 1.55;
+      const active = bmr * 1.725;
+
+      return {
+        headline: formatKcal(bmr),
+        subline: `보통 활동 유지 칼로리 ${formatKcal(moderate)}`,
+        rows: [
+          { label: "기초대사량(BMR)", value: formatKcal(bmr), tone: "strong" },
+          { label: "정주 생활 유지 칼로리", value: formatKcal(sedentary) },
+          { label: "가벼운 활동 유지 칼로리", value: formatKcal(light) },
+          { label: "보통 활동 유지 칼로리", value: formatKcal(moderate), tone: "strong" },
+          { label: "높은 활동 유지 칼로리", value: formatKcal(active) }
+        ],
+        chart: [
+          { name: "BMR", value: bmr },
+          { name: "가벼운활동", value: light },
+          { name: "보통활동", value: moderate },
+          { name: "높은활동", value: active }
+        ]
+      };
+    }
+  },
+  {
+    slug: "ideal-weight",
+    title: "이상체중 계산기",
+    description: "키와 성별을 기준으로 BMI 권장 범위, 표준체중, Hamwi·Devine 방식의 이상체중을 계산합니다.",
+    category: "생활",
+    keywords: ["이상체중 계산기", "표준체중 계산기", "적정 체중", "건강 체중 범위", "IBW 계산기"],
+    badge: "적정 체중 범위",
+    audience: "체중 관리 사용자, 건강검진 전후 체중 범위를 확인하려는 사용자",
+    fields: [
+      {
+        name: "gender",
+        label: "성별",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "남성", value: 1 },
+          { label: "여성", value: 0 }
+        ]
+      },
+      { name: "heightCm", label: "키", type: "number", unit: "cm", min: 120, max: 230, step: 1, defaultValue: 170 },
+      { name: "currentWeightKg", label: "현재 체중", type: "number", unit: "kg", min: 25, max: 250, step: 0.1, defaultValue: 70 }
+    ],
+    guideTitle: "이상체중 계산 기준",
+    guide: [
+      "이상체중은 하나의 정답이라기보다 키와 성별 기준으로 참고할 수 있는 체중 범위입니다.",
+      "이 계산기는 BMI 18.5~23 범위를 건강 체중 참고 범위로 보고, BMI 22 기준 표준체중을 함께 보여줍니다.",
+      "Hamwi와 Devine 방식은 성별과 키를 기준으로 한 오래된 이상체중 공식입니다. 근육량, 체지방률, 연령을 반영하지 않으므로 참고값으로 해석하세요."
+    ],
+    checkpoints: [
+      "키가 같아도 근육량과 체지방률에 따라 적정 체중은 달라질 수 있습니다.",
+      "BMI 범위와 공식 기반 이상체중을 함께 비교하는 것이 좋습니다.",
+      "성장기, 임신, 질환이 있는 경우 일반 공식보다 전문 기준을 우선해야 합니다."
+    ],
+    faqs: [
+      { question: "표준체중과 이상체중은 같은 뜻인가요?", answer: "비슷하게 쓰이지만 표준체중은 보통 BMI 기준, 이상체중은 여러 공식 기반 참고값을 뜻하는 경우가 많습니다." },
+      { question: "현재 체중이 범위 밖이면 문제가 있나요?", answer: "반드시 그렇지는 않습니다. 근육량, 체지방률, 건강 상태를 함께 봐야 합니다." }
+    ],
+    calculate(values) {
+      const heightM = values.heightCm / 100;
+      const low = heightM * heightM * 18.5;
+      const high = heightM * heightM * 23;
+      const standard = heightM * heightM * 22;
+      const inchesOverFiveFeet = Math.max(values.heightCm / 2.54 - 60, 0);
+      const hamwi = values.gender === 1 ? 48 + inchesOverFiveFeet * 2.7 : 45.5 + inchesOverFiveFeet * 2.2;
+      const devine = values.gender === 1 ? 50 + inchesOverFiveFeet * 2.3 : 45.5 + inchesOverFiveFeet * 2.3;
+      const gap = values.currentWeightKg - standard;
+
+      return {
+        headline: `${standard.toFixed(1)}kg`,
+        subline: `BMI 권장 범위 ${low.toFixed(1)}kg ~ ${high.toFixed(1)}kg`,
+        rows: [
+          { label: "BMI 22 표준체중", value: `${standard.toFixed(1)}kg`, tone: "strong" },
+          { label: "건강 체중 범위", value: `${low.toFixed(1)}kg ~ ${high.toFixed(1)}kg`, tone: "strong" },
+          { label: "Hamwi 이상체중", value: `${hamwi.toFixed(1)}kg` },
+          { label: "Devine 이상체중", value: `${devine.toFixed(1)}kg` },
+          { label: "현재 체중과 표준체중 차이", value: `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}kg` }
+        ],
+        chart: [
+          { name: "현재", value: values.currentWeightKg },
+          { name: "표준", value: standard },
+          { name: "하한", value: low },
+          { name: "상한", value: high }
         ]
       };
     }
@@ -3523,6 +3691,185 @@ export const calculators: CalculatorConfig[] = [
           { name: "기존총액", value: oldTotal },
           { name: "신규총액", value: newTotal },
           { name: "절감", value: Math.max(saving, 0) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "password-generator",
+    title: "비밀번호 생성기",
+    description: "길이와 문자 종류를 선택해 보안에 쓰기 좋은 무작위 비밀번호를 생성합니다.",
+    category: "생활",
+    keywords: ["비밀번호 생성기", "랜덤 비밀번호", "강력한 비밀번호", "패스워드 생성", "보안 비밀번호"],
+    badge: "랜덤 보안 문자열",
+    audience: "새 계정 비밀번호가 필요한 사용자, 임시 비밀번호를 빠르게 만들려는 사용자",
+    actionLabel: "비밀번호 다시 생성",
+    fields: [
+      { name: "length", label: "길이", type: "number", unit: "자", min: 8, max: 64, step: 1, defaultValue: 16 },
+      {
+        name: "includeUpper",
+        label: "대문자 포함",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "포함", value: 1 },
+          { label: "제외", value: 0 }
+        ]
+      },
+      {
+        name: "includeLower",
+        label: "소문자 포함",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "포함", value: 1 },
+          { label: "제외", value: 0 }
+        ]
+      },
+      {
+        name: "includeNumbers",
+        label: "숫자 포함",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "포함", value: 1 },
+          { label: "제외", value: 0 }
+        ]
+      },
+      {
+        name: "includeSymbols",
+        label: "특수문자 포함",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "포함", value: 1 },
+          { label: "제외", value: 0 }
+        ]
+      }
+    ],
+    guideTitle: "비밀번호 생성 기준",
+    guide: [
+      "이 도구는 선택한 문자 종류를 조합해 무작위 비밀번호를 생성합니다. 혼동하기 쉬운 일부 문자(0, 1, O, l 등)는 기본 문자풀에서 제외했습니다.",
+      "길이가 길고 문자 종류가 다양할수록 무차별 대입 공격에 더 강합니다. 일반적인 계정에는 14자 이상, 중요한 계정에는 20자 이상을 권장합니다.",
+      "생성된 비밀번호는 서버로 저장하지 않는 클라이언트 계산 결과로 활용되며, 실제 사용 시에는 비밀번호 관리자에 안전하게 보관하세요."
+    ],
+    checkpoints: [
+      "각 사이트마다 서로 다른 비밀번호를 쓰는 것이 가장 중요합니다.",
+      "특수문자를 허용하지 않는 서비스라면 특수문자 제외 옵션을 사용하세요.",
+      "생성 후 다시 생성 버튼을 누르면 새 조합을 확인할 수 있습니다."
+    ],
+    faqs: [
+      { question: "생성된 비밀번호가 저장되나요?", answer: "이 계산기 결과는 사용자의 브라우저에서 표시되는 값이며, 서버에 비밀번호를 저장하는 기능은 없습니다." },
+      { question: "어떤 길이가 안전한가요?", answer: "일반 계정은 14자 이상, 금융·업무 계정은 20자 이상처럼 길게 설정하는 편이 좋습니다." }
+    ],
+    calculate(values, context) {
+      const length = Math.min(Math.max(Math.floor(values.length || 16), 8), 64);
+      const seed =
+        20260927 +
+        length * 131 +
+        (values.includeUpper ? 17 : 0) +
+        (values.includeLower ? 31 : 0) +
+        (values.includeNumbers ? 47 : 0) +
+        (values.includeSymbols ? 61 : 0) +
+        (context?.refreshKey || 0) * 8191;
+      const password = generatePassword(
+        length,
+        values.includeUpper === 1,
+        values.includeLower === 1,
+        values.includeNumbers === 1,
+        values.includeSymbols === 1,
+        seed
+      );
+      const enabledTypes = [values.includeUpper, values.includeLower, values.includeNumbers, values.includeSymbols].filter((value) => value === 1).length || 3;
+      const poolSize =
+        (values.includeUpper === 1 ? 24 : 0) +
+        (values.includeLower === 1 ? 24 : 0) +
+        (values.includeNumbers === 1 ? 8 : 0) +
+        (values.includeSymbols === 1 ? 13 : 0);
+      const entropy = poolSize > 0 ? Math.log2(poolSize ** length) : 0;
+
+      return {
+        headline: password,
+        subline: `${length}자 · 문자 종류 ${enabledTypes}개 · 추정 엔트로피 ${entropy.toFixed(0)}bit`,
+        rows: [
+          { label: "생성된 비밀번호", value: password, tone: "strong" },
+          { label: "길이", value: `${length}자` },
+          { label: "문자 종류", value: `${enabledTypes}개` },
+          { label: "문자풀 크기", value: `${poolSize.toLocaleString("ko-KR")}개` },
+          { label: "추정 엔트로피", value: `${entropy.toFixed(0)}bit`, tone: "strong" }
+        ],
+        chart: [
+          { name: "길이", value: length },
+          { name: "문자종류", value: enabledTypes },
+          { name: "엔트로피", value: entropy }
+        ]
+      };
+    }
+  },
+  {
+    slug: "standard-deviation",
+    title: "표준편차 계산기",
+    description: "여러 숫자의 평균, 분산, 모집단 표준편차, 표본 표준편차를 계산합니다.",
+    category: "수학",
+    keywords: ["표준편차 계산기", "분산 계산기", "평균 계산", "통계 계산기", "표본 표준편차"],
+    badge: "기초 통계",
+    audience: "통계 학습자, 데이터 분포를 빠르게 확인하려는 사용자",
+    fields: [
+      { name: "x1", label: "값 1", type: "number", step: 0.01, defaultValue: 12 },
+      { name: "x2", label: "값 2", type: "number", step: 0.01, defaultValue: 15 },
+      { name: "x3", label: "값 3", type: "number", step: 0.01, defaultValue: 18 },
+      { name: "x4", label: "값 4", type: "number", step: 0.01, defaultValue: 20 },
+      { name: "x5", label: "값 5", type: "number", step: 0.01, defaultValue: 22 },
+      { name: "x6", label: "값 6", type: "number", step: 0.01, defaultValue: 25 },
+      { name: "x7", label: "값 7", type: "number", step: 0.01, defaultValue: 0, help: "사용하지 않는 값은 0으로 두고 아래 사용 개수에서 제외하세요." },
+      { name: "x8", label: "값 8", type: "number", step: 0.01, defaultValue: 0 },
+      { name: "count", label: "사용할 값 개수", type: "number", unit: "개", min: 2, max: 8, step: 1, defaultValue: 6 }
+    ],
+    guideTitle: "표준편차 계산 기준",
+    guide: [
+      "표준편차는 데이터가 평균에서 얼마나 퍼져 있는지 보여주는 대표적인 통계 지표입니다.",
+      "모집단 표준편차는 전체 데이터를 모두 알고 있다고 가정하고 n으로 나누며, 표본 표준편차는 일부 표본으로 전체를 추정하기 위해 n-1로 나눕니다.",
+      "값 1부터 사용 개수만큼만 계산에 포함합니다. 여러 데이터를 빠르게 비교할 때 평균과 표준편차를 함께 확인하세요."
+    ],
+    checkpoints: [
+      "표준편차가 클수록 값들이 평균에서 더 넓게 퍼져 있습니다.",
+      "전체 데이터라면 모집단 표준편차, 표본 데이터라면 표본 표준편차를 주로 봅니다.",
+      "극단값이 있으면 평균과 표준편차가 크게 흔들릴 수 있습니다."
+    ],
+    faqs: [
+      { question: "모집단 표준편차와 표본 표준편차는 무엇이 다른가요?", answer: "모집단은 n으로 나누고, 표본은 n-1로 나누어 전체 집단의 분산을 더 보수적으로 추정합니다." },
+      { question: "표준편차가 0이면 무슨 뜻인가요?", answer: "모든 값이 평균과 같아 데이터가 전혀 흩어져 있지 않다는 뜻입니다." }
+    ],
+    calculate(values) {
+      const raw = [values.x1, values.x2, values.x3, values.x4, values.x5, values.x6, values.x7, values.x8];
+      const count = Math.min(Math.max(Math.floor(values.count || 2), 2), raw.length);
+      const items = raw.slice(0, count).map((value) => Number.isFinite(value) ? value : 0);
+      const mean = items.reduce((sum, value) => sum + value, 0) / count;
+      const squaredDiffs = items.map((value) => (value - mean) ** 2);
+      const populationVariance = squaredDiffs.reduce((sum, value) => sum + value, 0) / count;
+      const sampleVariance = count > 1 ? squaredDiffs.reduce((sum, value) => sum + value, 0) / (count - 1) : 0;
+      const populationSd = Math.sqrt(populationVariance);
+      const sampleSd = Math.sqrt(sampleVariance);
+      const min = Math.min(...items);
+      const max = Math.max(...items);
+
+      return {
+        headline: sampleSd.toFixed(3),
+        subline: `평균 ${mean.toFixed(3)} · 표본 표준편차`,
+        rows: [
+          { label: "사용한 값 개수", value: `${count}개` },
+          { label: "평균", value: mean.toFixed(3), tone: "strong" },
+          { label: "모집단 분산", value: populationVariance.toFixed(3) },
+          { label: "모집단 표준편차", value: populationSd.toFixed(3), tone: "strong" },
+          { label: "표본 분산", value: sampleVariance.toFixed(3) },
+          { label: "표본 표준편차", value: sampleSd.toFixed(3), tone: "strong" },
+          { label: "최솟값~최댓값", value: `${min.toLocaleString("ko-KR")} ~ ${max.toLocaleString("ko-KR")}` }
+        ],
+        chart: [
+          { name: "평균", value: Math.abs(mean) },
+          { name: "모집단SD", value: populationSd },
+          { name: "표본SD", value: sampleSd },
+          { name: "범위", value: max - min }
         ]
       };
     }
