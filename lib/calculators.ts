@@ -52,6 +52,7 @@ export type CalculatorSlug =
   | "random-number"
   | "text-counter"
   | "tip-calculator"
+  | "poker-equity-calculator"
   | "password-generator"
   | "standard-deviation"
   | "bmr-calculator"
@@ -4106,6 +4107,39 @@ export const calculators: CalculatorConfig[] = [
           { name: "팁", value: tip },
           { name: "올림차액", value: extraFromRounding }
         ]
+      };
+    }
+  },
+  {
+    slug: "poker-equity-calculator",
+    title: "포커 승률 계산기",
+    description: "텍사스 홀덤 홀카드와 보드 카드를 선택해 플레이어별 승률, 타이율, 에퀴티를 몬테카를로 방식으로 계산합니다.",
+    category: "생활",
+    keywords: ["포커 승률 계산기", "포커 에퀴티", "텍사스 홀덤 승률", "홀덤 계산기", "포커 핸드 확률"],
+    badge: "홀덤 에퀴티",
+    audience: "텍사스 홀덤 핸드 승률과 콜 판단용 에퀴티를 확인하는 사용자",
+    fields: [],
+    guideTitle: "포커 승률 계산 기준",
+    guide: [
+      "각 플레이어의 홀카드 2장과 선택한 보드 카드를 기준으로 남은 카드를 샘플링해 승률을 추정합니다.",
+      "보드는 프리플랍 0장, 플랍 3장, 턴 4장, 리버 5장 형태로 지정하는 것을 권장합니다.",
+      "결과는 브라우저에서 계산되며 입력한 카드 정보가 서버로 전송되지 않습니다."
+    ],
+    checkpoints: [
+      "같은 카드는 플레이어 핸드나 보드에 중복으로 사용할 수 없습니다.",
+      "샘플 수가 많을수록 결과가 안정적이지만 계산 시간이 늘어납니다.",
+      "타이 발생 시 해당 팟을 나눈 값까지 포함해 에퀴티를 계산합니다."
+    ],
+    faqs: [
+      { question: "정확한 전체 조합 계산인가요?", answer: "아니요. 빠른 사용성을 위해 몬테카를로 샘플링으로 근사 계산합니다." },
+      { question: "몇 명까지 비교할 수 있나요?", answer: "2명부터 6명까지 플레이어를 추가해 멀티웨이 승률을 비교할 수 있습니다." }
+    ],
+    calculate() {
+      return {
+        headline: "카드 선택",
+        subline: "전용 포커 패널에서 홀카드와 보드를 선택하세요.",
+        rows: [{ label: "지원", value: "2~6명, 보드 0~5장, 중복 카드 방지, 승률·타이율·에퀴티", tone: "strong" }],
+        chart: []
       };
     }
   },

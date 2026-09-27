@@ -269,6 +269,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     return <TextCounter title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
+  if (activeCalculator.slug === "poker-equity-calculator") {
+    return <PokerEquityCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
       <form className="min-w-0 overflow-hidden rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
@@ -3146,6 +3150,295 @@ function TextCounter({ title, checkpoints }: { title: string; checkpoints: strin
       </section>
     </LifeToolShell>
   );
+}
+
+type PokerCard = `${string}${string}`;
+type PokerSlot = { area: "player" | "board"; playerIndex?: number; cardIndex: number };
+
+const pokerRanks = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"];
+const pokerSuits = [
+  { id: "s", label: "♠", color: "text-slate-900" },
+  { id: "h", label: "♥", color: "text-red-600" },
+  { id: "d", label: "♦", color: "text-blue-600" },
+  { id: "c", label: "♣", color: "text-emerald-700" }
+];
+const pokerDeck = pokerRanks.flatMap((rank) => pokerSuits.map((suit) => `${rank}${suit.id}` as PokerCard));
+const rankValueMap = new Map(pokerRanks.map((rank, index) => [rank, 14 - index]));
+
+function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoints: string[] }) {
+  const [players, setPlayers] = useState<(PokerCard | null)[][]>([
+    ["A" + "s" as PokerCard, "K" + "s" as PokerCard],
+    ["Q" + "h" as PokerCard, "Q" + "d" as PokerCard]
+  ]);
+  const [board, setBoard] = useState<(PokerCard | null)[]>([null, null, null, null, null]);
+  const [activeSlot, setActiveSlot] = useState<PokerSlot>({ area: "player", playerIndex: 0, cardIndex: 0 });
+  const [samples, setSamples] = useState(2500);
+
+  const selectedCards = [...players.flat(), ...board].filter(Boolean) as PokerCard[];
+  const duplicateCards = selectedCards.filter((card, index) => selectedCards.indexOf(card) !== index);
+  const completePlayers = players.filter((hand) => hand[0] && hand[1]).length;
+  const knownBoardCards = board.filter(Boolean).length;
+  const canCalculate = duplicateCards.length === 0 && completePlayers >= 2 && (knownBoardCards === 0 || knownBoardCards >= 3);
+  const result = useMemo(
+    () => canCalculate ? calculatePokerEquity(players, board, samples) : null,
+    [board, canCalculate, players, samples]
+  );
+
+  function setCard(card: PokerCard | null) {
+    if (activeSlot.area === "board") {
+      setBoard((current) => current.map((item, index) => index === activeSlot.cardIndex ? card : item));
+      return;
+    }
+    setPlayers((current) => current.map((hand, playerIndex) => (
+      playerIndex === activeSlot.playerIndex ? hand.map((item, cardIndex) => cardIndex === activeSlot.cardIndex ? card : item) : hand
+    )));
+  }
+
+  function addPlayer() {
+    setPlayers((current) => current.length >= 6 ? current : [...current, [null, null]]);
+  }
+
+  function removePlayer(index: number) {
+    setPlayers((current) => current.length <= 2 ? current : current.filter((_, playerIndex) => playerIndex !== index));
+    setActiveSlot({ area: "player", playerIndex: 0, cardIndex: 0 });
+  }
+
+  function applyExample() {
+    setPlayers([
+      ["A" + "s" as PokerCard, "K" + "s" as PokerCard],
+      ["Q" + "h" as PokerCard, "Q" + "d" as PokerCard]
+    ]);
+    setBoard([null, null, null, null, null]);
+    setActiveSlot({ area: "player", playerIndex: 0, cardIndex: 0 });
+  }
+
+  return (
+    <LifeToolShell title={title} heading="홀덤 핸드와 보드의 에퀴티를 비교하세요" checkpoints={checkpoints}>
+      <section className="rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-extrabold text-brand">카드 입력</p>
+            <h2 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">플레이어와 보드를 선택하세요</h2>
+          </div>
+          <button type="button" onClick={applyExample} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 hover:border-brand hover:text-brand">
+            예시
+          </button>
+        </div>
+
+        <div className="mt-5 grid gap-4">
+          {players.map((hand, playerIndex) => (
+            <div key={playerIndex} className="rounded-[18px] border border-line bg-paper p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-extrabold text-ink">플레이어 {playerIndex + 1}</p>
+                <button type="button" onClick={() => removePlayer(playerIndex)} disabled={players.length <= 2} className="text-xs font-extrabold text-slate-500 disabled:opacity-40">
+                  삭제
+                </button>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {[0, 1].map((cardIndex) => (
+                  <PokerCardSlot
+                    key={cardIndex}
+                    card={hand[cardIndex]}
+                    active={activeSlot.area === "player" && activeSlot.playerIndex === playerIndex && activeSlot.cardIndex === cardIndex}
+                    onClick={() => setActiveSlot({ area: "player", playerIndex, cardIndex })}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <button type="button" onClick={addPlayer} disabled={players.length >= 6} className="mt-4 rounded-full bg-brand px-4 py-2 text-sm font-extrabold text-white disabled:opacity-40">
+          플레이어 추가
+        </button>
+
+        <div className="mt-6 rounded-[18px] border border-line bg-paper p-4">
+          <p className="text-sm font-extrabold text-ink">보드</p>
+          <div className="mt-3 grid grid-cols-5 gap-2">
+            {board.map((card, cardIndex) => (
+              <PokerCardSlot
+                key={cardIndex}
+                card={card}
+                active={activeSlot.area === "board" && activeSlot.cardIndex === cardIndex}
+                onClick={() => setActiveSlot({ area: "board", cardIndex })}
+              />
+            ))}
+          </div>
+        </div>
+
+        <label className="mt-5 grid gap-2">
+          <span className="text-sm font-extrabold text-ink">샘플 수</span>
+          <select value={samples} onChange={(event) => setSamples(Number(event.target.value))} className="h-12 rounded-2xl border border-line bg-paper px-4 font-extrabold text-ink outline-none focus:border-brand">
+            <option value={1000}>1,000회 빠른 계산</option>
+            <option value={2500}>2,500회 기본</option>
+            <option value={5000}>5,000회 정밀</option>
+            <option value={10000}>10,000회 더 정밀</option>
+          </select>
+        </label>
+
+        <div className="mt-5 rounded-[18px] border border-line bg-white p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-sm font-extrabold text-ink">카드 선택</p>
+            <button type="button" onClick={() => setCard(null)} className="text-xs font-extrabold text-slate-500 hover:text-red-600">
+              선택 칸 비우기
+            </button>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {pokerSuits.map((suit) => (
+              <div key={suit.id} className="grid gap-1">
+                {pokerRanks.map((rank) => {
+                  const card = `${rank}${suit.id}` as PokerCard;
+                  const isUsed = selectedCards.includes(card);
+                  return (
+                    <button
+                      key={card}
+                      type="button"
+                      onClick={() => setCard(card)}
+                      disabled={isUsed}
+                      className={`h-9 rounded-xl border border-line bg-paper text-sm font-black disabled:opacity-30 ${suit.color}`}
+                    >
+                      {rank}{suit.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[20px] border border-line bg-white p-5 shadow-panel sm:p-6">
+        <p className="text-sm font-extrabold text-brand">계산 결과</p>
+        <h2 className="mt-2 text-4xl font-black text-ink">{result ? `${result[0].equity.toFixed(1)}%` : "입력 필요"}</h2>
+        <p className="mt-2 text-sm font-bold text-slate-500">{canCalculate ? `${samples.toLocaleString("ko-KR")}회 샘플링 · 타이 포함 에퀴티` : "2명 이상 홀카드와 유효한 보드를 선택하세요."}</p>
+        {duplicateCards.length > 0 && <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-extrabold text-red-700">중복 카드가 있습니다.</p>}
+        <div className="mt-5 grid gap-3">
+          {result?.map((row) => (
+            <div key={row.index} className="rounded-2xl bg-paper p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-extrabold text-ink">플레이어 {row.index + 1}</p>
+                <p className="text-lg font-black text-brand">{row.equity.toFixed(1)}%</p>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                <GeometryMetric label="승률" value={`${row.winRate.toFixed(1)}%`} />
+                <GeometryMetric label="타이율" value={`${row.tieRate.toFixed(1)}%`} />
+                <GeometryMetric label="핸드" value={(players[row.index].filter(Boolean) as PokerCard[]).map(formatPokerCard).join(" ")} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </LifeToolShell>
+  );
+}
+
+function PokerCardSlot({ card, active, onClick }: { card: PokerCard | null; active: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className={`h-14 rounded-2xl border px-2 text-lg font-black ${active ? "border-brand bg-white text-brand" : "border-line bg-white text-ink"}`}>
+      {card ? formatPokerCard(card) : "선택"}
+    </button>
+  );
+}
+
+function formatPokerCard(card: PokerCard) {
+  const rank = card[0];
+  const suit = pokerSuits.find((item) => item.id === card[1]);
+  return `${rank}${suit?.label ?? card[1]}`;
+}
+
+function createPokerSeededRandom(seed: number) {
+  let state = Math.floor(Math.abs(seed)) % 2147483647;
+  if (state <= 0) state = 1;
+  return () => {
+    state = (state * 48271) % 2147483647;
+    return state / 2147483647;
+  };
+}
+
+function calculatePokerEquity(players: (PokerCard | null)[][], board: (PokerCard | null)[], samples: number) {
+  const completePlayers = players
+    .map((hand, index) => ({ index, hand: hand.filter(Boolean) as PokerCard[] }))
+    .filter((player) => player.hand.length === 2);
+  const knownBoard = board.filter(Boolean) as PokerCard[];
+  const used = new Set([...completePlayers.flatMap((player) => player.hand), ...knownBoard]);
+  const baseDeck = pokerDeck.filter((card) => !used.has(card));
+  const boardNeeded = 5 - knownBoard.length;
+  const runs = Math.max(200, Math.min(20000, Math.round(samples)));
+  const wins = Array(completePlayers.length).fill(0);
+  const ties = Array(completePlayers.length).fill(0);
+  const equity = Array(completePlayers.length).fill(0);
+  const seed = [...used].join("").split("").reduce((sum, char) => sum + char.charCodeAt(0), runs + completePlayers.length * 97);
+  const random = createPokerSeededRandom(seed);
+
+  for (let run = 0; run < runs; run += 1) {
+    const deck = shufflePokerDeck(baseDeck, random);
+    const fullBoard = [...knownBoard, ...deck.slice(0, boardNeeded)];
+    const scores = completePlayers.map((player) => evaluateBestPokerHand([...player.hand, ...fullBoard]));
+    const best = Math.max(...scores);
+    const winners = scores.map((score, index) => score === best ? index : -1).filter((index) => index >= 0);
+    winners.forEach((winner) => {
+      equity[winner] += 1 / winners.length;
+      if (winners.length === 1) wins[winner] += 1;
+      else ties[winner] += 1;
+    });
+  }
+
+  return completePlayers.map((player, index) => ({
+    index: player.index,
+    winRate: wins[index] / runs * 100,
+    tieRate: ties[index] / runs * 100,
+    equity: equity[index] / runs * 100
+  })).sort((a, b) => b.equity - a.equity);
+}
+
+function shufflePokerDeck(deck: PokerCard[], random: () => number) {
+  const next = [...deck];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+  return next;
+}
+
+function evaluateBestPokerHand(cards: PokerCard[]) {
+  let best = 0;
+  for (let a = 0; a < cards.length - 4; a += 1) {
+    for (let b = a + 1; b < cards.length - 3; b += 1) {
+      for (let c = b + 1; c < cards.length - 2; c += 1) {
+        for (let d = c + 1; d < cards.length - 1; d += 1) {
+          for (let e = d + 1; e < cards.length; e += 1) {
+            best = Math.max(best, evaluateFivePokerCards([cards[a], cards[b], cards[c], cards[d], cards[e]]));
+          }
+        }
+      }
+    }
+  }
+  return best;
+}
+
+function evaluateFivePokerCards(cards: PokerCard[]) {
+  const ranks = cards.map((card) => rankValueMap.get(card[0]) ?? 0).sort((a, b) => b - a);
+  const suits = cards.map((card) => card[1]);
+  const flush = suits.every((suit) => suit === suits[0]);
+  const uniqueRanks = [...new Set(ranks)].sort((a, b) => b - a);
+  const wheel = uniqueRanks.join(",") === "14,5,4,3,2";
+  const straightHigh = wheel ? 5 : uniqueRanks.length === 5 && uniqueRanks[0] - uniqueRanks[4] === 4 ? uniqueRanks[0] : 0;
+  const groups = uniqueRanks
+    .map((rank) => ({ rank, count: ranks.filter((item) => item === rank).length }))
+    .sort((a, b) => b.count - a.count || b.rank - a.rank);
+
+  if (straightHigh && flush) return encodePokerScore(8, [straightHigh]);
+  if (groups[0].count === 4) return encodePokerScore(7, [groups[0].rank, groups[1].rank]);
+  if (groups[0].count === 3 && groups[1].count === 2) return encodePokerScore(6, [groups[0].rank, groups[1].rank]);
+  if (flush) return encodePokerScore(5, ranks);
+  if (straightHigh) return encodePokerScore(4, [straightHigh]);
+  if (groups[0].count === 3) return encodePokerScore(3, [groups[0].rank, ...groups.slice(1).map((group) => group.rank).sort((a, b) => b - a)]);
+  if (groups[0].count === 2 && groups[1].count === 2) return encodePokerScore(2, [groups[0].rank, groups[1].rank, groups[2].rank]);
+  if (groups[0].count === 2) return encodePokerScore(1, [groups[0].rank, ...groups.slice(1).map((group) => group.rank).sort((a, b) => b - a)]);
+  return encodePokerScore(0, ranks);
+}
+
+function encodePokerScore(category: number, kickers: number[]) {
+  return [category, ...kickers, 0, 0, 0, 0, 0].slice(0, 6).reduce((score, value) => score * 15 + value, 0);
 }
 
 function CalculusCalculator({ mode, title, checkpoints }: { mode: "derivative" | "integral"; title: string; checkpoints: string[] }) {
