@@ -47,8 +47,8 @@ export default function HomePage() {
               <Link href="/calculators" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
                 전체 계산기 보기
               </Link>
-              <Link href="#sources" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
-                기준 출처 확인
+              <Link href="/resources" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
+                참고 사이트 보기
               </Link>
             </div>
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -220,6 +220,11 @@ export default function HomePage() {
                 {item}
               </div>
             ))}
+          </div>
+          <div className="mt-6">
+            <Link href="/resources" className="inline-flex rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72]">
+              법률·세무·금융 참고 사이트 보기
+            </Link>
           </div>
         </div>
       </section>
