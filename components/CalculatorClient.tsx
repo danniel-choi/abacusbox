@@ -677,6 +677,7 @@ function ShareActions({
 
   function downloadImage() {
     downloadResultCard({
+      slug,
       title,
       shareLine: buildShareLine(slug, title, result),
       headline: result.headline,
@@ -750,6 +751,7 @@ function buildShareLine(slug: CalculatorSlug, title: string, result: Pick<Calcul
 }
 
 function downloadResultCard({
+  slug,
   title,
   shareLine,
   headline,
@@ -758,6 +760,7 @@ function downloadResultCard({
   url,
   fileName
 }: {
+  slug: CalculatorSlug;
   title: string;
   shareLine: string;
   headline: string;
@@ -795,7 +798,7 @@ function downloadResultCard({
 
   context.fillStyle = "#02b585";
   context.font = "800 64px sans-serif";
-  wrapCanvasText(context, headline, 128, 430, width - 256, 74, 2);
+  wrapCanvasText(context, headline, 128, slug === "unemployment" ? 440 : 430, width - 256, 74, 2);
 
   context.fillStyle = "#52606d";
   context.font = "600 30px sans-serif";
