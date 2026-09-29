@@ -798,7 +798,7 @@ function downloadResultCard({
 
   context.fillStyle = "#02b585";
   context.font = "800 64px sans-serif";
-  wrapCanvasText(context, headline, 128, slug === "unemployment" ? 440 : 430, width - 256, 74, 2);
+  wrapCanvasText(context, headline, 128, slug === "unemployment" ? 460 : 430, width - 256, 74, 2);
 
   context.fillStyle = "#52606d";
   context.font = "600 30px sans-serif";
