@@ -459,7 +459,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
               {activeCalculator.actionLabel}
             </button>
           )}
-          <ShareActions title={activeCalculator.title} result={result} fileName={`${activeCalculator.slug}-result.png`} />
+          <ShareActions slug={activeCalculator.slug} title={activeCalculator.title} result={result} fileName={`${activeCalculator.slug}-result.png`} />
         </div>
 
         <SavedResultsPanel currentSlug={activeCalculator.slug} items={savedResults} onDelete={deleteSavedResult} />
@@ -627,10 +627,12 @@ type PlaceSearchResult = {
 };
 
 function ShareActions({
+  slug,
   title,
   result,
   fileName
 }: {
+  slug: CalculatorSlug;
   title: string;
   result: Pick<CalculatorResult, "headline" | "subline" | "rows">;
   fileName: string;
@@ -648,16 +650,17 @@ function ShareActions({
   }
 
   async function copyResultText() {
-    await navigator.clipboard.writeText(buildShareText(title, result, window.location.href));
+    await navigator.clipboard.writeText(buildShareText(slug, title, result, window.location.href));
     showNotice("결과 요약을 복사했습니다.");
   }
 
   async function shareResult() {
-    const text = buildShareText(title, result, window.location.href);
+    const text = buildShareText(slug, title, result, window.location.href);
+    const shareLine = buildShareLine(slug, title, result);
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${title} 결과`,
+          title: shareLine,
           text,
           url: window.location.href
         });
@@ -675,6 +678,7 @@ function ShareActions({
   function downloadImage() {
     downloadResultCard({
       title,
+      shareLine: buildShareLine(slug, title, result),
       headline: result.headline,
       subline: result.subline,
       rows: result.rows,
@@ -719,17 +723,35 @@ function ShareActions({
   );
 }
 
-function buildShareText(title: string, result: Pick<CalculatorResult, "headline" | "subline" | "rows">, url: string) {
+function buildShareText(slug: CalculatorSlug, title: string, result: Pick<CalculatorResult, "headline" | "subline" | "rows">, url: string) {
   const rows = result.rows
     .slice(0, 5)
     .map((row) => `${row.label}: ${row.value}`)
     .join("\n");
+  const shareLine = buildShareLine(slug, title, result);
 
-  return [`[계산의정석] ${title}`, `결과: ${result.headline}`, result.subline, rows, url].filter(Boolean).join("\n");
+  return [shareLine, `[계산의정석] ${title}`, result.subline, rows, url].filter(Boolean).join("\n");
+}
+
+function buildShareLine(slug: CalculatorSlug, title: string, result: Pick<CalculatorResult, "headline" | "subline" | "rows">) {
+  const shortTitle = title.replace(/\s*계산기$/, "");
+  const headline = result.headline.trim();
+
+  if (slug === "year-end-tax-settlement") return `내 연말정산 예상 결과 ${headline}`;
+  if (slug === "poker-equity-calculator") return `내 포커 승률 ${headline}`;
+  if (slug === "retirement-savings") return `내 은퇴자금 ${headline}`;
+  if (slug === "fire-retirement-age") return `내 FIRE 예상 결과 ${headline}`;
+  if (slug === "spending-habit-score") return `내 소비 습관 점수 ${headline}`;
+  if (slug === "salary-vanish-calculator") return `내 월급은 ${headline}에 사라짐`;
+  if (slug === "credit-card-payoff") return `내 카드 상환 예상 기간 ${headline}`;
+  if (slug === "stock-return") return `내 주식 수익률 ${headline}`;
+
+  return `내 ${shortTitle} 결과 ${headline}`;
 }
 
 function downloadResultCard({
   title,
+  shareLine,
   headline,
   subline,
   rows,
@@ -737,6 +759,7 @@ function downloadResultCard({
   fileName
 }: {
   title: string;
+  shareLine: string;
   headline: string;
   subline: string;
   rows: ResultRow[];
@@ -764,8 +787,11 @@ function downloadResultCard({
   context.font = "800 34px sans-serif";
   context.fillText("계산의정석", 128, 150);
   context.fillStyle = "#ffffff";
-  context.font = "800 54px sans-serif";
-  wrapCanvasText(context, title, 128, 225, width - 256, 62, 2);
+  context.font = "800 58px sans-serif";
+  wrapCanvasText(context, shareLine, 128, 218, width - 256, 66, 2);
+  context.fillStyle = "#b7c3cf";
+  context.font = "700 26px sans-serif";
+  wrapCanvasText(context, title, 128, 356, width - 256, 34, 1);
 
   context.fillStyle = "#02b585";
   context.font = "800 64px sans-serif";
@@ -1073,7 +1099,7 @@ function DistanceCalculator({ title, checkpoints }: { title: string; checkpoints
         )}
 
         <div className="mt-5 flex flex-wrap gap-3">
-          <ShareActions title={title} result={distanceShareResult} fileName="distance-calculator-result.png" />
+          <ShareActions slug="distance-calculator" title={title} result={distanceShareResult} fileName="distance-calculator-result.png" />
         </div>
 
         <div className="mt-5 rounded-[18px] border border-line bg-white p-5">
@@ -3183,6 +3209,19 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
     () => canCalculate ? calculatePokerEquity(players, board, samples) : null,
     [board, canCalculate, players, samples]
   );
+  const pokerShareResult: Pick<CalculatorResult, "headline" | "subline" | "rows"> = result ? {
+    headline: `${result[0].equity.toFixed(1)}%`,
+    subline: `플레이어 ${result[0].index + 1} 기준 · ${samples.toLocaleString("ko-KR")}회 샘플링`,
+    rows: result.map((row) => ({
+      label: `플레이어 ${row.index + 1}`,
+      value: `에퀴티 ${row.equity.toFixed(1)}% · 승률 ${row.winRate.toFixed(1)}% · 타이 ${row.tieRate.toFixed(1)}%`,
+      tone: row.index === result[0].index ? "strong" : "muted"
+    }))
+  } : {
+    headline: "입력 필요",
+    subline: "2명 이상 홀카드와 유효한 보드를 선택하세요.",
+    rows: []
+  };
 
   function setCard(card: PokerCard | null) {
     if (activeSlot.area === "board") {
@@ -3326,6 +3365,11 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
             </div>
           ))}
         </div>
+        {result && (
+          <div className="mt-5 flex flex-wrap gap-3">
+            <ShareActions slug="poker-equity-calculator" title={title} result={pokerShareResult} fileName="poker-equity-result.png" />
+          </div>
+        )}
       </section>
     </LifeToolShell>
   );
