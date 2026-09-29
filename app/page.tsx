@@ -4,6 +4,7 @@ import {
   CALCULATOR_GROUP_META,
   getCalculatorsByGroup,
   getFeaturedCalculators,
+  getCalculatorGroup,
   getPopularCalculators,
   getRecentCalculators
 } from "@/lib/calculator-directory";
@@ -20,6 +21,17 @@ export default function HomePage() {
   const featured = getFeaturedCalculators().slice(0, 4);
   const popular = getPopularCalculators();
   const recent = getRecentCalculators();
+  const shareableSlugs = [
+    "year-end-tax-settlement",
+    "poker-equity-calculator",
+    "spending-habit-score",
+    "salary-vanish-calculator",
+    "fire-retirement-age",
+    "retirement-savings"
+  ];
+  const shareableCalculators = shareableSlugs
+    .map((slug) => calculators.find((calculator) => calculator.slug === slug))
+    .filter(Boolean) as typeof calculators;
   const latestBlogPosts = getLatestBlogPosts(3);
   const groups = Object.entries(CALCULATOR_GROUP_META).map(([key, meta]) => ({
     key,
@@ -120,6 +132,47 @@ export default function HomePage() {
       </section>
 
       <RecentCalculatorsSection />
+
+      <section className="page-shell section-shell">
+        <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel md:p-7">
+          <div className="section-heading mb-6">
+            <div>
+              <p className="text-sm font-extrabold text-brand">공유하기 좋은 계산기</p>
+              <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink md:text-3xl">내 결과를 카드로 저장하고 바로 공유하세요.</h2>
+            </div>
+            <Link href="/calculators" className="text-sm font-extrabold text-brand transition hover:text-ink">
+              전체 보기 ↗
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {shareableCalculators.map((calculator) => {
+              const groupMeta = CALCULATOR_GROUP_META[getCalculatorGroupForHome(calculator.slug)];
+              return (
+                <Link
+                  key={calculator.slug}
+                  href={`/calculators/${calculator.slug}`}
+                  className="group flex h-full flex-col justify-between rounded-[22px] border border-line bg-paper p-5 transition hover:-translate-y-1 hover:border-brand hover:bg-white hover:shadow-float"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-3">
+                      <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg ${groupMeta.softClass} ${groupMeta.accentClass}`}>
+                        {groupMeta.icon}
+                      </span>
+                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-slate-500 group-hover:text-brand">결과 카드</span>
+                    </div>
+                    <h3 className="mt-4 text-lg font-extrabold text-ink">{calculator.title}</h3>
+                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{calculator.description}</p>
+                  </div>
+                  <div className="mt-5 rounded-2xl bg-white px-4 py-3">
+                    <p className="text-xs font-extrabold text-brand">공유 예시</p>
+                    <p className="mt-1 text-sm font-extrabold leading-6 text-ink">{getShareExample(calculator.slug)}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
       <section className="page-shell section-shell">
         <div className="section-heading mb-6">
@@ -282,6 +335,20 @@ function HeroStat({ label, value }: { label: string; value: string }) {
       <p className="mt-2 text-2xl font-extrabold text-white">{value}</p>
     </div>
   );
+}
+
+function getCalculatorGroupForHome(slug: (typeof calculators)[number]["slug"]) {
+  return getCalculatorGroup(slug);
+}
+
+function getShareExample(slug: (typeof calculators)[number]["slug"]) {
+  if (slug === "year-end-tax-settlement") return "내 연말정산 예상 결과 환급 42만원";
+  if (slug === "poker-equity-calculator") return "내 포커 승률 68.4%";
+  if (slug === "spending-habit-score") return "내 소비 습관 점수 82점";
+  if (slug === "salary-vanish-calculator") return "내 월급은 24일차에 사라짐";
+  if (slug === "fire-retirement-age") return "내 FIRE 예상 결과 45세 FIRE 가능";
+  if (slug === "retirement-savings") return "내 은퇴자금 부족 1.8억원";
+  return "내 계산 결과를 이미지 카드로 공유";
 }
 
 function ProcessCard({ step, title, text }: { step: string; title: string; text: string }) {
