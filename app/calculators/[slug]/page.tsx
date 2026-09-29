@@ -13,6 +13,13 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+type ReferenceSite = {
+  href: string;
+  label: string;
+  text: string;
+  internal?: boolean;
+};
+
 export function generateStaticParams() {
   return calculators.map((calculator) => ({ slug: calculator.slug }));
 }
@@ -33,6 +40,60 @@ function getRelatedBlogPosts(calculator: NonNullable<ReturnType<typeof getCalcul
       return calculator.keywords.some((keyword) => haystack.includes(keyword)) || haystack.includes(titleNeedle);
     })
     .slice(0, 3);
+}
+
+function getReferenceSites(group: ReturnType<typeof getCalculatorGroup>) {
+  const common: ReferenceSite[] = [
+    {
+      href: "/resources",
+      label: "법률·세무·금융 참고 사이트",
+      text: "공식기관과 공공 정보 사이트를 분야별로 모아둔 참고 링크 허브입니다.",
+      internal: true
+    }
+  ];
+
+  if (group === "tax") {
+    return [
+      ...common,
+      { href: "https://www.nts.go.kr", label: "국세청", text: "소득세, 연말정산, 상속·증여세, 부가가치세 등 국세 제도 안내를 확인합니다." },
+      { href: "https://www.hometax.go.kr", label: "홈택스", text: "신고, 납부, 증명 발급, 연말정산 자료 조회를 진행하는 공식 세무 서비스입니다." },
+      { href: "https://txsi.hometax.go.kr", label: "국세법령정보시스템", text: "세법 법령, 예규, 판례, 심판례를 함께 확인할 수 있습니다." }
+    ];
+  }
+
+  if (group === "loan" || group === "investment") {
+    return [
+      ...common,
+      { href: "https://fine.fss.or.kr", label: "금융소비자정보포털 파인", text: "금융회사, 금융상품, 휴면계좌, 금융소비자 유의사항을 확인합니다." },
+      { href: "https://finlife.fss.or.kr", label: "금융상품한눈에", text: "예금, 적금, 대출, 연금저축 등 금융상품 조건을 비교합니다." },
+      { href: "https://dart.fss.or.kr", label: "전자공시시스템 DART", text: "상장·외감 기업의 공시와 재무제표를 확인합니다." }
+    ];
+  }
+
+  if (group === "labor") {
+    return [
+      ...common,
+      { href: "https://www.law.go.kr", label: "국가법령정보센터", text: "근로기준법, 시행령, 시행규칙 등 법령 원문과 개정 이력을 확인합니다." },
+      { href: "https://www.moel.go.kr", label: "고용노동부", text: "임금, 휴가, 퇴직, 고용보험 관련 정책과 민원 안내를 확인합니다." },
+      { href: "https://www.ei.go.kr", label: "고용보험", text: "실업급여, 고용보험 자격, 제도 안내를 확인합니다." }
+    ];
+  }
+
+  if (group === "business") {
+    return [
+      ...common,
+      { href: "https://www.hometax.go.kr", label: "홈택스", text: "사업자 세금 신고, 계산서, 부가가치세, 증명 발급을 처리합니다." },
+      { href: "https://www.nts.go.kr", label: "국세청", text: "부가가치세, 종합소득세, 사업자 세무 안내를 확인합니다." },
+      { href: "https://www.ftc.go.kr", label: "공정거래위원회", text: "전자상거래, 표시광고, 소비자거래 관련 제도와 사업자 유의사항을 확인합니다." }
+    ];
+  }
+
+  return [
+    ...common,
+    { href: "https://www.law.go.kr", label: "국가법령정보센터", text: "생활 속 계약, 제도, 신고 기준과 관련된 법령 원문을 확인합니다." },
+    { href: "https://www.easylaw.go.kr", label: "찾기쉬운 생활법령정보", text: "생활 주제별 법령 해설과 체크리스트를 확인합니다." },
+    { href: "https://fine.fss.or.kr", label: "금융소비자정보포털 파인", text: "금융 관련 생활 정보와 소비자 보호 자료를 확인합니다." }
+  ];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -76,6 +137,7 @@ export default async function CalculatorPage({ params }: Props) {
   const relatedCalculators = getRelatedCalculators(calculator.slug, 4);
   const relatedBlogPosts = getRelatedBlogPosts(calculator);
   const groupMeta = CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)];
+  const referenceSites = getReferenceSites(getCalculatorGroup(calculator.slug));
   const seoContent = calculatorSeoContent[calculator.slug];
 
   const jsonLd = {
@@ -294,6 +356,37 @@ export default async function CalculatorPage({ params }: Props) {
               </li>
             ))}
           </ul>
+          <div className="mt-6 rounded-[18px] border border-white/10 bg-white/5 p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-extrabold text-brand">공식 참고 사이트</p>
+                <h3 className="mt-2 text-xl font-extrabold text-white">이 계산기와 함께 확인할 만한 기관</h3>
+              </div>
+              <Link href="/resources" className="rounded-full border border-brand/40 px-4 py-2 text-sm font-extrabold text-brand transition hover:bg-brand hover:text-white">
+                전체 참고 사이트 보기
+              </Link>
+            </div>
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {referenceSites.map((site) => {
+                const className = "rounded-2xl border border-white/10 bg-white/6 p-4 transition hover:border-brand hover:bg-white/10";
+                const content = (
+                  <>
+                    <p className="text-sm font-extrabold text-brand">{site.label}</p>
+                    <p className="mt-2 text-sm font-medium leading-6 text-white/70">{site.text}</p>
+                  </>
+                );
+                return site.internal ? (
+                  <Link key={site.href} href={site.href} className={className}>
+                    {content}
+                  </Link>
+                ) : (
+                  <a key={site.href} href={site.href} target="_blank" rel="noreferrer" className={className}>
+                    {content}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
         </section>
 
         {relatedCalculators.length > 0 && (
