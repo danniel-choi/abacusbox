@@ -802,7 +802,7 @@ function downloadResultCard({
 
   context.fillStyle = "#52606d";
   context.font = "600 30px sans-serif";
-  wrapCanvasText(context, subline, 128, 615, width - 256, 42, 2);
+  wrapCanvasText(context, subline, 128, slug === "unemployment" ? 595 : 615, width - 256, 42, 2);
 
   const visibleRows = rows.slice(0, 6);
   visibleRows.forEach((row, index) => {
