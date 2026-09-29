@@ -53,6 +53,9 @@ export type CalculatorSlug =
   | "text-counter"
   | "tip-calculator"
   | "poker-equity-calculator"
+  | "spending-habit-score"
+  | "salary-vanish-calculator"
+  | "fire-retirement-age"
   | "password-generator"
   | "standard-deviation"
   | "bmr-calculator"
@@ -4140,6 +4143,192 @@ export const calculators: CalculatorConfig[] = [
         subline: "전용 포커 패널에서 홀카드와 보드를 선택하세요.",
         rows: [{ label: "지원", value: "2~6명, 보드 0~5장, 중복 카드 방지, 승률·타이율·에퀴티", tone: "strong" }],
         chart: []
+      };
+    }
+  },
+  {
+    slug: "spending-habit-score",
+    title: "소비 습관 점수 계산기",
+    description: "월 소득, 고정비, 변동비, 저축, 빚 상환, 충동구매 횟수를 입력해 소비 습관 점수와 유형을 계산합니다.",
+    category: "생활",
+    keywords: ["소비 습관 점수", "소비 성향 테스트", "지출 점수", "가계부 점검", "저축률 계산"],
+    badge: "공유형 점수",
+    audience: "내 소비 습관을 점수와 유형으로 가볍게 확인하고 싶은 사용자",
+    fields: [
+      { name: "monthlyIncome", label: "월 소득", type: "number", unit: "원", min: 0, step: 100000, defaultValue: 3200000 },
+      { name: "fixedCost", label: "월 고정비", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 1200000 },
+      { name: "variableCost", label: "월 변동비", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 950000 },
+      { name: "saving", label: "월 저축·투자", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 700000 },
+      { name: "debtPayment", label: "월 빚 상환", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 250000 },
+      { name: "impulseCount", label: "월 충동구매 횟수", type: "number", unit: "회", min: 0, max: 100, step: 1, defaultValue: 4 }
+    ],
+    guideTitle: "소비 습관 점수 계산 기준",
+    guide: [
+      "월 소득 대비 저축률, 소비율, 빚 상환 부담, 충동구매 횟수를 종합해 0~100점 점수로 환산합니다.",
+      "점수는 재미와 자기 점검을 위한 참고값이며, 실제 재무 상담이나 신용평가 기준이 아닙니다.",
+      "저축률이 높고 고정비와 충동구매가 낮을수록 점수가 올라가도록 설계했습니다."
+    ],
+    checkpoints: [
+      "고정비에는 주거비, 통신비, 보험료처럼 매달 거의 고정되는 비용을 넣으세요.",
+      "변동비에는 식비, 쇼핑, 교통, 취미, 외식비처럼 매달 달라지는 비용을 넣으세요.",
+      "소득이 불규칙하면 최근 3개월 평균을 입력하면 더 현실적입니다."
+    ],
+    faqs: [
+      { question: "점수가 낮으면 문제가 있다는 뜻인가요?", answer: "아니요. 재미형 점검 도구입니다. 다만 저축률과 고정비 비중을 확인하는 계기로 활용할 수 있습니다." },
+      { question: "저축과 투자는 같이 넣어도 되나요?", answer: "네. 예금, 적금, 연금, 주식, 펀드 등 미래를 위해 남기는 금액을 합산해 입력하세요." }
+    ],
+    calculate(values) {
+      const income = Math.max(values.monthlyIncome, 1);
+      const spending = values.fixedCost + values.variableCost;
+      const savingRate = values.saving / income;
+      const spendingRate = spending / income;
+      const debtRate = values.debtPayment / income;
+      const impulsePenalty = Math.min(20, values.impulseCount * 1.5);
+      const rawScore = 55 + savingRate * 85 - Math.max(0, spendingRate - 0.65) * 70 - debtRate * 35 - impulsePenalty;
+      const score = Math.max(0, Math.min(100, Math.round(rawScore)));
+      const type = score >= 85 ? "재테크 우등생" : score >= 70 ? "균형 잡힌 절약러" : score >= 50 ? "가끔 새는 지갑" : "월말 생존 모드";
+      const remaining = values.monthlyIncome - spending - values.saving - values.debtPayment;
+      return {
+        headline: `${score}점 · ${type}`,
+        subline: `저축률 ${formatPercent(savingRate * 100, 1)} · 월 잔액 ${formatWon(remaining)}`,
+        rows: [
+          { label: "소비 습관 점수", value: `${score}점`, tone: "strong" },
+          { label: "소비 유형", value: type, tone: "strong" },
+          { label: "저축률", value: formatPercent(savingRate * 100, 1) },
+          { label: "소비율", value: formatPercent(spendingRate * 100, 1) },
+          { label: "빚 상환 비율", value: formatPercent(debtRate * 100, 1) },
+          { label: "월 잔액", value: formatWon(remaining) }
+        ],
+        chart: [
+          { name: "저축", value: values.saving },
+          { name: "고정비", value: values.fixedCost },
+          { name: "변동비", value: values.variableCost },
+          { name: "빚상환", value: values.debtPayment }
+        ]
+      };
+    }
+  },
+  {
+    slug: "salary-vanish-calculator",
+    title: "월급 증발 계산기",
+    description: "월급에서 주거비, 대출, 식비, 구독, 쇼핑비를 빼면 월급이 며칠 만에 사라지는지 계산합니다.",
+    category: "생활",
+    keywords: ["월급 증발 계산기", "월급 순삭", "월급 남는 돈", "생활비 계산", "월급 소비"],
+    badge: "월급 순삭 테스트",
+    audience: "월급이 어디로 사라지는지 재미있게 확인하고 싶은 사용자",
+    fields: [
+      { name: "salary", label: "월급 실수령액", type: "number", unit: "원", min: 0, step: 100000, defaultValue: 2800000 },
+      { name: "housing", label: "주거비", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 750000 },
+      { name: "loan", label: "대출·카드 상환", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 350000 },
+      { name: "food", label: "식비·카페", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 650000 },
+      { name: "transport", label: "교통·통신", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 220000 },
+      { name: "subscriptions", label: "구독·멤버십", type: "number", unit: "원", min: 0, step: 1000, defaultValue: 69000 },
+      { name: "shopping", label: "쇼핑·취미", type: "number", unit: "원", min: 0, step: 10000, defaultValue: 300000 }
+    ],
+    guideTitle: "월급 증발 계산 기준",
+    guide: [
+      "입력한 월 지출 합계를 월급 실수령액과 비교해 월급이 며칠 치 지출로 소진되는지 계산합니다.",
+      "30일을 한 달로 보고 지출 비중이 100%를 넘으면 월급이 한 달을 버티지 못하는 상태로 표시합니다.",
+      "결과는 재미형 표현이지만, 고정비와 변동비를 분리해 월급 흐름을 점검하는 데 도움이 됩니다."
+    ],
+    checkpoints: [
+      "월급은 세후 실수령액 기준으로 입력하세요.",
+      "카드값은 이미 식비·쇼핑에 포함했다면 중복 입력하지 마세요.",
+      "남는 돈이 적다면 주거비, 구독비, 쇼핑비처럼 줄일 수 있는 항목부터 비교하세요."
+    ],
+    faqs: [
+      { question: "월급 증발일은 어떤 의미인가요?", answer: "한 달 지출 비중을 날짜로 바꾼 값입니다. 예를 들어 20일이면 월급의 20일 치가 고정·생활비로 사라진다는 뜻입니다." },
+      { question: "저축은 어디에 넣나요?", answer: "이 계산기는 지출 중심입니다. 저축까지 포함해 보고 싶다면 쇼핑·취미 대신 별도 지출로 더해 비교하세요." }
+    ],
+    calculate(values) {
+      const salary = Math.max(values.salary, 1);
+      const totalExpense = values.housing + values.loan + values.food + values.transport + values.subscriptions + values.shopping;
+      const expenseRate = totalExpense / salary;
+      const vanishDay = Math.max(1, Math.min(30, Math.ceil(expenseRate * 30)));
+      const remaining = values.salary - totalExpense;
+      const dailyBudget = remaining / 30;
+      const status = expenseRate >= 1 ? "월급 초과 경보" : expenseRate >= 0.85 ? "월말 긴장 모드" : expenseRate >= 0.65 ? "균형 관리 모드" : "여유 확보 모드";
+      return {
+        headline: `${vanishDay}일차 · ${status}`,
+        subline: `월 지출 ${formatWon(totalExpense)} · 남는 돈 ${formatWon(remaining)}`,
+        rows: [
+          { label: "월급 증발일", value: `${vanishDay}일차`, tone: "strong" },
+          { label: "상태", value: status, tone: "strong" },
+          { label: "월 지출 합계", value: formatWon(totalExpense) },
+          { label: "지출 비중", value: formatPercent(expenseRate * 100, 1) },
+          { label: "월 잔액", value: formatWon(remaining), tone: "strong" },
+          { label: "하루 잔여 예산", value: formatWon(dailyBudget) }
+        ],
+        chart: [
+          { name: "주거", value: values.housing },
+          { name: "상환", value: values.loan },
+          { name: "식비", value: values.food },
+          { name: "기타", value: values.transport + values.subscriptions + values.shopping }
+        ]
+      };
+    }
+  },
+  {
+    slug: "fire-retirement-age",
+    title: "FIRE 은퇴 가능 나이 계산기",
+    description: "현재 자산, 월 저축액, 연 지출, 기대수익률, 인출률을 입력해 경제적 자유 목표 나이를 계산합니다.",
+    category: "금융",
+    keywords: ["FIRE 계산기", "은퇴 가능 나이", "경제적 자유 계산기", "파이어족 계산", "조기은퇴 계산기"],
+    badge: "경제적 자유",
+    audience: "조기은퇴와 경제적 자유 목표를 재미있게 시뮬레이션하려는 사용자",
+    fields: [
+      { name: "currentAge", label: "현재 나이", type: "number", unit: "세", min: 15, max: 90, step: 1, defaultValue: 32 },
+      { name: "currentAssets", label: "현재 투자자산", type: "number", unit: "원", min: 0, step: 1000000, defaultValue: 50000000 },
+      { name: "monthlySaving", label: "월 저축·투자액", type: "number", unit: "원", min: 0, step: 100000, defaultValue: 1500000 },
+      { name: "annualSpending", label: "연간 생활비", type: "number", unit: "원", min: 0, step: 1000000, defaultValue: 30000000 },
+      { name: "annualReturn", label: "연 기대수익률", type: "number", unit: "%", min: 0, max: 30, step: 0.1, defaultValue: 5 },
+      { name: "withdrawalRate", label: "목표 인출률", type: "number", unit: "%", min: 1, max: 10, step: 0.1, defaultValue: 4 }
+    ],
+    guideTitle: "FIRE 은퇴 가능 나이 계산 기준",
+    guide: [
+      "목표 자산은 연간 생활비를 목표 인출률로 나누어 계산합니다. 예를 들어 연 생활비 3,000만원, 인출률 4%라면 목표 자산은 7억5천만원입니다.",
+      "현재 자산과 매년 저축액이 기대수익률로 성장한다고 가정해 목표 자산에 도달하는 나이를 찾습니다.",
+      "세금, 물가상승률, 소득 변화, 투자 손실, 은퇴 후 추가소득은 단순화되어 있으므로 재미형 시뮬레이션으로 해석하세요."
+    ],
+    checkpoints: [
+      "생활비를 낮추거나 월 저축액을 높이면 FIRE 나이가 크게 앞당겨질 수 있습니다.",
+      "기대수익률은 보수적으로 여러 번 바꿔보는 것이 좋습니다.",
+      "인출률이 낮을수록 필요한 목표 자산은 커집니다."
+    ],
+    faqs: [
+      { question: "4% 룰이 정확한 기준인가요?", answer: "아니요. 4%는 자주 쓰는 참고값일 뿐이며 시장 상황, 세금, 물가, 은퇴 기간에 따라 달라질 수 있습니다." },
+      { question: "집이나 전세보증금도 자산에 넣나요?", answer: "생활비를 만들어내는 투자자산 중심으로 넣는 것이 보수적입니다. 주거자산은 별도 시나리오로 비교하세요." }
+    ],
+    calculate(values) {
+      const withdrawalRate = Math.max(values.withdrawalRate, 0.1) / 100;
+      const targetAssets = values.annualSpending / withdrawalRate;
+      const annualSaving = values.monthlySaving * 12;
+      const annualReturn = values.annualReturn / 100;
+      let assets = values.currentAssets;
+      let years = 0;
+      while (assets < targetAssets && years < 80) {
+        assets = assets * (1 + annualReturn) + annualSaving;
+        years += 1;
+      }
+      const fireAge = values.currentAge + years;
+      const gap = Math.max(0, targetAssets - values.currentAssets);
+      const status = assets >= targetAssets ? `${fireAge}세 FIRE 가능` : "80년 내 도달 어려움";
+      return {
+        headline: status,
+        subline: `목표 자산 ${formatWon(targetAssets)} · 현재 부족액 ${formatWon(gap)}`,
+        rows: [
+          { label: "FIRE 목표 나이", value: assets >= targetAssets ? `${fireAge}세` : "도달 어려움", tone: "strong" },
+          { label: "남은 기간", value: assets >= targetAssets ? `${years.toLocaleString("ko-KR")}년` : "80년 이상" },
+          { label: "목표 자산", value: formatWon(targetAssets), tone: "strong" },
+          { label: "현재 투자자산", value: formatWon(values.currentAssets) },
+          { label: "연 저축액", value: formatWon(annualSaving) },
+          { label: "도달 시 예상자산", value: formatWon(assets) }
+        ],
+        chart: [
+          { name: "현재자산", value: values.currentAssets },
+          { name: "부족액", value: gap },
+          { name: "목표자산", value: targetAssets }
+        ]
       };
     }
   },
