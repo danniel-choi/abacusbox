@@ -3,6 +3,7 @@ import { floorToTen, formatPercent, formatWon } from "@/lib/format";
 import { legalStandards } from "@/lib/constants";
 
 export type CalculatorSlug =
+  | "minimum-wage"
   | "unpaid-wage"
   | "unemployment"
   | "severance"
@@ -1218,6 +1219,74 @@ export const calculators: CalculatorConfig[] = [
           { label: "지원", value: "괄호, 삼각함수, 로그, 제곱근, 거듭제곱, 계승, 메모리, 기록", tone: "strong" }
         ],
         chart: []
+      };
+    }
+  },
+  {
+    slug: "minimum-wage",
+    title: "최저임금 모의 계산기",
+    description: "월 지급액과 주 소정근로시간을 기준으로 환산 시급이 2026년 최저임금 이상인지 확인합니다.",
+    category: "노무",
+    keywords: ["최저임금 계산기", "최저시급 계산기", "최저임금 모의 계산기", "월급 최저임금"],
+    badge: "2026년 최저시급 10,320원",
+    audience: "아르바이트, 근로자, 급여 담당자",
+    fields: [
+      { name: "monthlyComparableWage", label: "월 최저임금 산입 대상 임금", type: "number", unit: "원", min: 0, max: 30000000, step: 100000, defaultValue: 2156880 },
+      { name: "weeklyHours", label: "주 소정근로시간", type: "number", unit: "시간", min: 1, max: 40, step: 0.5, defaultValue: 40 },
+      { name: "weeklyPaidHolidayHours", label: "주 유급주휴시간", type: "number", unit: "시간", min: 0, max: 8, step: 0.5, defaultValue: 8 },
+      {
+        name: "probationDiscount",
+        label: "수습 90% 적용",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "적용 안 함", value: 0 },
+          { label: "적용 가능", value: 1 }
+        ],
+        help: "1년 이상 계약, 수습 3개월 이내 등 요건을 충족할 때만 제한적으로 적용됩니다."
+      }
+    ],
+    guideTitle: "최저임금 판정 기준",
+    guide: [
+      "2026년 적용 최저임금은 시간급 10,320원입니다. 주 40시간에 유급주휴 8시간을 포함한 월 환산 기준은 209시간, 월 2,156,880원입니다.",
+      "월급제는 월 지급액 중 최저임금 산입 대상 임금을 월 유급시간으로 나누어 환산 시급을 계산한 뒤 최저임금과 비교합니다.",
+      "수습 감액은 모든 근로자에게 적용되는 것이 아닙니다. 1년 이상 근로계약, 수습 3개월 이내 등 요건과 단순노무직 제외 여부를 함께 확인해야 합니다."
+    ],
+    checkpoints: [
+      "상여금, 식대, 교통비 등은 지급 조건에 따라 최저임금 산입 여부가 달라질 수 있습니다.",
+      "주휴수당을 포함해 월 유급시간을 계산해야 월급제 최저임금 판정이 가능합니다.",
+      "계산 결과가 부족하면 근로계약서, 급여명세서, 출퇴근 기록을 함께 확인하세요."
+    ],
+    faqs: [
+      { question: "월 209시간은 언제 쓰나요?", answer: "주 40시간 근무와 주휴 8시간을 포함한 통상적인 월 환산 시간입니다. 근무시간이 다르면 월 유급시간도 달라집니다." },
+      { question: "세전 월급으로 입력하나요?", answer: "네. 최저임금 판정은 공제 전 임금 중 최저임금 산입 대상 임금을 기준으로 보는 것이 일반적입니다." }
+    ],
+    calculate(values) {
+      const weeklyPaidHours = values.weeklyHours + values.weeklyPaidHolidayHours;
+      const monthlyPaidHours = d(weeklyPaidHours).mul(365).div(7).div(12).toNumber();
+      const standardHourlyWage = values.probationDiscount === 1 ? legalStandards.minimumWage * 0.9 : legalStandards.minimumWage;
+      const requiredMonthlyWage = d(standardHourlyWage).mul(monthlyPaidHours).toNumber();
+      const hourlyEquivalent = monthlyPaidHours > 0 ? values.monthlyComparableWage / monthlyPaidHours : 0;
+      const shortage = Math.max(requiredMonthlyWage - values.monthlyComparableWage, 0);
+      const surplus = Math.max(values.monthlyComparableWage - requiredMonthlyWage, 0);
+      const isCompliant = shortage <= 0;
+
+      return {
+        headline: isCompliant ? "최저임금 충족" : `월 ${formatWon(shortage)} 부족`,
+        subline: `환산 시급 ${formatWon(hourlyEquivalent)} · 기준 시급 ${formatWon(standardHourlyWage)}`,
+        rows: [
+          { label: "월 유급시간", value: `${monthlyPaidHours.toFixed(1)}시간` },
+          { label: "환산 시급", value: formatWon(hourlyEquivalent), tone: isCompliant ? "strong" : undefined },
+          { label: "적용 기준 시급", value: formatWon(standardHourlyWage) },
+          { label: "필요 월 임금", value: formatWon(requiredMonthlyWage) },
+          { label: isCompliant ? "월 기준 초과액" : "월 기준 부족액", value: formatWon(isCompliant ? surplus : shortage), tone: "strong" },
+          { label: "판정", value: isCompliant ? "최저임금 이상" : "최저임금 미달 가능성", tone: isCompliant ? "strong" : "muted" }
+        ],
+        chart: [
+          { name: "지급액", value: values.monthlyComparableWage },
+          { name: "필요액", value: requiredMonthlyWage },
+          { name: "차이", value: isCompliant ? surplus : shortage }
+        ]
       };
     }
   },

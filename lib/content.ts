@@ -107,6 +107,13 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.",
     tags: ["학점", "성적", "GPA"]
   },
+  "minimum-wage": {
+    title: "최저임금 모의 계산기",
+    category: "노무 가이드",
+    audience: "아르바이트, 근로자, 급여 담당자",
+    description: "월 지급액과 주 소정근로시간을 기준으로 환산 시급이 2026년 최저임금 이상인지 확인합니다.",
+    tags: ["최저임금", "최저시급", "월급"]
+  },
   "unpaid-wage": {
     title: "임금체불 계산기",
     category: "노무 가이드",
@@ -299,6 +306,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
 };
 
 const hourlyAutoBlogCalculatorOrder = [
+  "minimum-wage",
   "unpaid-wage",
   "unemployment",
   "severance",

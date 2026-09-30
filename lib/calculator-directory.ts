@@ -58,6 +58,7 @@ export const CALCULATOR_GROUP_META: Record<
 };
 
 const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
+  "minimum-wage": "labor",
   "unpaid-wage": "labor",
   unemployment: "labor",
   severance: "labor",
@@ -164,6 +165,7 @@ export function getCalculatorsByGroup(group: CalculatorGroup) {
 
 export function getFeaturedCalculators() {
   const featuredSlugs: CalculatorSlug[] = [
+    "minimum-wage",
     "unpaid-wage",
     "year-end-tax-settlement",
     "earned-income-tax",
@@ -211,6 +213,7 @@ export function getFeaturedCalculators() {
 
 export function getPopularCalculators() {
   const popularSlugs: CalculatorSlug[] = [
+    "minimum-wage",
     "unpaid-wage",
     "unemployment",
     "severance",
@@ -246,6 +249,7 @@ export function getPopularCalculators() {
 
 export function getRecentCalculators() {
   const recentSlugs: CalculatorSlug[] = [
+    "minimum-wage",
     "unpaid-wage",
     "distance-calculator",
     "derivative-calculator",
