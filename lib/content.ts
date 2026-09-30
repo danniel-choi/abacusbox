@@ -45,6 +45,13 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "주행거리, 연비, 유류비, 보험료, 세금, 주차비를 기준으로 월 자동차 유지비를 계산합니다.",
     tags: ["자동차유지비", "생활비", "월예산"]
   },
+  "traffic-fine-penalty": {
+    title: "자동차 과태료·범칙금 계산기",
+    category: "생활 가이드",
+    audience: "교통법규 위반 고지서나 단속 내역을 확인하는 운전자",
+    description: "속도위반, 신호위반, 주정차 위반 등 주요 교통법규 위반의 과태료·범칙금·벌점과 감경 가능성을 추정합니다.",
+    tags: ["교통과태료", "범칙금", "벌점"]
+  },
   "moving-cost": {
     title: "이사 비용 계산기",
     category: "생활 가이드",

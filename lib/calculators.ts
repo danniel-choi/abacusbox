@@ -31,6 +31,7 @@ export type CalculatorSlug =
   | "unit-converter"
   | "real-estate-acquisition-tax"
   | "car-maintenance"
+  | "traffic-fine-penalty"
   | "moving-cost"
   | "mobile-plan"
   | "seller-profit"
@@ -243,6 +244,99 @@ function annualLeaveGrantedDays(yearsWorked: number, attendanceRate: number, ful
 
   const extra = Math.min(Math.floor((yearsWorked - 1) / 2), 10);
   return Math.min(15 + extra, 25);
+}
+
+const trafficFineRules = {
+  speed20: {
+    label: "속도위반 20km/h 이하",
+    penalty: { passenger: 40000, van: 40000, motorcycle: 30000 },
+    fine: { passenger: 30000, van: 30000, motorcycle: 20000 },
+    points: 0,
+    earlyDiscountable: true
+  },
+  speed40: {
+    label: "속도위반 20km/h 초과~40km/h 이하",
+    penalty: { passenger: 70000, van: 80000, motorcycle: 50000 },
+    fine: { passenger: 60000, van: 70000, motorcycle: 40000 },
+    points: 15,
+    earlyDiscountable: false
+  },
+  speed60: {
+    label: "속도위반 40km/h 초과~60km/h 이하",
+    penalty: { passenger: 100000, van: 110000, motorcycle: 70000 },
+    fine: { passenger: 90000, van: 100000, motorcycle: 60000 },
+    points: 30,
+    earlyDiscountable: false
+  },
+  speedOver60: {
+    label: "속도위반 60km/h 초과",
+    penalty: { passenger: 130000, van: 140000, motorcycle: 90000 },
+    fine: { passenger: 120000, van: 130000, motorcycle: 80000 },
+    points: 60,
+    earlyDiscountable: false
+  },
+  signal: {
+    label: "신호·지시 위반",
+    penalty: { passenger: 70000, van: 80000, motorcycle: 50000 },
+    fine: { passenger: 60000, van: 70000, motorcycle: 40000 },
+    points: 15,
+    earlyDiscountable: false
+  },
+  centerLine: {
+    label: "중앙선 침범",
+    penalty: { passenger: 90000, van: 100000, motorcycle: 70000 },
+    fine: { passenger: 60000, van: 70000, motorcycle: 40000 },
+    points: 30,
+    earlyDiscountable: false
+  },
+  busLane: {
+    label: "버스전용차로 위반",
+    penalty: { passenger: 60000, van: 70000, motorcycle: 50000 },
+    fine: { passenger: 50000, van: 60000, motorcycle: 40000 },
+    points: 10,
+    earlyDiscountable: false
+  },
+  parking: {
+    label: "주정차 위반",
+    penalty: { passenger: 40000, van: 50000, motorcycle: 40000 },
+    fine: { passenger: 40000, van: 50000, motorcycle: 40000 },
+    points: 0,
+    earlyDiscountable: true
+  },
+  phone: {
+    label: "운전 중 휴대전화 사용",
+    penalty: { passenger: 70000, van: 80000, motorcycle: 50000 },
+    fine: { passenger: 60000, van: 70000, motorcycle: 40000 },
+    points: 15,
+    earlyDiscountable: false
+  },
+  seatbelt: {
+    label: "안전띠 미착용",
+    penalty: { passenger: 30000, van: 30000, motorcycle: 30000 },
+    fine: { passenger: 30000, van: 30000, motorcycle: 30000 },
+    points: 0,
+    earlyDiscountable: false
+  }
+} as const;
+
+type TrafficFineRuleKey = keyof typeof trafficFineRules;
+type TrafficVehicleKey = "passenger" | "van" | "motorcycle";
+
+function trafficRuleKey(value: number): TrafficFineRuleKey {
+  const keys = Object.keys(trafficFineRules) as TrafficFineRuleKey[];
+  return keys[Math.min(Math.max(Math.round(value), 0), keys.length - 1)];
+}
+
+function trafficVehicleKey(value: number): TrafficVehicleKey {
+  if (value === 1) return "van";
+  if (value === 2) return "motorcycle";
+  return "passenger";
+}
+
+function applyTrafficProtectionZone(amount: number, isProtectionZone: boolean, ruleKey: TrafficFineRuleKey) {
+  if (!isProtectionZone) return amount;
+  if (!["speed20", "speed40", "speed60", "speedOver60", "signal", "parking"].includes(ruleKey)) return amount;
+  return amount * 2;
 }
 
 function comprehensiveIncomeTax(taxBase: number) {
@@ -3105,6 +3199,144 @@ export const calculators: CalculatorConfig[] = [
           { name: "유류비", value: fuelCost },
           { name: "보험료", value: insuranceMonthly },
           { name: "기타", value: taxMonthly + values.monthlyParking }
+        ]
+      };
+    }
+  },
+  {
+    slug: "traffic-fine-penalty",
+    title: "자동차 과태료·범칙금 계산기",
+    description: "속도위반, 신호위반, 주정차 위반 등 주요 교통법규 위반의 과태료·범칙금·벌점과 자진납부 감경액을 추정합니다.",
+    category: "생활",
+    keywords: ["자동차 과태료 계산기", "범칙금 계산기", "교통 과태료", "속도위반 과태료", "신호위반 범칙금", "벌점 계산"],
+    badge: "과태료·범칙금·벌점 비교",
+    audience: "무인단속 고지서나 현장단속 통고처분 금액을 빠르게 비교하려는 운전자",
+    fields: [
+      {
+        name: "violationType",
+        label: "위반 항목",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "속도위반 20km/h 이하", value: 0 },
+          { label: "속도위반 20~40km/h 초과", value: 1 },
+          { label: "속도위반 40~60km/h 초과", value: 2 },
+          { label: "속도위반 60km/h 초과", value: 3 },
+          { label: "신호·지시 위반", value: 4 },
+          { label: "중앙선 침범", value: 5 },
+          { label: "버스전용차로 위반", value: 6 },
+          { label: "주정차 위반", value: 7 },
+          { label: "운전 중 휴대전화 사용", value: 8 },
+          { label: "안전띠 미착용", value: 9 }
+        ],
+        help: "도로교통법 시행령 별표의 대표적인 승용·승합·이륜 기준을 간이 표로 반영합니다."
+      },
+      {
+        name: "vehicleType",
+        label: "차종",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "승용차", value: 0 },
+          { label: "승합차 등", value: 1 },
+          { label: "이륜차 등", value: 2 }
+        ]
+      },
+      {
+        name: "enforcementType",
+        label: "단속 방식",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "경찰 현장단속(범칙금)", value: 0 },
+          { label: "무인카메라·고지서(과태료)", value: 1 }
+        ],
+        help: "현장단속은 운전자에게 범칙금과 벌점이 부과될 수 있고, 무인단속 과태료는 보통 차량 소유자에게 부과됩니다."
+      },
+      {
+        name: "protectionZone",
+        label: "어린이보호구역 등 가중 구역",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "일반 구역", value: 0 },
+          { label: "보호구역 가중 적용", value: 1 }
+        ],
+        help: "속도·신호·주정차 위반은 보호구역 여부에 따라 금액이 커질 수 있어 2배 간이 가중으로 표시합니다."
+      },
+      {
+        name: "earlyPayment",
+        label: "의견제출 기한 내 자진납부",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "해당 없음", value: 0 },
+          { label: "자진납부 감경 검토", value: 1 }
+        ],
+        help: "일부 과태료는 의견제출 기한 내 자진납부 시 20% 감경 대상이 될 수 있습니다."
+      },
+      { name: "overdueMonths", label: "미납 개월 수", type: "number", unit: "개월", min: 0, max: 60, step: 1, defaultValue: 0 }
+    ],
+    guideTitle: "자동차 과태료·범칙금 계산 기준",
+    guide: [
+      "무인카메라 단속은 운전자를 특정하기 어려워 차량 소유자에게 과태료가 부과되는 경우가 많고, 현장단속은 실제 운전자에게 범칙금과 벌점이 함께 부과될 수 있습니다.",
+      "이 계산기는 속도위반, 신호·지시 위반, 중앙선 침범, 버스전용차로 위반, 주정차 위반, 운전 중 휴대전화 사용, 안전띠 미착용의 대표 금액을 승용차·승합차·이륜차 기준으로 빠르게 비교합니다.",
+      "과태료 자진납부 20% 감경은 모든 위반에 자동 적용되는 것이 아니므로 고지서의 감경 표시와 경찰청 교통민원24 또는 관할 기관 안내를 함께 확인해야 합니다."
+    ],
+    checkpoints: [
+      "범칙금은 금액이 과태료보다 낮아 보여도 벌점과 운전경력상 불이익이 생길 수 있습니다.",
+      "어린이보호구역, 노인·장애인보호구역, 주정차 특별구역은 일반 기준보다 금액이 커질 수 있습니다.",
+      "미납 가산금은 실제 고지서, 체납 기간, 관계 법령에 따라 달라질 수 있으므로 이 계산기는 참고용으로만 사용하세요."
+    ],
+    faqs: [
+      { question: "과태료와 범칙금 중 무엇이 더 유리한가요?", answer: "무인단속 과태료는 보통 벌점이 없지만 금액이 범칙금보다 높을 수 있습니다. 범칙금은 운전자에게 부과되어 벌점과 기록이 생길 수 있으므로 금액만 비교하면 안 됩니다." },
+      { question: "자진납부 감경은 항상 20%인가요?", answer: "아니요. 일부 경미한 과태료 항목에서 의견제출 기한 내 납부할 때 적용될 수 있습니다. 실제 감경 여부는 고지서와 교통민원24 안내를 확인해야 합니다." },
+      { question: "정확한 미납 내역은 어디서 확인하나요?", answer: "경찰청 교통민원24(eFine)에서 미납 과태료, 미납 범칙금, 최근 무인단속 내역을 확인할 수 있습니다." }
+    ],
+    calculate(values) {
+      const ruleKey = trafficRuleKey(values.violationType);
+      const vehicleKey = trafficVehicleKey(values.vehicleType);
+      const rule = trafficFineRules[ruleKey];
+      const isCamera = values.enforcementType === 1;
+      const isProtectionZone = values.protectionZone === 1;
+      const basePenalty = applyTrafficProtectionZone(rule.penalty[vehicleKey], isProtectionZone, ruleKey);
+      const baseFine = applyTrafficProtectionZone(rule.fine[vehicleKey], isProtectionZone, ruleKey);
+      const selectedBase = isCamera ? basePenalty : baseFine;
+      const canEarlyDiscount = isCamera && values.earlyPayment === 1 && rule.earlyDiscountable && values.overdueMonths === 0;
+      const discount = canEarlyDiscount ? selectedBase * 0.2 : 0;
+      const afterDiscount = selectedBase - discount;
+      const overdueMonths = Math.max(Math.floor(values.overdueMonths), 0);
+      const surchargeRate = overdueMonths > 0 ? Math.min(0.03 + overdueMonths * 0.012, 0.75) : 0;
+      const surcharge = isCamera ? afterDiscount * surchargeRate : 0;
+      const total = afterDiscount + surcharge;
+      const points = isCamera ? 0 : rule.points;
+      const compareDiff = Math.abs(basePenalty - baseFine);
+      const recommendation = isCamera
+        ? points > 0
+          ? "과태료는 일반적으로 벌점 없이 차량 소유자에게 부과됩니다."
+          : "과태료 납부 전 고지서의 감경 여부를 확인하세요."
+        : points > 0
+          ? `범칙금은 벌점 ${points}점이 함께 부과될 수 있습니다.`
+          : "범칙금은 운전자가 특정되는 현장단속 기준입니다.";
+
+      return {
+        headline: formatWon(total),
+        subline: `${rule.label} · ${isCamera ? "과태료" : "범칙금"} 기준 · ${recommendation}`,
+        rows: [
+          { label: "기준 위반 항목", value: rule.label, tone: "strong" },
+          { label: "과태료 기준액", value: formatWon(basePenalty) },
+          { label: "범칙금 기준액", value: formatWon(baseFine) },
+          { label: "선택 기준 금액", value: formatWon(selectedBase), tone: "strong" },
+          { label: "자진납부 감경 추정", value: discount > 0 ? `-${formatWon(discount)}` : "적용 안 됨" },
+          { label: "미납 가산금 추정", value: surcharge > 0 ? formatWon(surcharge) : "0원" },
+          { label: "예상 납부액", value: formatWon(total), tone: "strong" },
+          { label: "벌점", value: `${points}점`, tone: points > 0 ? "muted" : undefined },
+          { label: "과태료·범칙금 차이", value: formatWon(compareDiff) }
+        ],
+        chart: [
+          { name: "과태료", value: basePenalty },
+          { name: "범칙금", value: baseFine },
+          { name: "예상납부", value: total }
         ]
       };
     }
