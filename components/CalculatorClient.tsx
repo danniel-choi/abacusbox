@@ -798,11 +798,13 @@ function downloadResultCard({
 
   context.fillStyle = "#02b585";
   context.font = "800 64px sans-serif";
-  wrapCanvasText(context, headline, 128, slug === "unemployment" ? 460 : 430, width - 256, 74, 2);
+  const headlineY = slug === "unemployment" ? 460 : 438;
+  const headlineLines = wrapCanvasText(context, headline, 128, headlineY, width - 256, 74, 2);
 
   context.fillStyle = "#52606d";
   context.font = "600 30px sans-serif";
-  wrapCanvasText(context, subline, 128, slug === "unemployment" ? 595 : 615, width - 256, 42, 2);
+  const sublineY = headlineY + headlineLines * 74 + 28;
+  wrapCanvasText(context, subline, 128, sublineY, width - 256, 42, 2);
 
   const visibleRows = rows.slice(0, 6);
   visibleRows.forEach((row, index) => {
@@ -879,10 +881,13 @@ function wrapCanvasText(
   });
   if (line) lines.push(line);
 
-  lines.slice(0, maxLines).forEach((item, index) => {
+  const visibleLines = lines.slice(0, maxLines);
+  visibleLines.forEach((item, index) => {
     const lineText = index === maxLines - 1 && lines.length > maxLines ? truncateCanvasText(context, item, maxWidth) : item;
     context.fillText(lineText, x, y + index * lineHeight);
   });
+
+  return visibleLines.length || 1;
 }
 
 function truncateCanvasText(context: CanvasRenderingContext2D, text: string, maxWidth: number) {
