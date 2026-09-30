@@ -348,8 +348,8 @@ const hourlyAutoBlogCalculatorOrder = [
   "gpa"
 ];
 
-const legacyHourlyAutoBlogCalculatorOrders = [
-  hourlyAutoBlogCalculatorOrder.filter((slug) => slug !== "minimum-wage" && slug !== "unpaid-wage")
+const legacyHourlyAutoBlogSlugs = [
+  "loan-interest-checklist-20260930-16-hourly"
 ];
 
 const hourlyTemplateMeta = {
@@ -386,12 +386,8 @@ function buildHourlyAutoBlogDateCodes() {
 const hourlyAutoBlogDateCodes = buildHourlyAutoBlogDateCodes();
 
 function buildHourlyAutoBlogSlug(dateCode: string, hour: number) {
-  return buildHourlyAutoBlogSlugForOrder(dateCode, hour, hourlyAutoBlogCalculatorOrder);
-}
-
-function buildHourlyAutoBlogSlugForOrder(dateCode: string, hour: number, calculatorOrder: string[]) {
   const dayNumber = Number(dateCode.slice(-2));
-  const calculatorSlug = calculatorOrder[(dayNumber + hour) % calculatorOrder.length];
+  const calculatorSlug = hourlyAutoBlogCalculatorOrder[(dayNumber + hour) % hourlyAutoBlogCalculatorOrder.length];
   const templateKey = hourlyAutoBlogTemplateOrder[(dayNumber + hour) % hourlyAutoBlogTemplateOrder.length];
   const hourCode = String(hour).padStart(2, "0");
 
@@ -400,12 +396,12 @@ function buildHourlyAutoBlogSlugForOrder(dateCode: string, hour: number, calcula
 
 const hourlyAutoBlogSlugs = Array.from(
   new Set(
-    hourlyAutoBlogDateCodes.flatMap((dateCode) =>
-      Array.from({ length: 24 }, (_, hour) => [
-        buildHourlyAutoBlogSlug(dateCode, hour),
-        ...legacyHourlyAutoBlogCalculatorOrders.map((calculatorOrder) => buildHourlyAutoBlogSlugForOrder(dateCode, hour, calculatorOrder))
-      ]).flat()
-    )
+    [
+      ...hourlyAutoBlogDateCodes.flatMap((dateCode) =>
+        Array.from({ length: 24 }, (_, hour) => buildHourlyAutoBlogSlug(dateCode, hour))
+      ),
+      ...legacyHourlyAutoBlogSlugs
+    ]
   )
 );
 
