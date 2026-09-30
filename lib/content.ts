@@ -348,6 +348,10 @@ const hourlyAutoBlogCalculatorOrder = [
   "gpa"
 ];
 
+const legacyHourlyAutoBlogCalculatorOrders = [
+  hourlyAutoBlogCalculatorOrder.filter((slug) => slug !== "minimum-wage" && slug !== "unpaid-wage")
+];
+
 const hourlyTemplateMeta = {
   guide: { suffix: "핵심 정리", focus: "기준 구조와 입력 흐름" },
   checklist: { suffix: "입력 전 체크리스트", focus: "계산 전에 확인할 항목" },
@@ -382,16 +386,27 @@ function buildHourlyAutoBlogDateCodes() {
 const hourlyAutoBlogDateCodes = buildHourlyAutoBlogDateCodes();
 
 function buildHourlyAutoBlogSlug(dateCode: string, hour: number) {
+  return buildHourlyAutoBlogSlugForOrder(dateCode, hour, hourlyAutoBlogCalculatorOrder);
+}
+
+function buildHourlyAutoBlogSlugForOrder(dateCode: string, hour: number, calculatorOrder: string[]) {
   const dayNumber = Number(dateCode.slice(-2));
-  const calculatorSlug = hourlyAutoBlogCalculatorOrder[(dayNumber + hour) % hourlyAutoBlogCalculatorOrder.length];
+  const calculatorSlug = calculatorOrder[(dayNumber + hour) % calculatorOrder.length];
   const templateKey = hourlyAutoBlogTemplateOrder[(dayNumber + hour) % hourlyAutoBlogTemplateOrder.length];
   const hourCode = String(hour).padStart(2, "0");
 
   return `${calculatorSlug}-${templateKey}-${dateCode}-${hourCode}-hourly`;
 }
 
-const hourlyAutoBlogSlugs = hourlyAutoBlogDateCodes.flatMap((dateCode) =>
-  Array.from({ length: 24 }, (_, hour) => buildHourlyAutoBlogSlug(dateCode, hour))
+const hourlyAutoBlogSlugs = Array.from(
+  new Set(
+    hourlyAutoBlogDateCodes.flatMap((dateCode) =>
+      Array.from({ length: 24 }, (_, hour) => [
+        buildHourlyAutoBlogSlug(dateCode, hour),
+        ...legacyHourlyAutoBlogCalculatorOrders.map((calculatorOrder) => buildHourlyAutoBlogSlugForOrder(dateCode, hour, calculatorOrder))
+      ]).flat()
+    )
+  )
 );
 
 function buildHourlyAutoBlogPost(slug: string): BlogPost {
