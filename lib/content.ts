@@ -350,7 +350,8 @@ const hourlyAutoBlogCalculatorOrder = [
 
 const legacyHourlyAutoBlogSlugs = [
   "loan-interest-checklist-20260930-16-hourly",
-  "unit-converter-comparison-20261228-05-hourly"
+  "unit-converter-comparison-20261228-05-hourly",
+  "annual-leave-grant-mistakes-20260930-12-hourly"
 ];
 
 const hourlyTemplateMeta = {
