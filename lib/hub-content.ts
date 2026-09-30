@@ -47,13 +47,13 @@ export const hubContents: Record<HubKey, HubContent> = {
     path: "/labor",
     eyebrow: "급여·노무 허브",
     title: "급여, 퇴직, 휴가 계산기",
-    description: "실수령액, 퇴직금, 주휴수당, 연차수당, 실업급여처럼 근로자가 자주 확인하는 계산을 기준별로 묶었습니다.",
-    featuredSlugs: ["net-salary", "severance", "weekly-holiday", "annual-leave", "unemployment", "parental-leave"],
+    description: "임금체불, 실수령액, 퇴직금, 주휴수당, 연차수당, 실업급여처럼 근로자가 자주 확인하는 계산을 기준별로 묶었습니다.",
+    featuredSlugs: ["unpaid-wage", "net-salary", "severance", "weekly-holiday", "annual-leave", "unemployment"],
     blogSlugs: ["weekly-holiday-pay-part-time-guide", "unemployment-guide-2026", "severance-common-mistakes-2026", "net-salary-payslip-checklist"],
     sections: [
       {
         title: "노무 계산은 기간과 기준임금이 핵심입니다.",
-        body: "퇴직금, 연차수당, 주휴수당은 모두 근무기간과 임금 기준을 어떻게 잡느냐에 따라 결과가 달라집니다. 입사일, 퇴사일, 소정근로시간, 평균임금, 통상임금을 분리해서 입력해야 합니다."
+        body: "임금체불, 퇴직금, 연차수당, 주휴수당은 모두 근무기간과 임금 기준을 어떻게 잡느냐에 따라 결과가 달라집니다. 입사일, 퇴사일, 소정근로시간, 평균임금, 통상임금을 분리해서 입력해야 합니다."
       },
       {
         title: "급여명세서와 계산기 결과를 함께 봐야 합니다.",

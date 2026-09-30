@@ -3,6 +3,7 @@ import { floorToTen, formatPercent, formatWon } from "@/lib/format";
 import { legalStandards } from "@/lib/constants";
 
 export type CalculatorSlug =
+  | "unpaid-wage"
   | "unemployment"
   | "severance"
   | "weekly-holiday"
@@ -1217,6 +1218,76 @@ export const calculators: CalculatorConfig[] = [
           { label: "지원", value: "괄호, 삼각함수, 로그, 제곱근, 거듭제곱, 계승, 메모리, 기록", tone: "strong" }
         ],
         chart: []
+      };
+    }
+  },
+  {
+    slug: "unpaid-wage",
+    title: "임금체불 계산기",
+    description: "미지급 월급, 주휴수당, 연차수당, 퇴직금, 연장·야간·휴일수당을 합산해 임금체불 추정액을 계산합니다.",
+    category: "노무",
+    keywords: ["임금체불 계산기", "미지급 임금", "노동청 신고", "퇴직금 체불"],
+    badge: "체불임금 항목별 합산",
+    audience: "급여를 제때 받지 못한 근로자, 퇴직 정산 확인 사용자",
+    fields: [
+      { name: "monthlyUnpaidWage", label: "미지급 월급", type: "number", unit: "원", min: 0, max: 30000000, step: 100000, defaultValue: 2600000 },
+      { name: "unpaidMonths", label: "미지급 개월 수", type: "number", unit: "개월", min: 0, max: 24, step: 0.5, defaultValue: 1 },
+      { name: "hourlyWage", label: "통상 시급", type: "number", unit: "원", min: 10320, max: 100000, step: 100, defaultValue: legalStandards.minimumWage },
+      { name: "weeklyHours", label: "주 소정근로시간", type: "number", unit: "시간", min: 1, max: 52, step: 0.5, defaultValue: 40 },
+      { name: "unpaidWeeks", label: "주휴수당 미지급 주수", type: "number", unit: "주", min: 0, max: 104, step: 1, defaultValue: 4 },
+      { name: "dailyHours", label: "1일 소정근로시간", type: "number", unit: "시간", min: 1, max: 12, step: 0.5, defaultValue: 8 },
+      { name: "unusedAnnualLeaveDays", label: "미사용 연차일수", type: "number", unit: "일", min: 0, max: 50, step: 0.5, defaultValue: 0 },
+      { name: "severanceMonthlyPay", label: "퇴직금 기준 월 평균임금", type: "number", unit: "원", min: 0, max: 30000000, step: 100000, defaultValue: 2600000 },
+      { name: "serviceMonths", label: "계속근로기간", type: "number", unit: "개월", min: 0, max: 480, step: 1, defaultValue: 12 },
+      { name: "overtimeHours", label: "미지급 연장근로시간", type: "number", unit: "시간", min: 0, max: 1000, step: 0.5, defaultValue: 0 },
+      { name: "nightHours", label: "미지급 야간근로시간", type: "number", unit: "시간", min: 0, max: 1000, step: 0.5, defaultValue: 0 },
+      { name: "holidayHours", label: "미지급 휴일근로시간", type: "number", unit: "시간", min: 0, max: 1000, step: 0.5, defaultValue: 0 }
+    ],
+    guideTitle: "임금체불 추정 기준",
+    guide: [
+      "임금체불은 정해진 지급일에 임금, 퇴직금, 각종 수당이 전부 또는 일부 지급되지 않은 상태를 말합니다. 이 계산기는 미지급 월급, 주휴수당, 연차수당, 퇴직금, 연장·야간·휴일근로수당을 항목별로 합산합니다.",
+      "주휴수당은 주 소정근로시간이 15시간 이상인 경우를 전제로 추정하며, 주 40시간 이상은 8시간분을 한도로 계산합니다. 연차수당은 통상시급 × 1일 소정근로시간 × 미사용 연차일수로 계산합니다.",
+      "퇴직금은 계속근로기간 1년 이상인 경우 월 평균임금 × 근속연수 방식으로 빠르게 추정합니다. 실제 금액은 퇴직 전 3개월 임금, 상여금, 연차수당 포함 여부, 휴직기간 등에 따라 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "급여명세서, 근로계약서, 통장 입금 내역, 출퇴근 기록을 함께 보관하세요.",
+      "연장·야간·휴일수당은 이미 기본임금을 받았는지, 가산분만 못 받았는지에 따라 실제 청구액이 달라질 수 있습니다.",
+      "노동청 진정 전에는 사업장명, 대표자, 소재지, 근무기간, 미지급 기간과 금액을 표로 정리해 두면 좋습니다."
+    ],
+    faqs: [
+      { question: "계산된 금액을 그대로 청구하면 되나요?", answer: "참고용 추정액입니다. 실제 청구액은 임금명세서, 근로계약, 근무기록, 지급 내역을 기준으로 다시 확인해야 합니다." },
+      { question: "퇴직금은 1년 미만도 포함되나요?", answer: "이 계산기는 계속근로기간이 12개월 미만이면 퇴직금 항목을 0원으로 처리합니다. 예외적 상황은 노무 전문가나 고용노동부 상담을 권합니다." }
+    ],
+    calculate(values) {
+      const unpaidBaseWage = d(values.monthlyUnpaidWage).mul(values.unpaidMonths).toNumber();
+      const weeklyHolidayHours = values.weeklyHours >= 15 ? Math.min(values.weeklyHours / 40 * 8, 8) : 0;
+      const weeklyHolidayPay = d(values.hourlyWage).mul(weeklyHolidayHours).mul(values.unpaidWeeks).toNumber();
+      const annualLeavePay = d(values.hourlyWage).mul(values.dailyHours).mul(values.unusedAnnualLeaveDays).toNumber();
+      const severancePay = values.serviceMonths >= 12 ? d(values.severanceMonthlyPay).mul(values.serviceMonths).div(12).toNumber() : 0;
+      const overtimePay = d(values.hourlyWage).mul(values.overtimeHours).mul(1.5).toNumber();
+      const nightPay = d(values.hourlyWage).mul(values.nightHours).mul(0.5).toNumber();
+      const holidayPay = d(values.hourlyWage).mul(values.holidayHours).mul(1.5).toNumber();
+      const premiumPay = overtimePay + nightPay + holidayPay;
+      const total = unpaidBaseWage + weeklyHolidayPay + annualLeavePay + severancePay + premiumPay;
+
+      return {
+        headline: formatWon(total),
+        subline: `월급·수당·퇴직금 포함 ${formatWon(total)} 추정`,
+        rows: [
+          { label: "미지급 월급", value: formatWon(unpaidBaseWage), tone: "strong" },
+          { label: "주휴수당", value: formatWon(weeklyHolidayPay) },
+          { label: "연차수당", value: formatWon(annualLeavePay) },
+          { label: "퇴직금", value: formatWon(severancePay), tone: values.serviceMonths >= 12 ? "strong" : "muted" },
+          { label: "연장·야간·휴일수당", value: formatWon(premiumPay) },
+          { label: "임금체불 추정 합계", value: formatWon(total), tone: "strong" }
+        ],
+        chart: [
+          { name: "월급", value: unpaidBaseWage },
+          { name: "주휴", value: weeklyHolidayPay },
+          { name: "연차", value: annualLeavePay },
+          { name: "퇴직금", value: severancePay },
+          { name: "가산수당", value: premiumPay }
+        ]
       };
     }
   },

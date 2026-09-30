@@ -58,6 +58,7 @@ export const CALCULATOR_GROUP_META: Record<
 };
 
 const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
+  "unpaid-wage": "labor",
   unemployment: "labor",
   severance: "labor",
   "weekly-holiday": "labor",
@@ -163,6 +164,7 @@ export function getCalculatorsByGroup(group: CalculatorGroup) {
 
 export function getFeaturedCalculators() {
   const featuredSlugs: CalculatorSlug[] = [
+    "unpaid-wage",
     "year-end-tax-settlement",
     "earned-income-tax",
     "inheritance-tax",
@@ -209,6 +211,7 @@ export function getFeaturedCalculators() {
 
 export function getPopularCalculators() {
   const popularSlugs: CalculatorSlug[] = [
+    "unpaid-wage",
     "unemployment",
     "severance",
     "derivative-calculator",
@@ -243,6 +246,7 @@ export function getPopularCalculators() {
 
 export function getRecentCalculators() {
   const recentSlugs: CalculatorSlug[] = [
+    "unpaid-wage",
     "distance-calculator",
     "derivative-calculator",
     "integral-calculator",

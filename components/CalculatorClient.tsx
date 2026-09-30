@@ -738,6 +738,7 @@ function buildShareLine(slug: CalculatorSlug, title: string, result: Pick<Calcul
   const shortTitle = title.replace(/\s*계산기$/, "");
   const headline = result.headline.trim();
 
+  if (slug === "unpaid-wage") return `내 임금체불 추정액 ${headline}`;
   if (slug === "year-end-tax-settlement") return `내 연말정산 예상 결과 ${headline}`;
   if (slug === "poker-equity-calculator") return `내 포커 승률 ${headline}`;
   if (slug === "retirement-savings") return `내 은퇴자금 ${headline}`;

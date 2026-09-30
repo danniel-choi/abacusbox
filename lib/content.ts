@@ -107,6 +107,13 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.",
     tags: ["학점", "성적", "GPA"]
   },
+  "unpaid-wage": {
+    title: "임금체불 계산기",
+    category: "노무 가이드",
+    audience: "급여를 제때 받지 못한 근로자, 퇴직 정산 확인 사용자",
+    description: "미지급 월급, 주휴수당, 연차수당, 퇴직금, 연장·야간·휴일수당을 합산해 임금체불 추정액을 계산합니다.",
+    tags: ["임금체불", "미지급임금", "노동청신고"]
+  },
   unemployment: {
     title: "실업급여 모의계산기",
     category: "노무 가이드",
@@ -292,6 +299,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
 };
 
 const hourlyAutoBlogCalculatorOrder = [
+  "unpaid-wage",
   "unemployment",
   "severance",
   "weekly-holiday",
