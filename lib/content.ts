@@ -350,7 +350,6 @@ const hourlyAutoBlogCalculatorOrder = [
 
 const legacyHourlyAutoBlogSlugs = [
   "loan-interest-checklist-20260930-16-hourly",
-  "unit-converter-comparison-20261228-05-hourly",
   "annual-leave-grant-mistakes-20260930-12-hourly"
 ];
 
@@ -375,7 +374,7 @@ function toDateCode(date: Date) {
 function buildHourlyAutoBlogDateCodes() {
   const start = Date.UTC(2026, 8, 1);
   const today = new Date();
-  const end = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 90);
+  const end = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
   const dateCodes: string[] = [];
 
   for (let time = start; time <= end; time += 24 * 60 * 60 * 1000) {

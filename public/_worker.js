@@ -1,6 +1,83 @@
 const SITE_URL = "https://abacusbox.com";
 
 const calculatorMeta = {
+  "break-even": {
+    title: "원가율·손익분기점 계산기",
+    category: "사업 가이드",
+    audience: "셀러, 자영업자, 소규모 사업 운영자",
+    description: "판매가, 원가, 월 고정비를 기준으로 원가율과 손익분기 판매수량을 계산합니다.",
+    tags: ["손익분기점", "원가율", "판매수익"]
+  },
+  "car-maintenance": {
+    title: "자동차 유지비 계산기",
+    category: "생활 가이드",
+    audience: "차량 보유자, 구매 검토자",
+    description: "주행거리, 연비, 유류비, 보험료, 세금, 주차비를 기준으로 월 자동차 유지비를 계산합니다.",
+    tags: ["자동차유지비", "생활비", "월예산"]
+  },
+  "moving-cost": {
+    title: "이사 비용 계산기",
+    category: "생활 가이드",
+    audience: "이사 예정자, 포장이사 비교 사용자",
+    description: "집 크기, 거리, 엘리베이터 여부, 사다리차 여부를 기준으로 이사 비용을 추정합니다.",
+    tags: ["이사비용", "포장이사", "견적비교"]
+  },
+  "mobile-plan": {
+    title: "휴대폰 요금 계산기",
+    category: "생활 가이드",
+    audience: "요금제 변경 사용자, 통신비 절감 사용자",
+    description: "기본요금, 데이터 옵션, 선택약정 할인, 가족결합을 반영해 월 통신비를 계산합니다.",
+    tags: ["휴대폰요금", "통신비", "요금제"]
+  },
+  "bmi": {
+    title: "BMI 계산기",
+    category: "생활 가이드",
+    audience: "체중 관리 사용자, 건강 정보 확인 사용자",
+    description: "키와 몸무게를 기준으로 BMI 지수와 비만도 구간을 계산합니다.",
+    tags: ["BMI", "건강", "체중관리"]
+  },
+  "korean-age": {
+    title: "만나이 계산기",
+    category: "생활 가이드",
+    audience: "연령 확인 사용자, 서류 작성 사용자",
+    description: "생년월일과 기준일을 입력해 현재 만나이와 다음 생일까지 남은 기간을 계산합니다.",
+    tags: ["만나이", "생년월일", "기준일"]
+  },
+  "date-diff": {
+    title: "날짜 차이 계산기",
+    category: "생활 가이드",
+    audience: "일정 관리 사용자, 계약 기간 확인 사용자",
+    description: "시작일과 종료일 기준으로 날짜 차이와 주·개월 환산값을 계산합니다.",
+    tags: ["날짜계산", "기간계산", "일정관리"]
+  },
+  "unit-converter": {
+    title: "단위변환 계산기",
+    category: "생활 가이드",
+    audience: "생활 계산 사용자, 부동산·쇼핑·해외 단위 확인 사용자",
+    description: "길이, 무게, 면적 단위를 빠르게 변환합니다.",
+    tags: ["단위변환", "생활계산", "면적"]
+  },
+  "percent": {
+    title: "퍼센트 계산기",
+    category: "생활 가이드",
+    audience: "쇼핑, 업무, 공부, 보고서 작성 사용자",
+    description: "비율, 증가율, 감소율, 일부 값 계산을 한 번에 할 수 있는 퍼센트 계산기입니다.",
+    tags: ["퍼센트", "비율", "증가율"]
+  },
+  "discount-rate": {
+    title: "할인율 계산기",
+    category: "생활 가이드",
+    audience: "쇼핑 사용자, 판매자, 가격 비교 사용자",
+    description: "정가와 판매가를 기준으로 할인금액과 할인율을 계산합니다.",
+    tags: ["할인율", "쇼핑", "가격비교"]
+  },
+  "gpa": {
+    title: "학점 계산기",
+    category: "생활 가이드",
+    audience: "대학생, 성적 관리 사용자",
+    description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.",
+    tags: ["학점", "성적", "GPA"]
+  },
   "minimum-wage": {
     title: "최저임금 모의 계산기",
     category: "노무 가이드",
@@ -272,11 +349,15 @@ const worker = {
 
     const url = new URL(request.url);
     const slug = decodeURIComponent(url.pathname.replace(/^\/blog\//, "").replace(/\/$/, ""));
-    const post = buildAutoBlogPost(slug);
+  const post = buildAutoBlogPost(slug);
 
-    if (!post) {
-      return assetResponse;
-    }
+  if (post?.redirectTo) {
+    return Response.redirect(new URL(post.redirectTo, url), 302);
+  }
+
+  if (!post) {
+    return assetResponse;
+  }
 
     return new Response(renderBlogHtml(post), {
       headers: {
@@ -303,6 +384,12 @@ function buildAutoBlogPost(slug) {
 
   if (!meta || !template || !date || hour < 0 || hour > 23) {
     return null;
+  }
+
+  if (isFutureDateCode(dateCode)) {
+    return {
+      redirectTo: `/calculators/${calculatorSlug}`
+    };
   }
 
   const plainTitle = meta.title.replace(" 계산기", "");
@@ -340,6 +427,14 @@ function parseDateCode(dateCode) {
   }
 
   return `${dateCode.slice(0, 4)}-${dateCode.slice(4, 6)}-${dateCode.slice(6, 8)}`;
+}
+
+function isFutureDateCode(dateCode) {
+  const targetTime = Date.UTC(Number(dateCode.slice(0, 4)), Number(dateCode.slice(4, 6)) - 1, Number(dateCode.slice(6, 8)));
+  const now = new Date();
+  const todayTime = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+
+  return targetTime > todayTime;
 }
 
 function renderBlogHtml(post) {
