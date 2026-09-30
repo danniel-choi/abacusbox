@@ -70,7 +70,7 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
         if (data?.source === "fallback") {
           setItems(fallbackSlice);
           setTotal(paginationEnabled ? fallbackItems.length : fallbackSlice.length);
-          setError(data.warning || "실시간 데이터 연결이 없어서 기본 콘텐츠를 표시합니다.");
+          setError(null);
           return;
         }
         if (Array.isArray(data.items)) {
@@ -86,7 +86,7 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
         if (!active) return;
         setItems(fallbackSlice);
         setTotal(paginationEnabled ? fallbackItems.length : fallbackSlice.length);
-        setError("실시간 데이터 연결이 없어서 기본 콘텐츠를 표시합니다.");
+        setError(null);
       } finally {
         if (active) setLoading(false);
       }

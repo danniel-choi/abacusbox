@@ -95,7 +95,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
         const fallback = findFallback(fallbackItems, slug);
         if (fallback) {
           setItem(fallback);
-          setError("실시간 데이터 연결이 없어서 기본 콘텐츠를 표시합니다.");
+          setError(null);
         } else {
           setItem(null);
           setError("콘텐츠를 찾을 수 없습니다.");
