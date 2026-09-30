@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { blogPosts, getBlogPost, getLatestBlogPosts } from "@/lib/content";
 import { SITE_URL } from "@/lib/constants";
+import { getCalculator } from "@/lib/calculators";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -50,6 +51,7 @@ export default async function BlogPostPage({ params }: Props) {
   const relatedPosts = getLatestBlogPosts()
     .filter((item) => item.slug !== post.slug && (item.category === post.category || item.tags.some((tag) => post.tags.includes(tag))))
     .slice(0, 3);
+  const linkedCalculator = post.calculatorSlug ? getCalculator(post.calculatorSlug) : undefined;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -88,11 +90,44 @@ export default async function BlogPostPage({ params }: Props) {
         <h1 className="mt-5 break-words text-3xl font-extrabold leading-tight text-ink [word-break:normal] sm:text-4xl">{post.title}</h1>
         <p className="mt-4 break-words text-base font-medium leading-7 text-slate-600 [word-break:normal]">{post.excerpt}</p>
 
+        {linkedCalculator && (
+          <div className="mt-6 rounded-[22px] border border-brand/30 bg-[#f0fffa] p-5">
+            <p className="text-sm font-extrabold text-brand">이 글과 연결된 계산기</p>
+            <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h2 className="break-words text-xl font-extrabold text-ink">{linkedCalculator.title}</h2>
+                <p className="mt-2 break-words text-sm font-medium leading-6 text-slate-600">{linkedCalculator.description}</p>
+              </div>
+              <Link
+                href={`/calculators/${linkedCalculator.slug}`}
+                className="w-full rounded-full bg-brand px-5 py-3 text-center text-sm font-extrabold text-white transition hover:bg-[#029b72] sm:w-auto"
+              >
+                계산기로 바로가기
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div className="mt-8 grid min-w-0 gap-5 break-words text-base font-medium leading-8 text-slate-700 [word-break:normal]">
           {post.content.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
+
+        {linkedCalculator && (
+          <div className="mt-8 rounded-[22px] border border-line bg-paper p-5">
+            <p className="text-sm font-extrabold text-ink">숫자로 바로 확인하기</p>
+            <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
+              위 내용을 읽은 뒤 실제 금액이나 기간을 확인하려면 {linkedCalculator.title}에서 입력값을 바꿔가며 비교해 보세요.
+            </p>
+            <Link
+              href={`/calculators/${linkedCalculator.slug}`}
+              className="mt-4 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand"
+            >
+              {linkedCalculator.title} 열기
+            </Link>
+          </div>
+        )}
 
         <div className="mt-8 flex flex-wrap gap-2">
           {post.tags.map((tag) => (

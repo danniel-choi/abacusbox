@@ -7,6 +7,7 @@ export type BlogPost = {
   readTime: string;
   tags: string[];
   content: string[];
+  calculatorSlug?: string;
 };
 
 export type CommunityPost = {
@@ -411,6 +412,7 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
     publishedAt,
     readTime: "5분",
     tags: meta.tags,
+    calculatorSlug,
     content: [
       `${meta.title}는 ${meta.audience}가 빠르게 기준값을 확인할 때 유용한 도구입니다. ${meta.description}`,
       `계산 전에는 입력값의 기준을 먼저 맞춰야 합니다. 세전과 세후, 월 단위와 연 단위, 총액과 일부 금액이 섞이면 같은 계산기라도 결과 해석이 달라질 수 있습니다.`,
