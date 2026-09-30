@@ -347,15 +347,15 @@ const templateMeta = {
   scenario: { suffix: "상황별 활용 방법", focus: "실제 상황별 계산 흐름" }
 };
 
-const worker = {
-  async fetch(request, env) {
-    const assetResponse = env.ASSETS ? await env.ASSETS.fetch(request) : new Response(null, { status: 404 });
-    if (assetResponse.status !== 404) {
-      return assetResponse;
-    }
+export async function onRequest(context) {
+  const { request, env } = context;
+  const assetResponse = env.ASSETS ? await env.ASSETS.fetch(request) : new Response(null, { status: 404 });
+  if (assetResponse.status !== 404) {
+    return assetResponse;
+  }
 
-    const url = new URL(request.url);
-    const slug = decodeURIComponent(url.pathname.replace(/^\/blog\//, "").replace(/\/$/, ""));
+  const url = new URL(request.url);
+  const slug = decodeURIComponent(url.pathname.replace(/^\/blog\//, "").replace(/\/$/, ""));
   const post = buildAutoBlogPost(slug);
 
   if (post?.redirectTo) {
@@ -366,16 +366,13 @@ const worker = {
     return assetResponse;
   }
 
-    return new Response(renderBlogHtml(post), {
-      headers: {
-        "content-type": "text/html; charset=utf-8",
-        "cache-control": "public, max-age=300, s-maxage=3600"
-      }
-    });
-  }
-};
-
-export default worker;
+  return new Response(renderBlogHtml(post), {
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "public, max-age=300, s-maxage=3600"
+    }
+  });
+}
 
 function buildAutoBlogPost(slug) {
   const match = slug.match(/^(.+)-(guide|checklist|mistakes|comparison|scenario)-(\d{8})-(\d{2})-hourly$/);
