@@ -462,6 +462,8 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           <ShareActions slug={activeCalculator.slug} title={activeCalculator.title} result={result} fileName={`${activeCalculator.slug}-result.png`} />
         </div>
 
+        {activeCalculator.slug === "unpaid-wage" && <UnpaidWageComplaintHelper result={result} values={values as FormValues} />}
+
         <SavedResultsPanel currentSlug={activeCalculator.slug} items={savedResults} onDelete={deleteSavedResult} />
 
         {relatedCalculators.length > 0 && (
@@ -496,6 +498,102 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
       </section>
     </div>
   );
+}
+
+function UnpaidWageComplaintHelper({
+  result,
+  values
+}: {
+  result: Pick<CalculatorResult, "headline" | "subline" | "rows">;
+  values: FormValues;
+}) {
+  const [notice, setNotice] = useState("");
+  const complaintText = buildUnpaidWageComplaintText(result, values);
+
+  async function copyComplaintText() {
+    await navigator.clipboard.writeText(complaintText);
+    setNotice("신고서 초안 문구를 복사했습니다.");
+    window.setTimeout(() => setNotice(""), 1800);
+  }
+
+  return (
+    <div className="mt-5 rounded-[18px] border border-brand/30 bg-[#f0fffa] p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-extrabold text-brand">고용노동부 민원신청 준비</p>
+          <h3 className="mt-2 text-xl font-extrabold text-ink">임금체불 신고서 초안</h3>
+          <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
+            계산 결과를 바탕으로 민원 내용에 붙여 넣을 문구를 자동 생성합니다. 사업장명, 대표자, 근무기간은 제출 전에 직접 보완하세요.
+          </p>
+        </div>
+        <a
+          href="https://www.moel.go.kr/minwon/apply/formApplyList.do"
+          target="_blank"
+          rel="noreferrer"
+          className="w-full rounded-full bg-ink px-5 py-3 text-center text-sm font-extrabold text-white transition hover:bg-brand sm:w-auto"
+        >
+          고용노동부 민원신청 바로가기
+        </a>
+      </div>
+      <textarea
+        readOnly
+        value={complaintText}
+        className="mt-4 h-72 w-full resize-y rounded-2xl border border-line bg-white p-4 text-sm font-semibold leading-7 text-ink outline-none focus:border-brand"
+      />
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={copyComplaintText}
+          className="w-full rounded-full border border-brand px-5 py-3 text-sm font-extrabold text-brand transition hover:bg-brand hover:text-white sm:w-auto"
+        >
+          신고서 텍스트 복사
+        </button>
+        {notice && <p className="text-xs font-extrabold text-brand">{notice}</p>}
+      </div>
+      <p className="mt-3 text-xs font-semibold leading-6 text-slate-500">
+        실제 제출 전에는 근로계약서, 급여명세서, 통장 입금 내역, 출퇴근 기록 등 증빙과 금액을 다시 확인하세요.
+      </p>
+    </div>
+  );
+}
+
+function buildUnpaidWageComplaintText(result: Pick<CalculatorResult, "headline" | "subline" | "rows">, values: FormValues) {
+  const getRowValue = (label: string) => result.rows.find((row) => row.label === label)?.value ?? "-";
+  const numberValue = (name: string) => Number(values[name] ?? 0);
+
+  return [
+    "[임금체불 진정 내용 초안]",
+    "",
+    "1. 신청인",
+    "- 성명: ",
+    "- 연락처: ",
+    "",
+    "2. 사업장 정보",
+    "- 사업장명: ",
+    "- 대표자명: ",
+    "- 사업장 주소: ",
+    "- 근무기간: ",
+    "",
+    "3. 체불임금 산정 내역",
+    `- 임금체불 추정 합계: ${result.headline}`,
+    `- 미지급 월급: ${getRowValue("미지급 월급")} (월 ${numberValue("monthlyUnpaidWage").toLocaleString("ko-KR")}원 × ${numberValue("unpaidMonths").toLocaleString("ko-KR")}개월)`,
+    `- 주휴수당: ${getRowValue("주휴수당")} (주 ${numberValue("weeklyHours").toLocaleString("ko-KR")}시간, ${numberValue("unpaidWeeks").toLocaleString("ko-KR")}주 기준)`,
+    `- 연차수당: ${getRowValue("연차수당")} (미사용 연차 ${numberValue("unusedAnnualLeaveDays").toLocaleString("ko-KR")}일)`,
+    `- 퇴직금: ${getRowValue("퇴직금")} (계속근로기간 ${numberValue("serviceMonths").toLocaleString("ko-KR")}개월)`,
+    `- 연장·야간·휴일수당: ${getRowValue("연장·야간·휴일수당")}`,
+    "",
+    "4. 진정 취지",
+    "위 사업장에서 근로를 제공했으나 임금 및 수당 일부가 지급되지 않았습니다. 미지급 임금 산정 내역과 증빙자료를 첨부하오니 체불임금 지급 여부를 조사해 주시기 바랍니다.",
+    "",
+    "5. 첨부 예정 자료",
+    "- 근로계약서",
+    "- 급여명세서",
+    "- 통장 입금 내역",
+    "- 출퇴근 기록 또는 근무표",
+    "- 사업주와 주고받은 문자, 카카오톡, 이메일 등",
+    "",
+    "※ 본 문구는 계산의정석 임금체불 계산기 결과를 바탕으로 작성한 참고용 초안입니다. 실제 민원 신청 전 사실관계와 금액을 확인해 주세요."
+  ].join("\n");
 }
 
 function SavedResultsPanel({
