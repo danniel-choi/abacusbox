@@ -124,14 +124,23 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const chartMax = Math.max(...result.chart.map((point) => point.value), 1);
   const highlightedRows = result.rows.filter((row) => row.tone === "strong");
   const relatedCalculators = useMemo(() => getRelatedCalculators(activeCalculator.slug, 4), [activeCalculator.slug]);
-  const inputSummary = activeCalculator.fields.map((field) => ({
+  const visibleFields = useMemo(() => {
+    return activeCalculator.fields.filter((field) => {
+      if (activeCalculator.slug === "pet-age" && field.name === "dogSize") {
+        return Number(values.species ?? 1) === 1;
+      }
+
+      return true;
+    });
+  }, [activeCalculator.fields, activeCalculator.slug, values.species]);
+  const inputSummary = visibleFields.map((field) => ({
     label: field.label,
     value: formatInputValue(field, Number(values[field.name] ?? field.defaultValue))
   }));
 
   useEffect(() => {
     const params = new URLSearchParams();
-    activeCalculator.fields.forEach((field) => {
+    visibleFields.forEach((field) => {
       const value = values[field.name];
       if (Number.isFinite(value) && value !== field.defaultValue) {
         params.set(field.name, String(value));
@@ -140,7 +149,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
 
     const query = params.toString();
     router.replace(query ? `?${query}` : window.location.pathname, { scroll: false });
-  }, [activeCalculator.fields, router, values]);
+  }, [router, values, visibleFields]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -178,7 +187,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
       subline: result.subline,
       rows: result.rows.slice(0, 6),
       savedAt: new Date().toISOString(),
-      query: buildCalculatorQuery(activeCalculator.fields, values as FormValues)
+      query: buildCalculatorQuery(visibleFields, values as FormValues)
     };
     const next = [snapshot, ...savedResults.filter((item) => item.slug !== snapshot.slug || item.headline !== snapshot.headline)].slice(0, 12);
     writeSavedResults(next);
@@ -293,7 +302,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           </div>
         </div>
         <div className="grid gap-5">
-          {activeCalculator.fields.map((field) => (
+          {visibleFields.map((field) => (
             <label key={field.name} className="grid gap-2">
               <span className="flex items-center justify-between text-sm font-extrabold text-ink">
                 {field.label}
