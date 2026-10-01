@@ -5857,6 +5857,21 @@ function getNextActions(slug: CalculatorSlug): NextAction[] {
         tone: "ink"
       }
     ],
+    "draw-probability": [
+      {
+        title: "실제 추첨 번호 만들기",
+        text: "확률을 확인했다면 랜덤 숫자 생성기로 추첨 번호나 후보 순서를 바로 만들어 보세요.",
+        href: "/calculators/random-number",
+        label: "랜덤 숫자 생성"
+      },
+      {
+        title: "확률을 비율로 다시 보기",
+        text: "성공 확률과 실패 확률을 다른 비율 계산으로 비교해 보고 싶다면 퍼센트 계산기를 함께 사용하세요.",
+        href: "/calculators/percent",
+        label: "퍼센트 계산",
+        tone: "ink"
+      }
+    ],
     "pet-age": [
       {
         title: "입양일 기준 기간 계산",

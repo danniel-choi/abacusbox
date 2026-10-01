@@ -54,6 +54,7 @@ export type CalculatorSlug =
   | "internet-speed-test"
   | "pyeong-converter"
   | "random-number"
+  | "draw-probability"
   | "text-counter"
   | "tip-calculator"
   | "poker-equity-calculator"
@@ -462,6 +463,29 @@ function formatNumber(value: number, digits = 0) {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits
   });
+}
+
+function binomialAtLeastProbability(trials: number, target: number, probability: number) {
+  const n = Math.max(0, Math.floor(trials));
+  const k = Math.max(0, Math.floor(target));
+  const p = Math.min(Math.max(probability, 0), 1);
+
+  if (k <= 0) return 1;
+  if (n <= 0) return 0;
+  if (k > n) return 0;
+  if (p <= 0) return 0;
+  if (p >= 1) return 1;
+
+  let belowTarget = Math.pow(1 - p, n);
+  let pmf = belowTarget;
+
+  for (let success = 1; success < k; success += 1) {
+    pmf *= ((n - success + 1) / success) * (p / (1 - p));
+    belowTarget += pmf;
+    if (!Number.isFinite(belowTarget)) return 1;
+  }
+
+  return Math.min(Math.max(1 - belowTarget, 0), 1);
 }
 
 function createSeededRandom(seed: number) {
@@ -4488,6 +4512,81 @@ export const calculators: CalculatorConfig[] = [
           { label: "중복", value: values.unique === 0 ? "없음" : "허용" }
         ],
         chart: generated.map((value, index) => ({ name: `${index + 1}`, value: Math.abs(value) }))
+      };
+    }
+  },
+  {
+    slug: "draw-probability",
+    title: "뽑기 확률 계산기",
+    description: "1회 성공 확률과 뽑기 횟수를 입력해 최소 1회 성공 확률, 목표 개수 이상 성공 확률, 기대 성공 횟수와 예상 비용을 계산합니다.",
+    category: "생활",
+    keywords: ["뽑기 확률 계산기", "가챠 확률", "랜덤박스 확률", "추첨 확률", "뽑기 기대값", "이항분포 계산기"],
+    badge: "가챠·추첨 확률",
+    audience: "게임 뽑기, 랜덤박스, 이벤트 추첨 확률을 확인하는 사용자",
+    fields: [
+      { name: "successRate", label: "1회 성공 확률", type: "number", unit: "%", min: 0, max: 100, step: 0.01, defaultValue: 1 },
+      { name: "draws", label: "뽑기 횟수", type: "number", unit: "회", min: 1, max: 10000, step: 1, defaultValue: 100 },
+      { name: "targetCount", label: "목표 성공 개수", type: "number", unit: "개", min: 1, max: 1000, step: 1, defaultValue: 1 },
+      { name: "costPerDraw", label: "1회 비용", type: "number", unit: "원", min: 0, max: 10000000, step: 100, defaultValue: 3000 }
+    ],
+    guideTitle: "뽑기 확률 계산 기준",
+    guide: [
+      "각 뽑기는 서로 독립이고 매번 성공 확률이 같다고 가정해 이항분포로 계산합니다.",
+      "최소 1회 성공 확률은 1 - 실패확률^뽑기횟수로 계산합니다.",
+      "목표 성공 개수 이상 확률은 0개부터 목표 개수 미만까지의 확률을 뺀 값입니다.",
+      "천장, 확률업, 중복 보상, 픽업 실패 후 보정처럼 게임별 특수 규칙은 반영하지 않습니다."
+    ],
+    checkpoints: [
+      "확률 1%를 100번 시도해도 성공 확률은 100%가 아니라 약 63.4%입니다.",
+      "기대 성공 횟수는 평균값이므로 실제 결과를 보장하지 않습니다.",
+      "비용을 입력하면 총 예상 지출과 성공 1회당 기대 비용을 함께 확인할 수 있습니다."
+    ],
+    faqs: [
+      { question: "가챠 천장도 반영되나요?", answer: "아니요. 이 계산기는 기본 독립 시행 확률을 계산합니다. 천장, 스택, 픽업 보정은 게임마다 규칙이 달라 별도 계산이 필요합니다." },
+      { question: "1%를 100번 뽑으면 왜 100%가 아닌가요?", answer: "매번 실패할 가능성이 남아 있기 때문입니다. 100번 모두 실패할 확률은 0.99의 100제곱이고, 이를 1에서 뺀 값이 최소 1회 성공 확률입니다." },
+      { question: "목표 성공 개수는 무엇인가요?", answer: "예를 들어 같은 아이템 3개가 필요하면 목표 성공 개수에 3을 입력하면 됩니다. 입력한 횟수 안에 3개 이상 얻을 확률을 계산합니다." }
+    ],
+    calculate(values) {
+      const successRate = Math.min(Math.max(values.successRate, 0), 100);
+      const probability = successRate / 100;
+      const draws = Math.max(1, Math.min(10000, Math.floor(values.draws)));
+      const targetCount = Math.max(1, Math.min(draws, Math.floor(values.targetCount)));
+      const costPerDraw = Math.max(0, values.costPerDraw);
+      const totalCost = costPerDraw * draws;
+      const atLeastOne = binomialAtLeastProbability(draws, 1, probability);
+      const targetOrMore = binomialAtLeastProbability(draws, targetCount, probability);
+      const expectedSuccesses = draws * probability;
+      const noHit = 1 - atLeastOne;
+      const expectedCostPerSuccess = probability > 0 ? costPerDraw / probability : 0;
+      const drawsFor50 = probability > 0 && probability < 1 ? Math.ceil(Math.log(0.5) / Math.log(1 - probability)) : probability >= 1 ? 1 : 0;
+      const drawsFor90 = probability > 0 && probability < 1 ? Math.ceil(Math.log(0.1) / Math.log(1 - probability)) : probability >= 1 ? 1 : 0;
+      const chartPoints = Array.from(new Set([
+        1,
+        Math.max(1, Math.floor(draws * 0.25)),
+        Math.max(1, Math.floor(draws * 0.5)),
+        Math.max(1, Math.floor(draws * 0.75)),
+        draws
+      ])).sort((a, b) => a - b);
+
+      return {
+        headline: formatPercent(atLeastOne * 100, 2),
+        subline: `${draws.toLocaleString("ko-KR")}회 중 최소 1회 성공 확률 · 목표 ${targetCount.toLocaleString("ko-KR")}개 이상 ${formatPercent(targetOrMore * 100, 2)}`,
+        rows: [
+          { label: "1회 성공 확률", value: formatPercent(successRate, 2) },
+          { label: "뽑기 횟수", value: `${draws.toLocaleString("ko-KR")}회` },
+          { label: "최소 1회 성공 확률", value: formatPercent(atLeastOne * 100, 2), tone: "strong" },
+          { label: "모두 실패할 확률", value: formatPercent(noHit * 100, 2) },
+          { label: `목표 ${targetCount.toLocaleString("ko-KR")}개 이상 확률`, value: formatPercent(targetOrMore * 100, 2), tone: "strong" },
+          { label: "기대 성공 횟수", value: `${formatNumber(expectedSuccesses, 2)}개`, tone: "strong" },
+          { label: "총 예상 지출", value: formatWon(totalCost) },
+          { label: "성공 1회당 기대 비용", value: probability > 0 ? formatWon(expectedCostPerSuccess) : "계산 불가" },
+          { label: "50% 도달 예상 횟수", value: drawsFor50 > 0 ? `${drawsFor50.toLocaleString("ko-KR")}회` : "계산 불가" },
+          { label: "90% 도달 예상 횟수", value: drawsFor90 > 0 ? `${drawsFor90.toLocaleString("ko-KR")}회` : "계산 불가" }
+        ],
+        chart: chartPoints.map((count) => ({
+          name: `${count}회`,
+          value: binomialAtLeastProbability(count, 1, probability) * 100
+        }))
       };
     }
   },
