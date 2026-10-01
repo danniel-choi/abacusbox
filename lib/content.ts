@@ -80,6 +80,13 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "생년월일과 기준일을 입력해 현재 만나이와 다음 생일까지 남은 기간을 계산합니다.",
     tags: ["만나이", "생년월일", "기준일"]
   },
+  "pet-age": {
+    title: "강아지·고양이 나이 계산기",
+    category: "생활 가이드",
+    audience: "반려동물의 사람 나이와 생애 단계를 확인하려는 반려인",
+    description: "강아지와 고양이의 실제 나이를 사람 나이로 환산하고 성장기, 성견·성묘, 시니어, 노령 단계를 확인합니다.",
+    tags: ["강아지나이", "고양이나이", "반려동물"]
+  },
   "date-diff": {
     title: "날짜 차이 계산기",
     category: "생활 가이드",

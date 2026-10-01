@@ -27,6 +27,7 @@ export type CalculatorSlug =
   | "bmi"
   | "calorie-calculator"
   | "daily-intake"
+  | "pet-age"
   | "korean-age"
   | "unit-converter"
   | "real-estate-acquisition-tax"
@@ -632,6 +633,34 @@ function bmiStatus(bmi: number) {
   if (bmi < 25) return "과체중";
   if (bmi < 30) return "비만";
   return "고도비만";
+}
+
+function petLifeStage(species: number, ageYears: number) {
+  if (ageYears < 1) return "성장기";
+  if (species === 1) {
+    if (ageYears < 7) return "성견";
+    if (ageYears < 10) return "시니어";
+    return "노령견";
+  }
+  if (ageYears < 7) return "성묘";
+  if (ageYears < 11) return "시니어";
+  return "노령묘";
+}
+
+function dogHumanAge(ageYears: number, sizeType: number) {
+  if (ageYears <= 0) return 0;
+  if (ageYears <= 1) return ageYears * 15;
+  if (ageYears <= 2) return 15 + (ageYears - 1) * 9;
+
+  const yearlyRate = sizeType === 0 ? 4 : sizeType === 1 ? 5 : 6;
+  return 24 + (ageYears - 2) * yearlyRate;
+}
+
+function catHumanAge(ageYears: number) {
+  if (ageYears <= 0) return 0;
+  if (ageYears <= 1) return ageYears * 15;
+  if (ageYears <= 2) return 15 + (ageYears - 1) * 9;
+  return 24 + (ageYears - 2) * 4;
 }
 
 export const calculators: CalculatorConfig[] = [
@@ -2713,6 +2742,87 @@ export const calculators: CalculatorConfig[] = [
           { name: "표준", value: standard },
           { name: "하한", value: low },
           { name: "상한", value: high }
+        ]
+      };
+    }
+  },
+  {
+    slug: "pet-age",
+    title: "강아지·고양이 나이 계산기",
+    description: "반려견과 반려묘의 실제 나이를 사람 나이로 환산하고 성장기, 성견·성묘, 시니어, 노령 단계까지 확인합니다.",
+    category: "생활",
+    keywords: ["강아지 나이 계산기", "고양이 나이 계산기", "반려동물 나이", "개 나이 사람 나이", "고양이 사람 나이", "반려견 나이 환산"],
+    badge: "반려동물 나이 환산",
+    audience: "강아지나 고양이의 사람 나이와 생애 단계를 확인하려는 반려인",
+    fields: [
+      {
+        name: "species",
+        label: "반려동물",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "강아지", value: 1 },
+          { label: "고양이", value: 2 }
+        ]
+      },
+      {
+        name: "dogSize",
+        label: "강아지 체급",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "소형견", value: 0 },
+          { label: "중형견", value: 1 },
+          { label: "대형견", value: 2 }
+        ],
+        help: "고양이를 선택한 경우 체급 값은 계산에 반영하지 않습니다."
+      },
+      { name: "ageYears", label: "만 나이", type: "number", unit: "년", min: 0, max: 30, step: 1, defaultValue: 3 },
+      { name: "ageMonths", label: "추가 개월", type: "number", unit: "개월", min: 0, max: 11, step: 1, defaultValue: 0 }
+    ],
+    guideTitle: "강아지·고양이 나이 환산 기준",
+    guide: [
+      "반려동물 나이는 단순히 1년에 7세를 곱하는 방식보다 생애 초반 성장이 빠르다는 점을 반영해 보는 것이 자연스럽습니다.",
+      "강아지는 1세를 사람 나이 약 15세, 2세를 약 24세로 보고 이후에는 체급에 따라 소형견은 연 4세, 중형견은 연 5세, 대형견은 연 6세씩 더하는 간이 기준을 사용합니다.",
+      "고양이는 1세를 약 15세, 2세를 약 24세로 보고 이후에는 매년 약 4세씩 더하는 간이 기준으로 환산합니다."
+    ],
+    checkpoints: [
+      "품종, 체중, 중성화 여부, 생활환경, 질병 이력에 따라 실제 노화 속도는 달라질 수 있습니다.",
+      "7세 전후부터는 건강검진 주기, 치아 관리, 체중 관리, 관절·신장·심장 상태를 더 자주 살피는 것이 좋습니다.",
+      "이 계산기는 건강 진단이 아니라 생애 단계 이해를 돕는 참고용입니다."
+    ],
+    faqs: [
+      { question: "강아지 나이는 왜 체급을 나누나요?", answer: "대형견은 성견 이후 노화 속도가 더 빠른 편이라 간이 환산에서 소형견·중형견·대형견을 나누어 계산합니다." },
+      { question: "고양이는 품종별 차이를 반영하나요?", answer: "아니요. 현재는 일반적인 반려묘 기준의 간이 환산입니다. 품종과 건강 상태에 따라 실제 생애 단계는 달라질 수 있습니다." },
+      { question: "몇 살부터 시니어인가요?", answer: "이 계산기는 강아지는 약 7세, 고양이는 약 7세부터 시니어 단계로 안내합니다. 다만 대형견은 더 이르게 관리가 필요할 수 있습니다." }
+    ],
+    calculate(values) {
+      const ageYears = Math.max(values.ageYears, 0) + Math.max(Math.min(values.ageMonths, 11), 0) / 12;
+      const isDog = values.species === 1;
+      const humanAge = isDog ? dogHumanAge(ageYears, values.dogSize) : catHumanAge(ageYears);
+      const stage = petLifeStage(values.species, ageYears);
+      const speciesLabel = isDog ? "강아지" : "고양이";
+      const dogSizeLabel = values.dogSize === 0 ? "소형견" : values.dogSize === 1 ? "중형견" : "대형견";
+      const nextSeniorAge = isDog ? 7 : 7;
+      const seniorGap = Math.max(nextSeniorAge - ageYears, 0);
+      const adultEquivalent = isDog ? dogHumanAge(2, values.dogSize) : catHumanAge(2);
+      const seniorEquivalent = isDog ? dogHumanAge(7, values.dogSize) : catHumanAge(7);
+
+      return {
+        headline: `사람 나이 약 ${Math.round(humanAge)}세`,
+        subline: `${speciesLabel}${isDog ? ` · ${dogSizeLabel}` : ""} 기준 · 현재 단계 ${stage}`,
+        rows: [
+          { label: "실제 나이", value: `${Math.floor(ageYears)}년 ${Math.round((ageYears % 1) * 12)}개월`, tone: "strong" },
+          { label: "사람 나이 환산", value: `약 ${Math.round(humanAge)}세`, tone: "strong" },
+          { label: "생애 단계", value: stage },
+          { label: "2세 환산 기준", value: `약 ${Math.round(adultEquivalent)}세` },
+          { label: "7세 환산 기준", value: `약 ${Math.round(seniorEquivalent)}세` },
+          { label: "시니어 단계까지", value: seniorGap > 0 ? `약 ${seniorGap.toFixed(1)}년 남음` : "시니어 관리 권장 단계" }
+        ],
+        chart: [
+          { name: "현재", value: humanAge },
+          { name: "2세", value: adultEquivalent },
+          { name: "7세", value: seniorEquivalent }
         ]
       };
     }
