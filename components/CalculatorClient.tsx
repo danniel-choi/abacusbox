@@ -31,6 +31,14 @@ type SavedCalculatorResult = {
   query: string;
 };
 
+type NextAction = {
+  title: string;
+  text: string;
+  href: string;
+  label: string;
+  tone?: "brand" | "ink";
+};
+
 function formStorageKey(slug: CalculatorSlug) {
   return `calcrule:calculator-form:${slug}`;
 }
@@ -124,6 +132,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const chartMax = Math.max(...result.chart.map((point) => point.value), 1);
   const highlightedRows = result.rows.filter((row) => row.tone === "strong");
   const relatedCalculators = useMemo(() => getRelatedCalculators(activeCalculator.slug, 4), [activeCalculator.slug]);
+  const nextActions = useMemo(() => getNextActions(activeCalculator.slug), [activeCalculator.slug]);
   const visibleFields = useMemo(() => {
     return activeCalculator.fields.filter((field) => {
       if (activeCalculator.slug === "pet-age" && field.name === "dogSize") {
@@ -451,7 +460,40 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
+        {nextActions.length > 0 && (
+          <div className="mt-5 rounded-[18px] border border-brand/20 bg-[#f0fffa] p-5">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-sm font-extrabold text-brand">다음 액션</p>
+                <h3 className="mt-2 text-xl font-extrabold text-ink">계산 결과로 바로 이어서 할 일</h3>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-brand">맞춤 추천</span>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {nextActions.map((action) => (
+                <a
+                  key={action.title}
+                  href={action.href}
+                  className="flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-white p-4 transition hover:-translate-y-0.5 hover:border-brand hover:shadow-sm"
+                >
+                  <span>
+                    <span className="block text-base font-extrabold text-ink">{action.title}</span>
+                    <span className="mt-2 block text-sm font-medium leading-6 text-slate-600">{action.text}</span>
+                  </span>
+                  <span
+                    className={`mt-4 inline-flex w-fit rounded-full px-4 py-2 text-xs font-extrabold text-white ${
+                      action.tone === "ink" ? "bg-ink" : "bg-brand"
+                    }`}
+                  >
+                    {action.label}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div id="result-actions" className="mt-5 flex flex-wrap gap-3">
           <button
             type="button"
             onClick={saveCurrentResult}
@@ -5578,6 +5620,254 @@ function formatInputValue(
     : value.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
 
   return field.unit ? `${formatted}${field.unit}` : formatted;
+}
+
+function getNextActions(slug: CalculatorSlug): NextAction[] {
+  const defaultActions: NextAction[] = [
+    {
+      title: "관련 계산기 이어서 보기",
+      text: "같은 주제의 계산기를 함께 확인해 결과를 다른 조건과 비교해 보세요.",
+      href: "/calculators",
+      label: "계산기 전체 보기"
+    },
+    {
+      title: "결과 저장·공유하기",
+      text: "계산 결과를 저장하거나 이미지 카드로 공유해 나중에 다시 비교할 수 있습니다.",
+      href: "#result-actions",
+      label: "아래 저장 버튼 사용",
+      tone: "ink"
+    }
+  ];
+
+  const actionsBySlug: Partial<Record<CalculatorSlug, NextAction[]>> = {
+    severance: [
+      {
+        title: "실업급여까지 이어서 확인",
+        text: "퇴직금 예상액을 확인했다면 이직 후 받을 수 있는 구직급여 기간과 총액도 함께 보세요.",
+        href: "/calculators/unemployment",
+        label: "실업급여 계산"
+      },
+      {
+        title: "퇴직소득세 영향 보기",
+        text: "퇴직급여가 커질수록 세후 수령액 차이가 생깁니다. 퇴직소득세를 별도로 점검하세요.",
+        href: "/calculators/retirement-income-tax",
+        label: "퇴직소득세 계산",
+        tone: "ink"
+      }
+    ],
+    unemployment: [
+      {
+        title: "퇴직금과 같이 보기",
+        text: "실업급여 예상액과 퇴직금을 함께 보면 퇴사 후 현금흐름을 더 현실적으로 볼 수 있습니다.",
+        href: "/calculators/severance",
+        label: "퇴직금 계산"
+      },
+      {
+        title: "월 실수령액 비교",
+        text: "재취업 조건을 비교하려면 세후 월급 기준으로 이전 직장과 비교해 보세요.",
+        href: "/calculators/net-salary",
+        label: "실수령액 계산",
+        tone: "ink"
+      }
+    ],
+    "unpaid-wage": [
+      {
+        title: "신고서 문안 만들기",
+        text: "아래 고용노동부 신고서 초안 영역에서 미지급 항목을 정리하고 바로 민원 신청으로 이동하세요.",
+        href: "#result-actions",
+        label: "신고 준비하기"
+      },
+      {
+        title: "최저임금 위반 여부 확인",
+        text: "체불 금액이 최저임금 미달과 연결되는지 환산 시급도 함께 점검하세요.",
+        href: "/calculators/minimum-wage",
+        label: "최저임금 확인",
+        tone: "ink"
+      }
+    ],
+    "minimum-wage": [
+      {
+        title: "임금체불 금액 합산",
+        text: "최저임금 미달 가능성이 있다면 미지급 월급, 주휴수당, 연차수당까지 합산해 보세요.",
+        href: "/calculators/unpaid-wage",
+        label: "체불임금 계산"
+      },
+      {
+        title: "시급을 월급으로 환산",
+        text: "근무시간 조건별 일급·주급·월급을 비교해 계약 조건을 다시 확인하세요.",
+        href: "/calculators/hourly-wage",
+        label: "시급 계산",
+        tone: "ink"
+      }
+    ],
+    "year-end-tax-settlement": [
+      {
+        title: "근로소득세 구조 확인",
+        text: "환급 또는 추가납부가 나온 이유를 보려면 연간 근로소득세 흐름을 먼저 확인하세요.",
+        href: "/calculators/earned-income-tax",
+        label: "근로소득세 계산"
+      },
+      {
+        title: "연금계좌 절세액 보기",
+        text: "IRP·연금저축 납입액을 조정해 다음 연말정산 절세 여지를 확인하세요.",
+        href: "/calculators/pension-tax",
+        label: "연금 절세 계산",
+        tone: "ink"
+      }
+    ],
+    "earned-income-tax": [
+      {
+        title: "연말정산 환급까지 보기",
+        text: "소득세 예상액을 확인했다면 카드·의료비·연금 공제를 반영한 환급액도 비교하세요.",
+        href: "/calculators/year-end-tax-settlement",
+        label: "연말정산 계산"
+      },
+      {
+        title: "세후 월급으로 바꾸기",
+        text: "연간 세금뿐 아니라 4대 보험을 포함한 월 실수령액도 함께 확인하세요.",
+        href: "/calculators/net-salary",
+        label: "실수령액 계산",
+        tone: "ink"
+      }
+    ],
+    "real-estate-acquisition-tax": [
+      {
+        title: "주거비 조건 비교",
+        text: "취득 비용이 부담된다면 전세와 월세의 월 기회비용도 함께 비교해 보세요.",
+        href: "/calculators/jeonse-vs-monthly-rent",
+        label: "전세 vs 월세"
+      },
+      {
+        title: "중개보수까지 보기",
+        text: "매수 예산에는 취득세 외에 중개보수와 이사비도 함께 반영해야 합니다.",
+        href: "/calculators/real-estate-brokerage-fee",
+        label: "중개보수 계산",
+        tone: "ink"
+      }
+    ],
+    "loan-interest": [
+      {
+        title: "대출 한도와 DSR 보기",
+        text: "월 상환액이 부담되지 않는지 소득 기준 DSR과 LTV를 함께 확인하세요.",
+        href: "/calculators/loan-dsr",
+        label: "DSR 계산"
+      },
+      {
+        title: "상환표로 장기 비용 확인",
+        text: "월 납입액뿐 아니라 총이자와 원금 감소 흐름을 상환 스케줄로 확인하세요.",
+        href: "/calculators/loan-amortization",
+        label: "상환 스케줄",
+        tone: "ink"
+      }
+    ],
+    "loan-dsr": [
+      {
+        title: "월 상환액 상세 계산",
+        text: "가능 한도를 봤다면 실제 금리와 기간으로 월 납입액을 다시 계산하세요.",
+        href: "/calculators/loan-interest",
+        label: "대출이자 계산"
+      },
+      {
+        title: "중도상환 효과 보기",
+        text: "여유 자금이 있다면 중도상환으로 줄어드는 이자도 함께 비교하세요.",
+        href: "/calculators/loan-prepayment",
+        label: "중도상환 계산",
+        tone: "ink"
+      }
+    ],
+    "pension-tax": [
+      {
+        title: "연말정산 환급 영향 확인",
+        text: "연금계좌 절세액이 실제 환급에 얼마나 반영되는지 연말정산 계산기로 이어서 보세요.",
+        href: "/calculators/year-end-tax-settlement",
+        label: "연말정산 계산"
+      },
+      {
+        title: "은퇴자금 부족액 보기",
+        text: "절세와 별개로 은퇴 시점의 목표 자금과 부족액을 함께 점검하세요.",
+        href: "/calculators/retirement-savings",
+        label: "은퇴자금 계산",
+        tone: "ink"
+      }
+    ],
+    "traffic-fine-penalty": [
+      {
+        title: "납부기한 계산",
+        text: "고지서 납부기한과 경과일을 날짜 차이 계산기로 확인해 가산금 위험을 줄이세요.",
+        href: "/calculators/date-diff",
+        label: "날짜 차이 계산"
+      },
+      {
+        title: "차량 유지비에 반영",
+        text: "과태료까지 포함해 이번 달 차량 관련 지출을 다시 계산해 보세요.",
+        href: "/calculators/car-maintenance",
+        label: "자동차 유지비 계산",
+        tone: "ink"
+      }
+    ],
+    "pet-age": [
+      {
+        title: "입양일 기준 기간 계산",
+        text: "생일이나 입양일을 기준으로 정확히 몇 년 몇 개월이 지났는지 먼저 확인할 수 있습니다.",
+        href: "/calculators/date-diff",
+        label: "날짜 차이 계산"
+      },
+      {
+        title: "생활 계산기 더 보기",
+        text: "반려 생활에 함께 쓰기 좋은 날짜, 단위, 거리 계산기를 이어서 확인하세요.",
+        href: "/life",
+        label: "생활 도구 보기",
+        tone: "ink"
+      }
+    ],
+    "adsense-revenue": [
+      {
+        title: "YouTube 수익도 비교",
+        text: "콘텐츠 채널을 함께 운영한다면 조회수 기반 YouTube 광고 수익도 비교해 보세요.",
+        href: "/calculators/youtube-ad-revenue",
+        label: "유튜브 수익 계산"
+      },
+      {
+        title: "손익분기점 확인",
+        text: "콘텐츠 제작비와 운영비를 넣어 월 손익분기 트래픽을 확인하세요.",
+        href: "/calculators/break-even",
+        label: "손익분기점 계산",
+        tone: "ink"
+      }
+    ],
+    "youtube-ad-revenue": [
+      {
+        title: "애드센스 수익과 비교",
+        text: "사이트형 콘텐츠 수익과 영상 수익을 같은 기준으로 비교해 보세요.",
+        href: "/calculators/adsense-revenue",
+        label: "애드센스 계산"
+      },
+      {
+        title: "구독 매출 시뮬레이션",
+        text: "광고 외 멤버십이나 유료 구독 매출 모델도 함께 계산해 보세요.",
+        href: "/calculators/subscription-revenue",
+        label: "구독 매출 계산",
+        tone: "ink"
+      }
+    ],
+    "stock-return": [
+      {
+        title: "물타기 평균단가 확인",
+        text: "추가 매수 전 평균단가가 어떻게 바뀌는지 먼저 계산해 보세요.",
+        href: "/calculators/stock-average-price",
+        label: "평균단가 계산"
+      },
+      {
+        title: "복리 투자 성장 보기",
+        text: "단일 매매 수익률뿐 아니라 장기 투자 시나리오도 함께 확인하세요.",
+        href: "/calculators/compound-interest",
+        label: "복리 계산",
+        tone: "ink"
+      }
+    ]
+  };
+
+  return actionsBySlug[slug] ?? defaultActions;
 }
 
 function formatSavedAt(value: string) {
