@@ -39,6 +39,18 @@ type NextAction = {
   tone?: "brand" | "ink";
 };
 
+type ActionPlan = {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  steps: string[];
+  links: {
+    href: string;
+    label: string;
+    text: string;
+  }[];
+};
+
 function formStorageKey(slug: CalculatorSlug) {
   return `calcrule:calculator-form:${slug}`;
 }
@@ -133,6 +145,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const highlightedRows = result.rows.filter((row) => row.tone === "strong");
   const relatedCalculators = useMemo(() => getRelatedCalculators(activeCalculator.slug, 4), [activeCalculator.slug]);
   const nextActions = useMemo(() => getNextActions(activeCalculator.slug), [activeCalculator.slug]);
+  const actionPlan = useMemo(() => getActionPlan(activeCalculator.slug), [activeCalculator.slug]);
   const visibleFields = useMemo(() => {
     return activeCalculator.fields.filter((field) => {
       if (activeCalculator.slug === "pet-age" && field.name === "dogSize") {
@@ -489,6 +502,45 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                   </span>
                 </a>
               ))}
+            </div>
+          </div>
+        )}
+
+        {actionPlan && (
+          <div className="mt-5 rounded-[18px] border border-line bg-paper p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="max-w-2xl">
+                <p className="text-sm font-extrabold text-brand">{actionPlan.eyebrow}</p>
+                <h3 className="mt-2 text-xl font-extrabold text-ink">{actionPlan.title}</h3>
+                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{actionPlan.intro}</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">상담 전 정리</span>
+            </div>
+            <div className="mt-5 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="grid gap-2">
+                {actionPlan.steps.map((step, index) => (
+                  <div key={step} className="flex gap-3 rounded-2xl bg-white px-4 py-4">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-extrabold text-white">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm font-medium leading-6 text-slate-700">{step}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="grid gap-2">
+                {actionPlan.links.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target={link.href.startsWith("http") ? "_blank" : undefined}
+                    rel={link.href.startsWith("http") ? "noreferrer" : undefined}
+                    className="rounded-2xl border border-line bg-white px-4 py-4 transition hover:border-brand hover:shadow-sm"
+                  >
+                    <span className="block text-sm font-extrabold text-ink">{link.label}</span>
+                    <span className="mt-2 block text-sm font-medium leading-6 text-slate-600">{link.text}</span>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -5868,6 +5920,259 @@ function getNextActions(slug: CalculatorSlug): NextAction[] {
   };
 
   return actionsBySlug[slug] ?? defaultActions;
+}
+
+function getActionPlan(slug: CalculatorSlug): ActionPlan | null {
+  const group = getCalculatorGroup(slug);
+  const plansBySlug: Partial<Record<CalculatorSlug, ActionPlan>> = {
+    "unpaid-wage": {
+      eyebrow: "신고 준비 플랜",
+      title: "임금체불 신고 전 3가지를 먼저 정리하세요",
+      intro: "체불임금은 금액보다 근무기간, 지급 약정, 실제 지급 내역이 중요합니다. 계산 결과를 신고서 문안과 함께 정리하면 민원 작성 시간이 줄어듭니다.",
+      steps: [
+        "근로계약서, 급여명세서, 출퇴근 기록, 계좌 입금 내역을 같은 기간 기준으로 모읍니다.",
+        "기본급, 주휴수당, 연장·야간·휴일수당, 연차수당 중 어떤 항목이 미지급인지 나눕니다.",
+        "아래 신고서 초안 문구를 복사한 뒤 고용노동부 민원 신청 화면에서 사실관계 중심으로 붙여 넣습니다."
+      ],
+      links: [
+        {
+          href: "https://www.moel.go.kr/minwon/apply/formApplyList.do",
+          label: "고용노동부 민원신청",
+          text: "임금체불 진정, 기타 노동 민원을 공식 채널에서 신청합니다."
+        },
+        {
+          href: "/calculators/minimum-wage",
+          label: "최저임금 모의 계산",
+          text: "시급 환산 금액이 최저임금에 미달하는지 이어서 확인합니다."
+        }
+      ]
+    },
+    "year-end-tax-settlement": {
+      eyebrow: "환급 점검 플랜",
+      title: "연말정산 결과가 바뀌는 항목부터 다시 확인하세요",
+      intro: "환급액은 소득공제보다 세액공제 항목에서 체감 차이가 크게 나는 경우가 많습니다. 계산 결과가 예상과 다르면 증빙 누락 여부를 먼저 보세요.",
+      steps: [
+        "국세청 간소화 자료에서 의료비, 교육비, 기부금, 보험료, 연금계좌 자료가 누락되지 않았는지 확인합니다.",
+        "부양가족 공제는 소득요건과 중복공제 여부를 먼저 점검합니다.",
+        "환급액 차이가 크면 근로소득세 계산기와 연금 절세 계산기로 원인을 분리해 봅니다."
+      ],
+      links: [
+        {
+          href: "https://www.hometax.go.kr",
+          label: "홈택스",
+          text: "연말정산 간소화 자료, 신고·납부, 증명 발급을 확인합니다."
+        },
+        {
+          href: "/calculators/pension-tax",
+          label: "IRP·연금저축 절세액",
+          text: "다음 연말정산에서 조정할 수 있는 세액공제 여지를 계산합니다."
+        }
+      ]
+    },
+    "inheritance-tax": {
+      eyebrow: "상속 상담 준비",
+      title: "상속세는 재산 목록과 공제 요건을 먼저 분리하세요",
+      intro: "상속세는 입력한 재산 총액보다 평가 방식, 채무, 사전증여, 배우자공제 요건에 따라 실제 신고세액이 크게 달라질 수 있습니다.",
+      steps: [
+        "부동산, 금융재산, 보험금, 채무, 장례비, 사전증여를 항목별로 분리해 목록화합니다.",
+        "공동상속인 관계와 배우자공제 적용 가능성을 별도로 정리합니다.",
+        "신고기한과 필요한 증빙을 확인한 뒤 세무 상담 시 계산 결과와 입력값을 함께 제시합니다."
+      ],
+      links: [
+        {
+          href: "https://www.hometax.go.kr",
+          label: "홈택스",
+          text: "상속세 신고, 납부, 관련 증명 발급을 확인합니다."
+        },
+        {
+          href: "https://txsi.hometax.go.kr",
+          label: "국세법령정보시스템",
+          text: "상속세 관련 법령, 예규, 판례를 공식 자료로 확인합니다."
+        }
+      ]
+    },
+    "loan-interest": {
+      eyebrow: "대출 상담 준비",
+      title: "월 납입액만 보지 말고 한도와 중도상환 조건을 같이 보세요",
+      intro: "대출 비교는 금리 하나로 끝나지 않습니다. 상환 방식, DSR, 중도상환수수료, 변동금리 위험을 같이 정리해야 실제 부담을 볼 수 있습니다.",
+      steps: [
+        "월 납입액, 총이자, 만기, 상환방식을 같은 조건으로 맞춰 여러 금리를 비교합니다.",
+        "기존 대출의 연 원리금 상환액을 더해 DSR 기준을 함께 확인합니다.",
+        "갈아타기나 조기상환 가능성이 있다면 중도상환수수료와 남은 이자를 같이 계산합니다."
+      ],
+      links: [
+        {
+          href: "/calculators/loan-dsr",
+          label: "DSR/LTV 계산기",
+          text: "소득 기준으로 대출 여력과 월 상환 부담을 함께 봅니다."
+        },
+        {
+          href: "/calculators/loan-prepayment",
+          label: "중도상환 계산기",
+          text: "조기상환 시 줄어드는 이자와 수수료를 비교합니다."
+        }
+      ]
+    },
+    "real-estate-acquisition-tax": {
+      eyebrow: "부동산 비용 플랜",
+      title: "취득세는 매수 총비용 안에서 같이 봐야 합니다",
+      intro: "부동산 매수 비용은 취득세만으로 끝나지 않습니다. 중개보수, 이사비, 대출이자, 보유세까지 함께 놓아야 자금 계획이 안정적입니다.",
+      steps: [
+        "취득가액, 주택 수, 조정대상지역 여부, 감면 가능성을 계약 전 기준으로 다시 확인합니다.",
+        "중개보수, 등기비용, 이사비, 초기 수리비를 별도 예산으로 분리합니다.",
+        "대출을 함께 쓰는 경우 월 상환액과 보유세까지 더해 월 부담액을 확인합니다."
+      ],
+      links: [
+        {
+          href: "/calculators/real-estate-brokerage-fee",
+          label: "중개보수 계산기",
+          text: "매매·전월세 계약 전 예상 중개보수를 계산합니다."
+        },
+        {
+          href: "/calculators/property-tax",
+          label: "재산세 계산기",
+          text: "매수 후 보유기간에 발생할 세금까지 함께 봅니다."
+        }
+      ]
+    },
+    "stock-return": {
+      eyebrow: "투자 점검 플랜",
+      title: "수익률은 세금과 환율까지 같이 봐야 실제 성과가 보입니다",
+      intro: "투자 결과는 단순 수익률보다 매수 평균가, 세금, 환율, 수수료에 따라 체감 수익이 달라집니다.",
+      steps: [
+        "매수 단가와 추가 매수 계획을 평균단가 기준으로 다시 계산합니다.",
+        "국내·해외 주식 여부에 따라 배당세와 양도소득세 가능성을 분리합니다.",
+        "목표 수익률과 손실 허용 구간을 숫자로 정해 재진입 조건을 기록합니다."
+      ],
+      links: [
+        {
+          href: "/calculators/stock-average-price",
+          label: "주식 평단가 계산기",
+          text: "추가 매수 후 평균단가와 필요 매수 금액을 계산합니다."
+        },
+        {
+          href: "/calculators/stock-valuation",
+          label: "주식 가치평가 계산기",
+          text: "목표 가격과 현재 가격의 괴리를 함께 확인합니다."
+        }
+      ]
+    }
+  };
+
+  const plansByGroup: Partial<Record<ReturnType<typeof getCalculatorGroup>, ActionPlan>> = {
+    tax: {
+      eyebrow: "세금 신고 전 체크",
+      title: "계산 결과와 실제 신고 자료를 대조하세요",
+      intro: "세금 계산기는 신고 전 추정 도구입니다. 공제 요건, 증빙, 신고기한을 함께 확인해야 실제 납부액과 차이를 줄일 수 있습니다.",
+      steps: [
+        "입력한 금액이 총액인지 과세대상 금액인지 구분합니다.",
+        "공제와 감면 항목은 적용 요건, 한도, 중복 여부를 확인합니다.",
+        "최종 신고 전 홈택스 자료나 세무 상담으로 원자료와 대조합니다."
+      ],
+      links: [
+        {
+          href: "https://www.hometax.go.kr",
+          label: "홈택스",
+          text: "신고, 납부, 증명 발급, 간소화 자료 조회를 확인합니다."
+        },
+        {
+          href: "/tax",
+          label: "세금 계산기 모음",
+          text: "소득세, 상속세, 연금 절세 계산기를 이어서 봅니다."
+        }
+      ]
+    },
+    labor: {
+      eyebrow: "노무 분쟁 전 체크",
+      title: "근무 기록과 지급 내역을 같은 기간으로 맞추세요",
+      intro: "노무 계산은 실제 근무일, 약정임금, 지급 내역이 맞아야 의미가 있습니다. 계산 결과는 기록 정리와 상담 준비에 활용하세요.",
+      steps: [
+        "근로계약서, 급여명세서, 출퇴근 기록을 같은 기간으로 맞춥니다.",
+        "기본급, 수당, 퇴직금, 미지급 항목을 분리해 적습니다.",
+        "사업장과 협의가 어렵다면 공식 민원 또는 노무 상담 전 자료로 정리합니다."
+      ],
+      links: [
+        {
+          href: "https://www.moel.go.kr",
+          label: "고용노동부",
+          text: "임금, 휴가, 퇴직, 고용보험 관련 공식 안내를 확인합니다."
+        },
+        {
+          href: "/labor",
+          label: "노무 계산기 모음",
+          text: "퇴직금, 실업급여, 연차, 최저임금 계산기를 함께 봅니다."
+        }
+      ]
+    },
+    loan: {
+      eyebrow: "금융 상담 전 체크",
+      title: "금리, 기간, 한도, 총비용을 같은 표로 비교하세요",
+      intro: "금융 계산 결과는 상품 조건에 따라 달라집니다. 상담 전에는 월 부담과 총비용을 같이 정리하는 것이 좋습니다.",
+      steps: [
+        "금리, 만기, 상환방식, 수수료를 같은 기준으로 맞춥니다.",
+        "월 상환액과 총이자를 나눠서 비교합니다.",
+        "소득 대비 상환 부담과 비상자금 여력을 함께 확인합니다."
+      ],
+      links: [
+        {
+          href: "/loan",
+          label: "대출 계산기 모음",
+          text: "이자, DSR, 상환표, 중도상환 효과를 이어서 봅니다."
+        },
+        {
+          href: "https://finlife.fss.or.kr",
+          label: "금융상품 한눈에",
+          text: "금융감독원 금융상품 비교 공시를 참고합니다."
+        }
+      ]
+    },
+    investment: {
+      eyebrow: "투자 판단 전 체크",
+      title: "수익률과 위험을 같은 기준으로 기록하세요",
+      intro: "투자 계산기는 의사결정을 돕는 도구입니다. 실제 매매 전에는 세금, 수수료, 환율, 손실 가능성을 함께 확인해야 합니다.",
+      steps: [
+        "투입 원금, 추가 납입, 예상 수익률을 보수적으로 입력합니다.",
+        "세금, 수수료, 환율 영향을 별도로 점검합니다.",
+        "목표 수익과 손실 허용 범위를 숫자로 기록합니다."
+      ],
+      links: [
+        {
+          href: "/stock",
+          label: "주식·투자 계산기 모음",
+          text: "평단가, 수익률, 복리, 세금 계산기를 함께 봅니다."
+        },
+        {
+          href: "/calculators/compound-interest",
+          label: "복리 계산기",
+          text: "장기 수익률이 자산에 미치는 영향을 시뮬레이션합니다."
+        }
+      ]
+    },
+    business: {
+      eyebrow: "사업 판단 전 체크",
+      title: "매출보다 손익분기와 현금흐름을 먼저 보세요",
+      intro: "사업 계산은 매출 예상보다 고정비, 변동비, 광고비 회수 기간이 더 중요할 때가 많습니다.",
+      steps: [
+        "고정비와 변동비를 분리하고 월 기준으로 환산합니다.",
+        "손익분기 매출과 실제 가능한 판매량을 비교합니다.",
+        "광고비, 수수료, 세금 이후 남는 현금흐름을 확인합니다."
+      ],
+      links: [
+        {
+          href: "/business",
+          label: "사업 계산기 모음",
+          text: "손익분기, 광고수익, 구독수익 계산기를 함께 봅니다."
+        },
+        {
+          href: "/calculators/break-even",
+          label: "손익분기점 계산기",
+          text: "고정비와 마진 기준으로 필요한 매출을 계산합니다."
+        }
+      ]
+    }
+  };
+
+  return plansBySlug[slug] ?? plansByGroup[group] ?? null;
 }
 
 function formatSavedAt(value: string) {
