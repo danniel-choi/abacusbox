@@ -1,4 +1,4 @@
-import { error, getD1Binding, isMissingTableError, json, readJson, requireAdmin } from "../_lib/http.js";
+import { error, getD1Binding, json, readJson, requireAdmin } from "../_lib/http.js";
 
 const ACTIVE_WINDOW_MINUTES = 5;
 const TEST_VISITOR_PREFIXES = ["verify-", "local-check-"];
@@ -45,8 +45,7 @@ export async function onRequestGet(context) {
     const db = getD1Binding(context.env);
     if (!db) throw new Error("D1 binding is unavailable");
     return json(await readVisitorStats(db));
-  } catch (cause) {
-    if (!isMissingTableError(cause) && !String(cause?.message || cause).includes("D1 binding is unavailable")) throw cause;
+  } catch {
     return json(fallbackStats());
   }
 }
@@ -64,27 +63,31 @@ export async function onRequestPost(context) {
     const db = getD1Binding(context.env);
     if (!db) throw new Error("D1 binding is unavailable");
 
-    const updateResult = await db.prepare(`
-      UPDATE site_visitors
-      SET last_seen_at = CURRENT_TIMESTAMP,
-          last_path = ?
-      WHERE visitor_id = ?
-    `).bind(path || "/", visitorId).run();
+    try {
+      const updateResult = await db.prepare(`
+        UPDATE site_visitors
+        SET last_seen_at = CURRENT_TIMESTAMP,
+            last_path = ?
+        WHERE visitor_id = ?
+      `).bind(path || "/", visitorId).run();
 
-    if (Number(updateResult?.meta?.changes || 0) === 0) {
-      try {
-        await db.prepare(`
-          INSERT INTO site_visitors (visitor_id, first_seen_at, last_seen_at, last_path)
-          VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
-        `).bind(visitorId, path || "/").run();
-      } catch {
-        await db.prepare(`
-          UPDATE site_visitors
-          SET last_seen_at = CURRENT_TIMESTAMP,
-              last_path = ?
-          WHERE visitor_id = ?
-        `).bind(path || "/", visitorId).run();
+      if (Number(updateResult?.meta?.changes || 0) === 0) {
+        try {
+          await db.prepare(`
+            INSERT INTO site_visitors (visitor_id, first_seen_at, last_seen_at, last_path)
+            VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
+          `).bind(visitorId, path || "/").run();
+        } catch {
+          await db.prepare(`
+            UPDATE site_visitors
+            SET last_seen_at = CURRENT_TIMESTAMP,
+                last_path = ?
+            WHERE visitor_id = ?
+          `).bind(path || "/", visitorId).run();
+        }
       }
+    } catch {
+      // Still return readable stats when a heartbeat write fails transiently.
     }
 
     return json(await readVisitorStats(db));
