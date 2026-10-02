@@ -52,29 +52,43 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
-  const payload = await readJson(context.request);
-  const visitorId = String(payload?.visitorId || "").trim().slice(0, 120);
-  const path = String(payload?.path || "").trim().slice(0, 200);
-
-  if (!visitorId) {
-    return error("visitorId is required", 400);
-  }
-
   try {
+    const payload = await readJson(context.request);
+    const visitorId = String(payload?.visitorId || "").trim().slice(0, 120);
+    const path = String(payload?.path || "").trim().slice(0, 200);
+
+    if (!visitorId) {
+      return error("visitorId is required", 400);
+    }
+
     const db = getD1Binding(context.env);
     if (!db) throw new Error("D1 binding is unavailable");
 
-    await db.prepare(`
-      INSERT INTO site_visitors (visitor_id, first_seen_at, last_seen_at, last_path)
-      VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
-      ON CONFLICT(visitor_id) DO UPDATE SET
-        last_seen_at = CURRENT_TIMESTAMP,
-        last_path = excluded.last_path
-    `).bind(visitorId, path || "/").run();
+    const updateResult = await db.prepare(`
+      UPDATE site_visitors
+      SET last_seen_at = CURRENT_TIMESTAMP,
+          last_path = ?
+      WHERE visitor_id = ?
+    `).bind(path || "/", visitorId).run();
+
+    if (Number(updateResult?.meta?.changes || 0) === 0) {
+      try {
+        await db.prepare(`
+          INSERT INTO site_visitors (visitor_id, first_seen_at, last_seen_at, last_path)
+          VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
+        `).bind(visitorId, path || "/").run();
+      } catch {
+        await db.prepare(`
+          UPDATE site_visitors
+          SET last_seen_at = CURRENT_TIMESTAMP,
+              last_path = ?
+          WHERE visitor_id = ?
+        `).bind(path || "/", visitorId).run();
+      }
+    }
 
     return json(await readVisitorStats(db));
-  } catch (cause) {
-    if (!isMissingTableError(cause) && !String(cause?.message || cause).includes("D1 binding is unavailable")) throw cause;
+  } catch {
     return json(fallbackStats());
   }
 }
