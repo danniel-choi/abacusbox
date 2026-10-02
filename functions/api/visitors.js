@@ -100,6 +100,46 @@ async function incrementStat(db, key, amount = 1) {
   `).bind(amount, key).run();
 }
 
+async function recordVisitorHeartbeat(db, visitorId, path) {
+  try {
+    const updateResult = await db.prepare(`
+      UPDATE site_visitors
+      SET last_seen_at = CURRENT_TIMESTAMP,
+          last_path = ?
+      WHERE visitor_id = ?
+    `).bind(path || "/", visitorId).run();
+
+    const isNewVisitor = Number(updateResult?.meta?.changes || 0) === 0;
+    if (isNewVisitor) {
+      try {
+        await db.prepare(`
+          INSERT INTO site_visitors (visitor_id, first_seen_at, last_seen_at, last_path)
+          VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
+        `).bind(visitorId, path || "/").run();
+        await incrementStat(db, "total_visitors");
+      } catch {
+        await db.prepare(`
+          UPDATE site_visitors
+          SET last_seen_at = CURRENT_TIMESTAMP,
+              last_path = ?
+          WHERE visitor_id = ?
+        `).bind(path || "/", visitorId).run();
+      }
+    }
+
+    const dayKey = getKstDayKey();
+    const dailyResult = await db.prepare(`
+      INSERT OR IGNORE INTO site_visitor_days (day, visitor_id, first_seen_at)
+      VALUES (?, ?, CURRENT_TIMESTAMP)
+    `).bind(dayKey, visitorId).run();
+    if (Number(dailyResult?.meta?.changes || 0) > 0) {
+      await incrementStat(db, `today:${dayKey}`);
+    }
+  } catch {
+    // Heartbeat writes are best-effort; stats reads should keep working.
+  }
+}
+
 export async function onRequestGet(context) {
   try {
     const db = getD1Binding(context.env);
@@ -122,46 +162,11 @@ export async function onRequestPost(context) {
 
     const db = getD1Binding(context.env);
     if (!db) throw new Error("D1 binding is unavailable");
+    const stats = await readVisitorStats(db);
 
-    try {
-      const updateResult = await db.prepare(`
-        UPDATE site_visitors
-        SET last_seen_at = CURRENT_TIMESTAMP,
-            last_path = ?
-        WHERE visitor_id = ?
-      `).bind(path || "/", visitorId).run();
+    context.waitUntil?.(recordVisitorHeartbeat(db, visitorId, path));
 
-      const isNewVisitor = Number(updateResult?.meta?.changes || 0) === 0;
-      if (isNewVisitor) {
-        try {
-          await db.prepare(`
-            INSERT INTO site_visitors (visitor_id, first_seen_at, last_seen_at, last_path)
-            VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
-          `).bind(visitorId, path || "/").run();
-          await incrementStat(db, "total_visitors");
-        } catch {
-          await db.prepare(`
-            UPDATE site_visitors
-            SET last_seen_at = CURRENT_TIMESTAMP,
-                last_path = ?
-            WHERE visitor_id = ?
-          `).bind(path || "/", visitorId).run();
-        }
-      }
-
-      const dayKey = getKstDayKey();
-      const dailyResult = await db.prepare(`
-        INSERT OR IGNORE INTO site_visitor_days (day, visitor_id, first_seen_at)
-        VALUES (?, ?, CURRENT_TIMESTAMP)
-      `).bind(dayKey, visitorId).run();
-      if (Number(dailyResult?.meta?.changes || 0) > 0) {
-        await incrementStat(db, `today:${dayKey}`);
-      }
-    } catch {
-      // Still return readable stats when a heartbeat write fails transiently.
-    }
-
-    return json(await readVisitorStats(db));
+    return json(stats);
   } catch {
     return json(fallbackStats());
   }
