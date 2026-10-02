@@ -3394,10 +3394,10 @@ type PokerSlot = { area: "player" | "board"; playerIndex?: number; cardIndex: nu
 
 const pokerRanks = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"];
 const pokerSuits = [
-  { id: "s", label: "♠", color: "text-slate-900" },
-  { id: "h", label: "♥", color: "text-red-600" },
-  { id: "d", label: "♦", color: "text-blue-600" },
-  { id: "c", label: "♣", color: "text-emerald-700" }
+  { id: "s", label: "♠", color: "text-slate-950", name: "스페이드" },
+  { id: "h", label: "♥", color: "text-red-600", name: "하트" },
+  { id: "d", label: "♦", color: "text-red-600", name: "다이아" },
+  { id: "c", label: "♣", color: "text-slate-950", name: "클럽" }
 ];
 const pokerDeck = pokerRanks.flatMap((rank) => pokerSuits.map((suit) => `${rank}${suit.id}` as PokerCard));
 const rankValueMap = new Map(pokerRanks.map((rank, index) => [rank, 14 - index]));
@@ -3535,6 +3535,7 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
           <div className="grid grid-cols-4 gap-3">
             {pokerSuits.map((suit) => (
               <div key={suit.id} className="grid gap-1">
+                <p className="mb-1 text-center text-xs font-extrabold text-slate-500">{suit.name}</p>
                 {pokerRanks.map((rank) => {
                   const card = `${rank}${suit.id}` as PokerCard;
                   const isUsed = selectedCards.includes(card);
@@ -3544,9 +3545,10 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
                       type="button"
                       onClick={() => setCard(card)}
                       disabled={isUsed}
-                      className={`h-9 rounded-xl border border-line bg-paper text-sm font-black disabled:opacity-30 ${suit.color}`}
+                      className={`rounded-xl border border-line bg-white px-1 py-1 transition hover:border-brand hover:shadow-sm disabled:bg-slate-100 disabled:opacity-35 disabled:shadow-none`}
+                      aria-label={`${rank}${suit.name}`}
                     >
-                      {rank}{suit.label}
+                      <PokerCardFace card={card} size="picker" />
                     </button>
                   );
                 })}
@@ -3571,7 +3573,14 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 <GeometryMetric label="승률" value={`${row.winRate.toFixed(1)}%`} />
                 <GeometryMetric label="타이율" value={`${row.tieRate.toFixed(1)}%`} />
-                <GeometryMetric label="핸드" value={(players[row.index].filter(Boolean) as PokerCard[]).map(formatPokerCard).join(" ")} />
+                <div className="rounded-2xl border border-line bg-white px-4 py-3">
+                  <p className="text-xs font-bold text-slate-500">핸드</p>
+                  <div className="mt-2 flex gap-2">
+                    {(players[row.index].filter(Boolean) as PokerCard[]).map((card) => (
+                      <PokerCardFace key={card} card={card} size="small" />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -3588,16 +3597,39 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
 
 function PokerCardSlot({ card, active, onClick }: { card: PokerCard | null; active: boolean; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className={`h-14 rounded-2xl border px-2 text-lg font-black ${active ? "border-brand bg-white text-brand" : "border-line bg-white text-ink"}`}>
-      {card ? formatPokerCard(card) : "선택"}
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex min-h-24 items-center justify-center rounded-2xl border px-2 py-2 transition ${
+        active ? "border-brand bg-[#f0fffa] shadow-[0_0_0_3px_rgba(20,184,166,0.14)]" : "border-line bg-white hover:border-brand hover:shadow-sm"
+      }`}
+    >
+      {card ? <PokerCardFace card={card} size="slot" /> : <span className="text-sm font-extrabold text-slate-400">선택</span>}
     </button>
   );
 }
 
-function formatPokerCard(card: PokerCard) {
+function PokerCardFace({ card, size }: { card: PokerCard; size: "picker" | "small" | "slot" }) {
   const rank = card[0];
   const suit = pokerSuits.find((item) => item.id === card[1]);
-  return `${rank}${suit?.label ?? card[1]}`;
+  const color = suit?.color ?? "text-slate-950";
+  const dimensions = {
+    picker: "h-10 w-8 rounded-lg",
+    small: "h-16 w-11 rounded-xl",
+    slot: "h-20 w-14 rounded-xl"
+  }[size];
+  const rankClass = size === "picker" ? "text-[13px] leading-none" : size === "small" ? "text-base leading-none" : "text-lg leading-none";
+  const suitClass = size === "picker" ? "text-lg leading-none" : size === "small" ? "text-2xl leading-none" : "text-3xl leading-none";
+  const cornerClass = size === "picker" ? "hidden" : "block text-[10px] font-black leading-none";
+
+  return (
+    <span className={`relative inline-flex ${dimensions} shrink-0 flex-col items-center justify-center border border-slate-200 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.12)] ${color}`}>
+      <span className={`font-black ${rankClass}`}>{rank}</span>
+      <span className={`mt-0.5 font-black ${suitClass}`}>{suit?.label ?? card[1]}</span>
+      <span className={`absolute left-1 top-1 ${cornerClass}`}>{rank}</span>
+      <span className={`absolute bottom-1 right-1 rotate-180 ${cornerClass}`}>{rank}</span>
+    </span>
+  );
 }
 
 function createPokerSeededRandom(seed: number) {
