@@ -3409,9 +3409,16 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
   ]);
   const [board, setBoard] = useState<(PokerCard | null)[]>([null, null, null, null, null]);
   const [activeSlot, setActiveSlot] = useState<PokerSlot>({ area: "player", playerIndex: 0, cardIndex: 0 });
+  const [cardPickerOpen, setCardPickerOpen] = useState(false);
   const [samples, setSamples] = useState(2500);
 
   const selectedCards = [...players.flat(), ...board].filter(Boolean) as PokerCard[];
+  const activeCard = activeSlot.area === "board"
+    ? board[activeSlot.cardIndex]
+    : players[activeSlot.playerIndex ?? 0]?.[activeSlot.cardIndex] ?? null;
+  const activeSlotLabel = activeSlot.area === "board"
+    ? `보드 ${activeSlot.cardIndex + 1}`
+    : `플레이어 ${(activeSlot.playerIndex ?? 0) + 1} 카드 ${activeSlot.cardIndex + 1}`;
   const duplicateCards = selectedCards.filter((card, index) => selectedCards.indexOf(card) !== index);
   const completePlayers = players.filter((hand) => hand[0] && hand[1]).length;
   const knownBoardCards = board.filter(Boolean).length;
@@ -3444,6 +3451,16 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
     )));
   }
 
+  function openCardPicker(slot: PokerSlot) {
+    setActiveSlot(slot);
+    setCardPickerOpen(true);
+  }
+
+  function chooseCard(card: PokerCard | null) {
+    setCard(card);
+    setCardPickerOpen(false);
+  }
+
   function addPlayer() {
     setPlayers((current) => current.length >= 6 ? current : [...current, [null, null]]);
   }
@@ -3460,6 +3477,7 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
     ]);
     setBoard([null, null, null, null, null]);
     setActiveSlot({ area: "player", playerIndex: 0, cardIndex: 0 });
+    setCardPickerOpen(false);
   }
 
   return (
@@ -3490,7 +3508,7 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
                     key={cardIndex}
                     card={hand[cardIndex]}
                     active={activeSlot.area === "player" && activeSlot.playerIndex === playerIndex && activeSlot.cardIndex === cardIndex}
-                    onClick={() => setActiveSlot({ area: "player", playerIndex, cardIndex })}
+                    onClick={() => openCardPicker({ area: "player", playerIndex, cardIndex })}
                   />
                 ))}
               </div>
@@ -3509,7 +3527,7 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
                 key={cardIndex}
                 card={card}
                 active={activeSlot.area === "board" && activeSlot.cardIndex === cardIndex}
-                onClick={() => setActiveSlot({ area: "board", cardIndex })}
+                onClick={() => openCardPicker({ area: "board", cardIndex })}
               />
             ))}
           </div>
@@ -3524,39 +3542,53 @@ function PokerEquityCalculator({ title, checkpoints }: { title: string; checkpoi
             <option value={10000}>10,000회 더 정밀</option>
           </select>
         </label>
+      </section>
 
-        <div className="mt-5 rounded-[18px] border border-line bg-white p-4">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-sm font-extrabold text-ink">카드 선택</p>
-            <button type="button" onClick={() => setCard(null)} className="text-xs font-extrabold text-slate-500 hover:text-red-600">
-              선택 칸 비우기
-            </button>
-          </div>
-          <div className="grid grid-cols-4 gap-3">
-            {pokerSuits.map((suit) => (
-              <div key={suit.id} className="grid gap-1">
-                <p className="mb-1 text-center text-xs font-extrabold text-slate-500">{suit.name}</p>
-                {pokerRanks.map((rank) => {
-                  const card = `${rank}${suit.id}` as PokerCard;
-                  const isUsed = selectedCards.includes(card);
-                  return (
-                    <button
-                      key={card}
-                      type="button"
-                      onClick={() => setCard(card)}
-                      disabled={isUsed}
-                      className={`rounded-xl border border-line bg-white px-1 py-1 transition hover:border-brand hover:shadow-sm disabled:bg-slate-100 disabled:opacity-35 disabled:shadow-none`}
-                      aria-label={`${rank}${suit.name}`}
-                    >
-                      <PokerCardFace card={card} size="picker" />
-                    </button>
-                  );
-                })}
+      {cardPickerOpen && (
+        <div className="fixed inset-0 z-50 flex items-end bg-ink/58 px-3 py-4 backdrop-blur-sm sm:items-center sm:justify-center">
+          <button type="button" aria-label="카드 선택 닫기" className="absolute inset-0 cursor-default" onClick={() => setCardPickerOpen(false)} />
+          <div className="relative max-h-[88vh] w-full max-w-xl overflow-y-auto rounded-[22px] border border-white/20 bg-white p-4 shadow-[0_24px_80px_rgba(15,23,42,0.32)] sm:p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-extrabold text-brand">카드 선택</p>
+                <h3 className="mt-1 text-xl font-extrabold text-ink">{activeSlotLabel}</h3>
               </div>
-            ))}
+              <button type="button" onClick={() => setCardPickerOpen(false)} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 hover:border-brand hover:text-brand">
+                닫기
+              </button>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {activeCard && <PokerCardFace card={activeCard} size="small" />}
+              <button type="button" onClick={() => chooseCard(null)} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-slate-600 hover:border-red-300 hover:text-red-600">
+                선택 칸 비우기
+              </button>
+            </div>
+            <div className="mt-5 grid grid-cols-4 gap-3">
+              {pokerSuits.map((suit) => (
+                <div key={suit.id} className="grid gap-1">
+                  <p className="mb-1 text-center text-xs font-extrabold text-slate-500">{suit.name}</p>
+                  {pokerRanks.map((rank) => {
+                    const card = `${rank}${suit.id}` as PokerCard;
+                    const isUsed = selectedCards.includes(card) && card !== activeCard;
+                    return (
+                      <button
+                        key={card}
+                        type="button"
+                        onClick={() => chooseCard(card)}
+                        disabled={isUsed}
+                        className="rounded-xl border border-line bg-white px-1 py-1 transition hover:border-brand hover:shadow-sm disabled:bg-slate-100 disabled:opacity-35 disabled:shadow-none"
+                        aria-label={`${rank}${suit.name}`}
+                      >
+                        <PokerCardFace card={card} size="picker" />
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </section>
+      )}
 
       <section className="rounded-[20px] border border-line bg-white p-5 shadow-panel sm:p-6">
         <p className="text-sm font-extrabold text-brand">계산 결과</p>
