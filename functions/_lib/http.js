@@ -47,7 +47,7 @@ export async function requireAdmin(request, env) {
 }
 
 export function getD1Binding(env) {
-  return env.CONTENT_DB || env.calcrule || null;
+  return env.calcrule || env.CONTENT_DB || null;
 }
 
 export async function isValidAdminSecret(value, env) {
