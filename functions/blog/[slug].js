@@ -404,12 +404,6 @@ function buildAutoBlogPost(slug) {
     return null;
   }
 
-  if (isFutureDateCode(dateCode)) {
-    return {
-      redirectTo: `/calculators/${calculatorSlug}`
-    };
-  }
-
   const plainTitle = meta.title.replace(" 계산기", "");
   const title = `${plainTitle} ${template.suffix}`;
 
@@ -445,14 +439,6 @@ function parseDateCode(dateCode) {
   }
 
   return `${dateCode.slice(0, 4)}-${dateCode.slice(4, 6)}-${dateCode.slice(6, 8)}`;
-}
-
-function isFutureDateCode(dateCode) {
-  const targetTime = Date.UTC(Number(dateCode.slice(0, 4)), Number(dateCode.slice(4, 6)) - 1, Number(dateCode.slice(6, 8)));
-  const now = new Date();
-  const todayTime = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-
-  return targetTime > todayTime;
 }
 
 function renderBlogHtml(post) {
