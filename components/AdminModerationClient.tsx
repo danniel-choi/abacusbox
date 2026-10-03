@@ -84,6 +84,16 @@ type VisitorStats = {
   totalVisitors: number;
   activeWindowMinutes: number;
   source?: string;
+  topPages?: PageVisitStats[];
+};
+
+type PageVisitStats = {
+  path: string;
+  totalViews: number;
+  totalVisitors: number;
+  todayViews: number;
+  todayVisitors: number;
+  lastSeenAt: string | null;
 };
 
 type AdminPostListResponse = {
@@ -1014,20 +1024,63 @@ export function AdminModerationClient() {
             </div>
 
             {visitorStats ? (
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl bg-paper px-4 py-4">
-                  <p className="text-xs font-extrabold text-slate-500">현재 방문</p>
-                  <p className="mt-2 text-2xl font-extrabold text-ink">{visitorStats.activeVisitors}</p>
+              <>
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl bg-paper px-4 py-4">
+                    <p className="text-xs font-extrabold text-slate-500">현재 방문</p>
+                    <p className="mt-2 text-2xl font-extrabold text-ink">{visitorStats.activeVisitors}</p>
+                  </div>
+                  <div className="rounded-2xl bg-paper px-4 py-4">
+                    <p className="text-xs font-extrabold text-slate-500">오늘 방문</p>
+                    <p className="mt-2 text-2xl font-extrabold text-ink">{visitorStats.todayVisitors}</p>
+                  </div>
+                  <div className="rounded-2xl bg-paper px-4 py-4">
+                    <p className="text-xs font-extrabold text-slate-500">누적 방문</p>
+                    <p className="mt-2 text-2xl font-extrabold text-ink">{visitorStats.totalVisitors}</p>
+                  </div>
                 </div>
-                <div className="rounded-2xl bg-paper px-4 py-4">
-                  <p className="text-xs font-extrabold text-slate-500">오늘 방문</p>
-                  <p className="mt-2 text-2xl font-extrabold text-ink">{visitorStats.todayVisitors}</p>
+
+                <div className="mt-6 rounded-2xl border border-line">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-3">
+                    <div>
+                      <h3 className="text-base font-extrabold text-ink">인기 접속 페이지</h3>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">방문자 1명이 하루에 같은 페이지를 여러 번 열어도 1회로 집계합니다.</p>
+                    </div>
+                    <span className="rounded-full bg-paper px-3 py-1 text-xs font-extrabold text-slate-600">상위 {visitorStats.topPages?.length || 0}개</span>
+                  </div>
+
+                  {visitorStats.topPages && visitorStats.topPages.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full text-left text-sm">
+                        <thead className="bg-paper text-xs font-extrabold uppercase text-slate-500">
+                          <tr>
+                            <th className="px-4 py-3">페이지</th>
+                            <th className="px-4 py-3 text-right">오늘</th>
+                            <th className="px-4 py-3 text-right">누적</th>
+                            <th className="px-4 py-3">최근 집계</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-line">
+                          {visitorStats.topPages.map((page) => (
+                            <tr key={page.path}>
+                              <td className="max-w-[360px] px-4 py-3">
+                                <a href={page.path} target="_blank" rel="noreferrer" className="break-all font-extrabold text-brand hover:underline">
+                                  {page.path}
+                                </a>
+                              </td>
+                              <td className="px-4 py-3 text-right font-bold text-ink">{formatNumber(page.todayVisitors || page.todayViews)}</td>
+                              <td className="px-4 py-3 text-right font-bold text-ink">{formatNumber(page.totalVisitors || page.totalViews)}</td>
+                              <td className="px-4 py-3 text-xs font-semibold text-slate-500">{formatDateTime(page.lastSeenAt)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <EmptyState message="아직 페이지별 접속 통계가 없습니다. 새 방문부터 집계됩니다." compact />
+                  )}
                 </div>
-                <div className="rounded-2xl bg-paper px-4 py-4">
-                  <p className="text-xs font-extrabold text-slate-500">누적 방문</p>
-                  <p className="mt-2 text-2xl font-extrabold text-ink">{visitorStats.totalVisitors}</p>
-                </div>
-              </div>
+              </>
             ) : (
               <EmptyState message="방문자 통계를 아직 불러오지 않았습니다." compact />
             )}
@@ -1305,7 +1358,12 @@ export function AdminModerationClient() {
   );
 }
 
-function formatDateTime(value: string) {
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("ko-KR").format(value);
+}
+
+function formatDateTime(value: string | null) {
+  if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString("ko-KR");

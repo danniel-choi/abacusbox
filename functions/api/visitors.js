@@ -9,7 +9,8 @@ function fallbackStats() {
     todayVisitors: 0,
     totalVisitors: 0,
     activeWindowMinutes: ACTIVE_WINDOW_MINUTES,
-    source: "fallback"
+    source: "fallback",
+    topPages: []
   };
 }
 
@@ -17,7 +18,39 @@ function getKstDayKey() {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-async function readRollupVisitorStats(db) {
+function normalizePath(path) {
+  const cleanPath = String(path || "/").trim().slice(0, 200);
+  if (!cleanPath || !cleanPath.startsWith("/")) return "/";
+  return cleanPath.split("?")[0].split("#")[0] || "/";
+}
+
+async function readTopPageStats(db, limit = 12) {
+  const dayKey = getKstDayKey();
+  const rows = await db.prepare(`
+    SELECT
+      page_path AS path,
+      SUM(views) AS totalViews,
+      SUM(unique_visitors) AS totalVisitors,
+      SUM(CASE WHEN day = ? THEN views ELSE 0 END) AS todayViews,
+      SUM(CASE WHEN day = ? THEN unique_visitors ELSE 0 END) AS todayVisitors,
+      MAX(updated_at) AS lastSeenAt
+    FROM site_page_stats
+    GROUP BY page_path
+    ORDER BY totalViews DESC, todayViews DESC, page_path ASC
+    LIMIT ?
+  `).bind(dayKey, dayKey, limit).all();
+
+  return (rows?.results || []).map((item) => ({
+    path: String(item.path || "/"),
+    totalViews: Number(item.totalViews || 0),
+    totalVisitors: Number(item.totalVisitors || 0),
+    todayViews: Number(item.todayViews || 0),
+    todayVisitors: Number(item.todayVisitors || 0),
+    lastSeenAt: item.lastSeenAt ? String(item.lastSeenAt) : null
+  }));
+}
+
+async function readRollupVisitorStats(db, options = {}) {
   const dayKey = getKstDayKey();
   const todayKey = `today:${dayKey}`;
   const [activeRow, statRows] = await db.batch([
@@ -37,13 +70,24 @@ async function readRollupVisitorStats(db) {
     (statRows?.results || []).map((item) => [String(item.key), Number(item.value || 0)])
   );
 
-  return {
+  const statsPayload = {
     activeVisitors: Number(activeRow?.results?.[0]?.count || 0),
     todayVisitors: Number(stats.get(todayKey) || 0),
     totalVisitors: Number(stats.get("total_visitors") || 0),
     activeWindowMinutes: ACTIVE_WINDOW_MINUTES,
     source: "live"
   };
+
+  if (options.includeTopPages) {
+    try {
+      statsPayload.topPages = await readTopPageStats(db);
+    } catch (cause) {
+      if (!isMissingPageStatsTableError(cause)) throw cause;
+      statsPayload.topPages = [];
+    }
+  }
+
+  return statsPayload;
 }
 
 async function readLegacyVisitorStats(db) {
@@ -73,9 +117,9 @@ async function readLegacyVisitorStats(db) {
   };
 }
 
-async function readVisitorStats(db) {
+async function readVisitorStats(db, options = {}) {
   try {
-    return await readRollupVisitorStats(db);
+    return await readRollupVisitorStats(db, options);
   } catch (cause) {
     if (!isMissingRollupTableError(cause)) throw cause;
     return readLegacyVisitorStats(db);
@@ -85,6 +129,11 @@ async function readVisitorStats(db) {
 function isMissingRollupTableError(cause) {
   const text = String(cause?.message || cause || "");
   return text.includes("no such table") || text.includes("site_stats");
+}
+
+function isMissingPageStatsTableError(cause) {
+  const text = String(cause?.message || cause || "");
+  return text.includes("no such table") || text.includes("site_page_stats") || text.includes("site_page_visitor_days");
 }
 
 async function incrementStat(db, key, amount = 1) {
@@ -100,14 +149,35 @@ async function incrementStat(db, key, amount = 1) {
   `).bind(amount, key).run();
 }
 
+async function recordPageVisit(db, visitorId, path) {
+  const pagePath = normalizePath(path);
+  const dayKey = getKstDayKey();
+  const uniqueResult = await db.prepare(`
+    INSERT OR IGNORE INTO site_page_visitor_days (day, page_path, visitor_id, first_seen_at)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+  `).bind(dayKey, pagePath, visitorId).run();
+
+  if (Number(uniqueResult?.meta?.changes || 0) <= 0) return;
+
+  await db.prepare(`
+    INSERT INTO site_page_stats (page_path, day, views, unique_visitors, updated_at)
+    VALUES (?, ?, 1, 1, CURRENT_TIMESTAMP)
+    ON CONFLICT(page_path, day) DO UPDATE SET
+      views = views + 1,
+      unique_visitors = unique_visitors + 1,
+      updated_at = CURRENT_TIMESTAMP
+  `).bind(pagePath, dayKey).run();
+}
+
 async function recordVisitorHeartbeat(db, visitorId, path) {
   try {
+    const pagePath = normalizePath(path);
     const updateResult = await db.prepare(`
       UPDATE site_visitors
       SET last_seen_at = CURRENT_TIMESTAMP,
           last_path = ?
       WHERE visitor_id = ?
-    `).bind(path || "/", visitorId).run();
+    `).bind(pagePath, visitorId).run();
 
     const isNewVisitor = Number(updateResult?.meta?.changes || 0) === 0;
     if (isNewVisitor) {
@@ -115,7 +185,7 @@ async function recordVisitorHeartbeat(db, visitorId, path) {
         await db.prepare(`
           INSERT INTO site_visitors (visitor_id, first_seen_at, last_seen_at, last_path)
           VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
-        `).bind(visitorId, path || "/").run();
+        `).bind(visitorId, pagePath).run();
         await incrementStat(db, "total_visitors");
       } catch {
         await db.prepare(`
@@ -123,7 +193,7 @@ async function recordVisitorHeartbeat(db, visitorId, path) {
           SET last_seen_at = CURRENT_TIMESTAMP,
               last_path = ?
           WHERE visitor_id = ?
-        `).bind(path || "/", visitorId).run();
+        `).bind(pagePath, visitorId).run();
       }
     }
 
@@ -135,6 +205,12 @@ async function recordVisitorHeartbeat(db, visitorId, path) {
     if (Number(dailyResult?.meta?.changes || 0) > 0) {
       await incrementStat(db, `today:${dayKey}`);
     }
+
+    try {
+      await recordPageVisit(db, visitorId, pagePath);
+    } catch (cause) {
+      if (!isMissingPageStatsTableError(cause)) throw cause;
+    }
   } catch {
     // Heartbeat writes are best-effort; stats reads should keep working.
   }
@@ -144,7 +220,8 @@ export async function onRequestGet(context) {
   try {
     const db = getD1Binding(context.env);
     if (!db) throw new Error("D1 binding is unavailable");
-    return json(await readVisitorStats(db));
+    const isAdmin = await requireAdmin(context.request, context.env);
+    return json(await readVisitorStats(db, { includeTopPages: isAdmin }));
   } catch {
     return json(fallbackStats());
   }
