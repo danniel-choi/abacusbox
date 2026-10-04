@@ -78,6 +78,21 @@ type SchedulerRun = {
   created_at: string;
 };
 
+type CalculatorIdea = {
+  id: number;
+  title: string;
+  slug: string;
+  category: string;
+  seed_keyword: string | null;
+  source_url: string | null;
+  reason: string | null;
+  priority: number;
+  status: string;
+  generated_spec_json: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type VisitorStats = {
   activeVisitors: number;
   todayVisitors: number;
@@ -112,7 +127,7 @@ type AdminCommentListResponse = {
   totalPages: number;
 };
 
-type AdminView = "content" | "editor" | "comments" | "automation" | "tags";
+type AdminView = "content" | "editor" | "comments" | "automation" | "calculatorIdeas" | "tags";
 type PostFilters = {
   type: string;
   status: string;
@@ -169,6 +184,11 @@ export function AdminModerationClient() {
   const [editHistory, setEditHistory] = useState<EditSnapshot[]>([]);
   const [schedulerRuns, setSchedulerRuns] = useState<SchedulerRun[]>([]);
   const [visitorStats, setVisitorStats] = useState<VisitorStats | null>(null);
+  const [calculatorIdeas, setCalculatorIdeas] = useState<CalculatorIdea[]>([]);
+  const [ideaSeedKeyword, setIdeaSeedKeyword] = useState("");
+  const [ideaSourceUrl, setIdeaSourceUrl] = useState("");
+  const [ideaMemoText, setIdeaMemoText] = useState("");
+  const [ideaStatusFilter, setIdeaStatusFilter] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [loadingAutoBlogOptions, setLoadingAutoBlogOptions] = useState(false);
@@ -177,6 +197,8 @@ export function AdminModerationClient() {
   const [runningScheduler, setRunningScheduler] = useState(false);
   const [loadingSchedulerRuns, setLoadingSchedulerRuns] = useState(false);
   const [loadingVisitorStats, setLoadingVisitorStats] = useState(false);
+  const [loadingCalculatorIdeas, setLoadingCalculatorIdeas] = useState(false);
+  const [generatingCalculatorIdeas, setGeneratingCalculatorIdeas] = useState(false);
   const [clearingTestVisitors, setClearingTestVisitors] = useState(false);
   const [loadingEditPost, setLoadingEditPost] = useState(false);
   const [savingEditPost, setSavingEditPost] = useState(false);
@@ -474,6 +496,72 @@ export function AdminModerationClient() {
       setNotice("테스트 방문자 정리에 실패했습니다.");
     } finally {
       setClearingTestVisitors(false);
+    }
+  }
+
+  async function fetchCalculatorIdeas(status = ideaStatusFilter) {
+    setLoadingCalculatorIdeas(true);
+    try {
+      const params = new URLSearchParams();
+      if (status) params.set("status", status);
+      const response = await fetch(`/api/admin/calculator-ideas${params.toString() ? `?${params.toString()}` : ""}`, {
+        credentials: "same-origin",
+        headers: adminHeaders(token)
+      });
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      const data = await response.json();
+      setCalculatorIdeas(Array.isArray(data.items) ? data.items : []);
+      setNotice(null);
+    } catch {
+      setNotice("계산기 후보를 불러오지 못했습니다.");
+    } finally {
+      setLoadingCalculatorIdeas(false);
+    }
+  }
+
+  async function generateCalculatorIdeas() {
+    if (!ideaSeedKeyword.trim() && !ideaSourceUrl.trim() && !ideaMemoText.trim()) {
+      setNotice("검색어, 참고 URL, 메모 중 하나는 입력해야 합니다.");
+      return;
+    }
+
+    setGeneratingCalculatorIdeas(true);
+    try {
+      const response = await fetch("/api/admin/calculator-ideas", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: adminHeaders(token, true),
+        body: JSON.stringify({
+          seedKeyword: ideaSeedKeyword,
+          sourceUrl: ideaSourceUrl,
+          memoText: ideaMemoText
+        })
+      });
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      const data = await response.json();
+      setCalculatorIdeas(Array.isArray(data.items) ? data.items : []);
+      setNotice(`계산기 후보 ${Number(data.items?.length || 0)}개를 생성했습니다.`);
+      void fetchCalculatorIdeas();
+    } catch {
+      setNotice("계산기 후보 생성에 실패했습니다.");
+    } finally {
+      setGeneratingCalculatorIdeas(false);
+    }
+  }
+
+  async function updateCalculatorIdeaStatus(id: number, status: string) {
+    try {
+      const response = await fetch("/api/admin/calculator-ideas", {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: adminHeaders(token, true),
+        body: JSON.stringify({ id, status })
+      });
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      setCalculatorIdeas((items) => items.map((item) => item.id === id ? { ...item, status } : item));
+      setNotice("계산기 후보 상태를 변경했습니다.");
+    } catch {
+      setNotice("계산기 후보 상태 변경에 실패했습니다.");
     }
   }
 
@@ -811,6 +899,14 @@ export function AdminModerationClient() {
               void fetchVisitorStats();
             }}
           />
+          <AdminViewButton
+            active={activeView === "calculatorIdeas"}
+            label="계산기 발굴"
+            onClick={() => {
+              setActiveView("calculatorIdeas");
+              void fetchCalculatorIdeas();
+            }}
+          />
           <AdminViewButton active={activeView === "tags"} label="태그" onClick={() => setActiveView("tags")} />
         </div>
       </section>
@@ -1092,6 +1188,109 @@ export function AdminModerationClient() {
         </section>
       )}
 
+      {activeView === "calculatorIdeas" && (
+        <section className="mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <div className="rounded-[24px] border border-line bg-white p-6 shadow-panel">
+            <div>
+              <h2 className="text-2xl font-extrabold text-ink">계산기 자동 발굴</h2>
+              <p className="mt-2 text-sm font-semibold text-slate-500">검색어와 참고 URL에서 계산기 후보를 뽑고, 기존 기능과 겹치는지 1차로 분류합니다.</p>
+            </div>
+
+            <div className="mt-5 grid gap-4">
+              <label className="grid gap-2">
+                <span className="text-sm font-extrabold text-ink">검색어</span>
+                <input value={ideaSeedKeyword} onChange={(event) => setIdeaSeedKeyword(event.target.value)} placeholder="예: 해외주식 양도소득세, 전세대출 갈아타기" className="rounded-2xl border border-line px-4 py-3 text-sm font-semibold outline-none transition focus:border-brand" />
+              </label>
+              <label className="grid gap-2">
+                <span className="text-sm font-extrabold text-ink">참고 URL</span>
+                <input value={ideaSourceUrl} onChange={(event) => setIdeaSourceUrl(event.target.value)} placeholder="https://..." className="rounded-2xl border border-line px-4 py-3 text-sm font-semibold outline-none transition focus:border-brand" />
+              </label>
+              <label className="grid gap-2">
+                <span className="text-sm font-extrabold text-ink">검색 메모</span>
+                <textarea value={ideaMemoText} onChange={(event) => setIdeaMemoText(event.target.value)} placeholder="검색 결과에서 자주 보인 표현, 커뮤니티 질문, 경쟁 사이트 메뉴 등을 붙여넣으세요." rows={6} className="rounded-2xl border border-line px-4 py-3 text-sm font-semibold leading-6 outline-none transition focus:border-brand" />
+              </label>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button type="button" onClick={generateCalculatorIdeas} disabled={generatingCalculatorIdeas} className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72] disabled:cursor-not-allowed disabled:opacity-60">
+                {generatingCalculatorIdeas ? "후보 생성 중..." : "후보 자동 생성"}
+              </button>
+              <button type="button" onClick={() => fetchCalculatorIdeas()} className="rounded-full border border-brand px-5 py-3 text-sm font-extrabold text-brand transition hover:bg-brand hover:text-white">
+                {loadingCalculatorIdeas ? "불러오는 중..." : "저장 후보 새로고침"}
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-2xl bg-paper px-4 py-4 text-sm font-semibold leading-6 text-slate-600">
+              자동 생성 결과는 바로 배포되는 계산기가 아니라 후보 초안입니다. 계산식 출처와 법률·세무 기준 검증 후 실제 계산기로 반영하는 흐름으로 관리합니다.
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-line bg-white p-6 shadow-panel">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-extrabold text-ink">계산기 후보 목록</h2>
+                <p className="mt-2 text-sm font-semibold text-slate-500">우선순위가 높은 후보부터 검토하고 상태를 바꿔 개발 대기열로 넘깁니다.</p>
+              </div>
+              <select
+                value={ideaStatusFilter}
+                onChange={(event) => {
+                  setIdeaStatusFilter(event.target.value);
+                  void fetchCalculatorIdeas(event.target.value);
+                }}
+                className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink outline-none focus:border-brand"
+              >
+                <option value="">전체</option>
+                <option value="candidate">후보</option>
+                <option value="planned">계획</option>
+                <option value="building">제작중</option>
+                <option value="launched">출시</option>
+                <option value="rejected">보류</option>
+              </select>
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              {calculatorIdeas.length > 0 ? (
+                calculatorIdeas.map((idea) => (
+                  <div key={idea.id} className="rounded-2xl border border-line bg-paper p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-lg font-extrabold text-ink">{idea.title}</h3>
+                          <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">{idea.category}</span>
+                          <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-extrabold text-brand">우선순위 {idea.priority}</span>
+                        </div>
+                        <p className="mt-2 text-xs font-bold text-slate-500">/{idea.slug}</p>
+                      </div>
+                      <select value={idea.status} onChange={(event) => updateCalculatorIdeaStatus(idea.id, event.target.value)} className="rounded-full border border-line bg-white px-3 py-2 text-xs font-extrabold text-ink outline-none focus:border-brand">
+                        <option value="candidate">후보</option>
+                        <option value="planned">계획</option>
+                        <option value="building">제작중</option>
+                        <option value="launched">출시</option>
+                        <option value="rejected">보류</option>
+                      </select>
+                    </div>
+                    {idea.reason && <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">{idea.reason}</p>}
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-slate-500">
+                      {idea.seed_keyword && <span className="rounded-full bg-white px-3 py-1">검색어 {idea.seed_keyword}</span>}
+                      {idea.source_url && <a href={idea.source_url} target="_blank" rel="noreferrer" className="rounded-full bg-white px-3 py-1 text-brand hover:underline">참고 URL</a>}
+                      <span className="rounded-full bg-white px-3 py-1">업데이트 {formatDateTime(idea.updated_at)}</span>
+                    </div>
+                    {idea.generated_spec_json && (
+                      <details className="mt-3">
+                        <summary className="cursor-pointer text-xs font-extrabold text-brand">계산기 초안 보기</summary>
+                        <pre className="mt-2 max-h-56 overflow-auto rounded-2xl bg-white p-3 text-xs leading-5 text-slate-700">{formatJsonPreview(idea.generated_spec_json)}</pre>
+                      </details>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <EmptyState message="저장된 계산기 후보가 없습니다. 검색어 또는 참고 URL로 후보를 생성해 보세요." compact />
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {activeView === "content" && (
         <section className="mt-6 rounded-[24px] border border-line bg-white p-6 shadow-panel">
           <div>
@@ -1367,6 +1566,14 @@ function formatDateTime(value: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString("ko-KR");
+}
+
+function formatJsonPreview(value: string) {
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch {
+    return value;
+  }
 }
 
 function toDateTimeLocalValue(value: string) {
