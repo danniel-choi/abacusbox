@@ -129,17 +129,158 @@ function extractIdeaTerms(seedKeyword, sourceText) {
     .slice(0, 12);
 }
 
-function buildSpec(title, category) {
+function toVariableName(slug) {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((part, index) => index === 0 ? part : `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`)
+    .join("")
+    .replace(/[^A-Za-z0-9_$]/g, "") || "calculatorIdea";
+}
+
+function buildFieldSet(title, category) {
+  if (category === "세금") {
+    return [
+      { name: "taxableAmount", label: "과세 기준 금액", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 50000000 },
+      { name: "deductionAmount", label: "공제 금액", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 0 },
+      { name: "taxRate", label: "예상 세율", type: "number", unit: "%", min: 0, max: 100, step: 0.1, defaultValue: 10 }
+    ];
+  }
+
+  if (category === "금융") {
+    return [
+      { name: "principal", label: "기준 금액", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 10000000 },
+      { name: "annualRate", label: "연 비율", type: "number", unit: "%", min: -100, max: 100, step: 0.1, defaultValue: 5 },
+      { name: "months", label: "기간", type: "number", unit: "개월", min: 1, max: 600, step: 1, defaultValue: 12 }
+    ];
+  }
+
+  if (category === "노무") {
+    return [
+      { name: "monthlyPay", label: "월 기준 금액", type: "number", unit: "원", min: 0, max: 100000000, step: 10000, defaultValue: 2500000 },
+      { name: "workMonths", label: "근무 기간", type: "number", unit: "개월", min: 1, max: 600, step: 1, defaultValue: 12 },
+      { name: "rate", label: "적용 비율", type: "number", unit: "%", min: 0, max: 300, step: 0.1, defaultValue: 100 }
+    ];
+  }
+
+  if (category === "수학") {
+    return [
+      { name: "valueA", label: "값 A", type: "number", min: -1000000, max: 1000000, step: 1, defaultValue: 10 },
+      { name: "valueB", label: "값 B", type: "number", min: -1000000, max: 1000000, step: 1, defaultValue: 5 },
+      { name: "precision", label: "소수점 자리", type: "number", min: 0, max: 10, step: 1, defaultValue: 2 }
+    ];
+  }
+
+  return [
+    { name: "baseAmount", label: "기준 금액", type: "number", unit: "원", min: 0, max: 1000000000, step: 1000, defaultValue: 100000 },
+    { name: "rate", label: "비율", type: "number", unit: "%", min: 0, max: 100, step: 0.1, defaultValue: 10 },
+    { name: "quantity", label: "수량", type: "number", min: 1, max: 100000, step: 1, defaultValue: 1 }
+  ];
+}
+
+function buildFormula(category) {
+  if (category === "세금") return "const base = Math.max(values.taxableAmount - values.deductionAmount, 0);\n      const resultAmount = base * (values.taxRate / 100);";
+  if (category === "금융") return "const monthlyRate = values.annualRate / 100 / 12;\n      const resultAmount = values.principal * Math.pow(1 + monthlyRate, values.months) - values.principal;";
+  if (category === "노무") return "const resultAmount = values.monthlyPay * values.workMonths * (values.rate / 100);";
+  if (category === "수학") return "const resultAmount = values.valueA + values.valueB;\n      const rounded = Number(resultAmount.toFixed(values.precision));";
+  return "const resultAmount = values.baseAmount * (values.rate / 100) * values.quantity;";
+}
+
+function buildCodeSnippet({ title, slug, category, fields }) {
+  const variableName = toVariableName(slug);
+  const formula = buildFormula(category);
+  const fieldText = JSON.stringify(fields, null, 6)
+    .replace(/\n/g, "\n    ")
+    .replace(/"type": "number"/g, 'type: "number"')
+    .replace(/"name":/g, "name:")
+    .replace(/"label":/g, "label:")
+    .replace(/"unit":/g, "unit:")
+    .replace(/"min":/g, "min:")
+    .replace(/"max":/g, "max:")
+    .replace(/"step":/g, "step:")
+    .replace(/"defaultValue":/g, "defaultValue:");
+
+  return `const ${variableName}: CalculatorConfig = {
+  slug: "${slug}" as CalculatorSlug,
+  title: "${title}",
+  description: "${title}의 기준 금액, 적용 비율, 기간 조건을 입력해 예상 결과를 빠르게 확인합니다.",
+  category: "${category}",
+  keywords: ["${title}", "${title.replace(/\s*계산기$/, "")}", "${category} 계산기"],
+  badge: "자동 발굴 후보",
+  audience: "${title}가 필요한 사용자",
+  fields: ${fieldText},
+  guideTitle: "${title} 사용 전 확인할 점",
+  guide: [
+    "이 초안은 자동 발굴 후보를 빠르게 구현하기 위한 출발점입니다.",
+    "공식 기준, 예외 조건, 최신 법령 또는 약관을 확인한 뒤 계산식을 확정하세요.",
+    "결과값은 참고용으로 안내하고 실제 신고, 계약, 납부 전 원자료 확인 문구를 유지하세요."
+  ],
+  checkpoints: [
+    "입력 단위가 원, %, 개월 중 무엇인지 확인",
+    "최소/최대값과 기본값이 실제 사용자 사례에 맞는지 조정",
+    "공식 출처가 있는 계산식인지 검증",
+    "모바일에서 결과 카드 문구가 넘치지 않는지 확인"
+  ],
+  faqs: [
+    {
+      question: "${title} 결과를 그대로 사용해도 되나요?",
+      answer: "자동 계산 결과는 참고값입니다. 실제 신고, 계약, 납부, 정산 전에는 공식 안내와 원자료를 함께 확인해야 합니다."
+    },
+    {
+      question: "어떤 값을 먼저 입력해야 하나요?",
+      answer: "기준 금액과 적용 비율을 먼저 맞춘 뒤 기간, 공제, 추가 조건을 순서대로 조정하는 방식이 좋습니다."
+    }
+  ],
+  calculate: (values) => {
+      ${formula}
+      const displayAmount = ${category === "수학" ? "rounded" : "resultAmount"};
+
+    return {
+      headline: formatWon(displayAmount),
+      subline: "입력한 조건을 기준으로 계산한 예상 결과입니다.",
+      rows: [
+        { label: "예상 결과", value: formatWon(displayAmount), tone: "strong" },
+        { label: "검증 상태", value: "공식 계산식 확인 필요", tone: "muted" }
+      ],
+      chart: [
+        { name: "예상 결과", value: displayAmount }
+      ]
+    };
+  }
+};`;
+}
+
+function buildImplementationDraft(title, slug, category) {
+  const fields = buildFieldSet(title, category);
+  return {
+    codeSnippet: buildCodeSnippet({ title, slug, category, fields }),
+    insertionChecklist: [
+      "lib/calculators.ts의 CalculatorSlug union에 slug 추가",
+      "calculators 배열에 코드 스니펫 추가",
+      "lib/calculator-directory.ts의 GROUP_BY_SLUG에 카테고리 매핑 추가",
+      "필요하면 lib/calculator-seo.ts에 SEO 본문 추가",
+      "npm run lint와 npm run build로 타입과 정적 경로 생성 확인"
+    ],
+    validationChecklist: [
+      "공식 출처 또는 신뢰 가능한 계산 기준 확보",
+      "경계값 테스트: 0, 음수, 매우 큰 값, 소수점",
+      "모바일 결과 카드 줄바꿈 확인",
+      "관련 계산기와 내부 링크 연결",
+      "면책/참고용 안내 문구 확인"
+    ]
+  };
+}
+
+function buildSpec(title, category, slug = slugifyIdea(title)) {
+  const fields = buildFieldSet(title, category);
   return {
     title,
+    slug,
     category,
-    fields: [
-      { name: "baseAmount", label: "기준 금액", type: "number", unit: "원" },
-      { name: "rate", label: "비율", type: "number", unit: "%" },
-      { name: "period", label: "기간", type: "number", unit: "개월" }
-    ],
+    fields,
     result: "입력값을 기준으로 예상 금액, 월 환산액, 체크포인트를 보여주는 계산기 초안",
-    notes: ["공식 기준이 필요한 영역은 출처 확인 후 계산식을 확정하세요.", "후보 저장 후 실제 계산식 검증 단계가 필요합니다."]
+    notes: ["공식 기준이 필요한 영역은 출처 확인 후 계산식을 확정하세요.", "후보 저장 후 실제 계산식 검증 단계가 필요합니다."],
+    implementation: buildImplementationDraft(title, slug, category)
   };
 }
 
@@ -148,16 +289,17 @@ function buildIdeas({ seedKeyword, sourceUrl, sourceText }) {
   return titles.map((title) => {
     const category = inferCategory(title);
     const duplicate = isExistingCalculator(title);
+    const slug = slugifyIdea(title);
     return {
       title,
-      slug: slugifyIdea(title),
+      slug,
       category,
       seedKeyword: seedKeyword || null,
       sourceUrl: sourceUrl || null,
       reason: buildReason(title, seedKeyword, sourceUrl, duplicate),
       priority: scoreIdea(title, seedKeyword, sourceText),
       status: duplicate ? "rejected" : "candidate",
-      generatedSpec: buildSpec(title, category)
+      generatedSpec: buildSpec(title, category, slug)
     };
   }).sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title, "ko"));
 }
@@ -303,15 +445,50 @@ export async function onRequestPatch(context) {
   const payload = await readJson(context.request);
   const id = Number(payload?.id || 0);
   const status = String(payload?.status || "");
+  const action = String(payload?.action || "");
   const allowed = new Set(["candidate", "planned", "building", "launched", "rejected"]);
 
-  if (!id || !allowed.has(status)) {
-    return error("valid id and status are required", 400);
+  if (!id) {
+    return error("valid id is required", 400);
   }
 
   try {
     const db = getD1Binding(context.env);
     if (!db) throw new Error("D1 binding is unavailable");
+
+    if (action === "generateDraft") {
+      const idea = await db.prepare(`
+        SELECT id, title, slug, category
+        FROM calculator_ideas
+        WHERE id = ?
+        LIMIT 1
+      `).bind(id).first();
+
+      if (!idea?.id) return error("calculator idea not found", 404);
+
+      const specJson = JSON.stringify(buildSpec(String(idea.title), String(idea.category), String(idea.slug)));
+      await db.prepare(`
+        UPDATE calculator_ideas
+        SET generated_spec_json = ?,
+            status = CASE WHEN status = 'candidate' THEN 'planned' ELSE status END,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).bind(specJson, id).run();
+
+      const updated = await db.prepare(`
+        SELECT *
+        FROM calculator_ideas
+        WHERE id = ?
+        LIMIT 1
+      `).bind(id).first();
+
+      return json({ ok: true, item: updated });
+    }
+
+    if (!allowed.has(status)) {
+      return error("valid status is required", 400);
+    }
+
     await db.prepare(`
       UPDATE calculator_ideas
       SET status = ?,

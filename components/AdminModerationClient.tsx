@@ -565,6 +565,40 @@ export function AdminModerationClient() {
     }
   }
 
+  async function generateCalculatorIdeaDraft(id: number) {
+    try {
+      const response = await fetch("/api/admin/calculator-ideas", {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: adminHeaders(token, true),
+        body: JSON.stringify({ id, action: "generateDraft" })
+      });
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      const data = await response.json();
+      if (data.item) {
+        setCalculatorIdeas((items) => items.map((item) => item.id === id ? data.item : item));
+      }
+      setNotice("계산기 구현 초안을 생성했습니다.");
+    } catch {
+      setNotice("계산기 구현 초안 생성에 실패했습니다.");
+    }
+  }
+
+  async function copyCalculatorIdeaCode(idea: CalculatorIdea) {
+    const code = getCalculatorIdeaCode(idea);
+    if (!code) {
+      setNotice("복사할 구현 코드가 없습니다. 먼저 구현 초안을 생성하세요.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(code);
+      setNotice("계산기 구현 코드를 복사했습니다.");
+    } catch {
+      setNotice("브라우저 클립보드 복사에 실패했습니다.");
+    }
+  }
+
   async function createQuickSamplePost() {
     if (!isReady) {
       setNotice("관리자 로그인이 필요합니다.");
@@ -1275,10 +1309,18 @@ export function AdminModerationClient() {
                       {idea.source_url && <a href={idea.source_url} target="_blank" rel="noreferrer" className="rounded-full bg-white px-3 py-1 text-brand hover:underline">참고 URL</a>}
                       <span className="rounded-full bg-white px-3 py-1">업데이트 {formatDateTime(idea.updated_at)}</span>
                     </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button type="button" onClick={() => generateCalculatorIdeaDraft(idea.id)} className="rounded-full bg-ink px-3 py-2 text-xs font-extrabold text-white transition hover:bg-brand">
+                        구현 초안 생성
+                      </button>
+                      <button type="button" onClick={() => copyCalculatorIdeaCode(idea)} className="rounded-full border border-brand bg-white px-3 py-2 text-xs font-extrabold text-brand transition hover:bg-brand hover:text-white">
+                        코드 복사
+                      </button>
+                    </div>
                     {idea.generated_spec_json && (
                       <details className="mt-3">
-                        <summary className="cursor-pointer text-xs font-extrabold text-brand">계산기 초안 보기</summary>
-                        <pre className="mt-2 max-h-56 overflow-auto rounded-2xl bg-white p-3 text-xs leading-5 text-slate-700">{formatJsonPreview(idea.generated_spec_json)}</pre>
+                        <summary className="cursor-pointer text-xs font-extrabold text-brand">계산기 구현 초안 보기</summary>
+                        {renderCalculatorIdeaDraft(idea)}
                       </details>
                     )}
                   </div>
@@ -1574,6 +1616,56 @@ function formatJsonPreview(value: string) {
   } catch {
     return value;
   }
+}
+
+function parseCalculatorIdeaSpec(idea: CalculatorIdea) {
+  if (!idea.generated_spec_json) return null;
+  try {
+    return JSON.parse(idea.generated_spec_json) as {
+      implementation?: {
+        codeSnippet?: string;
+        insertionChecklist?: string[];
+        validationChecklist?: string[];
+      };
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getCalculatorIdeaCode(idea: CalculatorIdea) {
+  return parseCalculatorIdeaSpec(idea)?.implementation?.codeSnippet || "";
+}
+
+function renderCalculatorIdeaDraft(idea: CalculatorIdea) {
+  const spec = parseCalculatorIdeaSpec(idea);
+  const implementation = spec?.implementation;
+
+  if (!implementation?.codeSnippet) {
+    return <pre className="mt-2 max-h-56 overflow-auto rounded-2xl bg-white p-3 text-xs leading-5 text-slate-700">{formatJsonPreview(idea.generated_spec_json || "")}</pre>;
+  }
+
+  return (
+    <div className="mt-2 grid gap-3">
+      <pre className="max-h-72 overflow-auto rounded-2xl bg-white p-3 text-xs leading-5 text-slate-700">{implementation.codeSnippet}</pre>
+      {implementation.insertionChecklist && implementation.insertionChecklist.length > 0 && (
+        <div className="rounded-2xl bg-white p-3">
+          <p className="text-xs font-extrabold text-ink">반영 체크리스트</p>
+          <ul className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-600">
+            {implementation.insertionChecklist.map((item) => <li key={item}>- {item}</li>)}
+          </ul>
+        </div>
+      )}
+      {implementation.validationChecklist && implementation.validationChecklist.length > 0 && (
+        <div className="rounded-2xl bg-white p-3">
+          <p className="text-xs font-extrabold text-ink">검증 체크리스트</p>
+          <ul className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-600">
+            {implementation.validationChecklist.map((item) => <li key={item}>- {item}</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function toDateTimeLocalValue(value: string) {
