@@ -66,6 +66,9 @@ export type CalculatorSlug =
   | "standard-deviation"
   | "bmr-calculator"
   | "ideal-weight"
+  | "one-rep-max"
+  | "sleep-calculator"
+  | "running-pace"
   | "loan-prepayment"
   | "refinance-calculator"
   | "credit-card-payoff"
@@ -85,6 +88,8 @@ export type CalculatorSlug =
   | "crypto-investment-growth"
   | "gold-price-calculator"
   | "silver-price-calculator"
+  | "auto-installment"
+  | "fuel-cost"
   | "lotto-generator"
   | "cbm-freight"
   | "subscription-revenue"
@@ -2855,6 +2860,233 @@ export const calculators: CalculatorConfig[] = [
     }
   },
   {
+    slug: "one-rep-max",
+    title: "1RM 계산기",
+    description: "운동 중량과 반복 횟수로 예상 1회 최대 중량과 훈련 강도별 목표 중량을 계산합니다.",
+    category: "생활",
+    keywords: ["1RM 계산기", "원알엠 계산기", "운동 중량 계산기", "웨이트 반복 횟수", "근력 운동"],
+    badge: "근력 운동",
+    audience: "벤치프레스, 스쿼트, 데드리프트 등 운동 중량을 계획하려는 사용자",
+    fields: [
+      { name: "weightKg", label: "사용 중량", type: "number", unit: "kg", min: 1, max: 500, step: 0.5, defaultValue: 80 },
+      { name: "reps", label: "반복 횟수", type: "number", unit: "회", min: 1, max: 30, step: 1, defaultValue: 8 },
+      {
+        name: "formula",
+        label: "계산 공식",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "Epley", value: 0 },
+          { label: "Brzycki", value: 1 },
+          { label: "Lombardi", value: 2 }
+        ]
+      }
+    ],
+    guideTitle: "1RM 계산 기준",
+    guide: [
+      "1RM은 한 번 들어 올릴 수 있는 최대 중량을 뜻합니다. 직접 최대 중량을 시도하지 않아도 반복 가능한 중량과 횟수로 추정할 수 있습니다.",
+      "이 계산기는 Epley, Brzycki, Lombardi 공식을 선택해 예상 1RM과 95%, 90%, 85%, 80%, 75%, 70% 훈련 중량을 함께 보여줍니다.",
+      "반복 횟수가 많을수록 공식 추정 오차가 커질 수 있으므로 보통 2~10회 반복 기록을 기준으로 보는 편이 좋습니다."
+    ],
+    checkpoints: [
+      "운동 전 충분히 워밍업하고, 무리한 최대 중량 시도는 피하세요.",
+      "반복 횟수가 10회를 넘으면 근지구력 요소가 커져 1RM 추정 오차가 커질 수 있습니다.",
+      "컨디션, 자세, 운동 종목, 장비에 따라 실제 가능한 중량은 달라집니다."
+    ],
+    faqs: [
+      { question: "어떤 공식이 가장 정확한가요?", answer: "운동 종목과 개인에 따라 다릅니다. Epley는 널리 쓰이는 간단한 추정식이고, Brzycki는 낮은 반복 수에서 자주 사용됩니다." },
+      { question: "1RM을 직접 측정해야 하나요?", answer: "초보자나 혼자 운동하는 경우 직접 최대 중량을 시도하기보다 반복 기록으로 추정하는 편이 안전합니다." }
+    ],
+    calculate(values) {
+      const weight = Math.max(values.weightKg, 0);
+      const reps = Math.min(Math.max(Math.floor(values.reps), 1), 30);
+      const oneRm = values.formula === 1
+        ? weight * 36 / (37 - reps)
+        : values.formula === 2
+          ? weight * reps ** 0.1
+          : weight * (1 + reps / 30);
+      const formulaLabel = values.formula === 1 ? "Brzycki" : values.formula === 2 ? "Lombardi" : "Epley";
+      const roundWeight = (value: number) => Math.round(value * 2) / 2;
+      const w95 = roundWeight(oneRm * 0.95);
+      const w90 = roundWeight(oneRm * 0.9);
+      const w85 = roundWeight(oneRm * 0.85);
+      const w80 = roundWeight(oneRm * 0.8);
+      const w75 = roundWeight(oneRm * 0.75);
+      const w70 = roundWeight(oneRm * 0.7);
+
+      return {
+        headline: `${roundWeight(oneRm).toLocaleString("ko-KR")}kg`,
+        subline: `${weight.toLocaleString("ko-KR")}kg × ${reps}회 기준 · ${formulaLabel} 공식`,
+        rows: [
+          { label: "예상 1RM", value: `${roundWeight(oneRm).toLocaleString("ko-KR")}kg`, tone: "strong" },
+          { label: "95% 강도", value: `${w95.toLocaleString("ko-KR")}kg` },
+          { label: "90% 강도", value: `${w90.toLocaleString("ko-KR")}kg`, tone: "strong" },
+          { label: "85% 강도", value: `${w85.toLocaleString("ko-KR")}kg` },
+          { label: "80% 강도", value: `${w80.toLocaleString("ko-KR")}kg` },
+          { label: "75% 강도", value: `${w75.toLocaleString("ko-KR")}kg` },
+          { label: "70% 강도", value: `${w70.toLocaleString("ko-KR")}kg` }
+        ],
+        chart: [
+          { name: "1RM", value: oneRm },
+          { name: "90%", value: w90 },
+          { name: "80%", value: w80 },
+          { name: "70%", value: w70 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "sleep-calculator",
+    title: "수면 계산기",
+    description: "기상 시간과 잠드는 데 걸리는 시간을 기준으로 90분 수면 주기별 권장 취침 시간을 계산합니다.",
+    category: "생활",
+    keywords: ["수면 계산기", "취침 시간 계산기", "수면 주기", "몇시에 자야", "기상 시간 계산"],
+    badge: "수면 주기",
+    audience: "기상 시간에 맞춰 몇 시에 잠들면 좋을지 확인하려는 사용자",
+    fields: [
+      { name: "wakeHour", label: "기상 시", type: "number", unit: "시", min: 0, max: 23, step: 1, defaultValue: 7 },
+      { name: "wakeMinute", label: "기상 분", type: "number", unit: "분", min: 0, max: 59, step: 1, defaultValue: 0 },
+      { name: "sleepLatency", label: "잠드는 시간", type: "number", unit: "분", min: 0, max: 120, step: 5, defaultValue: 15 },
+      {
+        name: "preferredCycles",
+        label: "추천 주기",
+        type: "select",
+        defaultValue: 5,
+        options: [
+          { label: "4주기 약 6시간", value: 4 },
+          { label: "5주기 약 7시간 30분", value: 5 },
+          { label: "6주기 약 9시간", value: 6 }
+        ]
+      }
+    ],
+    guideTitle: "수면 계산 기준",
+    guide: [
+      "수면은 보통 약 90분 단위의 주기로 설명합니다. 이 계산기는 원하는 기상 시간에서 90분 주기를 거꾸로 빼 권장 취침 시간을 보여줍니다.",
+      "침대에 누운 시간과 실제 잠드는 시간은 다르므로 잠드는 데 걸리는 시간을 별도로 입력해 취침 준비 시간을 보정합니다.",
+      "수면 주기는 개인차가 있고 수면의 질, 카페인, 스트레스, 수면 환경에 영향을 받으므로 참고용으로 활용하세요."
+    ],
+    checkpoints: [
+      "권장 수면 시간은 성인 기준 보통 7~9시간 범위가 많이 언급됩니다.",
+      "주말과 평일 기상 시간이 크게 달라지면 수면 리듬이 흔들릴 수 있습니다.",
+      "불면이나 과도한 주간 졸림이 지속되면 전문 상담을 고려하세요."
+    ],
+    faqs: [
+      { question: "정확히 90분마다 깨야 하나요?", answer: "아니요. 90분은 평균적인 설명 모델입니다. 개인별 수면 주기는 다를 수 있습니다." },
+      { question: "취침 시간이 자정을 넘으면 어떻게 보나요?", answer: "계산기는 24시간 기준으로 전날 밤 또는 당일 새벽 시간을 함께 표시합니다." }
+    ],
+    calculate(values) {
+      const wakeHour = Math.min(Math.max(Math.floor(values.wakeHour), 0), 23);
+      const wakeMinute = Math.min(Math.max(Math.floor(values.wakeMinute), 0), 59);
+      const latency = Math.min(Math.max(Math.floor(values.sleepLatency), 0), 120);
+      const preferredCycles = Math.min(Math.max(Math.floor(values.preferredCycles), 4), 6);
+      const wakeTotal = wakeHour * 60 + wakeMinute;
+      const formatClock = (minutes: number) => {
+        const normalized = ((minutes % 1440) + 1440) % 1440;
+        const hour = Math.floor(normalized / 60);
+        const minute = normalized % 60;
+        return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+      };
+      const bedtimeFor = (cycles: number) => wakeTotal - cycles * 90 - latency;
+      const preferredBedtime = bedtimeFor(preferredCycles);
+      const sleepMinutes = preferredCycles * 90;
+      const sleepHours = `${Math.floor(sleepMinutes / 60)}시간 ${sleepMinutes % 60}분`;
+
+      return {
+        headline: formatClock(preferredBedtime),
+        subline: `${formatClock(wakeTotal)} 기상 · ${preferredCycles}주기(${sleepHours}) 기준`,
+        rows: [
+          { label: "추천 취침 준비 시간", value: formatClock(preferredBedtime), tone: "strong" },
+          { label: "실제 잠드는 목표", value: formatClock(preferredBedtime + latency), tone: "strong" },
+          { label: "4주기 취침 준비", value: formatClock(bedtimeFor(4)) },
+          { label: "5주기 취침 준비", value: formatClock(bedtimeFor(5)) },
+          { label: "6주기 취침 준비", value: formatClock(bedtimeFor(6)) },
+          { label: "잠드는 시간 보정", value: `${latency.toLocaleString("ko-KR")}분` }
+        ],
+        chart: [
+          { name: "4주기", value: 360 },
+          { name: "5주기", value: 450 },
+          { name: "6주기", value: 540 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "running-pace",
+    title: "러닝 페이스 계산기",
+    description: "달린 거리와 기록을 입력해 km당 페이스, 평균 속도, 목표 거리 예상 기록을 계산합니다.",
+    category: "생활",
+    keywords: ["러닝 페이스 계산기", "마라톤 페이스", "km 페이스", "달리기 기록 계산", "평균 속도 계산"],
+    badge: "달리기 기록",
+    audience: "러닝 기록을 페이스로 바꾸거나 목표 거리 완주 시간을 예측하려는 사용자",
+    fields: [
+      { name: "distance", label: "달린 거리", type: "number", unit: "km", min: 0.1, max: 300, step: 0.1, defaultValue: 10 },
+      { name: "hours", label: "기록 시", type: "number", unit: "시간", min: 0, max: 24, step: 1, defaultValue: 0 },
+      { name: "minutes", label: "기록 분", type: "number", unit: "분", min: 0, max: 59, step: 1, defaultValue: 50 },
+      { name: "seconds", label: "기록 초", type: "number", unit: "초", min: 0, max: 59, step: 1, defaultValue: 0 },
+      {
+        name: "targetDistance",
+        label: "목표 거리",
+        type: "select",
+        defaultValue: 21.0975,
+        options: [
+          { label: "5km", value: 5 },
+          { label: "10km", value: 10 },
+          { label: "하프마라톤", value: 21.0975 },
+          { label: "마라톤", value: 42.195 }
+        ]
+      }
+    ],
+    guideTitle: "러닝 페이스 계산 기준",
+    guide: [
+      "러닝 페이스는 1km를 달리는 데 걸린 시간입니다. 같은 기록이라도 거리 기준 페이스를 보면 훈련 강도와 목표 기록을 비교하기 쉽습니다.",
+      "이 계산기는 입력한 거리와 기록으로 km당 페이스, mile당 페이스, 평균 속도, 목표 거리 예상 기록을 계산합니다.",
+      "목표 거리 예상 기록은 같은 페이스를 유지한다고 가정한 단순 환산이며, 실제 장거리 기록은 체력, 코스, 날씨, 보급에 따라 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "GPS 오차와 신호 끊김이 있으면 거리와 페이스가 다르게 나올 수 있습니다.",
+      "마라톤처럼 긴 거리는 후반 페이스 저하를 별도로 고려해야 합니다.",
+      "목표 페이스는 훈련 난이도와 회복 상태에 맞춰 조정하세요."
+    ],
+    faqs: [
+      { question: "km 페이스와 평균 속도는 어떻게 다른가요?", answer: "km 페이스는 1km당 걸린 시간이고, 평균 속도는 1시간 동안 갈 수 있는 거리(km/h)입니다." },
+      { question: "하프 기록으로 풀코스 기록을 예측해도 되나요?", answer: "단순 환산은 같은 페이스 유지 가정이라 실제 풀코스 기록보다 낙관적일 수 있습니다." }
+    ],
+    calculate(values) {
+      const distance = Math.max(values.distance, 0.1);
+      const totalSeconds = Math.max(values.hours * 3600 + values.minutes * 60 + values.seconds, 1);
+      const paceSeconds = totalSeconds / distance;
+      const paceMileSeconds = paceSeconds * 1.609344;
+      const speed = distance / (totalSeconds / 3600);
+      const projectedSeconds = paceSeconds * values.targetDistance;
+      const formatDuration = (seconds: number) => {
+        const rounded = Math.round(seconds);
+        const hours = Math.floor(rounded / 3600);
+        const minutes = Math.floor((rounded % 3600) / 60);
+        const secs = rounded % 60;
+        return hours > 0
+          ? `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+          : `${minutes}:${String(secs).padStart(2, "0")}`;
+      };
+
+      return {
+        headline: `${formatDuration(paceSeconds)}/km`,
+        subline: `평균 속도 ${speed.toFixed(2)}km/h · ${values.targetDistance.toLocaleString("ko-KR")}km 예상 ${formatDuration(projectedSeconds)}`,
+        rows: [
+          { label: "km당 페이스", value: `${formatDuration(paceSeconds)}/km`, tone: "strong" },
+          { label: "mile당 페이스", value: `${formatDuration(paceMileSeconds)}/mile` },
+          { label: "평균 속도", value: `${speed.toFixed(2)}km/h`, tone: "strong" },
+          { label: "입력 기록", value: formatDuration(totalSeconds) },
+          { label: "목표 거리 예상 기록", value: formatDuration(projectedSeconds), tone: "strong" }
+        ],
+        chart: [
+          { name: "입력거리", value: distance },
+          { name: "목표거리", value: values.targetDistance },
+          { name: "평균속도", value: speed }
+        ]
+      };
+    }
+  },
+  {
     slug: "calorie-calculator",
     title: "칼로리 계산기",
     description: "성별, 나이, 키, 체중, 활동 수준, 체중 목표를 입력해 BMR, TDEE, BMI, 목표 칼로리와 매크로 영양소를 계산합니다.",
@@ -3573,6 +3805,134 @@ export const calculators: CalculatorConfig[] = [
           { name: "과태료", value: basePenalty },
           { name: "범칙금", value: baseFine },
           { name: "예상납부", value: total }
+        ]
+      };
+    }
+  },
+  {
+    slug: "auto-installment",
+    title: "자동차 할부 계산기",
+    description: "차량 가격, 선수금, 금리, 기간을 입력해 월 할부금과 총 이자, 총 납부액을 계산합니다.",
+    category: "금융",
+    keywords: ["자동차 할부 계산기", "차 할부 계산", "자동차 대출 계산기", "월 할부금 계산", "차량 할부 이자"],
+    badge: "월 할부금",
+    audience: "신차·중고차 구매 전 월 납입액과 총 이자를 비교하려는 사용자",
+    fields: [
+      { name: "vehiclePrice", label: "차량 가격", type: "number", unit: "원", min: 0, max: 500000000, step: 100000, defaultValue: 35000000 },
+      { name: "downPayment", label: "선수금", type: "number", unit: "원", min: 0, max: 500000000, step: 100000, defaultValue: 7000000 },
+      { name: "annualRate", label: "연 금리", type: "number", unit: "%", min: 0, max: 30, step: 0.1, defaultValue: 5.5 },
+      { name: "months", label: "할부 기간", type: "number", unit: "개월", min: 1, max: 120, step: 1, defaultValue: 60 },
+      { name: "extraFees", label: "취등록·부대비용", type: "number", unit: "원", min: 0, max: 50000000, step: 10000, defaultValue: 2500000 }
+    ],
+    guideTitle: "자동차 할부 계산 기준",
+    guide: [
+      "자동차 할부는 차량 가격에서 선수금을 뺀 금액을 대출 원금으로 보고 원리금 균등상환 방식으로 월 납입액을 계산합니다.",
+      "취등록세, 보험료, 탁송료, 번호판 비용 등 부대비용은 실제 견적과 다를 수 있어 별도 입력값으로 더해 총 초기 필요 자금을 확인합니다.",
+      "프로모션 금리, 잔가보장, 유예할부, 리스·렌트 구조는 일반 원리금 균등상환과 다르므로 계약서 기준으로 다시 확인해야 합니다."
+    ],
+    checkpoints: [
+      "선수금이 차량 가격보다 크면 할부 원금은 0원으로 계산합니다.",
+      "월 할부금 외에도 보험료, 자동차세, 유류비 같은 유지비를 함께 봐야 합니다.",
+      "금리 1~2%p 차이도 장기 할부에서는 총 이자 차이가 크게 날 수 있습니다."
+    ],
+    faqs: [
+      { question: "무이자 할부도 계산되나요?", answer: "네. 연 금리를 0%로 입력하면 할부 원금을 기간으로 나눈 월 납입액을 보여줍니다." },
+      { question: "리스나 장기렌트도 같은 방식인가요?", answer: "아니요. 리스·렌트는 잔존가치, 보험, 세금 포함 여부가 달라 별도 견적 기준으로 봐야 합니다." }
+    ],
+    calculate(values) {
+      const principal = Math.max(values.vehiclePrice - values.downPayment, 0);
+      const months = Math.max(Math.floor(values.months), 1);
+      const monthlyRate = values.annualRate / 100 / 12;
+      const monthlyPayment = monthlyRate === 0
+        ? principal / months
+        : principal * monthlyRate * (1 + monthlyRate) ** months / ((1 + monthlyRate) ** months - 1);
+      const totalInstallment = monthlyPayment * months;
+      const totalInterest = totalInstallment - principal;
+      const initialCash = values.downPayment + values.extraFees;
+      const totalCost = totalInstallment + initialCash;
+
+      return {
+        headline: formatWon(monthlyPayment),
+        subline: `할부 원금 ${formatWon(principal)} · 총 이자 ${formatWon(totalInterest)}`,
+        rows: [
+          { label: "월 할부금", value: formatWon(monthlyPayment), tone: "strong" },
+          { label: "할부 원금", value: formatWon(principal), tone: "strong" },
+          { label: "총 이자", value: formatWon(totalInterest) },
+          { label: "할부 총 납부액", value: formatWon(totalInstallment) },
+          { label: "초기 필요 현금", value: formatWon(initialCash), tone: "strong" },
+          { label: "총 지출 예상", value: formatWon(totalCost) }
+        ],
+        chart: [
+          { name: "원금", value: principal },
+          { name: "이자", value: totalInterest },
+          { name: "초기비용", value: initialCash }
+        ]
+      };
+    }
+  },
+  {
+    slug: "fuel-cost",
+    title: "유류비 계산기",
+    description: "주행거리, 연비, 유류 단가를 입력해 예상 주유량, 유류비, 1인당 부담액을 계산합니다.",
+    category: "생활",
+    keywords: ["유류비 계산기", "기름값 계산기", "주유비 계산", "연비 계산", "교통비 나누기"],
+    badge: "주행 유류비",
+    audience: "출퇴근, 여행, 장거리 운전 전 예상 기름값을 계산하려는 사용자",
+    fields: [
+      { name: "distance", label: "편도 주행거리", type: "number", unit: "km", min: 0, max: 5000, step: 1, defaultValue: 120 },
+      {
+        name: "tripType",
+        label: "왕복 여부",
+        type: "select",
+        defaultValue: 2,
+        options: [
+          { label: "편도", value: 1 },
+          { label: "왕복", value: 2 }
+        ]
+      },
+      { name: "fuelEfficiency", label: "연비", type: "number", unit: "km/L", min: 1, max: 60, step: 0.1, defaultValue: 12 },
+      { name: "fuelPrice", label: "유류 단가", type: "number", unit: "원/L", min: 500, max: 4000, step: 10, defaultValue: 1700 },
+      { name: "people", label: "나눌 인원", type: "number", unit: "명", min: 1, max: 20, step: 1, defaultValue: 2 },
+      { name: "tollParking", label: "통행료·주차비", type: "number", unit: "원", min: 0, max: 1000000, step: 1000, defaultValue: 0 }
+    ],
+    guideTitle: "유류비 계산 기준",
+    guide: [
+      "유류비는 주행거리를 실제 연비로 나눠 필요한 연료량을 구하고, 여기에 유류 단가를 곱해 계산합니다.",
+      "왕복을 선택하면 입력한 편도 거리를 두 배로 반영합니다. 통행료와 주차비를 입력하면 총 이동 비용과 1인당 부담액을 함께 볼 수 있습니다.",
+      "실제 연비는 도심·고속도로 비율, 정체, 적재량, 에어컨 사용, 타이어 상태에 따라 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "공인연비보다 실제 주행 연비를 입력하는 편이 정확합니다.",
+      "여행 비용을 나눌 때는 통행료와 주차비까지 함께 넣어야 합니다.",
+      "유류 단가는 실시간 자동 연동이 아니므로 직접 확인한 가격을 입력하세요."
+    ],
+    faqs: [
+      { question: "전기차 충전비도 계산할 수 있나요?", answer: "단위를 전비(km/kWh)와 충전 단가(원/kWh)처럼 바꿔 입력하면 참고용으로 활용할 수 있습니다." },
+      { question: "오늘 기름값이 자동으로 반영되나요?", answer: "아니요. 현재는 사용자가 확인한 L당 유류 단가를 직접 입력하는 방식입니다." }
+    ],
+    calculate(values) {
+      const totalDistance = Math.max(values.distance, 0) * (values.tripType === 2 ? 2 : 1);
+      const liters = values.fuelEfficiency > 0 ? totalDistance / values.fuelEfficiency : 0;
+      const fuelCost = liters * values.fuelPrice;
+      const totalCost = fuelCost + values.tollParking;
+      const people = Math.max(Math.floor(values.people), 1);
+      const perPerson = totalCost / people;
+
+      return {
+        headline: formatWon(totalCost),
+        subline: `${totalDistance.toLocaleString("ko-KR")}km 기준 · 예상 주유량 ${formatNumber(liters, 1)}L`,
+        rows: [
+          { label: "총 주행거리", value: `${totalDistance.toLocaleString("ko-KR")}km`, tone: "strong" },
+          { label: "예상 주유량", value: `${formatNumber(liters, 1)}L` },
+          { label: "유류비", value: formatWon(fuelCost), tone: "strong" },
+          { label: "통행료·주차비", value: formatWon(values.tollParking) },
+          { label: "총 이동 비용", value: formatWon(totalCost), tone: "strong" },
+          { label: "1인당 부담액", value: formatWon(perPerson), tone: "strong" }
+        ],
+        chart: [
+          { name: "유류비", value: fuelCost },
+          { name: "통행·주차", value: values.tollParking },
+          { name: "1인당", value: perPerson }
         ]
       };
     }
