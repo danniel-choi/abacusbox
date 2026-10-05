@@ -29,6 +29,7 @@ export type CalculatorSlug =
   | "daily-intake"
   | "pet-age"
   | "korean-age"
+  | "zodiac-sign"
   | "unit-converter"
   | "real-estate-acquisition-tax"
   | "car-maintenance"
@@ -3149,6 +3150,86 @@ export const calculators: CalculatorConfig[] = [
           { name: "만나이", value: age },
           { name: "다음생일까지", value: diffDays },
           { name: "경과년수×10", value: age * 10 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "zodiac-sign",
+    title: "별자리 계산기",
+    description: "생월과 생일을 입력해 서양 별자리, 날짜 구간, 다음 별자리까지 남은 기간을 확인합니다.",
+    category: "생활",
+    keywords: ["별자리 계산기", "생일 별자리", "내 별자리", "서양 별자리", "황도 12궁"],
+    badge: "생일 기준",
+    audience: "생일로 자신의 서양 별자리와 날짜 구간을 빠르게 확인하려는 사용자",
+    fields: [
+      { name: "birthMonth", label: "생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 3 },
+      { name: "birthDay", label: "생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 21 }
+    ],
+    guideTitle: "별자리 계산 기준",
+    guide: [
+      "이 계산기는 일반적으로 많이 쓰이는 서양 점성술의 태양 별자리 날짜 구간을 기준으로 별자리를 판정합니다.",
+      "생월과 생일만 입력하면 양자리부터 물고기자리까지 12개 별자리 중 하나를 보여주고, 해당 별자리의 날짜 구간과 다음 별자리 시작일까지 남은 일수를 함께 계산합니다.",
+      "별자리 구간은 연도와 시간대, 점성술 체계에 따라 세부 경계가 달라질 수 있습니다. 이 페이지는 재미와 참고용으로 활용하세요."
+    ],
+    checkpoints: [
+      "월과 일을 정확히 입력하세요.",
+      "2월 30일처럼 존재하지 않는 날짜는 해당 월의 마지막 날로 보정합니다.",
+      "별자리 경계일에 태어난 경우 점성술 체계별 차이가 있을 수 있습니다."
+    ],
+    faqs: [
+      { question: "별자리는 음력 생일로 계산하나요?", answer: "일반적인 서양 별자리는 양력 생일 기준으로 계산합니다." },
+      { question: "경계일에 태어나면 왜 사이트마다 다를 수 있나요?", answer: "태양이 별자리 구간을 지나는 시각은 해마다 조금씩 달라질 수 있어, 정밀 점성술에서는 출생연도와 시간까지 보기도 합니다." },
+      { question: "이 결과를 운세로 봐도 되나요?", answer: "이 계산기는 별자리 구간을 알려주는 참고 도구입니다. 운세나 성향 설명은 재미로만 봐주세요." }
+    ],
+    calculate(values) {
+      const signs = [
+        { name: "염소자리", start: [12, 22], end: [1, 19], element: "흙", keyword: "책임감과 현실감" },
+        { name: "물병자리", start: [1, 20], end: [2, 18], element: "공기", keyword: "독창성과 자유로움" },
+        { name: "물고기자리", start: [2, 19], end: [3, 20], element: "물", keyword: "공감과 상상력" },
+        { name: "양자리", start: [3, 21], end: [4, 19], element: "불", keyword: "추진력과 시작의 에너지" },
+        { name: "황소자리", start: [4, 20], end: [5, 20], element: "흙", keyword: "안정감과 꾸준함" },
+        { name: "쌍둥이자리", start: [5, 21], end: [6, 21], element: "공기", keyword: "호기심과 소통" },
+        { name: "게자리", start: [6, 22], end: [7, 22], element: "물", keyword: "보호 본능과 감수성" },
+        { name: "사자자리", start: [7, 23], end: [8, 22], element: "불", keyword: "표현력과 자신감" },
+        { name: "처녀자리", start: [8, 23], end: [9, 23], element: "흙", keyword: "분석력과 섬세함" },
+        { name: "천칭자리", start: [9, 24], end: [10, 22], element: "공기", keyword: "균형감과 관계 감각" },
+        { name: "전갈자리", start: [10, 23], end: [11, 22], element: "물", keyword: "집중력과 깊이" },
+        { name: "사수자리", start: [11, 23], end: [12, 21], element: "불", keyword: "탐험심과 확장성" }
+      ];
+      const month = Math.min(Math.max(Math.floor(values.birthMonth), 1), 12);
+      const lastDay = new Date(2026, month, 0).getDate();
+      const day = Math.min(Math.max(Math.floor(values.birthDay), 1), lastDay);
+      const dayOfYear = daysBetweenDates(new Date(2026, 0, 1), new Date(2026, month - 1, day)) + 1;
+
+      const toDayOfYear = (date: number[]) => daysBetweenDates(new Date(2026, 0, 1), new Date(2026, date[0] - 1, date[1])) + 1;
+      const selected = signs.find((sign) => {
+        const start = toDayOfYear(sign.start);
+        const end = toDayOfYear(sign.end);
+        return start <= end ? dayOfYear >= start && dayOfYear <= end : dayOfYear >= start || dayOfYear <= end;
+      }) || signs[0];
+      const selectedIndex = signs.findIndex((sign) => sign.name === selected.name);
+      const next = signs[(selectedIndex + 1) % signs.length];
+      const nextStart = toDayOfYear(next.start);
+      const daysUntilNext = nextStart > dayOfYear ? nextStart - dayOfYear : 365 - dayOfYear + nextStart;
+      const dateLabel = `${month}월 ${day}일`;
+      const rangeLabel = `${selected.start[0]}월 ${selected.start[1]}일 ~ ${selected.end[0]}월 ${selected.end[1]}일`;
+
+      return {
+        headline: selected.name,
+        subline: `${dateLabel} 기준 · ${rangeLabel}`,
+        rows: [
+          { label: "입력 생일", value: dateLabel },
+          { label: "별자리", value: selected.name, tone: "strong" },
+          { label: "날짜 구간", value: rangeLabel, tone: "strong" },
+          { label: "원소", value: selected.element },
+          { label: "키워드", value: selected.keyword },
+          { label: `다음 별자리(${next.name})까지`, value: `${daysUntilNext.toLocaleString("ko-KR")}일` }
+        ],
+        chart: [
+          { name: "올해 경과일", value: dayOfYear },
+          { name: "다음 별자리", value: daysUntilNext },
+          { name: "구간 참고", value: selectedIndex + 1 }
         ]
       };
     }
