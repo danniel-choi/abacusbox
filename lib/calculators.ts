@@ -83,6 +83,7 @@ export type CalculatorSlug =
   | "stock-valuation"
   | "crypto-investment-growth"
   | "gold-price-calculator"
+  | "silver-price-calculator"
   | "lotto-generator"
   | "cbm-freight"
   | "subscription-revenue"
@@ -6530,6 +6531,93 @@ export const calculators: CalculatorConfig[] = [
           { label: "g 환산 중량", value: `${formatNumber(gramWeight, 2)}g` },
           { label: "순도", value: formatPercent(values.purity, values.purity % 1 === 0 ? 0 : 2) },
           { label: "순금 환산 중량", value: `${formatNumber(pureGoldWeight, 2)}g`, tone: "strong" },
+          { label: "시세 기준 가치", value: formatWon(spotValue), tone: "strong" },
+          { label: "예상 구매 금액", value: formatWon(estimatedBuyPrice) },
+          { label: "예상 매도 수령액", value: formatWon(estimatedSellPrice), tone: "strong" },
+          { label: "매수·매도 차이", value: formatWon(spreadGap) }
+        ],
+        chart: [
+          { name: "시세가치", value: spotValue },
+          { name: "구매예상", value: estimatedBuyPrice },
+          { name: "매도예상", value: estimatedSellPrice }
+        ]
+      };
+    }
+  },
+  {
+    slug: "silver-price-calculator",
+    title: "은 시세 계산기",
+    description: "1g 은 시세, 중량, 순도, 수수료를 입력해 순은 환산 중량과 예상 매입·매도 금액을 계산합니다.",
+    category: "금융",
+    keywords: ["은 시세 계산기", "은값 계산기", "순은 계산기", "실버바 계산기", "은 매입가 계산"],
+    badge: "순은·트로이온스 반영",
+    audience: "실버바, 은화, 은 제품의 순은 환산 가치와 예상 거래 금액을 확인하려는 사용자",
+    fields: [
+      { name: "silverPricePerGram", label: "순은 1g 시세", type: "number", unit: "원", min: 0, max: 100000, step: 10, defaultValue: 1800 },
+      { name: "weight", label: "중량", type: "number", unit: "g", min: 0, max: 1000000, step: 0.01, defaultValue: 31.1035 },
+      {
+        name: "purity",
+        label: "순도",
+        type: "select",
+        defaultValue: 99.99,
+        options: [
+          { label: "순은 99.99%", value: 99.99 },
+          { label: "순은 99.9%", value: 99.9 },
+          { label: "Sterling 92.5%", value: 92.5 },
+          { label: "Coin Silver 90%", value: 90 },
+          { label: "800 Silver 80%", value: 80 }
+        ]
+      },
+      {
+        name: "weightUnit",
+        label: "중량 단위",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "g", value: 1 },
+          { label: "kg", value: 1000 },
+          { label: "트로이온스(31.1035g)", value: 31.1035 }
+        ]
+      },
+      { name: "buySpreadRate", label: "구매 프리미엄", type: "number", unit: "%", min: 0, max: 100, step: 0.1, defaultValue: 8 },
+      { name: "sellDiscountRate", label: "매도 차감률", type: "number", unit: "%", min: 0, max: 100, step: 0.1, defaultValue: 8 },
+      { name: "fixedFee", label: "고정 수수료", type: "number", unit: "원", min: 0, max: 10000000, step: 100, defaultValue: 0 }
+    ],
+    guideTitle: "은 시세 계산 기준",
+    guide: [
+      "은 시세 계산기는 사용자가 입력한 순은 1g 기준 시세를 바탕으로 중량과 순도를 반영해 순은 환산 중량을 계산합니다.",
+      "실버바나 은화는 트로이온스 기준으로 표시되는 경우가 많습니다. 1트로이온스는 31.1035g으로 환산합니다.",
+      "은 제품은 금보다 부가세, 프리미엄, 매입 차감률의 영향이 크게 느껴질 수 있습니다. 실제 거래 전에는 판매처의 최신 고시가와 매입 조건을 확인하세요."
+    ],
+    checkpoints: [
+      "은 시세는 순은 1g 기준으로 입력합니다.",
+      "트로이온스 단위는 31.1035g으로 계산합니다.",
+      "Sterling Silver는 보통 92.5% 순도로 환산합니다.",
+      "실제 매입가는 제품 상태, 브랜드, 감정비, 업체별 스프레드에 따라 달라질 수 있습니다."
+    ],
+    faqs: [
+      { question: "실시간 은 시세가 자동으로 들어오나요?", answer: "아니요. 현재 버전은 사용자가 확인한 순은 1g 시세를 직접 입력하는 방식입니다. 거래 전에는 거래소나 판매처의 최신 고시가를 확인하세요." },
+      { question: "1트로이온스 은값도 계산할 수 있나요?", answer: "네. 중량 단위에서 트로이온스(31.1035g)를 선택하면 입력한 중량을 트로이온스 단위로 보고 g으로 환산합니다." },
+      { question: "Sterling Silver 제품은 어떻게 계산하나요?", answer: "중량을 입력하고 순도를 Sterling 92.5%로 선택하면 순은 환산 중량과 예상 매도 금액을 계산합니다." }
+    ],
+    calculate(values) {
+      const inputWeight = Math.max(values.weight, 0);
+      const gramWeight = inputWeight * values.weightUnit;
+      const pureSilverWeight = gramWeight * (values.purity / 100);
+      const spotValue = pureSilverWeight * values.silverPricePerGram;
+      const estimatedBuyPrice = spotValue * (1 + values.buySpreadRate / 100) + values.fixedFee;
+      const estimatedSellPrice = Math.max(spotValue * (1 - values.sellDiscountRate / 100) - values.fixedFee, 0);
+      const perTroyOuncePrice = values.silverPricePerGram * 31.1035;
+      const spreadGap = estimatedBuyPrice - estimatedSellPrice;
+
+      return {
+        headline: formatWon(estimatedSellPrice),
+        subline: `순은 환산 ${formatNumber(pureSilverWeight, 2)}g · 1트로이온스 ${formatWon(perTroyOuncePrice)}`,
+        rows: [
+          { label: "입력 중량", value: `${formatNumber(inputWeight, 2)}${values.weightUnit === 1 ? "g" : values.weightUnit === 1000 ? "kg" : "oz t"}` },
+          { label: "g 환산 중량", value: `${formatNumber(gramWeight, 2)}g` },
+          { label: "순도", value: formatPercent(values.purity, values.purity % 1 === 0 ? 0 : 2) },
+          { label: "순은 환산 중량", value: `${formatNumber(pureSilverWeight, 2)}g`, tone: "strong" },
           { label: "시세 기준 가치", value: formatWon(spotValue), tone: "strong" },
           { label: "예상 구매 금액", value: formatWon(estimatedBuyPrice) },
           { label: "예상 매도 수령액", value: formatWon(estimatedSellPrice), tone: "strong" },

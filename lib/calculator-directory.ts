@@ -93,6 +93,7 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "stock-valuation": "investment",
   "crypto-investment-growth": "investment",
   "gold-price-calculator": "investment",
+  "silver-price-calculator": "investment",
   "inflation-calculator": "investment",
   "roi-calculator": "investment",
   "present-value": "investment",
@@ -192,6 +193,7 @@ export function getFeaturedCalculators() {
     "lotto-generator",
     "crypto-investment-growth",
     "gold-price-calculator",
+    "silver-price-calculator",
     "stock-return",
     "seller-profit",
     "adsense-revenue",
@@ -250,6 +252,7 @@ export function getPopularCalculators() {
     "lotto-generator",
     "crypto-investment-growth",
     "gold-price-calculator",
+    "silver-price-calculator",
     "stock-average-price",
     "seller-profit"
   ];
@@ -304,6 +307,7 @@ export function getRecentCalculators() {
     "stock-return",
     "crypto-investment-growth",
     "gold-price-calculator",
+    "silver-price-calculator",
     "adsense-revenue",
     "youtube-ad-revenue",
     "stock-average-price",

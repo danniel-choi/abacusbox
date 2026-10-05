@@ -77,6 +77,39 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/stock", label: "투자 계산기 모음", text: "주식, 암호화폐, 수익률 관련 계산기를 함께 확인합니다." }
     ]
   },
+  "silver-price-calculator": {
+    title: "은 시세 계산기 | 순은·Sterling·실버바 매입가 계산",
+    description:
+      "은 시세 계산기로 순은 1g 시세, 중량, 순도, 수수료를 입력해 순은 환산 중량, 시세 기준 가치, 예상 구매 금액과 매도 수령액을 확인하세요.",
+    keywords: ["은 시세 계산기", "은값 계산기", "순은 계산기", "실버바 계산기", "1온스 은값", "Sterling Silver 계산", "은 매입가 계산"],
+    searchIntents: [
+      "오늘 은값 기준으로 실버바나 은화의 예상 가치를 알고 싶을 때",
+      "g, kg, 트로이온스 단위를 바꿔 은 금액을 비교할 때",
+      "Sterling Silver 제품을 순은 기준으로 환산하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "은 시세 계산은 순은 환산 중량을 기준으로 합니다.",
+        body:
+          "은 제품은 99.99% 순은, 99.9% 실버바, 92.5% Sterling Silver처럼 순도가 다를 수 있습니다. 이 계산기는 제품 중량에 순도 비율을 곱해 순은 환산 중량을 구한 뒤 1g 시세를 적용합니다."
+      },
+      {
+        title: "트로이온스는 31.1035g으로 계산합니다.",
+        body:
+          "국제 귀금속 거래에서는 트로이온스 단위를 자주 사용합니다. 중량 단위에서 트로이온스를 선택하면 입력값에 31.1035g을 곱해 g 기준 중량으로 바꾸고, 1트로이온스 가격도 함께 보여줍니다."
+      },
+      {
+        title: "은은 프리미엄과 차감률의 영향이 클 수 있습니다.",
+        body:
+          "은 제품은 금보다 단가가 낮아 고정 수수료, 부가세, 배송비, 매입 차감률의 체감 영향이 커질 수 있습니다. 계산 결과는 참고용이며 실제 거래 전에는 판매처나 매입처의 최신 고시가와 조건을 확인해야 합니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/gold-price-calculator", label: "금 시세 계산기", text: "금 제품의 순금 환산 가치와 매입가도 함께 비교할 수 있습니다." },
+      { href: "/calculators/exchange-rate", label: "환율 계산기", text: "국제 은 가격을 원화로 비교할 때 환율도 함께 참고하세요." },
+      { href: "/stock", label: "투자 계산기 모음", text: "주식, 귀금속, 암호화폐 관련 계산기를 함께 확인합니다." }
+    ]
+  },
   "year-end-tax-settlement": {
     title: `연말정산 환급액 계산기 | ${legalStandards.year}년 소득공제·세액공제 미리보기`,
     description:
