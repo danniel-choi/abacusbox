@@ -3157,11 +3157,11 @@ export const calculators: CalculatorConfig[] = [
   {
     slug: "zodiac-sign",
     title: "별자리 계산기",
-    description: "생월과 생일을 입력해 서양 별자리, 날짜 구간, 다음 별자리까지 남은 기간을 확인합니다.",
+    description: "생월과 생일을 입력해 서양 별자리, 날짜 구간, 월별 탄생석, 다음 별자리까지 남은 기간을 확인합니다.",
     category: "생활",
-    keywords: ["별자리 계산기", "생일 별자리", "내 별자리", "서양 별자리", "황도 12궁"],
-    badge: "생일 기준",
-    audience: "생일로 자신의 서양 별자리와 날짜 구간을 빠르게 확인하려는 사용자",
+    keywords: ["별자리 계산기", "생일 별자리", "내 별자리", "서양 별자리", "황도 12궁", "탄생석", "월별 탄생석"],
+    badge: "생일·탄생석",
+    audience: "생일로 자신의 서양 별자리와 탄생석, 날짜 구간을 빠르게 확인하려는 사용자",
     fields: [
       { name: "birthMonth", label: "생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 3 },
       { name: "birthDay", label: "생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 21 }
@@ -3169,7 +3169,7 @@ export const calculators: CalculatorConfig[] = [
     guideTitle: "별자리 계산 기준",
     guide: [
       "이 계산기는 일반적으로 많이 쓰이는 서양 점성술의 태양 별자리 날짜 구간을 기준으로 별자리를 판정합니다.",
-      "생월과 생일만 입력하면 양자리부터 물고기자리까지 12개 별자리 중 하나를 보여주고, 해당 별자리의 날짜 구간과 다음 별자리 시작일까지 남은 일수를 함께 계산합니다.",
+      "생월과 생일만 입력하면 양자리부터 물고기자리까지 12개 별자리 중 하나를 보여주고, 해당 별자리의 날짜 구간과 월별 탄생석, 다음 별자리 시작일까지 남은 일수를 함께 계산합니다.",
       "별자리 구간은 연도와 시간대, 점성술 체계에 따라 세부 경계가 달라질 수 있습니다. 이 페이지는 재미와 참고용으로 활용하세요."
     ],
     checkpoints: [
@@ -3179,6 +3179,7 @@ export const calculators: CalculatorConfig[] = [
     ],
     faqs: [
       { question: "별자리는 음력 생일로 계산하나요?", answer: "일반적인 서양 별자리는 양력 생일 기준으로 계산합니다." },
+      { question: "탄생석은 어떤 기준인가요?", answer: "탄생석은 월별로 널리 알려진 대표 보석을 기준으로 안내합니다. 국가나 전통에 따라 보조 탄생석이 다르게 소개될 수 있습니다." },
       { question: "경계일에 태어나면 왜 사이트마다 다를 수 있나요?", answer: "태양이 별자리 구간을 지나는 시각은 해마다 조금씩 달라질 수 있어, 정밀 점성술에서는 출생연도와 시간까지 보기도 합니다." },
       { question: "이 결과를 운세로 봐도 되나요?", answer: "이 계산기는 별자리 구간을 알려주는 참고 도구입니다. 운세나 성향 설명은 재미로만 봐주세요." }
     ],
@@ -3197,9 +3198,24 @@ export const calculators: CalculatorConfig[] = [
         { name: "전갈자리", start: [10, 23], end: [11, 22], element: "물", keyword: "집중력과 깊이" },
         { name: "사수자리", start: [11, 23], end: [12, 21], element: "불", keyword: "탐험심과 확장성" }
       ];
+      const birthstones = [
+        { month: 1, name: "가넷", meaning: "진실, 우정, 보호", alternatives: "로즈 쿼츠" },
+        { month: 2, name: "자수정", meaning: "평온, 지혜, 성실", alternatives: "오닉스" },
+        { month: 3, name: "아쿠아마린", meaning: "용기, 행복, 침착함", alternatives: "블러드스톤" },
+        { month: 4, name: "다이아몬드", meaning: "영원한 사랑, 순수, 강인함", alternatives: "수정" },
+        { month: 5, name: "에메랄드", meaning: "희망, 행운, 치유", alternatives: "크리소프레이즈" },
+        { month: 6, name: "진주", meaning: "순수, 건강, 부드러운 지혜", alternatives: "문스톤, 알렉산드라이트" },
+        { month: 7, name: "루비", meaning: "열정, 사랑, 생명력", alternatives: "카넬리안" },
+        { month: 8, name: "페리도트", meaning: "부부의 행복, 긍정, 풍요", alternatives: "스피넬" },
+        { month: 9, name: "사파이어", meaning: "진실, 지혜, 신뢰", alternatives: "라피스 라줄리" },
+        { month: 10, name: "오팔", meaning: "희망, 창의성, 행운", alternatives: "투르말린" },
+        { month: 11, name: "토파즈", meaning: "우정, 풍요, 자신감", alternatives: "시트린" },
+        { month: 12, name: "터키석", meaning: "성공, 보호, 행운", alternatives: "탄자나이트, 지르콘" }
+      ];
       const month = Math.min(Math.max(Math.floor(values.birthMonth), 1), 12);
       const lastDay = new Date(2026, month, 0).getDate();
       const day = Math.min(Math.max(Math.floor(values.birthDay), 1), lastDay);
+      const birthstone = birthstones[month - 1];
       const dayOfYear = daysBetweenDates(new Date(2026, 0, 1), new Date(2026, month - 1, day)) + 1;
 
       const toDayOfYear = (date: number[]) => daysBetweenDates(new Date(2026, 0, 1), new Date(2026, date[0] - 1, date[1])) + 1;
@@ -3216,14 +3232,17 @@ export const calculators: CalculatorConfig[] = [
       const rangeLabel = `${selected.start[0]}월 ${selected.start[1]}일 ~ ${selected.end[0]}월 ${selected.end[1]}일`;
 
       return {
-        headline: selected.name,
-        subline: `${dateLabel} 기준 · ${rangeLabel}`,
+        headline: `${selected.name} · ${birthstone.name}`,
+        subline: `${dateLabel} 기준 · ${rangeLabel} · ${month}월 탄생석`,
         rows: [
           { label: "입력 생일", value: dateLabel },
           { label: "별자리", value: selected.name, tone: "strong" },
           { label: "날짜 구간", value: rangeLabel, tone: "strong" },
           { label: "원소", value: selected.element },
           { label: "키워드", value: selected.keyword },
+          { label: `${month}월 탄생석`, value: birthstone.name, tone: "strong" },
+          { label: "탄생석 의미", value: birthstone.meaning },
+          { label: "함께 보는 보석", value: birthstone.alternatives },
           { label: `다음 별자리(${next.name})까지`, value: `${daysUntilNext.toLocaleString("ko-KR")}일` }
         ],
         chart: [
