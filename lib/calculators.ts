@@ -429,10 +429,24 @@ function realEstateAcquisitionRate(homePrice: number) {
   return 0.03;
 }
 
-function addMonthsToDate(year: number, month: number, day: number, monthsToAdd: number) {
-  const base = new Date(year, month - 1, day);
-  base.setMonth(base.getMonth() + monthsToAdd);
-  return base;
+function addMonthsClampedUtc(date: Date, monthsToAdd: number) {
+  const targetMonthIndex = date.getUTCMonth() + monthsToAdd;
+  const targetYear = date.getUTCFullYear() + Math.floor(targetMonthIndex / 12);
+  const targetMonth = ((targetMonthIndex % 12) + 12) % 12;
+  const lastDay = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+  return makeUtcDate(targetYear, targetMonth + 1, Math.min(date.getUTCDate(), lastDay));
+}
+
+function addMonthsClampedUtcWithStatus(date: Date, monthsToAdd: number) {
+  const targetMonthIndex = date.getUTCMonth() + monthsToAdd;
+  const targetYear = date.getUTCFullYear() + Math.floor(targetMonthIndex / 12);
+  const targetMonth = ((targetMonthIndex % 12) + 12) % 12;
+  const lastDay = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+  const clamped = date.getUTCDate() > lastDay;
+  return {
+    date: makeUtcDate(targetYear, targetMonth + 1, Math.min(date.getUTCDate(), lastDay)),
+    clamped
+  };
 }
 
 function daysBetweenDates(from: Date, to: Date) {
@@ -4599,48 +4613,109 @@ export const calculators: CalculatorConfig[] = [
   },
   {
     slug: "military-discharge-date",
-    title: "군 전역일 계산기",
-    description: "입대일과 복무 개월 수를 기준으로 예상 전역일을 계산합니다.",
+    title: "전역일 계산기",
+    description: "입영일과 복무 형태를 기준으로 전역일, D-day, 복무 진행률, 진급 예정일을 계산합니다.",
     category: "노무",
-    keywords: ["군 전역일 계산기", "복무기간 계산", "입대일 계산"],
-    badge: "입대일 기준",
-    audience: "입대 예정자, 군 복무자, 가족",
+    keywords: ["전역일 계산기", "군 전역일 계산기", "복무기간 계산", "입대일 계산", "군 복무 D-day", "진급일 계산"],
+    badge: "군별 복무기간",
+    audience: "입대 예정자, 현역 복무자, 사회복무요원, 가족",
     fields: [
-      { name: "enlistYear", label: "입대연도", type: "number", unit: "년", min: 2000, max: 2100, step: 1, defaultValue: 2026 },
-      { name: "enlistMonth", label: "입대월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 9 },
-      { name: "enlistDay", label: "입대일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 1 },
-      { name: "serviceMonths", label: "복무기간", type: "number", unit: "개월", min: 1, max: 36, step: 1, defaultValue: 18 }
+      {
+        name: "serviceType",
+        label: "복무 형태",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "육군 18개월", value: 0 },
+          { label: "해군 20개월", value: 1 },
+          { label: "공군 21개월", value: 2 },
+          { label: "해병대 18개월", value: 3 },
+          { label: "사회복무요원 21개월", value: 4 },
+          { label: "직접 입력", value: 5 }
+        ]
+      },
+      { name: "enlistYear", label: "입영연도", type: "number", unit: "년", min: 2000, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "enlistMonth", label: "입영월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 10 },
+      { name: "enlistDay", label: "입영일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 5 },
+      {
+        name: "serviceMonths",
+        label: "직접 입력 복무기간",
+        type: "number",
+        unit: "개월",
+        min: 1,
+        max: 60,
+        step: 1,
+        defaultValue: 18,
+        help: "복무 형태를 직접 입력으로 선택했을 때 적용합니다."
+      }
     ],
     guideTitle: "전역일 계산 기준",
     guide: [
-      "전역일은 군별, 병과, 제도 변경, 복무 단축 여부에 따라 달라질 수 있습니다. 이 계산기는 입대일에 복무 개월 수를 더하는 단순 기준으로 예상 날짜를 계산합니다.",
-      "2026년 8월 27일 현재 복무기간 제도는 변경 가능성이 있으므로, 실제 전역일은 병무청·소속 부대 안내를 우선 확인해야 합니다.",
-      "휴가, 조기전역, 연장복무, 징계, 특례 적용 등은 반영하지 않습니다."
+      "전역일은 입영일부터 복무 개월 수가 되는 날의 전날로 계산합니다. 예를 들어 2026년 1월 5일 육군 입영이면 18개월 뒤인 2027년 7월 5일의 전날, 2027년 7월 4일이 예상 전역일입니다.",
+      "현재 병 복무기간은 육군·해병대 18개월, 해군 20개월, 공군 21개월, 사회복무요원 21개월을 기본값으로 둡니다. 특수 복무나 제도 변경 대상자는 직접 입력을 사용하세요.",
+      "형 집행, 복무 이탈, 군기교육처분, 전역 보류, 연장복무, 조기전역 등은 실제 전역일을 바꿀 수 있어 소속 부대와 병무청 안내가 최종 기준입니다."
     ],
     checkpoints: [
-      "복무기간 개월 수를 직접 입력하는 구조라 군별 차이를 스스로 반영할 수 있습니다.",
-      "실제 전역일은 행정 처리 기준일과 다를 수 있습니다.",
-      "제도 변경 가능성이 있어 최신 공지를 반드시 확인해야 합니다."
+      "전역일은 입영일 + 복무기간의 전날로 계산합니다.",
+      "말일 입영처럼 끝나는 달에 같은 날짜가 없으면 해당 달의 말일을 기준으로 계산합니다.",
+      "진급 예정일은 최저 복무기간 기준의 참고값이며 심사와 부대 사정에 따라 달라질 수 있습니다."
     ],
     faqs: [
-      { question: "육군, 해군, 공군 기간이 다른데 반영되나요?", answer: "현재는 복무 개월 수 직접 입력 방식이라 원하는 기간을 넣어 계산하면 됩니다." },
-      { question: "정확한 전역 예정일과 차이가 날 수 있나요?", answer: "네. 부대 행정 기준, 복무 변동, 제도 변경에 따라 실제 날짜와 차이가 날 수 있습니다." }
+      { question: "육군, 해군, 공군 기간이 자동 반영되나요?", answer: "네. 육군·해병대 18개월, 해군 20개월, 공군·사회복무요원 21개월 기본값을 선택할 수 있습니다. 다른 기간은 직접 입력을 선택하세요." },
+      { question: "전역일은 복무 만료일과 같은가요?", answer: "계산식은 입영일부터 복무 개월 수가 되는 날의 전날을 전역일로 봅니다. 실제 행정상 전역일은 소속 부대 기준을 확인해야 합니다." },
+      { question: "진급일도 정확한가요?", answer: "이병 2개월 뒤 첫 1일, 일병 6개월 뒤, 상병 6개월 뒤를 기준으로 한 가장 빠른 참고일입니다. 진급 심사와 부대 사정에 따라 늦어질 수 있습니다." }
     ],
     calculate(values) {
-      const dischargeDate = addMonthsToDate(values.enlistYear, values.enlistMonth, values.enlistDay, Math.floor(values.serviceMonths));
-      const formatted = `${dischargeDate.getFullYear()}-${String(dischargeDate.getMonth() + 1).padStart(2, "0")}-${String(dischargeDate.getDate()).padStart(2, "0")}`;
+      const serviceProfiles = [
+        { label: "육군", months: 18 },
+        { label: "해군", months: 20 },
+        { label: "공군", months: 21 },
+        { label: "해병대", months: 18 },
+        { label: "사회복무요원", months: 21 },
+        { label: "직접 입력", months: Math.max(Math.floor(values.serviceMonths), 1) }
+      ];
+      const profile = serviceProfiles[Math.min(Math.max(Math.floor(values.serviceType), 0), serviceProfiles.length - 1)];
+      const serviceMonths = profile.months;
+      const enlistDate = clampDate(values.enlistYear, values.enlistMonth, values.enlistDay);
+      const serviceEnd = addMonthsClampedUtcWithStatus(enlistDate, serviceMonths);
+      const dischargeDate = serviceEnd.clamped ? serviceEnd.date : addUtcDays(serviceEnd.date, -1);
+      const today = todayKstDate();
+      const totalDays = Math.max(utcDaysBetween(enlistDate, dischargeDate) + 1, 1);
+      const elapsedDays = today < enlistDate ? 0 : today > dischargeDate ? totalDays : utcDaysBetween(enlistDate, today) + 1;
+      const remainingDays = today > dischargeDate ? 0 : Math.max(utcDaysBetween(today, dischargeDate), 0);
+      const progressRate = Math.min(Math.max((elapsedDays / totalDays) * 100, 0), 100);
+      const halfDate = addUtcDays(enlistDate, Math.floor(totalDays / 2));
+      const d100Date = addUtcDays(dischargeDate, -100);
+      const privateDoneDate = addMonthsClampedUtc(enlistDate, 2);
+      const privateFirstDate = privateDoneDate.getUTCDate() === 1
+        ? privateDoneDate
+        : makeUtcDate(privateDoneDate.getUTCFullYear(), privateDoneDate.getUTCMonth() + 2, 1);
+      const corporalDate = addMonthsClampedUtc(privateFirstDate, 6);
+      const sergeantDate = addMonthsClampedUtc(corporalDate, 6);
+      const dDayLabel = today > dischargeDate ? `D+${utcDaysBetween(dischargeDate, today).toLocaleString("ko-KR")}` : `D-${remainingDays.toLocaleString("ko-KR")}`;
+
       return {
-        headline: formatted,
-        subline: `${Math.floor(values.serviceMonths)}개월 복무 기준 예상 전역일`,
+        headline: formatKoreanDate(dischargeDate),
+        subline: `${profile.label} ${serviceMonths}개월 기준 · ${dDayLabel} · 진행률 ${formatPercent(progressRate, 1)}`,
         rows: [
-          { label: "입대일", value: `${values.enlistYear}-${String(values.enlistMonth).padStart(2, "0")}-${String(values.enlistDay).padStart(2, "0")}` },
-          { label: "복무기간", value: `${Math.floor(values.serviceMonths)}개월` },
-          { label: "예상 전역일", value: formatted, tone: "strong" }
+          { label: "복무 형태", value: `${profile.label} ${serviceMonths}개월`, tone: "strong" },
+          { label: "입영일", value: formatKoreanDate(enlistDate) },
+          { label: "예상 전역일", value: formatKoreanDate(dischargeDate), tone: "strong" },
+          { label: "D-day", value: dDayLabel, tone: "strong" },
+          { label: "전체 복무일수", value: `${totalDays.toLocaleString("ko-KR")}일` },
+          { label: "복무한 날", value: `${elapsedDays.toLocaleString("ko-KR")}일` },
+          { label: "남은 날", value: `${remainingDays.toLocaleString("ko-KR")}일 (${Math.floor(remainingDays / 7).toLocaleString("ko-KR")}주 ${remainingDays % 7}일)` },
+          { label: "복무 진행률", value: formatPercent(progressRate, 1), tone: "strong" },
+          { label: "절반 지나는 날", value: formatKoreanDate(halfDate) },
+          { label: "전역 100일 전", value: formatKoreanDate(d100Date) },
+          { label: "일병 진급 참고일", value: `${formatKoreanDate(privateFirstDate)} (${today <= privateFirstDate ? `D-${utcDaysBetween(today, privateFirstDate).toLocaleString("ko-KR")}` : "경과"})` },
+          { label: "상병 진급 참고일", value: `${formatKoreanDate(corporalDate)} (${today <= corporalDate ? `D-${utcDaysBetween(today, corporalDate).toLocaleString("ko-KR")}` : "경과"})` },
+          { label: "병장 진급 참고일", value: `${formatKoreanDate(sergeantDate)} (${today <= sergeantDate ? `D-${utcDaysBetween(today, sergeantDate).toLocaleString("ko-KR")}` : "경과"})` }
         ],
         chart: [
-          { name: "입대월", value: values.enlistMonth },
-          { name: "복무개월", value: values.serviceMonths },
-          { name: "전역월", value: dischargeDate.getMonth() + 1 }
+          { name: "복무한 날", value: elapsedDays },
+          { name: "남은 날", value: remainingDays },
+          { name: "전체 복무", value: totalDays }
         ]
       };
     }

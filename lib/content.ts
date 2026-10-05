@@ -200,11 +200,11 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     tags: ["실수령액", "4대보험", "급여명세서"]
   },
   "military-discharge-date": {
-    title: "군 전역일 계산기",
+    title: "전역일 계산기",
     category: "생활 가이드",
-    audience: "입대 예정자, 군 복무자, 가족",
-    description: "입대일과 복무 개월 수를 기준으로 예상 전역일을 계산합니다.",
-    tags: ["전역일", "군복무", "날짜계산"]
+    audience: "입대 예정자, 현역 복무자, 사회복무요원, 가족",
+    description: "입영일과 복무 형태를 기준으로 전역일, D-day, 복무 진행률, 진급 예정일을 계산합니다.",
+    tags: ["전역일", "군복무", "D-day", "진급일"]
   },
   "loan-interest": {
     title: "대출 이자 계산기",

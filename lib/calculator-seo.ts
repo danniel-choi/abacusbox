@@ -11,6 +11,35 @@ export type CalculatorSeoContent = {
 };
 
 export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoContent>> = {
+  "military-discharge-date": {
+    title: "전역일 계산기 | 군 복무 D-day·진급일·복무 진행률 계산",
+    description: "전역일 계산기로 육군·해군·공군·해병대·사회복무요원 복무기간을 선택해 예상 전역일, D-day, 복무 진행률, 진급 예정일을 확인하세요.",
+    keywords: ["전역일 계산기", "군 전역일 계산기", "군 복무 D-day", "입영일 전역일", "진급일 계산", "복무 진행률", "사회복무요원 소집해제일"],
+    searchIntents: [
+      "입영일 기준 예상 전역일을 알고 싶을 때",
+      "전역까지 남은 일수와 복무 진행률을 확인하고 싶을 때",
+      "일병·상병·병장 진급 예정일을 참고하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "군별 복무기간을 선택해 전역일을 계산합니다.",
+        body: "육군·해병대 18개월, 해군 20개월, 공군·사회복무요원 21개월 기본값을 제공하고, 직접 입력으로 다른 복무기간도 계산할 수 있습니다."
+      },
+      {
+        title: "D-day와 복무 진행률을 함께 보여줍니다.",
+        body: "전역일뿐 아니라 전체 복무일수, 복무한 날, 남은 날, 절반 지나는 날, 전역 100일 전 날짜까지 한 번에 확인할 수 있습니다."
+      },
+      {
+        title: "진급 예정일은 참고값으로 제공합니다.",
+        body: "이병 2개월 뒤 첫 1일, 일병 6개월 뒤, 상병 6개월 뒤 기준으로 일병·상병·병장 진급 참고일을 계산합니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/dday", label: "디데이 계산기", text: "전역 이후 복학·휴가·여행 일정까지 D-day로 관리합니다." },
+      { href: "/calculators/date-diff", label: "날짜 차이 계산기", text: "두 날짜 사이의 기간을 따로 계산합니다." },
+      { href: "/labor", label: "급여·노무 계산기 모음", text: "복무와 근로 관련 계산기를 함께 확인합니다." }
+    ]
+  },
   "anniversary-calculator": {
     title: "기념일 계산기 | 100일·1주년·D-day 날짜 계산",
     description: "기념일 계산기로 시작일을 입력해 100일, 200일, 1주년, 원하는 N일 기념일과 오늘 기준 남은 기간을 확인하세요.",
