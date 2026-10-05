@@ -29,6 +29,9 @@ export type CalculatorSlug =
   | "daily-intake"
   | "pet-age"
   | "korean-age"
+  | "anniversary-calculator"
+  | "milestone-birthday"
+  | "lunar-solar-converter"
   | "zodiac-sign"
   | "unit-converter"
   | "real-estate-acquisition-tax"
@@ -475,6 +478,74 @@ function formatNumber(value: number, digits = 0) {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits
   });
+}
+
+function makeUtcDate(year: number, month: number, day: number) {
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function clampDate(year: number, month: number, day: number) {
+  const safeYear = Math.min(Math.max(Math.floor(year), 1900), 2100);
+  const safeMonth = Math.min(Math.max(Math.floor(month), 1), 12);
+  const lastDay = new Date(Date.UTC(safeYear, safeMonth, 0)).getUTCDate();
+  const safeDay = Math.min(Math.max(Math.floor(day), 1), lastDay);
+  return makeUtcDate(safeYear, safeMonth, safeDay);
+}
+
+function formatIsoDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function formatKoreanDate(date: Date) {
+  return `${date.getUTCFullYear()}년 ${date.getUTCMonth() + 1}월 ${date.getUTCDate()}일`;
+}
+
+function addUtcDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function utcDaysBetween(start: Date, end: Date) {
+  return Math.round((Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate()) - Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate())) / 86400000);
+}
+
+function todayKstDate() {
+  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return makeUtcDate(kst.getUTCFullYear(), kst.getUTCMonth() + 1, kst.getUTCDate());
+}
+
+function lunarDateParts(date: Date) {
+  const formatter = new Intl.DateTimeFormat("ko-KR-u-ca-chinese", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC"
+  });
+  const parts = formatter.formatToParts(date);
+  const relatedYear = Number(parts.find((part) => String(part.type) === "relatedYear")?.value || date.getUTCFullYear());
+  const yearName = String(parts.find((part) => String(part.type) === "yearName")?.value || "");
+  const monthText = String(parts.find((part) => part.type === "month")?.value || "");
+  const day = Number(parts.find((part) => part.type === "day")?.value || 1);
+  const isLeapMonth = monthText.includes("윤");
+  const month = Number(monthText.replace(/[^0-9]/g, "")) || 1;
+  return { year: relatedYear, yearName, month, day, isLeapMonth };
+}
+
+function formatLunarDate(parts: ReturnType<typeof lunarDateParts>) {
+  return `${parts.year}년${parts.yearName ? `(${parts.yearName}년)` : ""} ${parts.isLeapMonth ? "윤" : ""}${parts.month}월 ${parts.day}일`;
+}
+
+function findSolarDateFromLunar(year: number, month: number, day: number, isLeapMonth: boolean) {
+  const searchStart = makeUtcDate(year, 1, 1);
+  const searchEnd = makeUtcDate(year + 1, 3, 31);
+  for (let cursor = new Date(searchStart); cursor <= searchEnd; cursor = addUtcDays(cursor, 1)) {
+    const lunar = lunarDateParts(cursor);
+    if (lunar.year === year && lunar.month === month && lunar.day === day && lunar.isLeapMonth === isLeapMonth) {
+      return cursor;
+    }
+  }
+  return null;
 }
 
 function binomialAtLeastProbability(trials: number, target: number, probability: number) {
@@ -3386,6 +3457,261 @@ export const calculators: CalculatorConfig[] = [
           { name: "만나이", value: age },
           { name: "다음생일까지", value: diffDays },
           { name: "경과년수×10", value: age * 10 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "anniversary-calculator",
+    title: "기념일 계산기",
+    description: "시작일과 날짜 수를 입력해 100일, 1주년, D-day 같은 기념일 날짜와 오늘 기준 남은 기간을 계산합니다.",
+    category: "생활",
+    keywords: ["기념일 계산기", "100일 계산기", "날짜 계산", "커플 기념일", "디데이 계산"],
+    badge: "100일·1주년",
+    audience: "기념일을 챙기는 커플, 가족 일정 관리자, 행사 준비자",
+    fields: [
+      { name: "startYear", label: "시작연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "startMonth", label: "시작월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 1 },
+      { name: "startDay", label: "시작일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 1 },
+      { name: "daysCount", label: "계산할 날짜 수", type: "number", unit: "일", min: 1, max: 10000, step: 1, defaultValue: 100 },
+      {
+        name: "countMode",
+        label: "계산 방식",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "시작일을 1일로 포함", value: 1 },
+          { label: "시작일 다음 날을 1일로 계산", value: 0 }
+        ]
+      }
+    ],
+    guideTitle: "기념일 계산 기준",
+    guide: [
+      "시작일을 1일로 포함하면 만난 날, 출생일, 개업일 같은 첫날을 하루로 세어 100일 날짜를 계산합니다.",
+      "시작일 다음 날을 1일로 계산하면 기간 경과 기준의 날짜 계산에 가깝습니다. 계약 기간, 행사 D-day처럼 첫날을 제외할 때 사용하세요.",
+      "윤년과 월말 날짜는 실제 달력 기준으로 자동 반영합니다."
+    ],
+    checkpoints: [
+      "커플 100일은 보통 시작일을 1일로 포함해 계산합니다.",
+      "계약·납기 계산은 시작일 포함 여부가 다를 수 있어 기준을 먼저 확인하세요.",
+      "오늘 기준 남은 기간이 음수이면 이미 지난 기념일입니다."
+    ],
+    faqs: [
+      { question: "100일 계산은 시작일을 포함하나요?", answer: "일반적인 기념일 계산은 시작일을 1일로 포함합니다. 단, 일정 관리나 법정 기간 계산은 시작일을 제외하는 경우가 있어 계산 방식을 선택할 수 있게 했습니다." },
+      { question: "1주년 날짜도 볼 수 있나요?", answer: "네. 결과에 100일, 200일, 1주년, 2주년 참고 날짜를 함께 보여줍니다." }
+    ],
+    calculate(values) {
+      const start = clampDate(values.startYear, values.startMonth, values.startDay);
+      const days = Math.max(Math.floor(values.daysCount), 1);
+      const offset = values.countMode === 1 ? days - 1 : days;
+      const target = addUtcDays(start, offset);
+      const today = todayKstDate();
+      const remaining = utcDaysBetween(today, target);
+      const prefix = remaining >= 0 ? "남은 기간" : "지난 기간";
+      const included100 = addUtcDays(start, 99);
+      const included200 = addUtcDays(start, 199);
+      const firstAnniversary = clampDate(start.getUTCFullYear() + 1, start.getUTCMonth() + 1, start.getUTCDate());
+      const secondAnniversary = clampDate(start.getUTCFullYear() + 2, start.getUTCMonth() + 1, start.getUTCDate());
+
+      return {
+        headline: formatKoreanDate(target),
+        subline: `${days.toLocaleString("ko-KR")}일 기념일 · ${prefix} ${Math.abs(remaining).toLocaleString("ko-KR")}일`,
+        rows: [
+          { label: "시작일", value: formatKoreanDate(start) },
+          { label: `${days.toLocaleString("ko-KR")}일 기념일`, value: formatKoreanDate(target), tone: "strong" },
+          { label: "오늘 기준", value: `${remaining >= 0 ? "D-" : "D+"}${Math.abs(remaining).toLocaleString("ko-KR")}`, tone: "strong" },
+          { label: "100일", value: formatKoreanDate(included100) },
+          { label: "200일", value: formatKoreanDate(included200) },
+          { label: "1주년", value: formatKoreanDate(firstAnniversary) },
+          { label: "2주년", value: formatKoreanDate(secondAnniversary) }
+        ],
+        chart: [
+          { name: "계산일수", value: days },
+          { name: "오늘기준 차이", value: Math.abs(remaining) },
+          { name: "1주년 기준", value: 365 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "milestone-birthday",
+    title: "환갑·칠순·팔순 계산기",
+    description: "생년월일을 입력해 환갑, 칠순, 팔순 날짜와 오늘 기준 남은 기간을 계산합니다.",
+    category: "생활",
+    keywords: ["환갑 계산기", "칠순 계산기", "팔순 계산기", "고희 계산", "생신 계산기"],
+    badge: "환갑·칠순·팔순",
+    audience: "부모님 생신과 가족 행사를 준비하는 사용자",
+    fields: [
+      { name: "birthYear", label: "출생연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 1966 },
+      { name: "birthMonth", label: "출생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 5 },
+      { name: "birthDay", label: "출생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 10 }
+    ],
+    guideTitle: "환갑·칠순·팔순 계산 기준",
+    guide: [
+      "환갑은 보통 만 60세 생일을 기준으로 계산합니다.",
+      "칠순과 팔순은 전통적으로 세는나이 70세, 80세가 되는 해를 말해 각각 만 69세, 만 79세 생일 무렵에 챙기는 경우가 많습니다.",
+      "가족 관습에 따라 만 70세, 만 80세 생일에 행사를 잡기도 하므로 전통 기준과 만 나이 기준을 함께 보여줍니다."
+    ],
+    checkpoints: [
+      "환갑은 출생연도 + 60년입니다.",
+      "전통 칠순은 출생연도 + 69년, 전통 팔순은 출생연도 + 79년으로 봅니다.",
+      "음력 생일로 챙기는 경우에는 음력·양력 변환기로 행사일을 함께 확인하세요."
+    ],
+    faqs: [
+      { question: "칠순은 만 70세인가요?", answer: "전통적으로는 세는나이 70세라서 만 69세 생일 전후를 칠순으로 보는 경우가 많습니다. 다만 요즘은 만 70세 생일에 맞춰 기념하기도 합니다." },
+      { question: "음력 생일 기준도 계산하나요?", answer: "이 계산기는 입력한 양력 날짜 기준입니다. 음력 생일은 음력·양력 변환기에서 해당 연도의 양력 날짜를 먼저 확인하세요." }
+    ],
+    calculate(values) {
+      const birth = clampDate(values.birthYear, values.birthMonth, values.birthDay);
+      const today = todayKstDate();
+      const month = birth.getUTCMonth() + 1;
+      const day = birth.getUTCDate();
+      const hwangap = clampDate(birth.getUTCFullYear() + 60, month, day);
+      const chilsunTraditional = clampDate(birth.getUTCFullYear() + 69, month, day);
+      const palsunTraditional = clampDate(birth.getUTCFullYear() + 79, month, day);
+      const chilsunFullAge = clampDate(birth.getUTCFullYear() + 70, month, day);
+      const palsunFullAge = clampDate(birth.getUTCFullYear() + 80, month, day);
+      const milestones = [
+        { label: "환갑(만 60세)", date: hwangap },
+        { label: "칠순(전통·세는나이 70세)", date: chilsunTraditional },
+        { label: "팔순(전통·세는나이 80세)", date: palsunTraditional },
+        { label: "만 70세 생일", date: chilsunFullAge },
+        { label: "만 80세 생일", date: palsunFullAge }
+      ];
+      const next = milestones.find((item) => utcDaysBetween(today, item.date) >= 0) || milestones[milestones.length - 1];
+      const remaining = utcDaysBetween(today, next.date);
+
+      return {
+        headline: formatKoreanDate(next.date),
+        subline: `${next.label}까지 ${Math.max(remaining, 0).toLocaleString("ko-KR")}일`,
+        rows: [
+          { label: "출생일", value: formatKoreanDate(birth) },
+          { label: "다음 주요 생신", value: next.label, tone: "strong" },
+          { label: "다음 주요 생신 날짜", value: formatKoreanDate(next.date), tone: "strong" },
+          { label: "환갑", value: formatKoreanDate(hwangap) },
+          { label: "칠순(전통)", value: formatKoreanDate(chilsunTraditional) },
+          { label: "팔순(전통)", value: formatKoreanDate(palsunTraditional) },
+          { label: "칠순(만 70세 기준)", value: formatKoreanDate(chilsunFullAge) },
+          { label: "팔순(만 80세 기준)", value: formatKoreanDate(palsunFullAge) }
+        ],
+        chart: [
+          { name: "환갑", value: 60 },
+          { name: "칠순", value: 69 },
+          { name: "팔순", value: 79 },
+          { name: "만80세", value: 80 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "lunar-solar-converter",
+    title: "음력 양력 변환기",
+    description: "양력 날짜를 음력으로, 음력 날짜를 양력으로 변환하고 윤달 여부와 간지 정보를 확인합니다.",
+    category: "생활",
+    keywords: ["음력 양력 변환기", "양력 음력 변환", "음력 생일 계산", "윤달 계산", "음력 날짜"],
+    badge: "음력·양력",
+    audience: "음력 생일, 제사, 명절 날짜를 확인하는 사용자",
+    fields: [
+      {
+        name: "direction",
+        label: "변환 방향",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "양력 → 음력", value: 0 },
+          { label: "음력 → 양력", value: 1 }
+        ]
+      },
+      { name: "year", label: "연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "month", label: "월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 2 },
+      { name: "day", label: "일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 17 },
+      {
+        name: "leapMonth",
+        label: "음력 윤달 여부",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "평달", value: 0 },
+          { label: "윤달", value: 1 }
+        ],
+        help: "음력에서 양력으로 변환할 때만 사용합니다."
+      }
+    ],
+    guideTitle: "음력·양력 변환 기준",
+    guide: [
+      "양력에서 음력으로 변환할 때는 입력한 양력 날짜의 음력 연월일과 간지를 보여줍니다.",
+      "음력에서 양력으로 변환할 때는 해당 음력 날짜가 나타나는 양력 날짜를 1900~2100년 범위에서 검색합니다.",
+      "브라우저와 서버의 국제화 캘린더 데이터를 활용한 참고용 변환입니다. 역사적 날짜, 지역별 관습, 공식 서류는 기관 기준을 확인하세요."
+    ],
+    checkpoints: [
+      "음력 윤달 날짜는 해당 연도에 윤달이 있을 때만 변환됩니다.",
+      "음력 생일은 매년 양력 날짜가 달라질 수 있습니다.",
+      "1900년 이전이나 2100년 이후 날짜는 입력 범위 밖입니다."
+    ],
+    faqs: [
+      { question: "음력 생일도 매년 계산할 수 있나요?", answer: "네. 음력 생일의 연도, 월, 일을 입력하고 음력 → 양력을 선택하면 해당 연도의 양력 생일을 찾을 수 있습니다." },
+      { question: "윤달은 어떻게 입력하나요?", answer: "음력 날짜가 윤달이면 윤달을 선택하세요. 해당 연도에 그 윤달이 없으면 변환 가능한 날짜가 없다고 표시됩니다." }
+    ],
+    calculate(values) {
+      const year = Math.min(Math.max(Math.floor(values.year), 1900), 2100);
+      const month = Math.min(Math.max(Math.floor(values.month), 1), 12);
+      const day = Math.min(Math.max(Math.floor(values.day), 1), 31);
+
+      if (values.direction === 0) {
+        const solar = clampDate(year, month, day);
+        const lunar = lunarDateParts(solar);
+
+        return {
+          headline: formatLunarDate(lunar),
+          subline: `${formatKoreanDate(solar)} 양력 기준`,
+          rows: [
+            { label: "입력 양력", value: formatKoreanDate(solar), tone: "strong" },
+            { label: "변환 음력", value: formatLunarDate(lunar), tone: "strong" },
+            { label: "음력 연도 간지", value: lunar.yearName ? `${lunar.yearName}년` : "확인 불가" },
+            { label: "윤달 여부", value: lunar.isLeapMonth ? "윤달" : "평달" },
+            { label: "ISO 날짜", value: formatIsoDate(solar) }
+          ],
+          chart: [
+            { name: "음력월", value: lunar.month },
+            { name: "음력일", value: lunar.day },
+            { name: "양력월", value: solar.getUTCMonth() + 1 }
+          ]
+        };
+      }
+
+      const solar = findSolarDateFromLunar(year, month, day, values.leapMonth === 1);
+      if (!solar) {
+        return {
+          headline: "변환 가능한 날짜 없음",
+          subline: "해당 연도에 입력한 음력 날짜 또는 윤달이 없을 수 있습니다.",
+          rows: [
+            { label: "입력 음력", value: `${year}년 ${values.leapMonth === 1 ? "윤" : ""}${month}월 ${day}일`, tone: "strong" },
+            { label: "확인 결과", value: "변환 가능한 양력 날짜를 찾지 못했습니다.", tone: "strong" },
+            { label: "확인 범위", value: "1900년 1월 1일 ~ 2101년 3월 31일" }
+          ],
+          chart: [
+            { name: "음력월", value: month },
+            { name: "음력일", value: day },
+            { name: "결과", value: 0 }
+          ]
+        };
+      }
+
+      const lunar = lunarDateParts(solar);
+      return {
+        headline: formatKoreanDate(solar),
+        subline: `${formatLunarDate(lunar)} 음력 기준`,
+        rows: [
+          { label: "입력 음력", value: `${year}년 ${values.leapMonth === 1 ? "윤" : ""}${month}월 ${day}일`, tone: "strong" },
+          { label: "변환 양력", value: formatKoreanDate(solar), tone: "strong" },
+          { label: "확인된 음력", value: formatLunarDate(lunar) },
+          { label: "윤달 여부", value: lunar.isLeapMonth ? "윤달" : "평달" },
+          { label: "ISO 날짜", value: formatIsoDate(solar) }
+        ],
+        chart: [
+          { name: "양력월", value: solar.getUTCMonth() + 1 },
+          { name: "양력일", value: solar.getUTCDate() },
+          { name: "음력월", value: lunar.month }
         ]
       };
     }

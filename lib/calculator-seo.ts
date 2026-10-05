@@ -11,6 +11,81 @@ export type CalculatorSeoContent = {
 };
 
 export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoContent>> = {
+  "anniversary-calculator": {
+    title: "기념일 계산기 | 100일·1주년·D-day 날짜 계산",
+    description: "기념일 계산기로 시작일을 입력해 100일, 200일, 1주년, 원하는 N일 기념일과 오늘 기준 남은 기간을 확인하세요.",
+    keywords: ["기념일 계산기", "100일 계산기", "커플 100일", "1주년 계산", "디데이 계산기", "날짜 계산기"],
+    searchIntents: [
+      "만난 날 기준 100일이 언제인지 알고 싶을 때",
+      "개업일이나 시작일 기준 N일 기념일을 계산하고 싶을 때",
+      "오늘 기준 기념일까지 며칠 남았는지 확인하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "시작일 포함 여부를 선택해 기념일을 계산합니다.",
+        body: "커플 100일처럼 첫날을 1일로 세는 방식과 일정 기간 계산처럼 시작일 다음 날부터 세는 방식을 선택할 수 있습니다."
+      },
+      {
+        title: "100일과 1주년을 함께 확인합니다.",
+        body: "원하는 날짜 수의 기념일뿐 아니라 100일, 200일, 1주년, 2주년 날짜를 함께 보여줘 일정 저장이나 선물 준비에 활용하기 쉽습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/dday", label: "디데이 계산기", text: "특정 날짜까지 남은 기간을 빠르게 확인합니다." },
+      { href: "/calculators/date-diff", label: "날짜 차이 계산기", text: "두 날짜 사이의 정확한 기간을 계산합니다." },
+      { href: "/calculators/lunar-solar-converter", label: "음력 양력 변환기", text: "음력 생일이나 가족 기념일의 양력 날짜를 확인합니다." }
+    ]
+  },
+  "milestone-birthday": {
+    title: "환갑·칠순·팔순 계산기 | 부모님 생신 날짜 계산",
+    description: "환갑, 칠순, 팔순 계산기로 생년월일 기준 환갑 날짜와 전통 칠순·팔순, 만 70세·만 80세 생일을 함께 확인하세요.",
+    keywords: ["환갑 계산기", "칠순 계산기", "팔순 계산기", "부모님 생신 계산", "고희 계산", "만 70세 생일"],
+    searchIntents: [
+      "부모님 환갑 날짜를 계산하고 싶을 때",
+      "칠순과 만 70세 기준이 헷갈릴 때",
+      "팔순 행사 날짜를 미리 준비하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "환갑은 만 60세 생일 기준으로 계산합니다.",
+        body: "출생연도에 60년을 더해 환갑 날짜를 계산하고, 오늘 기준으로 다음 주요 생신까지 남은 기간을 함께 보여줍니다."
+      },
+      {
+        title: "칠순·팔순은 전통 기준과 만 나이 기준을 나눠 보여줍니다.",
+        body: "전통적으로 칠순은 세는나이 70세, 팔순은 세는나이 80세에 해당합니다. 가족 관습에 맞춰 비교할 수 있도록 만 70세와 만 80세 생일도 함께 제공합니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/korean-age", label: "만나이 계산기", text: "기준일 현재 만 나이를 확인합니다." },
+      { href: "/calculators/lunar-solar-converter", label: "음력 양력 변환기", text: "음력 생신을 양력 날짜로 변환합니다." },
+      { href: "/calculators/anniversary-calculator", label: "기념일 계산기", text: "행사일까지 남은 날짜와 기념일을 계산합니다." }
+    ]
+  },
+  "lunar-solar-converter": {
+    title: "음력 양력 변환기 | 음력 생일·윤달 날짜 계산",
+    description: "음력 양력 변환기로 양력 날짜를 음력으로, 음력 생일과 윤달 날짜를 양력으로 변환하고 간지 정보를 확인하세요.",
+    keywords: ["음력 양력 변환기", "양력 음력 변환", "음력 생일 양력", "윤달 계산기", "음력 날짜 계산"],
+    searchIntents: [
+      "음력 생일의 올해 양력 날짜를 알고 싶을 때",
+      "양력 날짜가 음력으로 몇 월 며칠인지 확인하고 싶을 때",
+      "윤달 생일이나 제사 날짜를 변환하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "양력과 음력을 양방향으로 변환합니다.",
+        body: "양력 날짜를 입력하면 음력 연월일과 간지를 보여주고, 음력 날짜를 입력하면 해당 연도의 양력 날짜를 찾아줍니다."
+      },
+      {
+        title: "윤달 여부를 따로 선택할 수 있습니다.",
+        body: "음력에서 양력으로 변환할 때 평달과 윤달을 구분해 입력할 수 있습니다. 해당 연도에 존재하지 않는 윤달 날짜는 변환 불가로 안내합니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/milestone-birthday", label: "환갑·칠순·팔순 계산기", text: "음력 생신의 양력 날짜를 확인한 뒤 주요 생신을 계산합니다." },
+      { href: "/calculators/anniversary-calculator", label: "기념일 계산기", text: "변환한 날짜 기준 기념일을 계산합니다." },
+      { href: "/calculators/date-add", label: "날짜 더하기 계산기", text: "날짜에 며칠, 몇 주, 몇 개월을 더해봅니다." }
+    ]
+  },
   "draw-probability": {
     title: "뽑기 확률 계산기 | 가챠·랜덤박스 성공 확률과 기대값 계산",
     description:
