@@ -76,7 +76,11 @@ export type CalculatorSlug =
   | "rental-property-roi"
   | "percent"
   | "loan-amortization"
+  | "youth-future-savings"
   | "youth-leap-account"
+  | "earned-income-tax-credit"
+  | "kpass-refund"
+  | "childbirth-grant"
   | "isa-tax"
   | "card-installment"
   | "retirement-income-tax"
@@ -5959,6 +5963,75 @@ export const calculators: CalculatorConfig[] = [
     }
   },
   {
+    slug: "youth-future-savings",
+    title: "청년미래적금 계산기",
+    description: "월 납입액, 가입 유형, 예상 금리를 입력해 청년미래적금 3년 만기 예상 수령액을 계산합니다.",
+    category: "금융",
+    keywords: ["청년미래적금 계산기", "청년미래적금", "정부기여금", "청년 적금", "청년 자산형성"],
+    badge: "3년 만기·정부기여금",
+    audience: "청년미래적금 가입 전 월 납입액과 정부기여금을 미리 비교하려는 사용자",
+    fields: [
+      { name: "monthlyDeposit", label: "월 납입액", type: "number", unit: "원", min: 1000, max: 500000, step: 1000, defaultValue: 500000 },
+      {
+        name: "planType",
+        label: "가입 유형",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "일반형 6%", value: 6 },
+          { label: "우대형 12%", value: 12 }
+        ]
+      },
+      { name: "annualRate", label: "예상 연 이율", type: "number", unit: "%", min: 0, max: 20, step: 0.1, defaultValue: 4 },
+      { name: "months", label: "납입 개월 수", type: "number", unit: "개월", min: 1, max: 36, step: 1, defaultValue: 36 }
+    ],
+    guideTitle: "청년미래적금 계산 기준",
+    guide: [
+      "청년미래적금은 2026년 신설된 3년 만기 자유적립식 정책 금융상품으로, 월 납입한도 50만원과 이자소득 비과세 구조를 전제로 계산합니다.",
+      "정부기여금은 일반형 납입액의 6%, 우대형 납입액의 12%로 단순 추정합니다. 실제 가입 유형은 개인소득, 가구소득, 중소기업 재직, 소상공인 요건 등에 따라 달라질 수 있습니다.",
+      "예상 이자는 월말 납입 후 월복리로 적립되는 간이 방식입니다. 은행별 금리, 우대금리, 중도해지, 가입 시점에 따라 실제 만기 수령액은 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "월 납입한도는 50만원으로 제한해 계산합니다.",
+      "정부기여금은 6% 또는 12% 매칭으로 추정합니다.",
+      "가입 자격과 기여금 유형은 실제 신청 시 금융기관·서민금융진흥원 기준을 확인해야 합니다."
+    ],
+    faqs: [
+      { question: "청년도약계좌와 같은 상품인가요?", answer: "아니요. 청년미래적금은 2026년 신설된 별도 상품으로, 3년 만기와 월 50만원 한도 구조가 핵심입니다." },
+      { question: "우대형은 누구나 받을 수 있나요?", answer: "아니요. 중소기업 재직, 소득, 가구소득 등 별도 요건을 충족해야 할 수 있습니다. 계산기는 금액 비교용입니다." }
+    ],
+    calculate(values) {
+      const months = Math.min(Math.max(Math.floor(values.months), 1), 36);
+      const monthlyDeposit = Math.min(Math.max(values.monthlyDeposit, 0), 500000);
+      const matchRate = values.planType / 100;
+      const monthlyRate = values.annualRate / 100 / 12;
+      const principal = monthlyDeposit * months;
+      const governmentContribution = principal * matchRate;
+      const maturityPrincipal = monthlyRate > 0
+        ? monthlyDeposit * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
+        : principal;
+      const estimatedInterest = Math.max(maturityPrincipal - principal, 0);
+      const total = principal + governmentContribution + estimatedInterest;
+
+      return {
+        headline: formatWon(total),
+        subline: `${months}개월 납입 · 정부기여금 ${formatWon(governmentContribution)} · 예상 이자 ${formatWon(estimatedInterest)}`,
+        rows: [
+          { label: "월 납입액", value: formatWon(monthlyDeposit), tone: "strong" },
+          { label: "납입 원금", value: formatWon(principal), tone: "strong" },
+          { label: "정부기여금", value: formatWon(governmentContribution), tone: "strong" },
+          { label: "예상 이자", value: formatWon(estimatedInterest) },
+          { label: "예상 만기 수령액", value: formatWon(total), tone: "strong" }
+        ],
+        chart: [
+          { name: "납입원금", value: principal },
+          { name: "정부기여금", value: governmentContribution },
+          { name: "예상이자", value: estimatedInterest }
+        ]
+      };
+    }
+  },
+  {
     slug: "youth-leap-account",
     title: "청년도약계좌 계산기",
     description: "월 납입액과 소득구간을 기준으로 청년도약계좌 정부기여금과 만기 누적 납입액을 계산합니다.",
@@ -6016,6 +6089,236 @@ export const calculators: CalculatorConfig[] = [
           { name: "납입원금", value: principal60 },
           { name: "정부기여금", value: gov60 },
           { name: "합계", value: total }
+        ]
+      };
+    }
+  },
+  {
+    slug: "earned-income-tax-credit",
+    title: "근로장려금 계산기",
+    description: "가구 유형과 연간 총소득을 입력해 근로장려금 예상 지급액을 간이 계산합니다.",
+    category: "세금",
+    keywords: ["근로장려금 계산기", "EITC 계산기", "근로장려금 지급액", "근로장려금 소득요건", "장려금 계산"],
+    badge: "가구유형별 간이 산정",
+    audience: "근로장려금 신청 전 예상 지급액과 소득 구간을 확인하려는 사용자",
+    fields: [
+      {
+        name: "householdType",
+        label: "가구 유형",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "단독가구", value: 0 },
+          { label: "홑벌이가구", value: 1 },
+          { label: "맞벌이가구", value: 2 }
+        ]
+      },
+      { name: "annualIncome", label: "연간 총소득", type: "number", unit: "원", min: 0, max: 100000000, step: 100000, defaultValue: 18000000 },
+      { name: "assetReduction", label: "재산요건 감액률", type: "number", unit: "%", min: 0, max: 100, step: 5, defaultValue: 0 }
+    ],
+    guideTitle: "근로장려금 계산 기준",
+    guide: [
+      "근로장려금은 가구 유형, 총소득, 재산요건, 근로·사업·종교인 소득 여부 등에 따라 지급액이 달라집니다.",
+      "이 계산기는 가구 유형별 최대지급액과 총소득 구간을 단순화한 간이 산식입니다. 재산요건, 부양자녀, 사업소득 업종별 조정률, 반기 신청 정산 등 실제 심사 요소는 모두 반영하지 않습니다.",
+      "계산 결과는 신청 가능성을 빠르게 가늠하는 참고값이며, 실제 지급액은 국세청 홈택스 심사 결과를 기준으로 확정됩니다."
+    ],
+    checkpoints: [
+      "총소득 기준을 넘으면 예상 지급액은 0원입니다.",
+      "재산요건에 따라 지급액이 감액되거나 제외될 수 있습니다.",
+      "반기 신청은 연간 산정액의 일부를 먼저 지급하고 정산하는 구조입니다."
+    ],
+    faqs: [
+      { question: "이 금액이 실제 지급액인가요?", answer: "아니요. 실제 지급액은 국세청이 소득·재산·가구 요건을 심사해 확정합니다." },
+      { question: "자녀장려금도 포함되나요?", answer: "아니요. 이 계산기는 근로장려금만 간이 추정합니다." }
+    ],
+    calculate(values) {
+      const configs = [
+        { label: "단독가구", maxIncome: 22000000, maxBenefit: 1650000, plateauStart: 4000000, plateauEnd: 9000000 },
+        { label: "홑벌이가구", maxIncome: 32000000, maxBenefit: 2850000, plateauStart: 7000000, plateauEnd: 14000000 },
+        { label: "맞벌이가구", maxIncome: 44000000, maxBenefit: 3300000, plateauStart: 8000000, plateauEnd: 17000000 }
+      ];
+      const config = configs[Math.min(Math.max(Math.floor(values.householdType), 0), configs.length - 1)];
+      const income = Math.max(values.annualIncome, 0);
+      let estimated = 0;
+      if (income <= config.plateauStart) {
+        estimated = config.plateauStart > 0 ? config.maxBenefit * income / config.plateauStart : 0;
+      } else if (income <= config.plateauEnd) {
+        estimated = config.maxBenefit;
+      } else if (income < config.maxIncome) {
+        estimated = config.maxBenefit * (config.maxIncome - income) / (config.maxIncome - config.plateauEnd);
+      }
+      const reductionRate = Math.min(Math.max(values.assetReduction, 0), 100) / 100;
+      const reduced = Math.max(estimated * (1 - reductionRate), 0);
+
+      return {
+        headline: formatWon(reduced),
+        subline: `${config.label} · 최대지급액 ${formatWon(config.maxBenefit)} · 총소득 ${formatWon(income)}`,
+        rows: [
+          { label: "가구 유형", value: config.label },
+          { label: "연간 총소득", value: formatWon(income), tone: "strong" },
+          { label: "소득요건 상한", value: formatWon(config.maxIncome) },
+          { label: "감액 전 추정액", value: formatWon(estimated), tone: "strong" },
+          { label: "재산요건 감액률", value: formatPercent(values.assetReduction, 0) },
+          { label: "예상 근로장려금", value: formatWon(reduced), tone: "strong" }
+        ],
+        chart: [
+          { name: "총소득", value: income },
+          { name: "상한", value: config.maxIncome },
+          { name: "예상지급", value: reduced }
+        ]
+      };
+    }
+  },
+  {
+    slug: "kpass-refund",
+    title: "K-패스 환급 계산기",
+    description: "월 대중교통비와 이용 횟수, 이용자 유형을 입력해 K-패스 예상 환급액을 계산합니다.",
+    category: "생활",
+    keywords: ["K패스 계산기", "K-패스 환급 계산기", "대중교통 환급", "모두의 카드", "교통비 환급"],
+    badge: "대중교통비 환급",
+    audience: "월 대중교통비에서 K-패스로 얼마나 돌려받을 수 있는지 확인하려는 사용자",
+    fields: [
+      { name: "monthlyFare", label: "월 대중교통비", type: "number", unit: "원", min: 0, max: 1000000, step: 1000, defaultValue: 80000 },
+      { name: "rideCount", label: "월 이용 횟수", type: "number", unit: "회", min: 0, max: 200, step: 1, defaultValue: 40 },
+      {
+        name: "userType",
+        label: "이용자 유형",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "일반 20%", value: 20 },
+          { label: "청년·2자녀·어르신 30%", value: 30 },
+          { label: "3자녀 이상 50%", value: 50 },
+          { label: "저소득층 53.3%", value: 53.3 }
+        ]
+      },
+      {
+        name: "firstMonth",
+        label: "최초 가입월",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "아니오 - 15회 이상 요건 적용", value: 0 },
+          { label: "예 - 15회 미만도 계산", value: 1 }
+        ]
+      }
+    ],
+    guideTitle: "K-패스 환급 계산 기준",
+    guide: [
+      "K-패스는 월 15회 이상 대중교통을 이용하면 이용자 유형별 환급률에 따라 교통비 일부를 다음 달 돌려받는 제도입니다.",
+      "기본 환급률은 일반 20%, 청년·2자녀·어르신 30%, 3자녀 이상 50%, 저소득층 53.3% 기준으로 계산합니다.",
+      "카드사 실적, 지자체 추가 혜택, 모두의 카드 정액형·플러스형 적용 여부에 따라 실제 환급액은 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "최초 가입월이 아니면 월 15회 미만 이용 시 기본 환급 대상이 아닐 수 있습니다.",
+      "여러 유형에 해당하면 보통 더 높은 환급률을 적용해 비교합니다.",
+      "시외버스, KTX 등 일부 교통수단은 환급 대상에서 제외될 수 있습니다."
+    ],
+    faqs: [
+      { question: "15회 미만이면 환급이 없나요?", answer: "일반적으로 월 15회 이상 이용 요건이 있습니다. 최초 가입월은 예외가 적용될 수 있어 선택값으로 반영했습니다." },
+      { question: "청년과 다자녀가 중복이면 합산하나요?", answer: "보통 환급률을 합산하지 않고 해당 유형 중 유리한 기준을 적용해 봅니다." }
+    ],
+    calculate(values) {
+      const eligible = values.firstMonth === 1 || values.rideCount >= 15;
+      const refundRate = values.userType / 100;
+      const refund = eligible ? values.monthlyFare * refundRate : 0;
+      const netFare = Math.max(values.monthlyFare - refund, 0);
+      const annualRefund = refund * 12;
+
+      return {
+        headline: formatWon(refund),
+        subline: eligible ? `환급률 ${formatPercent(values.userType, 1)} · 실부담 ${formatWon(netFare)}` : "월 15회 미만으로 기본 환급 요건 확인 필요",
+        rows: [
+          { label: "월 대중교통비", value: formatWon(values.monthlyFare), tone: "strong" },
+          { label: "월 이용 횟수", value: `${Math.floor(values.rideCount).toLocaleString("ko-KR")}회` },
+          { label: "적용 환급률", value: formatPercent(values.userType, 1), tone: "strong" },
+          { label: "예상 월 환급액", value: formatWon(refund), tone: "strong" },
+          { label: "환급 후 실부담", value: formatWon(netFare) },
+          { label: "연 환급 환산", value: formatWon(annualRefund) }
+        ],
+        chart: [
+          { name: "실부담", value: netFare },
+          { name: "환급액", value: refund },
+          { name: "월교통비", value: values.monthlyFare }
+        ]
+      };
+    }
+  },
+  {
+    slug: "childbirth-grant",
+    title: "출산 지원금 계산기",
+    description: "출생 순위, 현재 개월 수, 지자체 지원금을 입력해 첫만남이용권·부모급여·아동수당 예상액을 계산합니다.",
+    category: "생활",
+    keywords: ["출산 지원금 계산기", "첫만남이용권", "부모급여", "아동수당", "육아 지원금"],
+    badge: "전국 공통 지원금",
+    audience: "출산 후 받을 수 있는 전국 공통 양육 지원금을 한 번에 확인하려는 보호자",
+    fields: [
+      {
+        name: "birthOrder",
+        label: "출생 순위",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "첫째", value: 1 },
+          { label: "둘째 이상", value: 2 }
+        ]
+      },
+      { name: "childAgeMonths", label: "현재 아동 개월 수", type: "number", unit: "개월", min: 0, max: 120, step: 1, defaultValue: 0 },
+      { name: "localGrant", label: "지자체 출산지원금", type: "number", unit: "원", min: 0, max: 50000000, step: 100000, defaultValue: 0 },
+      {
+        name: "includeAlreadyPaid",
+        label: "이미 받은 금액 포함",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "남은 기간만 계산", value: 0 },
+          { label: "출생부터 누적 계산", value: 1 }
+        ]
+      }
+    ],
+    guideTitle: "출산 지원금 계산 기준",
+    guide: [
+      "전국 공통 지원금인 첫만남이용권, 부모급여, 아동수당을 중심으로 계산합니다. 지자체 출산축하금은 지역마다 달라 직접 입력하도록 했습니다.",
+      "첫만남이용권은 첫째 200만원, 둘째 이상 300만원으로 계산합니다. 부모급여는 만 0세 월 100만원, 만 1세 월 50만원으로 계산합니다.",
+      "아동수당은 월 10만원으로 계산하며, 현재 화면은 만 8세 미만 96개월 기준의 일반적인 구조를 사용합니다. 제도 변경이나 지역 추가 지급은 별도 확인이 필요합니다."
+    ],
+    checkpoints: [
+      "지자체 지원금은 거주지, 출생순위, 전입 조건에 따라 크게 달라집니다.",
+      "어린이집 이용 시 부모급여 일부가 보육료 바우처로 지급될 수 있습니다.",
+      "첫만남이용권은 출생 직후 1회성 바우처로 보는 것이 자연스럽습니다."
+    ],
+    faqs: [
+      { question: "지자체 출산지원금도 자동 반영되나요?", answer: "아니요. 지역별 차이가 커서 직접 입력하도록 했습니다." },
+      { question: "어린이집에 다니면 부모급여 현금이 줄어드나요?", answer: "어린이집 이용 시 보육료 바우처가 우선 지원되고 차액만 현금으로 지급될 수 있습니다. 이 계산기는 총 지원 가치 기준입니다." }
+    ],
+    calculate(values) {
+      const age = Math.min(Math.max(Math.floor(values.childAgeMonths), 0), 120);
+      const firstEncounter = values.birthOrder >= 2 ? 3000000 : 2000000;
+      const startMonth = values.includeAlreadyPaid === 1 ? 0 : age;
+      const monthsUntil = (limit: number) => Math.max(limit - startMonth, 0);
+      const parentBenefitMonths0 = Math.max(12 - startMonth, 0);
+      const parentBenefitMonths1 = Math.max(Math.min(24, 24) - Math.max(startMonth, 12), 0);
+      const parentBenefit = parentBenefitMonths0 * 1000000 + parentBenefitMonths1 * 500000;
+      const childAllowance = monthsUntil(96) * 100000;
+      const includeVoucher = values.includeAlreadyPaid === 1 || age === 0;
+      const voucher = includeVoucher ? firstEncounter : 0;
+      const total = voucher + parentBenefit + childAllowance + values.localGrant;
+
+      return {
+        headline: formatWon(total),
+        subline: `${values.includeAlreadyPaid === 1 ? "출생부터 누적" : "남은 기간"} · 첫만남 ${formatWon(voucher)} · 부모급여 ${formatWon(parentBenefit)}`,
+        rows: [
+          { label: "첫만남이용권", value: formatWon(voucher), tone: "strong" },
+          { label: "부모급여 예상액", value: formatWon(parentBenefit), tone: "strong" },
+          { label: "아동수당 예상액", value: formatWon(childAllowance), tone: "strong" },
+          { label: "지자체 지원금", value: formatWon(values.localGrant) },
+          { label: "예상 지원금 합계", value: formatWon(total), tone: "strong" }
+        ],
+        chart: [
+          { name: "첫만남", value: voucher },
+          { name: "부모급여", value: parentBenefit },
+          { name: "아동수당", value: childAllowance },
+          { name: "지자체", value: values.localGrant }
         ]
       };
     }
