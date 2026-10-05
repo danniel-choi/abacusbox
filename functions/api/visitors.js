@@ -57,7 +57,7 @@ async function readRollupVisitorStats(db, options = {}) {
     db.prepare(`
       SELECT COUNT(*) AS count
       FROM site_visitors
-      WHERE datetime(last_seen_at) >= datetime('now', ?)
+      WHERE last_seen_at >= datetime('now', ?)
     `).bind(`-${ACTIVE_WINDOW_MINUTES} minutes`),
     db.prepare(`
       SELECT key, value
@@ -95,7 +95,7 @@ async function readLegacyVisitorStats(db) {
     db.prepare(`
       SELECT COUNT(*) AS count
       FROM site_visitors
-      WHERE datetime(last_seen_at) >= datetime('now', ?)
+      WHERE last_seen_at >= datetime('now', ?)
     `).bind(`-${ACTIVE_WINDOW_MINUTES} minutes`),
     db.prepare(`
       SELECT COUNT(*) AS count
