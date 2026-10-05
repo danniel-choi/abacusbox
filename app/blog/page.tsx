@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { AdSenseAd } from "@/components/AdSenseAd";
 import { ContentListClient, type ContentListItem } from "@/components/ContentListClient";
 import { getLatestBlogPosts } from "@/lib/content";
 
@@ -33,6 +34,10 @@ export default function BlogPage() {
           계산 결과를 이해하는 데 필요한 제도 설명, 비교 글, 운영 업데이트를 모아둔 공간입니다.
         </p>
       </section>
+
+      <div className="mt-8">
+        <AdSenseAd placement="top" />
+      </div>
 
       <Suspense fallback={<section className="mt-8 text-sm font-semibold text-slate-500">콘텐츠를 불러오는 중입니다.</section>}>
         <ContentListClient apiPath="/api/blog" detailBasePath="/blog" fallbackItems={fallbackItems} meta="blog" pageSize={10} detailMode="path" />

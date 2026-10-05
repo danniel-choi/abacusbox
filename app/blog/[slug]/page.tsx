@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdSenseAd } from "@/components/AdSenseAd";
 import { blogPosts, getBlogPost, getLatestBlogPosts } from "@/lib/content";
 import { SITE_URL } from "@/lib/constants";
 import { getCalculator } from "@/lib/calculators";
@@ -109,8 +110,11 @@ export default async function BlogPostPage({ params }: Props) {
         )}
 
         <div className="mt-8 grid min-w-0 gap-5 break-words text-base font-medium leading-8 text-slate-700 [word-break:normal]">
-          {post.content.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
+          {post.content.map((paragraph, index) => (
+            <div key={paragraph} className="contents">
+              <p>{paragraph}</p>
+              {index === 2 && <AdSenseAd placement="inArticle" className="my-2" />}
+            </div>
           ))}
         </div>
 
@@ -137,6 +141,8 @@ export default async function BlogPostPage({ params }: Props) {
           ))}
         </div>
       </article>
+
+      <AdSenseAd placement="bottom" className="mt-8" />
 
       {relatedPosts.length > 0 && (
         <section className="readable-content mt-8 w-full max-w-full min-w-0 overflow-hidden rounded-[28px] border border-line bg-white p-6 shadow-panel">

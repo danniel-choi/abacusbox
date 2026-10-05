@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdSenseAd } from "@/components/AdSenseAd";
 import { CalculatorDirectoryClient } from "@/components/CalculatorDirectoryClient";
 
 export const metadata: Metadata = {
@@ -16,6 +17,10 @@ export default function CalculatorsPage() {
           노무, 금융, 절세, 생활, 사업 계산기와 수학 도구를 그룹별로 정리하고 검색과 필터로 바로 찾을 수 있게 구성했습니다.
         </p>
       </section>
+
+      <div className="mt-8">
+        <AdSenseAd placement="top" />
+      </div>
 
       <div className="mt-8">
         <CalculatorDirectoryClient />

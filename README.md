@@ -17,7 +17,7 @@
 - D1 스키마가 아직 비어 있으면 읽기 API는 bundled fallback 콘텐츠로 응답하고, 쓰기/관리 API는 명시적으로 503을 반환
 - SEO: 페이지별 metadata, canonical, FAQ JSON-LD, WebApplication JSON-LD, sitemap, robots
 - Cloudflare Pages + D1 준비: `wrangler.toml`, `migrations/`, `functions/api/*`, `_routes.json`
-- 애드센스 기본 요건: 소개, 문의, 개인정보처리방침 페이지 포함
+- 애드센스: 승인용 메타/스크립트, 수동 광고 슬롯 컴포넌트, 소개·문의·개인정보처리방침 페이지 포함
 - 디자인: Pretendard JP 기반 타이포그래피, 네이비/그린 브랜드 시스템, 계산의정석 SVG 로고
 
 ## 실행
@@ -42,6 +42,20 @@ npm run dev
 2. `wrangler.toml`의 `preview_database_id`를 실제 preview D1 ID로 교체
 3. Pages 프로젝트의 D1 binding 이름을 `CONTENT_DB`로 맞춤
 4. 관리자 쓰기 API를 쓸 경우 `ADMIN_API_TOKEN` 환경변수 추가 (`.dev.vars` 또는 Dashboard secret)
+
+### AdSense 광고 슬롯 설정
+
+AdSense에서 디스플레이 광고 단위를 만든 뒤 Cloudflare Pages 환경변수에 슬롯 ID를 등록하면 광고가 노출됩니다.
+
+```bash
+NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT=공통_디스플레이_슬롯_ID
+NEXT_PUBLIC_ADSENSE_TOP_SLOT=상단_슬롯_ID
+NEXT_PUBLIC_ADSENSE_CALCULATOR_SLOT=계산기_결과하단_슬롯_ID
+NEXT_PUBLIC_ADSENSE_IN_ARTICLE_SLOT=본문중간_슬롯_ID
+NEXT_PUBLIC_ADSENSE_BOTTOM_SLOT=하단_슬롯_ID
+```
+
+개별 슬롯 값이 없으면 `NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT`을 공통 fallback으로 사용합니다.
 
 ### 권장 명령
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { AdSenseAd } from "@/components/AdSenseAd";
 import { CalculatorClient } from "@/components/CalculatorClient";
 import { calculators, getCalculator } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getRelatedCalculators } from "@/lib/calculator-directory";
@@ -257,6 +258,8 @@ export default async function CalculatorPage({ params }: Props) {
       </div>
 
       <article className="mx-auto mt-10 grid max-w-6xl gap-8 px-4">
+        <AdSenseAd placement="calculator" />
+
         <section className="grid gap-4 md:grid-cols-3">
           {calculator.checkpoints.map((item, index) => (
             <div key={item} className="rounded-[20px] border border-line bg-white p-5 shadow-panel">
@@ -306,6 +309,8 @@ export default async function CalculatorPage({ params }: Props) {
             </div>
           </section>
         )}
+
+        <AdSenseAd placement="inArticle" />
 
         <section>
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
@@ -424,6 +429,8 @@ export default async function CalculatorPage({ params }: Props) {
             </div>
           </section>
         )}
+
+        <AdSenseAd placement="bottom" />
 
         {relatedBlogPosts.length > 0 && (
           <section className="rounded-[20px] border border-line bg-white p-6 shadow-panel">

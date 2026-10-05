@@ -13,6 +13,7 @@ import { legalStandards } from "@/lib/constants";
 import { formatWon } from "@/lib/format";
 import { hubContents, hubOrder } from "@/lib/hub-content";
 import { CalculatorDirectoryClient } from "@/components/CalculatorDirectoryClient";
+import { AdSenseAd } from "@/components/AdSenseAd";
 import { HomeBlogRoller } from "@/components/HomeBlogRoller";
 import { Logo } from "@/components/Logo";
 import { RecentCalculatorsSection } from "@/components/RecentCalculatorsSection";
@@ -133,6 +134,10 @@ export default function HomePage() {
 
       <RecentCalculatorsSection />
 
+      <section className="page-shell py-2 md:py-3">
+        <AdSenseAd placement="top" />
+      </section>
+
       <section className="page-shell section-shell">
         <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel md:p-7">
           <div className="section-heading mb-6">
@@ -201,6 +206,10 @@ export default function HomePage() {
 
       <section id="directory" className="page-shell section-shell">
         <CalculatorDirectoryClient compact />
+      </section>
+
+      <section className="page-shell py-2 md:py-3">
+        <AdSenseAd placement="bottom" />
       </section>
 
       <section className="page-shell py-2 md:py-3">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdSenseAd } from "@/components/AdSenseAd";
 import { getCalculatorsByGroup } from "@/lib/calculator-directory";
 import { calculators, type CalculatorConfig } from "@/lib/calculators";
 import { blogPosts, type BlogPost } from "@/lib/content";
@@ -38,6 +39,10 @@ export function HubPage({ hub }: { hub: HubContent }) {
         ))}
       </section>
 
+      <div className="mt-8">
+        <AdSenseAd placement="top" />
+      </div>
+
       <section className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
         <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel">
           <div className="flex flex-wrap items-end justify-between gap-3">
@@ -76,6 +81,10 @@ export function HubPage({ hub }: { hub: HubContent }) {
           </div>
         </aside>
       </section>
+
+      <div className="mt-8">
+        <AdSenseAd placement="bottom" />
+      </div>
 
       <section className="mt-8 rounded-[28px] border border-line bg-white p-6 shadow-panel">
         <div className="flex flex-wrap items-end justify-between gap-3">
