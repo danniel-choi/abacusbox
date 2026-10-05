@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdSenseAd } from "@/components/AdSenseAd";
 import { blogPosts, getBlogPost, getLatestBlogPosts } from "@/lib/content";
-import { SITE_URL } from "@/lib/constants";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { getCalculator } from "@/lib/calculators";
 
 type Props = {
@@ -39,7 +39,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${SITE_URL}/blog/${post.slug}`,
       publishedTime: post.publishedAt,
       authors: ["계산의정석"],
-      tags: post.tags
+      tags: post.tags,
+      images: [
+        {
+          url: DEFAULT_OG_IMAGE,
+          width: 1200,
+          height: 630,
+          alt: `${post.title} - 계산의정석`
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: [DEFAULT_OG_IMAGE]
     }
   };
 }

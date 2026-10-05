@@ -1,4 +1,5 @@
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://abacusbox.com";
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 export const legalStandards = {
   year: 2026,

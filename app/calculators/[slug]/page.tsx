@@ -8,7 +8,7 @@ import { calculators, getCalculator } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getRelatedCalculators } from "@/lib/calculator-directory";
 import { calculatorSeoContent } from "@/lib/calculator-seo";
 import { blogPosts } from "@/lib/content";
-import { legalStandards, officialSources, SITE_URL } from "@/lib/constants";
+import { DEFAULT_OG_IMAGE, legalStandards, officialSources, SITE_URL } from "@/lib/constants";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -121,12 +121,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: seoContent?.description || buildSeoDescription(calculator),
       url: `${SITE_URL}/calculators/${calculator.slug}`,
       type: "article",
-      locale: "ko_KR"
+      locale: "ko_KR",
+      images: [
+        {
+          url: DEFAULT_OG_IMAGE,
+          width: 1200,
+          height: 630,
+          alt: `${calculator.title} - 계산의정석`
+        }
+      ]
     },
     twitter: {
       card: "summary_large_image",
       title: seoContent?.title || buildSeoTitle(calculator.title),
-      description: seoContent?.description || buildSeoDescription(calculator)
+      description: seoContent?.description || buildSeoDescription(calculator),
+      images: [DEFAULT_OG_IMAGE]
     }
   };
 }

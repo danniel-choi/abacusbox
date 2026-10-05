@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
-import { SITE_URL } from "@/lib/constants";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { Header } from "@/components/Header";
 import { VisitorCounter } from "@/components/VisitorCounter";
 
@@ -19,7 +19,21 @@ export const metadata: Metadata = {
     description: "계산의 정석이라는 이름으로 찾을 수 있는 계산기와 수학 도구 플랫폼. 분야별 계산기와 기준 설명을 함께 제공합니다.",
     type: "website",
     locale: "ko_KR",
-    url: SITE_URL
+    url: SITE_URL,
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "계산의정석 계산기 디렉토리"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "계산의정석(계산의 정석) - 노무·금융·생활 계산기 디렉토리",
+    description: "계산의 정석이라는 이름으로 찾을 수 있는 계산기와 수학 도구 플랫폼. 분야별 계산기와 기준 설명을 함께 제공합니다.",
+    images: [DEFAULT_OG_IMAGE]
   },
   robots: {
     index: true,

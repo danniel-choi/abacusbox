@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#040713"/>
+      <stop offset="0.58" stop-color="#101827"/>
+      <stop offset="1" stop-color="#063d35"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="64" y="64" width="1072" height="502" rx="42" fill="#ffffff" opacity="0.055"/>
+  <rect x="86" y="86" width="1028" height="458" rx="34" fill="none" stroke="#ffffff" stroke-opacity="0.12"/>
+
+  <g transform="translate(100 110)" filter="url(#shadow)">
+    <rect width="116" height="116" rx="26" fill="#ffffff"/>
+    <circle cx="58" cy="56" r="42" fill="#02B585"/>
+    <path d="M34 66c0-17 11.4-29 24-29s24 12 24 29v9c0 7-5.4 12.5-12.4 12.5H46.4C39.4 87.5 34 82 34 75v-9Z" fill="#ffffff"/>
+    <path d="M42 64c0-9.5 7.5-17 17-17h2c9.5 0 17 7.5 17 17v2c0 4.2-3.3 7.5-7.5 7.5h-21c-4.2 0-7.5-3.3-7.5-7.5v-2Z" fill="#040713"/>
+    <path d="M50 66h20" stroke="#02B585" stroke-width="5" stroke-linecap="round"/>
+    <path d="M28 58 14 48M88 58l14-10M42 95l-8 12M74 95l8 12" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <text x="244" y="166" fill="#02B585" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif" font-size="28" font-weight="800">계산의정석 · ABACUSBOX</text>
+  <text x="100" y="296" fill="#ffffff" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif" font-size="82" font-weight="900">필요한 계산을</text>
+  <text x="100" y="394" fill="#ffffff" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif" font-size="82" font-weight="900">한 번에 정리합니다</text>
+  <text x="104" y="460" fill="#cbd5e1" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif" font-size="30" font-weight="700">노무 · 세금 · 금융 · 생활 · 투자 · 수학 도구</text>
+
+  <g transform="translate(100 508)">
+    <rect width="196" height="46" rx="23" fill="#02B585"/>
+    <text x="98" y="31" fill="#ffffff" text-anchor="middle" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif" font-size="20" font-weight="900">무료 계산기</text>
+    <rect x="212" width="238" height="46" rx="23" fill="#ffffff" opacity="0.1"/>
+    <text x="331" y="31" fill="#ffffff" text-anchor="middle" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif" font-size="20" font-weight="900">기준 설명과 FAQ</text>
+    <rect x="466" width="222" height="46" rx="23" fill="#ffffff" opacity="0.1"/>
+    <text x="577" y="31" fill="#ffffff" text-anchor="middle" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif" font-size="20" font-weight="900">결과 공유 카드</text>
+  </g>
+
+  <text x="1098" y="524" fill="#ffffff" text-anchor="end" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif" font-size="25" font-weight="800">abacusbox.com</text>
+</svg>
