@@ -205,6 +205,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.",
     tags: ["학점", "성적", "GPA"]
   },
+  "school-grade": {
+    title: "내신 등급 계산기",
+    category: "생활 가이드",
+    audience: "고등학생, 학부모, 내신 성적을 관리하는 사용자",
+    description: "과목별 석차등급과 단위수를 기준으로 5등급제·9등급제 내신 가중평균과 석차 기준 예상 등급을 계산합니다.",
+    tags: ["내신등급", "고등학교내신", "성적관리"],
+    hubLabel: "일상 도구 계산기",
+    relatedTitles: ["학점 계산기", "퍼센트 계산기"]
+  },
   "minimum-wage": {
     title: "최저임금 모의 계산기",
     category: "노무 가이드",
@@ -580,7 +589,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
   ["stock-return", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
-  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "draw-probability", "moving-cost", "mobile-plan", "gpa"],
+  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "draw-probability", "moving-cost", "mobile-plan", "gpa", "school-grade"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];

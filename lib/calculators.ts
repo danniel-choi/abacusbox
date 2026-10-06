@@ -49,6 +49,7 @@ export type CalculatorSlug =
   | "break-even"
   | "jeonse-vs-monthly-rent"
   | "gpa"
+  | "school-grade"
   | "exchange-rate"
   | "vat"
   | "discount-rate"
@@ -605,6 +606,30 @@ function vehicleInspectionFineEstimate(overdueDays: number) {
 function formatVehicleInspectionMonths(months: number) {
   if (months % 12 === 0) return `${months / 12}년`;
   return `${months}개월`;
+}
+
+const schoolGradeThresholds = {
+  9: [4, 11, 23, 40, 60, 77, 89, 96, 100],
+  5: [10, 34, 66, 90, 100]
+} as const;
+
+function schoolGradeSystem(value: number) {
+  return value === 5 ? 5 : 9;
+}
+
+function schoolGradeFromPercent(percentile: number, system: 5 | 9) {
+  const thresholds = schoolGradeThresholds[system];
+  const safePercentile = Math.min(Math.max(percentile, 0), 100);
+  const index = thresholds.findIndex((threshold) => safePercentile <= threshold);
+  return index >= 0 ? index + 1 : thresholds.length;
+}
+
+function schoolGradePercentRange(grade: number, system: 5 | 9) {
+  const thresholds = schoolGradeThresholds[system];
+  const safeGrade = Math.min(Math.max(Math.round(grade), 1), thresholds.length);
+  const lower = safeGrade === 1 ? 0 : thresholds[safeGrade - 2];
+  const upper = thresholds[safeGrade - 1];
+  return `${lower}% 초과~${upper}% 이내`;
 }
 
 function addUtcDays(date: Date, days: number) {
@@ -5205,6 +5230,119 @@ export const calculators: CalculatorConfig[] = [
           { name: "과목2", value: values.course2Credit * values.course2Grade },
           { name: "과목3", value: values.course3Credit * values.course3Grade },
           { name: "과목4", value: values.course4Credit * values.course4Grade }
+        ]
+      };
+    }
+  },
+  {
+    slug: "school-grade",
+    title: "내신 등급 계산기",
+    description: "고등학교 과목별 석차등급과 단위수를 입력해 5등급제·9등급제 내신 가중평균을 계산하고, 석차 기준 예상 등급도 확인합니다.",
+    category: "생활",
+    keywords: ["내신 등급 계산기", "고등학교 내신 계산기", "내신 평균 등급", "5등급제 내신", "9등급제 내신", "석차 등급 계산기"],
+    badge: "5등급·9등급",
+    audience: "고등학교 내신 평균 등급과 석차 기준 등급을 빠르게 확인하려는 학생과 학부모",
+    fields: [
+      {
+        name: "gradeSystem",
+        label: "등급 체계",
+        type: "select",
+        defaultValue: 9,
+        options: [
+          { label: "9등급제", value: 9 },
+          { label: "5등급제", value: 5 }
+        ],
+        help: "2025학년도 고1부터 5등급제가 순차 적용됩니다. 성적표에 적용된 체계를 선택하세요."
+      },
+      { name: "subject1Credit", label: "국어 단위수", type: "number", unit: "단위", min: 0, max: 20, step: 1, defaultValue: 4 },
+      { name: "subject1Grade", label: "국어 등급", type: "number", unit: "등급", min: 1, max: 9, step: 1, defaultValue: 2 },
+      { name: "subject2Credit", label: "수학 단위수", type: "number", unit: "단위", min: 0, max: 20, step: 1, defaultValue: 4 },
+      { name: "subject2Grade", label: "수학 등급", type: "number", unit: "등급", min: 1, max: 9, step: 1, defaultValue: 3 },
+      { name: "subject3Credit", label: "영어 단위수", type: "number", unit: "단위", min: 0, max: 20, step: 1, defaultValue: 4 },
+      { name: "subject3Grade", label: "영어 등급", type: "number", unit: "등급", min: 1, max: 9, step: 1, defaultValue: 2 },
+      { name: "subject4Credit", label: "한국사 단위수", type: "number", unit: "단위", min: 0, max: 20, step: 1, defaultValue: 3 },
+      { name: "subject4Grade", label: "한국사 등급", type: "number", unit: "등급", min: 1, max: 9, step: 1, defaultValue: 1 },
+      { name: "subject5Credit", label: "사회 단위수", type: "number", unit: "단위", min: 0, max: 20, step: 1, defaultValue: 3 },
+      { name: "subject5Grade", label: "사회 등급", type: "number", unit: "등급", min: 1, max: 9, step: 1, defaultValue: 2 },
+      { name: "subject6Credit", label: "과학 단위수", type: "number", unit: "단위", min: 0, max: 20, step: 1, defaultValue: 3 },
+      { name: "subject6Grade", label: "과학 등급", type: "number", unit: "등급", min: 1, max: 9, step: 1, defaultValue: 3 },
+      { name: "subject7Credit", label: "추가1 단위수", type: "number", unit: "단위", min: 0, max: 20, step: 1, defaultValue: 0 },
+      { name: "subject7Grade", label: "추가1 등급", type: "number", unit: "등급", min: 1, max: 9, step: 1, defaultValue: 3 },
+      { name: "subject8Credit", label: "추가2 단위수", type: "number", unit: "단위", min: 0, max: 20, step: 1, defaultValue: 0 },
+      { name: "subject8Grade", label: "추가2 등급", type: "number", unit: "등급", min: 1, max: 9, step: 1, defaultValue: 3 },
+      { name: "rank", label: "석차", type: "number", unit: "등", min: 1, max: 10000, step: 1, defaultValue: 12 },
+      { name: "enrollment", label: "수강자 수", type: "number", unit: "명", min: 1, max: 10000, step: 1, defaultValue: 200 },
+      { name: "sameRankCount", label: "동석차 인원", type: "number", unit: "명", min: 1, max: 10000, step: 1, defaultValue: 1 }
+    ],
+    guideTitle: "내신 등급 계산 기준",
+    guide: [
+      "내신 평균 등급은 과목별 등급을 단순 평균하지 않고, 각 과목의 단위수 또는 학점으로 가중평균해 계산합니다.",
+      "9등급제는 누적 4%, 11%, 23%, 40%, 60%, 77%, 89%, 96%, 100% 구간을 사용하고, 5등급제는 누적 10%, 34%, 66%, 90%, 100% 구간을 사용합니다.",
+      "석차 기준 예상 등급은 동석차가 있을 때 중간석차를 사용합니다. 예를 들어 공동 3등이 4명이면 3 + (4-1)/2 = 4.5등으로 백분율을 계산합니다."
+    ],
+    checkpoints: [
+      "단위수가 0인 과목은 평균 계산에서 제외됩니다.",
+      "5등급제를 선택하면 입력 등급은 1~5등급 범위로 자동 제한해 계산합니다.",
+      "대학별 내신 반영 방식, 진로선택과목, 성취도 과목, 학년별 반영비율은 학교·대학 기준을 따로 확인해야 합니다."
+    ],
+    faqs: [
+      { question: "2025학년도 이후에는 무조건 5등급제인가요?", answer: "2025학년도 고1부터 5등급제가 순차 적용되는 흐름입니다. 본인의 입학연도와 성적표에 표시된 등급 체계를 기준으로 선택하세요." },
+      { question: "단순평균과 가중평균이 왜 다른가요?", answer: "단위수가 큰 과목은 내신 평균에 더 크게 반영됩니다. 그래서 등급만 더해 나누는 단순평균보다 단위수 가중평균이 실제 판단에 가깝습니다." },
+      { question: "석차 등급 결과가 실제 성적표와 다를 수 있나요?", answer: "네. 동점자 처리, 과목 성격, 학교 학업성적관리 규정에 따라 실제 산출이 달라질 수 있어 계산 결과는 참고용입니다." }
+    ],
+    calculate(values) {
+      const system = schoolGradeSystem(values.gradeSystem);
+      const maxGrade = system;
+      const subjects = [
+        [values.subject1Credit, values.subject1Grade],
+        [values.subject2Credit, values.subject2Grade],
+        [values.subject3Credit, values.subject3Grade],
+        [values.subject4Credit, values.subject4Grade],
+        [values.subject5Credit, values.subject5Grade],
+        [values.subject6Credit, values.subject6Grade],
+        [values.subject7Credit, values.subject7Grade],
+        [values.subject8Credit, values.subject8Grade]
+      ]
+        .map(([credit, grade]) => ({
+          credit: Math.max(credit, 0),
+          grade: Math.min(Math.max(Math.round(grade), 1), maxGrade)
+        }))
+        .filter((subject) => subject.credit > 0);
+      const totalCredits = subjects.reduce((sum, subject) => sum + subject.credit, 0);
+      const weightedPoints = subjects.reduce((sum, subject) => sum + subject.credit * subject.grade, 0);
+      const weightedAverage = totalCredits > 0 ? weightedPoints / totalCredits : 0;
+      const simpleAverage = subjects.length > 0
+        ? subjects.reduce((sum, subject) => sum + subject.grade, 0) / subjects.length
+        : 0;
+      const enrollment = Math.max(Math.floor(values.enrollment), 1);
+      const rank = Math.min(Math.max(Math.floor(values.rank), 1), enrollment);
+      const sameRankCount = Math.min(Math.max(Math.floor(values.sameRankCount), 1), enrollment - rank + 1);
+      const middleRank = rank + (sameRankCount - 1) / 2;
+      const rankPercentile = middleRank / enrollment * 100;
+      const rankGrade = schoolGradeFromPercent(rankPercentile, system);
+      const averageGradeBand = Math.min(Math.max(Math.round(weightedAverage), 1), maxGrade);
+      const bestSubject = subjects.length ? Math.min(...subjects.map((subject) => subject.grade)) : 0;
+      const weakestSubject = subjects.length ? Math.max(...subjects.map((subject) => subject.grade)) : 0;
+
+      return {
+        headline: `${formatNumber(weightedAverage, 2)}등급`,
+        subline: `${system}등급제 · 총 ${formatNumber(totalCredits)}단위 · 석차 기준 ${rankGrade}등급`,
+        rows: [
+          { label: "내신 가중평균", value: `${formatNumber(weightedAverage, 2)}등급`, tone: "strong" },
+          { label: "단순평균 참고", value: `${formatNumber(simpleAverage, 2)}등급` },
+          { label: "반영 과목 수", value: `${subjects.length.toLocaleString("ko-KR")}과목` },
+          { label: "총 단위수", value: `${formatNumber(totalCredits)}단위`, tone: "strong" },
+          { label: "가중 등급 구간 참고", value: `${averageGradeBand}등급권 (${schoolGradePercentRange(averageGradeBand, system)})` },
+          { label: "석차 백분율", value: `${formatNumber(rankPercentile, 2)}%` },
+          { label: "석차 기준 예상 등급", value: `${rankGrade}등급`, tone: "strong" },
+          { label: "중간석차", value: `${formatNumber(middleRank, 1)}등 / ${enrollment.toLocaleString("ko-KR")}명` },
+          { label: "가장 좋은 과목 등급", value: bestSubject > 0 ? `${bestSubject}등급` : "입력 필요" },
+          { label: "가장 낮은 과목 등급", value: weakestSubject > 0 ? `${weakestSubject}등급` : "입력 필요" }
+        ],
+        chart: [
+          { name: "가중평균", value: weightedAverage },
+          { name: "단순평균", value: simpleAverage },
+          { name: "석차등급", value: rankGrade }
         ]
       };
     }

@@ -146,9 +146,9 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "daily",
     path: "/daily",
     eyebrow: "일상 도구 허브",
-    title: "날짜, 단위, 퍼센트, 텍스트 계산기",
-    description: "날짜 차이, D-Day, 기념일, 만 나이, 단위변환, 퍼센트, 할인율, 텍스트 세기, 비밀번호 생성처럼 자주 쓰는 빠른 도구를 모았습니다.",
-    featuredSlugs: ["date-diff", "dday", "anniversary-calculator", "unit-converter", "percent", "text-counter"],
+    title: "날짜, 단위, 내신, 퍼센트 계산기",
+    description: "날짜 차이, D-Day, 기념일, 만 나이, 내신 등급, 단위변환, 퍼센트, 할인율, 텍스트 세기처럼 자주 쓰는 빠른 도구를 모았습니다.",
+    featuredSlugs: ["date-diff", "dday", "school-grade", "anniversary-calculator", "unit-converter", "percent"],
     blogSlugs: ["distance-calculator-how-to-use", "unit-converter-comparison-20261228-05-hourly", "math-notes-classroom-guide"],
     sections: [
       {
@@ -161,7 +161,7 @@ export const hubContents: Record<HubKey, HubContent> = {
       },
       {
         title: "업무와 공부에도 함께 쓸 수 있습니다.",
-        body: "텍스트 세기, 비밀번호 생성, 스톱워치, 학점 계산 같은 도구는 일상뿐 아니라 문서 작성, 공부, 계정 관리, 일정 정리에 바로 사용할 수 있습니다."
+        body: "텍스트 세기, 비밀번호 생성, 스톱워치, 학점·내신 등급 계산 같은 도구는 일상뿐 아니라 문서 작성, 공부, 계정 관리, 일정 정리에 바로 사용할 수 있습니다."
       }
     ],
     checklist: ["기준일과 종료일 확인", "원본 단위 확인", "퍼센트 기준값 확인", "텍스트·비밀번호는 목적에 맞춰 다시 점검"]
