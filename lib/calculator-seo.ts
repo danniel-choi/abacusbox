@@ -214,6 +214,39 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/stock", label: "투자 계산기 모음", text: "주식, 귀금속, 암호화폐 관련 계산기를 함께 확인합니다." }
     ]
   },
+  "money-value-calculator": {
+    title: "화폐가치 계산기 | 과거·현재·미래 돈 가치 환산",
+    description:
+      "화폐가치 계산기로 기준 금액, 기준연도, 대상연도, 연 물가상승률을 입력해 과거 돈의 현재 가치와 현재 돈의 미래 필요 금액을 계산하세요.",
+    keywords: ["화폐가치 계산기", "돈 가치 계산기", "과거 돈 현재 가치", "현재 돈 미래 가치", "물가상승률 계산", "구매력 계산"],
+    searchIntents: [
+      "과거 가격을 현재 가치로 환산하고 싶을 때",
+      "현재 목표 금액이 미래에 어느 정도 필요해질지 확인할 때",
+      "물가상승률이 구매력에 미치는 영향을 비교할 때"
+    ],
+    sections: [
+      {
+        title: "기준연도와 대상연도로 돈의 가치를 환산합니다.",
+        body:
+          "같은 100만원이라도 10년 전과 오늘, 10년 뒤의 구매력은 다릅니다. 기준 금액과 두 연도를 입력하면 연 물가상승률을 복리로 반영해 대상연도 기준 금액을 추정합니다."
+      },
+      {
+        title: "미래 금액은 같은 구매력을 유지하는 데 필요한 돈입니다.",
+        body:
+          "대상연도가 미래라면 현재 금액에 물가상승률을 누적 적용해 같은 구매력을 유지하기 위해 필요한 금액을 보여줍니다."
+      },
+      {
+        title: "과거 환산은 물가상승률로 할인해 계산합니다.",
+        body:
+          "대상연도가 과거라면 기준 금액을 물가상승률로 할인해 과거 시점의 대략적인 구매력 기준 금액을 확인할 수 있습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/inflation-calculator", label: "인플레이션 계산기", text: "현재 금액의 미래 필요 금액과 구매력 감소를 함께 확인합니다." },
+      { href: "/calculators/present-value", label: "현재가치 계산기", text: "미래 현금흐름을 할인율로 현재 가치로 환산합니다." },
+      { href: "/calculators/compound-interest", label: "복리 계산기", text: "복리 수익률과 적립식 투자 결과를 비교합니다." }
+    ]
+  },
   "year-end-tax-settlement": {
     title: `연말정산 환급액 계산기 | ${legalStandards.year}년 소득공제·세액공제 미리보기`,
     description:

@@ -22,6 +22,7 @@ export type CalculatorSlug =
   | "inheritance-tax"
   | "compound-interest"
   | "inflation-calculator"
+  | "money-value-calculator"
   | "roi-calculator"
   | "present-value"
   | "bmi"
@@ -2518,6 +2519,66 @@ export const calculators: CalculatorConfig[] = [
           { name: "현재금액", value: values.currentAmount },
           { name: "미래필요", value: futureCost },
           { name: "실질구매력", value: purchasingPower }
+        ]
+      };
+    }
+  },
+  {
+    slug: "money-value-calculator",
+    title: "화폐가치 계산기",
+    description: "기준 금액, 기준연도, 대상연도, 연 물가상승률을 입력해 과거·현재·미래 화폐가치를 환산합니다.",
+    category: "금융",
+    keywords: ["화폐가치 계산기", "돈 가치 계산기", "물가상승률 화폐가치", "과거 돈 현재 가치", "현재 돈 미래 가치", "구매력 계산"],
+    badge: "돈의 시간가치",
+    audience: "과거 가격을 현재 가치로 비교하거나, 현재 목표 금액의 미래 구매력을 확인하려는 사용자",
+    fields: [
+      { name: "baseAmount", label: "기준 금액", type: "number", unit: "원", min: 100, max: 100000000000, step: 10000, defaultValue: 1000000 },
+      { name: "baseYear", label: "기준연도", type: "number", unit: "년", min: 1950, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "targetYear", label: "대상연도", type: "number", unit: "년", min: 1950, max: 2100, step: 1, defaultValue: 2036 },
+      { name: "inflationRate", label: "연 물가상승률", type: "number", unit: "%", min: -10, max: 30, step: 0.1, defaultValue: 3 }
+    ],
+    guideTitle: "화폐가치 계산 기준",
+    guide: [
+      "화폐가치는 물가 변화에 따라 같은 금액으로 살 수 있는 상품과 서비스의 양이 달라지는 개념입니다.",
+      "기준연도보다 대상연도가 미래라면 기준 금액에 물가상승률을 복리로 적용해 같은 구매력을 유지하는 데 필요한 금액을 계산합니다.",
+      "기준연도보다 대상연도가 과거라면 물가상승률로 할인해 당시 구매력 기준 금액을 추정합니다."
+    ],
+    checkpoints: [
+      "입력한 물가상승률은 사용자가 가정한 평균값입니다. 실제 소비자물가지수와는 다를 수 있습니다.",
+      "교육비, 의료비, 주거비처럼 특정 지출 항목은 평균 물가보다 더 빠르게 변할 수 있습니다.",
+      "기간이 길수록 작은 물가상승률 차이도 결과 금액을 크게 바꿉니다."
+    ],
+    faqs: [
+      { question: "과거 돈을 현재 가치로 계산할 수 있나요?", answer: "네. 기준연도를 과거 연도, 대상연도를 현재 연도로 입력하면 물가상승률을 반영한 현재 가치 추정액을 볼 수 있습니다." },
+      { question: "현재 돈의 미래 가치는 어떻게 보나요?", answer: "기준연도를 현재, 대상연도를 미래로 입력하면 같은 구매력을 유지하기 위해 필요한 미래 금액과 구매력 감소분을 확인할 수 있습니다." }
+    ],
+    calculate(values) {
+      const years = values.targetYear - values.baseYear;
+      const factor = (1 + values.inflationRate / 100) ** Math.abs(years);
+      const convertedValue = years >= 0
+        ? values.baseAmount * factor
+        : factor === 0
+          ? 0
+          : values.baseAmount / factor;
+      const purchasingPowerChange = convertedValue - values.baseAmount;
+      const direction = years > 0 ? "뒤" : years < 0 ? "전" : "현재";
+      const periodText = years === 0 ? "같은 연도" : `${Math.abs(years).toLocaleString("ko-KR")}년 ${direction}`;
+      const equivalentLabel = years >= 0 ? "대상연도 필요 금액" : "대상연도 환산 금액";
+
+      return {
+        headline: formatWon(convertedValue),
+        subline: `${values.baseYear.toLocaleString("ko-KR")}년 ${formatWon(values.baseAmount)}의 ${values.targetYear.toLocaleString("ko-KR")}년 기준 가치`,
+        rows: [
+          { label: "기준 금액", value: formatWon(values.baseAmount) },
+          { label: "계산 기간", value: periodText, tone: "strong" },
+          { label: "연 물가상승률", value: formatPercent(values.inflationRate, 1), tone: "strong" },
+          { label: equivalentLabel, value: formatWon(convertedValue), tone: "strong" },
+          { label: years >= 0 ? "증가한 필요 금액" : "할인된 금액 차이", value: formatWon(purchasingPowerChange) }
+        ],
+        chart: [
+          { name: "기준금액", value: values.baseAmount },
+          { name: "환산가치", value: convertedValue },
+          { name: "차이", value: Math.abs(purchasingPowerChange) }
         ]
       };
     }
