@@ -214,6 +214,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     hubLabel: "일상 도구 계산기",
     relatedTitles: ["학점 계산기", "퍼센트 계산기"]
   },
+  "kinship-calculator": {
+    title: "촌수 계산기",
+    category: "생활 가이드",
+    audience: "친척 관계, 가족 호칭, 족보를 정리하는 사용자",
+    description: "가족 관계를 선택하거나 공통 조상까지의 세대 수를 입력해 부모, 형제, 사촌, 육촌 같은 친족 촌수를 계산합니다.",
+    tags: ["촌수", "가족관계", "친척호칭"],
+    hubLabel: "일상 도구 계산기",
+    relatedTitles: ["만나이 계산기", "기념일 계산기"]
+  },
   "minimum-wage": {
     title: "최저임금 모의 계산기",
     category: "노무 가이드",
@@ -589,7 +598,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
   ["stock-return", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
-  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "draw-probability", "moving-cost", "mobile-plan", "gpa", "school-grade"],
+  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "draw-probability", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];

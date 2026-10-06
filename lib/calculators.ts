@@ -50,6 +50,7 @@ export type CalculatorSlug =
   | "jeonse-vs-monthly-rent"
   | "gpa"
   | "school-grade"
+  | "kinship-calculator"
   | "exchange-rate"
   | "vat"
   | "discount-rate"
@@ -630,6 +631,37 @@ function schoolGradePercentRange(grade: number, system: 5 | 9) {
   const lower = safeGrade === 1 ? 0 : thresholds[safeGrade - 2];
   const upper = thresholds[safeGrade - 1];
   return `${lower}% 초과~${upper}% 이내`;
+}
+
+type KinshipPreset = {
+  label: string;
+  degree: number;
+  category: "직계혈족" | "방계혈족" | "인척";
+  personGenerations: number;
+  relativeGenerations: number;
+  note: string;
+};
+
+const kinshipPresets: KinshipPreset[] = [
+  { label: "배우자", degree: 0, category: "인척", personGenerations: 0, relativeGenerations: 0, note: "혼인으로 맺어진 관계로 혈족 촌수와 구분해 0촌처럼 설명합니다." },
+  { label: "부모 ↔ 자녀", degree: 1, category: "직계혈족", personGenerations: 0, relativeGenerations: 1, note: "한 세대를 바로 오르내리는 직계 관계입니다." },
+  { label: "형제·자매", degree: 2, category: "방계혈족", personGenerations: 1, relativeGenerations: 1, note: "나와 형제·자매가 각각 부모까지 1세대씩 올라가므로 2촌입니다." },
+  { label: "조부모 ↔ 손자녀", degree: 2, category: "직계혈족", personGenerations: 0, relativeGenerations: 2, note: "두 세대를 오르내리는 직계 관계입니다." },
+  { label: "삼촌·이모·고모·외삼촌 ↔ 조카", degree: 3, category: "방계혈족", personGenerations: 2, relativeGenerations: 1, note: "한쪽은 조부모까지 2세대, 다른 쪽은 부모까지 1세대로 보아 3촌입니다." },
+  { label: "사촌 형제·자매", degree: 4, category: "방계혈족", personGenerations: 2, relativeGenerations: 2, note: "두 사람이 각각 조부모까지 2세대씩 올라가므로 4촌입니다." },
+  { label: "종조부모·대고모 ↔ 종손자녀", degree: 4, category: "방계혈족", personGenerations: 3, relativeGenerations: 1, note: "한쪽은 증조부모까지 3세대, 다른 쪽은 부모까지 1세대로 보아 4촌입니다." },
+  { label: "오촌 조카·오촌 당숙", degree: 5, category: "방계혈족", personGenerations: 3, relativeGenerations: 2, note: "공통 조상까지의 세대 수가 3세대와 2세대이면 5촌입니다." },
+  { label: "육촌 형제·자매", degree: 6, category: "방계혈족", personGenerations: 3, relativeGenerations: 3, note: "두 사람이 각각 증조부모까지 3세대씩 올라가므로 6촌입니다." },
+  { label: "팔촌 형제·자매", degree: 8, category: "방계혈족", personGenerations: 4, relativeGenerations: 4, note: "두 사람이 각각 고조부모까지 4세대씩 올라가므로 8촌입니다." }
+];
+
+function kinshipPreset(index: number) {
+  return kinshipPresets[Math.min(Math.max(Math.floor(index), 0), kinshipPresets.length - 1)] ?? kinshipPresets[0];
+}
+
+function kinshipCategory(personGenerations: number, relativeGenerations: number, degree: number) {
+  if (degree === 0) return "인척";
+  return personGenerations === 0 || relativeGenerations === 0 ? "직계혈족" : "방계혈족";
 }
 
 function addUtcDays(date: Date, days: number) {
@@ -5343,6 +5375,103 @@ export const calculators: CalculatorConfig[] = [
           { name: "가중평균", value: weightedAverage },
           { name: "단순평균", value: simpleAverage },
           { name: "석차등급", value: rankGrade }
+        ]
+      };
+    }
+  },
+  {
+    slug: "kinship-calculator",
+    title: "촌수 계산기",
+    description: "가족 관계를 선택하거나 공통 조상까지의 세대 수를 입력해 부모·형제·사촌·육촌 같은 친족 관계가 몇 촌인지 계산합니다.",
+    category: "생활",
+    keywords: ["촌수 계산기", "친척 촌수 계산", "가족 관계 촌수", "사촌 몇촌", "형제 몇촌", "공통 조상 촌수 계산"],
+    badge: "관계·직접 계산",
+    audience: "가족 관계, 친척 호칭, 상속·증여 관련 친족 거리를 빠르게 확인하려는 사용자",
+    fields: [
+      {
+        name: "calculationMode",
+        label: "계산 방식",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "관계 목록에서 선택", value: 0 },
+          { label: "직접 계산(공통 조상 기준)", value: 1 }
+        ],
+        help: "자주 쓰는 관계는 목록에서 고르고, 더 먼 친척은 공통 조상까지 올라가는 세대 수를 직접 입력하세요."
+      },
+      {
+        name: "relationship",
+        label: "가족 관계 선택",
+        type: "select",
+        defaultValue: 3,
+        options: [
+          { label: "배우자", value: 0 },
+          { label: "부모 ↔ 자녀", value: 1 },
+          { label: "형제·자매", value: 2 },
+          { label: "조부모 ↔ 손자녀", value: 3 },
+          { label: "삼촌·이모·고모·외삼촌 ↔ 조카", value: 4 },
+          { label: "사촌 형제·자매", value: 5 },
+          { label: "종조부모·대고모 ↔ 종손자녀", value: 6 },
+          { label: "오촌 조카·오촌 당숙", value: 7 },
+          { label: "육촌 형제·자매", value: 8 },
+          { label: "팔촌 형제·자매", value: 9 }
+        ]
+      },
+      { name: "personGenerations", label: "나에서 공통 조상까지", type: "number", unit: "세대", min: 0, max: 10, step: 1, defaultValue: 2, help: "사촌이면 나→부모→조부모라서 2세대입니다." },
+      { name: "relativeGenerations", label: "상대에서 공통 조상까지", type: "number", unit: "세대", min: 0, max: 10, step: 1, defaultValue: 2, help: "사촌이면 상대도 조부모까지 2세대입니다." }
+    ],
+    guideTitle: "촌수 계산 기준",
+    guide: [
+      "촌수는 두 사람이 몇 단계의 부모-자녀 관계를 거쳐 연결되는지 나타내는 숫자입니다. 부모와 자녀는 1촌, 형제·자매는 나-부모-형제 구조라서 2촌입니다.",
+      "공통 조상 기준 직접 계산은 내가 공통 조상까지 올라가는 세대 수와 상대가 공통 조상까지 올라가는 세대 수를 더합니다. 사촌은 2세대+2세대라서 4촌입니다.",
+      "배우자는 혈연으로 이어진 촌수가 아니므로 혈족 계산과 구분해 0촌 인척으로 표시합니다. 배우자의 가족처럼 혼인으로 맺어진 관계는 법률·제도 판단 시 별도 기준을 확인해야 합니다."
+    ],
+    checkpoints: [
+      "직계혈족은 부모·조부모·자녀·손자녀처럼 위아래로 곧게 이어지는 관계입니다.",
+      "방계혈족은 형제·자매, 삼촌·이모·고모, 사촌처럼 공통 조상에서 옆으로 갈라지는 관계입니다.",
+      "상속, 혼인 제한, 세금, 가족관계 등록 같은 법률 판단은 실제 가족관계와 법령 기준을 함께 확인해야 합니다."
+    ],
+    faqs: [
+      { question: "사촌은 왜 4촌인가요?", answer: "나와 사촌은 조부모를 공통 조상으로 합니다. 내가 조부모까지 2세대, 사촌도 조부모까지 2세대라서 2+2=4촌입니다." },
+      { question: "형제·자매는 왜 2촌인가요?", answer: "나에서 부모까지 1세대, 부모에서 형제·자매까지 1세대이므로 총 2촌입니다." },
+      { question: "배우자는 몇 촌인가요?", answer: "배우자는 혈족 촌수 계산과 다르게 혼인으로 맺어진 인척 관계입니다. 일상적으로 0촌처럼 설명하지만 혈족 촌수와는 구분합니다." }
+    ],
+    calculate(values) {
+      const preset = kinshipPreset(values.relationship);
+      const isManual = values.calculationMode === 1;
+      const personGenerations = isManual ? Math.max(Math.floor(values.personGenerations), 0) : preset.personGenerations;
+      const relativeGenerations = isManual ? Math.max(Math.floor(values.relativeGenerations), 0) : preset.relativeGenerations;
+      const degree = isManual ? personGenerations + relativeGenerations : preset.degree;
+      const category = isManual ? kinshipCategory(personGenerations, relativeGenerations, degree) : preset.category;
+      const formula = degree === 0
+        ? "혈족 촌수 계산 대상 아님"
+        : `${personGenerations.toLocaleString("ko-KR")}세대 + ${relativeGenerations.toLocaleString("ko-KR")}세대 = ${degree.toLocaleString("ko-KR")}촌`;
+      const label = isManual ? "직접 입력 관계" : preset.label;
+      const explanation = isManual
+        ? category === "직계혈족"
+          ? "한쪽이 공통 조상 본인이므로 위아래로 이어지는 직계 관계로 볼 수 있습니다."
+          : degree === 0
+            ? "두 사람이 같은 사람으로 입력된 상태입니다."
+            : "두 사람이 공통 조상에서 옆가지로 갈라지는 방계 관계로 볼 수 있습니다."
+        : preset.note;
+
+      return {
+        headline: degree === 0 ? "0촌" : `${degree.toLocaleString("ko-KR")}촌`,
+        subline: `${label} · ${category} · ${formula}`,
+        rows: [
+          { label: "관계", value: label, tone: "strong" },
+          { label: "촌수", value: degree === 0 ? "0촌" : `${degree.toLocaleString("ko-KR")}촌`, tone: "strong" },
+          { label: "구분", value: category },
+          { label: "계산식", value: formula, tone: "strong" },
+          { label: "나에서 공통 조상까지", value: `${personGenerations.toLocaleString("ko-KR")}세대` },
+          { label: "상대에서 공통 조상까지", value: `${relativeGenerations.toLocaleString("ko-KR")}세대` },
+          { label: "관계 설명", value: explanation },
+          { label: "활용 참고", value: "친족 호칭, 가족 행사, 족보, 상속·증여 사전 점검에 참고할 수 있습니다." }
+        ],
+        chart: [
+          { name: "나→공통조상", value: personGenerations },
+          { name: "상대→공통조상", value: relativeGenerations },
+          { name: "촌수", value: degree }
         ]
       };
     }
