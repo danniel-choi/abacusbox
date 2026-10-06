@@ -90,6 +90,7 @@ export type CalculatorSlug =
   | "retirement-income-tax"
   | "savings"
   | "pension-tax"
+  | "survivor-pension"
   | "stock-return"
   | "coin-profit-calculator"
   | "stock-average-price"
@@ -7752,6 +7753,86 @@ export const calculators: CalculatorConfig[] = [
           { name: "연금저축", value: pensionApplied },
           { name: "IRP", value: totalApplied - pensionApplied },
           { name: "한도잔여", value: Math.max(9000000 - totalApplied, 0) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "survivor-pension",
+    title: "유족연금 계산기",
+    description: "사망자의 국민연금 기본연금 월액과 가입기간을 기준으로 유족연금 예상액, 부양가족연금 가산액, 본인 노령연금 중복 조정액을 계산합니다.",
+    category: "금융",
+    keywords: ["유족연금 계산기", "국민연금 유족연금", "유족연금 수령액", "배우자 유족연금", "노령연금 유족연금 중복", "부양가족연금"],
+    badge: "40·50·60% 지급률",
+    audience: "배우자나 가족 사망 시 국민연금 유족연금 예상액과 본인 노령연금 중복 선택을 확인하려는 사용자",
+    fields: [
+      { name: "basicPensionMonthly", label: "사망자 기본연금 월액", type: "number", unit: "원", min: 0, max: 10000000, step: 10000, defaultValue: 1000000, help: "국민연금공단 예상연금의 기본연금액 또는 노령연금 월액을 참고해 입력하세요." },
+      { name: "subscriptionYears", label: "사망자 가입기간", type: "number", unit: "년", min: 1, max: 60, step: 1, defaultValue: 20 },
+      {
+        name: "spouseAllowance",
+        label: "배우자 부양가족연금",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "해당", value: 1 },
+          { label: "미해당", value: 0 }
+        ]
+      },
+      { name: "childParentCount", label: "자녀·부모 가산 대상", type: "number", unit: "명", min: 0, max: 10, step: 1, defaultValue: 0 },
+      { name: "ownOldAgePension", label: "본인 노령연금 월액", type: "number", unit: "원", min: 0, max: 10000000, step: 10000, defaultValue: 0, help: "본인 노령연금이 없으면 0원으로 두세요." }
+    ],
+    guideTitle: "국민연금 유족연금 계산 기준",
+    guide: [
+      "국민연금 유족연금은 사망자의 기본연금액에 가입기간별 지급률을 곱해 계산합니다. 가입기간 10년 미만은 40%, 10년 이상 20년 미만은 50%, 20년 이상은 60%를 적용합니다.",
+      "2026년 기준 부양가족연금액은 배우자 월 25,550원, 자녀·부모 1명당 월 17,030원을 가산하는 방식으로 반영했습니다.",
+      "유족이 본인 노령연금도 받을 수 있다면 유족연금 전액과 본인 노령연금 전액+유족연금 30% 중 유리한 금액을 비교합니다."
+    ],
+    checkpoints: [
+      "실제 유족연금은 사망자의 가입 이력, 소득 재평가, 수급권자 순위와 생계유지 요건에 따라 달라질 수 있습니다.",
+      "부양가족연금 가산 대상은 배우자, 일정 요건의 자녀·부모 등 자격 요건을 충족해야 합니다.",
+      "본인 노령연금과 유족연금이 함께 발생하면 중복급여 조정이 적용됩니다.",
+      "정확한 수급권과 금액은 국민연금공단 또는 국번없이 1355 상담으로 확인해야 합니다."
+    ],
+    faqs: [
+      { question: "사망자가 받던 노령연금 전액을 받나요?", answer: "대체로 전액이 아니라 사망자의 기본연금액에 가입기간별 지급률 40%, 50%, 60%를 적용해 계산합니다." },
+      { question: "내 노령연금이 있으면 유족연금도 같이 받을 수 있나요?", answer: "둘을 단순 합산하지 않고, 유족연금 전액 또는 본인 노령연금 전액+유족연금 30% 중 유리한 쪽을 비교하는 방식으로 봅니다." },
+      { question: "부양가족연금은 누구에게 붙나요?", answer: "수급권자에 의해 생계를 유지하는 배우자, 자녀, 부모 등 일정 요건을 충족하는 가족이 있을 때 가산됩니다." }
+    ],
+    calculate(values) {
+      const subscriptionYears = Math.max(values.subscriptionYears, 0);
+      const survivorRate = subscriptionYears < 10 ? 0.4 : subscriptionYears < 20 ? 0.5 : 0.6;
+      const spouseFamilyPension = values.spouseAllowance === 1 ? 25550 : 0;
+      const childParentCount = Math.max(Math.floor(values.childParentCount), 0);
+      const childParentFamilyPension = childParentCount * 17030;
+      const familyPension = spouseFamilyPension + childParentFamilyPension;
+      const baseSurvivorPension = Math.max(values.basicPensionMonthly, 0) * survivorRate;
+      const survivorPension = baseSurvivorPension + familyPension;
+      const ownOldAgePension = Math.max(values.ownOldAgePension, 0);
+      const ownPlusPartialSurvivor = ownOldAgePension + survivorPension * 0.3;
+      const recommendedMonthly = ownOldAgePension > 0 ? Math.max(survivorPension, ownPlusPartialSurvivor) : survivorPension;
+      const recommendedLabel = ownOldAgePension > 0 && ownPlusPartialSurvivor > survivorPension
+        ? "본인 노령연금+유족연금 30%"
+        : "유족연금 전액";
+
+      return {
+        headline: formatWon(recommendedMonthly),
+        subline: `${recommendedLabel} 기준 · 가입기간 지급률 ${formatPercent(survivorRate * 100, 0)}`,
+        rows: [
+          { label: "가입기간 지급률", value: formatPercent(survivorRate * 100, 0), tone: "strong" },
+          { label: "유족연금 기본액", value: formatWon(baseSurvivorPension), tone: "strong" },
+          { label: "배우자 부양가족연금", value: formatWon(spouseFamilyPension) },
+          { label: "자녀·부모 부양가족연금", value: formatWon(childParentFamilyPension) },
+          { label: "유족연금 월 예상액", value: formatWon(survivorPension), tone: "strong" },
+          { label: "본인 노령연금 월액", value: formatWon(ownOldAgePension) },
+          { label: "본인연금+유족연금 30%", value: formatWon(ownPlusPartialSurvivor) },
+          { label: "유리한 선택", value: recommendedLabel, tone: "strong" },
+          { label: "예상 월 수령액", value: formatWon(recommendedMonthly), tone: "strong" },
+          { label: "예상 연 수령액", value: formatWon(recommendedMonthly * 12), tone: "strong" }
+        ],
+        chart: [
+          { name: "유족연금", value: survivorPension },
+          { name: "본인+30%", value: ownPlusPartialSurvivor },
+          { name: "부양가족", value: familyPension }
         ]
       };
     }

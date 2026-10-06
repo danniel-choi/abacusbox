@@ -280,6 +280,39 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/calculators/stock-average-price", label: "주식 물타기 계산기", text: "추가 매수 후 평균단가 변화를 계산합니다." }
     ]
   },
+  "survivor-pension": {
+    title: "유족연금 계산기 | 국민연금 유족연금 수령액·중복급여 비교",
+    description:
+      "유족연금 계산기로 사망자의 기본연금 월액과 가입기간을 입력해 국민연금 유족연금 예상액, 부양가족연금 가산액, 본인 노령연금 중복 조정액을 확인하세요.",
+    keywords: ["유족연금 계산기", "국민연금 유족연금", "유족연금 수령액", "배우자 유족연금", "노령연금 유족연금 중복", "부양가족연금"],
+    searchIntents: [
+      "배우자 사망 시 국민연금 유족연금 예상액을 알고 싶을 때",
+      "가입기간별 40%, 50%, 60% 지급률을 빠르게 적용하고 싶을 때",
+      "본인 노령연금이 있을 때 유족연금 전액과 30% 가산 선택을 비교할 때"
+    ],
+    sections: [
+      {
+        title: "가입기간에 따라 40·50·60% 지급률을 적용합니다.",
+        body:
+          "국민연금 유족연금은 사망자의 기본연금액에 가입기간별 지급률을 곱해 계산합니다. 가입기간 10년 미만은 40%, 10년 이상 20년 미만은 50%, 20년 이상은 60%를 적용합니다."
+      },
+      {
+        title: "부양가족연금 가산액을 함께 반영합니다.",
+        body:
+          "2026년 기준 배우자 부양가족연금은 월 25,550원, 자녀·부모는 1명당 월 17,030원으로 계산해 유족연금 예상액에 더합니다."
+      },
+      {
+        title: "본인 노령연금이 있으면 중복급여 조정을 비교합니다.",
+        body:
+          "유족이 본인 노령연금도 받을 수 있는 경우에는 유족연금 전액과 본인 노령연금 전액+유족연금 30% 중 금액상 유리한 선택을 비교해 보여줍니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/retirement-income-tax", label: "퇴직소득세 계산기", text: "퇴직금 수령 전 세후 금액을 함께 점검합니다." },
+      { href: "/calculators/pension-tax", label: "IRP·연금저축 절세액 계산기", text: "노후자금 준비와 세액공제 효과를 계산합니다." },
+      { href: "/calculators/inheritance-tax", label: "상속세 계산기", text: "상속 발생 시 예상 세금도 함께 참고합니다." }
+    ]
+  },
   "year-end-tax-settlement": {
     title: `연말정산 환급액 계산기 | ${legalStandards.year}년 소득공제·세액공제 미리보기`,
     description:
