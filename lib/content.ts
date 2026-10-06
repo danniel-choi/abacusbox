@@ -2,7 +2,7 @@ export type BlogPost = {
   slug: string;
   title: string;
   excerpt: string;
-  category: "노무 가이드" | "금융 가이드" | "세금 가이드" | "생활 가이드" | "사업 가이드" | "수학 도구" | "운영";
+  category: "노무 가이드" | "금융 가이드" | "세금 가이드" | "건강 가이드" | "생활 가이드" | "사업 가이드" | "수학 도구" | "운영";
   publishedAt: string;
   readTime: string;
   tags: string[];
@@ -28,6 +28,8 @@ type AutoBlogMeta = {
   audience: string;
   description: string;
   tags: string[];
+  hubLabel?: string;
+  relatedTitles?: string[];
 };
 
 const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
@@ -75,10 +77,75 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   bmi: {
     title: "BMI 계산기",
-    category: "생활 가이드",
+    category: "건강 가이드",
     audience: "체중 관리 사용자, 건강 정보 확인 사용자",
     description: "키와 몸무게를 기준으로 BMI 지수와 비만도 구간을 계산합니다.",
-    tags: ["BMI", "건강", "체중관리"]
+    tags: ["BMI", "건강", "체중관리"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["칼로리 계산기", "표준체중 계산기"]
+  },
+  "bmr-calculator": {
+    title: "BMR 기초대사량 계산기",
+    category: "건강 가이드",
+    audience: "운동 목표와 식단 기준을 잡는 사용자",
+    description: "성별, 나이, 키, 체중, 활동량을 기준으로 기초대사량과 유지 칼로리를 계산합니다.",
+    tags: ["BMR", "기초대사량", "유지칼로리"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["칼로리 계산기", "일일 섭취 권장량 계산기"]
+  },
+  "ideal-weight": {
+    title: "이상체중 계산기",
+    category: "건강 가이드",
+    audience: "건강검진 전후 체중 범위를 확인하는 사용자",
+    description: "키를 기준으로 BMI 22 표준체중과 건강 체중 범위를 계산합니다.",
+    tags: ["표준체중", "적정체중", "건강체중"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["BMI 계산기", "칼로리 계산기"]
+  },
+  "calorie-calculator": {
+    title: "칼로리 계산기",
+    category: "건강 가이드",
+    audience: "감량, 유지, 증량 목표를 세우는 사용자",
+    description: "BMR, TDEE, BMI, 목표 칼로리와 매크로 영양소를 한 번에 계산합니다.",
+    tags: ["칼로리", "다이어트", "TDEE"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["BMR 기초대사량 계산기", "일일 섭취 권장량 계산기"]
+  },
+  "daily-intake": {
+    title: "일일 섭취 권장량 계산기",
+    category: "건강 가이드",
+    audience: "하루 권장 칼로리와 탄단지 기준을 확인하는 사용자",
+    description: "나이, 성별, 키, 체중, 활동 수준, 목표를 입력해 하루 권장 칼로리와 탄단지 참고량을 계산합니다.",
+    tags: ["RDI", "권장섭취량", "탄단지"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["칼로리 계산기", "BMI 계산기"]
+  },
+  "one-rep-max": {
+    title: "1RM 계산기",
+    category: "건강 가이드",
+    audience: "근력 운동 중량을 계획하는 사용자",
+    description: "운동 중량과 반복 횟수로 예상 1회 최대 중량과 강도별 훈련 중량을 계산합니다.",
+    tags: ["1RM", "근력운동", "운동중량"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["BMR 기초대사량 계산기", "러닝 페이스 계산기"]
+  },
+  "sleep-calculator": {
+    title: "수면 계산기",
+    category: "건강 가이드",
+    audience: "기상 시간에 맞춰 취침 시간을 계획하는 사용자",
+    description: "기상 시간과 잠드는 데 걸리는 시간을 기준으로 권장 취침 시간을 계산합니다.",
+    tags: ["수면", "취침시간", "수면주기"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["러닝 페이스 계산기", "스톱워치"]
+  },
+  "running-pace": {
+    title: "러닝 페이스 계산기",
+    category: "건강 가이드",
+    audience: "달리기 기록과 목표 페이스를 관리하는 사용자",
+    description: "거리와 기록을 입력해 km당 페이스, 평균 속도, 목표 거리 예상 기록을 계산합니다.",
+    tags: ["러닝", "페이스", "마라톤"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["1RM 계산기", "칼로리 계산기"]
   },
   "korean-age": {
     title: "만나이 계산기",
@@ -324,10 +391,208 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     audience: "온라인 셀러, 자사몰 운영자, 마켓 판매자",
     description: "판매가, 원가, 수수료율, 광고비, 배송비를 기준으로 판매 수익과 마진율을 계산합니다.",
     tags: ["판매수익", "마진율", "온라인셀러"]
+  },
+  "earned-income-tax": {
+    title: "근로소득세 계산기",
+    category: "세금 가이드",
+    audience: "연봉과 월급의 소득세 구조를 확인하는 직장인",
+    description: "총급여, 공제, 세액공제 조건을 입력해 근로소득세와 지방소득세를 계산합니다.",
+    tags: ["근로소득세", "월급세금", "연봉"],
+    hubLabel: "세금 계산기",
+    relatedTitles: ["연말정산 환급액 계산기", "실수령액 계산기"]
+  },
+  "year-end-tax-settlement": {
+    title: "연말정산 환급액 계산기",
+    category: "세금 가이드",
+    audience: "연말정산 환급액과 추가 납부 가능성을 미리 보는 근로자",
+    description: "총급여, 카드 사용액, 의료비, 교육비, 기부금, 기납부세액을 입력해 환급 또는 추가납부 예상액을 계산합니다.",
+    tags: ["연말정산", "환급액", "소득공제"],
+    hubLabel: "세금 계산기",
+    relatedTitles: ["근로소득세 계산기", "IRP·연금저축 절세액 계산기"]
+  },
+  "inheritance-tax": {
+    title: "상속세 계산기",
+    category: "세금 가이드",
+    audience: "상속 재산과 공제 구조를 미리 점검하는 가족",
+    description: "상속재산, 채무, 공제액, 사전증여를 입력해 상속세 과세표준과 예상 세액을 계산합니다.",
+    tags: ["상속세", "상속공제", "사전증여"],
+    hubLabel: "세금 계산기",
+    relatedTitles: ["취득세 계산기", "유족연금 계산기"]
+  },
+  "survivor-pension": {
+    title: "유족연금 계산기",
+    category: "세금 가이드",
+    audience: "국민연금 유족연금 예상액과 본인 노령연금 중복 조정을 확인하는 사용자",
+    description: "사망자의 기본연금 월액과 가입기간을 기준으로 유족연금 예상액, 부양가족연금, 중복급여 조정액을 계산합니다.",
+    tags: ["유족연금", "국민연금", "노령연금"],
+    hubLabel: "세금 계산기",
+    relatedTitles: ["퇴직소득세 계산기", "상속세 계산기"]
+  },
+  "earned-income-tax-credit": {
+    title: "근로장려금 계산기",
+    category: "세금 가이드",
+    audience: "근로장려금 신청 가능성과 예상액을 확인하는 가구",
+    description: "가구 유형, 총소득, 재산 조건을 입력해 근로장려금 예상액을 계산합니다.",
+    tags: ["근로장려금", "장려금", "지원금"],
+    hubLabel: "세금 계산기",
+    relatedTitles: ["근로소득세 계산기", "연말정산 환급액 계산기"]
+  },
+  "youth-future-savings": {
+    title: "청년미래적금 계산기",
+    category: "금융 가이드",
+    audience: "청년 정책 저축 상품의 만기 수령액을 비교하는 사용자",
+    description: "월 납입액, 기간, 금리, 정부 지원 조건을 입력해 만기 예상액을 계산합니다.",
+    tags: ["청년미래적금", "정책금융", "저축"],
+    hubLabel: "금융 계산기",
+    relatedTitles: ["청년도약계좌 계산기", "예금·적금 실수령액 계산기"]
+  },
+  "stock-return": {
+    title: "주식 수익률 계산기",
+    category: "금융 가이드",
+    audience: "주식 매매 전후 실제 손익을 확인하는 투자자",
+    description: "매수단가, 매도단가, 수량, 수수료와 거래세를 반영해 순손익과 수익률을 계산합니다.",
+    tags: ["주식수익률", "투자손익", "거래세"],
+    hubLabel: "투자 계산기",
+    relatedTitles: ["주식 물타기 계산기", "코인 수익률 계산기"]
+  },
+  "coin-profit-calculator": {
+    title: "코인 수익률 계산기",
+    category: "금융 가이드",
+    audience: "비트코인·알트코인 매매 손익을 확인하는 투자자",
+    description: "매수가, 매도가, 보유 수량, 거래소 수수료를 입력해 코인 순손익과 실제 수익률을 계산합니다.",
+    tags: ["코인수익률", "암호화폐", "거래소수수료"],
+    hubLabel: "투자 계산기",
+    relatedTitles: ["암호화폐 투자 성장 계산기", "주식 수익률 계산기"]
+  },
+  "crypto-investment-growth": {
+    title: "암호화폐 투자 성장 계산기",
+    category: "금융 가이드",
+    audience: "암호화폐 장기 투자 시나리오를 비교하는 투자자",
+    description: "초기 투자금, 월 추가 투자금, 투자 기간, 예상 수익률로 코인 포트폴리오 성장 시나리오를 계산합니다.",
+    tags: ["암호화폐", "비트코인", "적립식투자"],
+    hubLabel: "투자 계산기",
+    relatedTitles: ["코인 수익률 계산기", "복리 투자 수익 계산기"]
+  },
+  "stock-average-price": {
+    title: "주식 물타기 계산기",
+    category: "금융 가이드",
+    audience: "추가 매수 후 평균단가를 확인하는 투자자",
+    description: "현재 보유 수량과 평균단가에 추가 매수 조건을 더해 새로운 평균 매입단가를 계산합니다.",
+    tags: ["물타기", "평단가", "추가매수"],
+    hubLabel: "투자 계산기",
+    relatedTitles: ["주식 수익률 계산기", "PER/PBR 주식 가치평가 계산기"]
+  },
+  "gold-price-calculator": {
+    title: "금 시세 계산기",
+    category: "금융 가이드",
+    audience: "보유 금 제품의 시세 기준 가치를 확인하는 사용자",
+    description: "금 시세, 중량, 순도, 수수료를 입력해 순금 환산 가치와 예상 매입·매도 금액을 계산합니다.",
+    tags: ["금시세", "순금", "귀금속"],
+    hubLabel: "투자 계산기",
+    relatedTitles: ["은 시세 계산기", "환율 계산기"]
+  },
+  "money-value-calculator": {
+    title: "화폐가치 계산기",
+    category: "금융 가이드",
+    audience: "과거·현재·미래 돈의 가치를 비교하는 사용자",
+    description: "기준 금액, 기준연도, 대상연도, 물가상승률로 화폐가치를 환산합니다.",
+    tags: ["화폐가치", "물가상승률", "구매력"],
+    hubLabel: "투자 계산기",
+    relatedTitles: ["인플레이션 계산기", "현재가치 계산기"]
+  },
+  "adsense-revenue": {
+    title: "구글 애드센스 수익 계산기",
+    category: "사업 가이드",
+    audience: "블로그와 웹사이트 광고 수익을 추정하는 운영자",
+    description: "페이지뷰, 클릭률, CPC, RPM을 입력해 일·월·연간 애드센스 예상 수익을 계산합니다.",
+    tags: ["애드센스", "광고수익", "RPM"],
+    hubLabel: "사업 계산기",
+    relatedTitles: ["YouTube 광고 수익 계산기", "손익분기점 계산기"]
+  },
+  "youtube-ad-revenue": {
+    title: "YouTube 광고 수익 계산기",
+    category: "사업 가이드",
+    audience: "유튜브 채널 수익을 추정하는 크리에이터",
+    description: "조회수, 수익화 비율, RPM을 기준으로 YouTube 광고 수익을 계산합니다.",
+    tags: ["유튜브수익", "광고수익", "크리에이터"],
+    hubLabel: "사업 계산기",
+    relatedTitles: ["구글 애드센스 수익 계산기", "구독 매출 계산기"]
+  },
+  "subscription-revenue": {
+    title: "구독 매출 계산기",
+    category: "사업 가이드",
+    audience: "구독형 서비스의 반복 매출을 점검하는 운영자",
+    description: "구독자 수, 월 구독료, 이탈률, CAC를 입력해 MRR, ARR, 이탈 영향, 회수기간을 계산합니다.",
+    tags: ["구독매출", "MRR", "SaaS"],
+    hubLabel: "사업 계산기",
+    relatedTitles: ["손익분기점 계산기", "판매자 수익 계산기"]
+  },
+  "math-notes": {
+    title: "수학 노트",
+    category: "수학 도구",
+    audience: "수업, 과외, 자기주도학습에서 풀이 과정을 정리하는 사용자",
+    description: "식, 설명, 표, 그래프를 한 노트에 정리해 수학 풀이 과정을 남길 수 있습니다.",
+    tags: ["수학노트", "풀이정리", "학습도구"],
+    hubLabel: "수학 도구",
+    relatedTitles: ["그래핑 계산기", "공학용 계산기"]
+  },
+  "graphing-calculator": {
+    title: "그래핑 계산기",
+    category: "수학 도구",
+    audience: "함수 그래프와 표를 함께 확인하는 학생과 교사",
+    description: "함수식을 입력해 그래프를 그리고 값의 변화를 시각적으로 확인합니다.",
+    tags: ["그래프", "함수", "수학"],
+    hubLabel: "수학 도구",
+    relatedTitles: ["수학 노트", "공학용 계산기"]
+  },
+  "scientific-calculator": {
+    title: "공학용 계산기",
+    category: "수학 도구",
+    audience: "삼각함수, 로그, 지수 계산이 필요한 학습자",
+    description: "일반 사칙연산보다 복잡한 과학·공학 계산을 브라우저에서 처리합니다.",
+    tags: ["공학용계산기", "삼각함수", "로그"],
+    hubLabel: "수학 도구",
+    relatedTitles: ["그래핑 계산기", "행렬 계산기"]
+  },
+  "derivative-calculator": {
+    title: "미분 계산기",
+    category: "수학 도구",
+    audience: "미분 결과와 식 변화를 확인하는 학습자",
+    description: "입력한 함수의 미분 결과와 기본 풀이 흐름을 확인합니다.",
+    tags: ["미분", "함수", "수학"],
+    hubLabel: "수학 도구",
+    relatedTitles: ["적분 계산기", "그래핑 계산기"]
   }
 };
 
-const hourlyAutoBlogCalculatorOrder = [
+const hourlyAutoBlogCalculatorGroups = [
+  ["minimum-wage", "unpaid-wage", "unemployment", "severance", "weekly-holiday", "hourly-wage", "annual-leave", "annual-leave-grant", "parental-leave", "net-salary"],
+  ["loan-interest", "loan-dsr", "loan-amortization", "card-installment", "exchange-rate", "savings", "lump-sum-deposit", "compound-interest", "youth-future-savings", "youth-leap-account"],
+  ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
+  ["stock-return", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
+  ["bmi", "calorie-calculator", "daily-intake", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
+  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "draw-probability", "moving-cost", "mobile-plan", "gpa"],
+  ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
+  ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
+];
+
+function interleaveAutoBlogCalculators(groups: string[][]) {
+  const maxLength = Math.max(...groups.map((group) => group.length));
+  const ordered: string[] = [];
+
+  for (let index = 0; index < maxLength; index += 1) {
+    for (const group of groups) {
+      const slug = group[index];
+      if (slug) ordered.push(slug);
+    }
+  }
+
+  return ordered;
+}
+
+const hourlyAutoBlogCalculatorOrder = interleaveAutoBlogCalculators(hourlyAutoBlogCalculatorGroups);
+
+const legacyHourlyAutoBlogCalculatorOrder = [
   "minimum-wage",
   "unpaid-wage",
   "unemployment",
@@ -407,13 +672,17 @@ function buildHourlyAutoBlogDateCodes() {
 
 const hourlyAutoBlogDateCodes = buildHourlyAutoBlogDateCodes();
 
-function buildHourlyAutoBlogSlug(dateCode: string, hour: number) {
+function buildHourlyAutoBlogSlugFromOrder(dateCode: string, hour: number, calculatorOrder: string[]) {
   const dayNumber = Number(dateCode.slice(-2));
-  const calculatorSlug = hourlyAutoBlogCalculatorOrder[(dayNumber + hour) % hourlyAutoBlogCalculatorOrder.length];
+  const calculatorSlug = calculatorOrder[(dayNumber + hour) % calculatorOrder.length];
   const templateKey = hourlyAutoBlogTemplateOrder[(dayNumber + hour) % hourlyAutoBlogTemplateOrder.length];
   const hourCode = String(hour).padStart(2, "0");
 
   return `${calculatorSlug}-${templateKey}-${dateCode}-${hourCode}-hourly`;
+}
+
+function buildHourlyAutoBlogSlug(dateCode: string, hour: number) {
+  return buildHourlyAutoBlogSlugFromOrder(dateCode, hour, hourlyAutoBlogCalculatorOrder);
 }
 
 const hourlyAutoBlogSlugs = Array.from(
@@ -421,6 +690,9 @@ const hourlyAutoBlogSlugs = Array.from(
     [
       ...hourlyAutoBlogDateCodes.flatMap((dateCode) =>
         Array.from({ length: 24 }, (_, hour) => buildHourlyAutoBlogSlug(dateCode, hour))
+      ),
+      ...hourlyAutoBlogDateCodes.flatMap((dateCode) =>
+        Array.from({ length: 24 }, (_, hour) => buildHourlyAutoBlogSlugFromOrder(dateCode, hour, legacyHourlyAutoBlogCalculatorOrder))
       ),
       ...legacyHourlyAutoBlogSlugs
     ]
@@ -436,6 +708,12 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
   const template = hourlyTemplateMeta[templateKey];
   const publishedAt = `${dateCode.slice(0, 4)}-${dateCode.slice(4, 6)}-${dateCode.slice(6, 8)}`;
   const plainTitle = meta.title.replace(" 계산기", "");
+  const relatedText = meta.relatedTitles?.length
+    ? `함께 보면 좋은 계산기는 ${meta.relatedTitles.join(", ")}입니다. 하나의 결과만 보는 것보다 관련 계산기를 이어서 사용하면 비용, 기간, 세금, 건강 지표처럼 서로 영향을 주는 항목을 더 입체적으로 볼 수 있습니다.`
+    : "계산 결과를 더 잘 해석하려면 같은 분야의 다른 계산기도 함께 확인하는 것이 좋습니다. 금액, 기간, 비율, 조건을 나눠서 보면 결과가 달라지는 이유가 더 선명해집니다.";
+  const hubText = meta.hubLabel
+    ? `${meta.hubLabel} 안에서 비슷한 목적의 계산기를 함께 찾아보면 입력 기준을 맞추기 쉽습니다.`
+    : "계산기 목록에서 같은 주제의 도구를 함께 찾아보면 입력 기준을 맞추기 쉽습니다.";
 
   return {
     slug,
@@ -450,6 +728,8 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
       `${meta.title}는 ${meta.audience}가 빠르게 기준값을 확인할 때 유용한 도구입니다. ${meta.description}`,
       `계산 전에는 입력값의 기준을 먼저 맞춰야 합니다. 세전과 세후, 월 단위와 연 단위, 총액과 일부 금액이 섞이면 같은 계산기라도 결과 해석이 달라질 수 있습니다.`,
       `${template.focus}을 볼 때는 기준 시나리오 하나만 두지 말고 보수적인 경우와 여유 있는 경우를 함께 비교하는 편이 좋습니다. 작은 입력 차이가 월 비용이나 예상 금액에서는 크게 벌어질 수 있습니다.`,
+      relatedText,
+      hubText,
       `계산 결과는 의사결정을 돕는 참고값입니다. 실제 계약, 신고, 구매, 급여 정산, 비용 집행 전에는 견적서, 명세서, 약정서, 공식 안내문처럼 원자료를 함께 확인해야 합니다.`,
       `계산의정석의 ${meta.title}는 복잡한 표를 보기 전에 대략적인 범위를 잡는 데 맞춰져 있습니다. 결과가 예상과 다르면 입력 단위, 기간, 포함 항목을 다시 점검해 보세요.`,
       `마지막으로 결과값 하나보다 항목별 구조를 보는 습관이 중요합니다. 어떤 항목이 결과를 크게 움직이는지 알면 절감, 협상, 계획 수정의 우선순위를 더 쉽게 정할 수 있습니다.`
