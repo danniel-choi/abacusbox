@@ -172,13 +172,13 @@ export const hubContents: Record<HubKey, HubContent> = {
     path: "/life",
     eyebrow: "생활 계산 허브",
     title: "교통, 반려동물, 지원금, 생활비 계산기",
-    description: "반려동물 나이, 교통 과태료, 유류비, K패스 환급, 출산 지원금, 생활비 습관처럼 실제 생활 판단에 필요한 계산을 모았습니다.",
-    featuredSlugs: ["pet-age", "traffic-fine-penalty", "fuel-cost", "kpass-refund", "childbirth-grant", "spending-habit-score"],
+    description: "반려동물 나이, 자동차 검사 기간, 교통 과태료, 유류비, K패스 환급, 출산 지원금처럼 실제 생활 판단에 필요한 계산을 모았습니다.",
+    featuredSlugs: ["pet-age", "vehicle-inspection-period", "traffic-fine-penalty", "fuel-cost", "kpass-refund", "childbirth-grant"],
     blogSlugs: ["moving-cost-comparison-20260926-02-hourly", "distance-calculator-how-to-use", "car-maintenance-mistakes-20260926-01-hourly"],
     sections: [
       {
         title: "생활 계산기는 실제 선택을 돕는 도구입니다.",
-        body: "교통비, 차량비, 지원금, 반려동물 나이처럼 생활 속 계산은 단순 숫자보다 다음 행동과 연결됩니다. 예상 금액과 조건을 먼저 확인하면 신청, 납부, 비교의 우선순위를 잡기 쉽습니다."
+        body: "교통비, 차량비, 자동차 검사 기간, 지원금, 반려동물 나이처럼 생활 속 계산은 단순 숫자보다 다음 행동과 연결됩니다. 예상 금액과 조건을 먼저 확인하면 신청, 납부, 비교의 우선순위를 잡기 쉽습니다."
       },
       {
         title: "제도형 계산은 조건을 함께 봐야 합니다.",

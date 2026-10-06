@@ -38,6 +38,7 @@ export type CalculatorSlug =
   | "real-estate-acquisition-tax"
   | "car-maintenance"
   | "traffic-fine-penalty"
+  | "vehicle-inspection-period"
   | "moving-cost"
   | "mobile-plan"
   | "seller-profit"
@@ -515,6 +516,95 @@ function formatIsoDate(date: Date) {
 
 function formatKoreanDate(date: Date) {
   return `${date.getUTCFullYear()}년 ${date.getUTCMonth() + 1}월 ${date.getUTCDate()}일`;
+}
+
+type VehicleInspectionRule = {
+  label: string;
+  firstMonths: number;
+  recurringMonths: (ageYears: number) => number;
+  note: string;
+};
+
+const vehicleInspectionRules: VehicleInspectionRule[] = [
+  {
+    label: "비사업용 승용·피견인",
+    firstMonths: 60,
+    recurringMonths: () => 24,
+    note: "비사업용 승용차는 신규 등록 후 최초 5년, 이후 2년 주기를 적용합니다."
+  },
+  {
+    label: "사업용 승용",
+    firstMonths: 24,
+    recurringMonths: () => 12,
+    note: "사업용 승용차는 신규 등록 후 최초 2년, 이후 1년 주기를 적용합니다."
+  },
+  {
+    label: "비사업용 경형·소형 승합·화물",
+    firstMonths: 24,
+    recurringMonths: (ageYears) => (ageYears <= 4 ? 24 : 12),
+    note: "차령 4년 이하 2년, 4년 초과 1년 주기를 적용합니다."
+  },
+  {
+    label: "사업용 경형·소형 승합",
+    firstMonths: 24,
+    recurringMonths: (ageYears) => (ageYears <= 4 ? 24 : 12),
+    note: "차령 4년 이하 2년, 4년 초과 1년 주기를 적용합니다."
+  },
+  {
+    label: "사업용 경형·소형 화물",
+    firstMonths: 24,
+    recurringMonths: () => 12,
+    note: "사업용 경형·소형 화물차는 최초 2년 후 1년 주기를 적용합니다."
+  },
+  {
+    label: "중형·대형 승합",
+    firstMonths: 12,
+    recurringMonths: (ageYears) => (ageYears <= 8 ? 12 : 6),
+    note: "차령 8년 이하 1년, 8년 초과 6개월 주기를 적용합니다."
+  },
+  {
+    label: "비사업용 중형·대형 화물",
+    firstMonths: 12,
+    recurringMonths: (ageYears) => (ageYears <= 5 ? 12 : 6),
+    note: "차령 5년 이하 1년, 5년 초과 6개월 주기를 적용합니다."
+  },
+  {
+    label: "사업용 중형 화물",
+    firstMonths: 12,
+    recurringMonths: (ageYears) => (ageYears <= 5 ? 12 : 6),
+    note: "차령 5년 이하 1년, 5년 초과 6개월 주기를 적용합니다."
+  },
+  {
+    label: "사업용 대형 화물",
+    firstMonths: 12,
+    recurringMonths: (ageYears) => (ageYears <= 2 ? 12 : 6),
+    note: "차령 2년 이하 1년, 2년 초과 6개월 주기를 적용합니다."
+  },
+  {
+    label: "특수자동차",
+    firstMonths: 12,
+    recurringMonths: (ageYears) => (ageYears <= 5 ? 12 : 6),
+    note: "차령 5년 이하 1년, 5년 초과 6개월 주기를 적용합니다."
+  }
+];
+
+function vehicleInspectionRule(index: number) {
+  return vehicleInspectionRules[Math.min(Math.max(Math.floor(index), 0), vehicleInspectionRules.length - 1)] ?? vehicleInspectionRules[0];
+}
+
+function vehicleAgeYears(registrationDate: Date, referenceDate: Date) {
+  return Math.max((referenceDate.getTime() - registrationDate.getTime()) / (1000 * 60 * 60 * 24 * 365.2425), 0);
+}
+
+function vehicleInspectionFineEstimate(overdueDays: number) {
+  if (overdueDays <= 0) return 0;
+  if (overdueDays <= 30) return 40000;
+  return Math.min(600000, 40000 + Math.ceil((overdueDays - 30) / 3) * 20000);
+}
+
+function formatVehicleInspectionMonths(months: number) {
+  if (months % 12 === 0) return `${months / 12}년`;
+  return `${months}개월`;
 }
 
 function addUtcDays(date: Date, days: number) {
@@ -4212,6 +4302,117 @@ export const calculators: CalculatorConfig[] = [
           { name: "과태료", value: basePenalty },
           { name: "범칙금", value: baseFine },
           { name: "예상납부", value: total }
+        ]
+      };
+    }
+  },
+  {
+    slug: "vehicle-inspection-period",
+    title: "자동차 검사 기간 계산기",
+    description: "자동차 등록일, 차종, 사업용 여부, 검사 유효기간 만료일을 입력해 정기·종합검사 가능 기간과 다음 만료일을 계산합니다.",
+    category: "생활",
+    keywords: ["자동차 검사 기간 계산기", "자동차 검사 만료일", "자동차 정기검사 기간", "자동차 종합검사 기간", "자동차 검사 주기", "자동차 검사 과태료"],
+    badge: "검사 가능 기간",
+    audience: "자동차 정기검사·종합검사 만료일과 실제 검사 가능 기간을 확인하려는 운전자",
+    fields: [
+      {
+        name: "calculationMode",
+        label: "계산 기준",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "현재 검사유효기간 만료일 기준", value: 0 },
+          { label: "신규등록일 기준 최초 검사", value: 1 }
+        ],
+        help: "자동차등록증이나 TS 안내에서 확인한 검사유효기간 만료일이 있으면 첫 번째를 선택하세요."
+      },
+      {
+        name: "vehicleType",
+        label: "차종·용도",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "비사업용 승용·피견인", value: 0 },
+          { label: "사업용 승용", value: 1 },
+          { label: "비사업용 경형·소형 승합·화물", value: 2 },
+          { label: "사업용 경형·소형 승합", value: 3 },
+          { label: "사업용 경형·소형 화물", value: 4 },
+          { label: "중형·대형 승합", value: 5 },
+          { label: "비사업용 중형·대형 화물", value: 6 },
+          { label: "사업용 중형 화물", value: 7 },
+          { label: "사업용 대형 화물", value: 8 },
+          { label: "특수자동차", value: 9 }
+        ],
+        help: "자동차등록증의 차종과 용도 기준에 맞춰 선택하세요."
+      },
+      { name: "registrationYear", label: "신규등록 연도", type: "number", unit: "년", min: 1990, max: 2100, step: 1, defaultValue: 2022 },
+      { name: "registrationMonth", label: "신규등록 월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 7 },
+      { name: "registrationDay", label: "신규등록 일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 1 },
+      { name: "expiryYear", label: "검사유효기간 만료 연도", type: "number", unit: "년", min: 1990, max: 2100, step: 1, defaultValue: 2027 },
+      { name: "expiryMonth", label: "검사유효기간 만료 월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 6 },
+      { name: "expiryDay", label: "검사유효기간 만료 일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 30 }
+    ],
+    guideTitle: "자동차 검사 기간 계산 기준",
+    guide: [
+      "자동차 정기검사·종합검사는 차종과 사업용 여부, 차령에 따라 6개월·1년·2년·5년 주기가 달라집니다. 이 계산기는 자동차관리법 시행규칙의 대표 주기를 입력 선택지로 정리했습니다.",
+      "검사 가능 기간은 검사유효기간 만료일 90일 전부터 만료일 후 31일까지로 계산합니다. 이 기간 안에 검사를 받으면 다음 검사유효기간은 기존 만료일을 기준으로 이어집니다.",
+      "중형·대형 승합, 화물, 특수자동차처럼 차령에 따라 6개월 주기로 바뀌는 차량은 신규등록일과 기준 만료일을 함께 입력해야 현재 주기를 더 정확히 볼 수 있습니다."
+    ],
+    checkpoints: [
+      "검사유효기간 만료일은 자동차등록증, TS 사이버검사소, 검사 안내문 기준을 우선하세요.",
+      "종합검사 대상 지역 여부는 주소지와 차종에 따라 달라질 수 있지만 검사 가능 기간 계산 방식은 만료일 기준으로 확인합니다.",
+      "검사 지연 과태료는 실제 지연일수와 부과 고지 기준에 따라 달라질 수 있어 참고액으로만 보세요."
+    ],
+    faqs: [
+      { question: "검사 만료일보다 일찍 받아도 손해인가요?", answer: "만료일 전 90일 이내에 검사를 받으면 다음 검사유효기간은 기존 만료일을 기준으로 이어지므로 보통 기간 손해가 없습니다." },
+      { question: "종합검사와 정기검사 기간이 다른가요?", answer: "대상 지역과 검사 항목은 다를 수 있지만, 운전자가 확인해야 하는 검사 가능 기간은 검사유효기간 만료일을 기준으로 계산합니다." },
+      { question: "검사유효기간 만료일을 모르면 어떻게 하나요?", answer: "자동차등록증이나 TS 사이버검사소에서 먼저 확인하는 것이 가장 정확합니다. 신차라면 신규등록일 기준 최초 검사 모드로 대략적인 첫 만료일을 확인할 수 있습니다." }
+    ],
+    calculate(values) {
+      const today = todayKstDate();
+      const rule = vehicleInspectionRule(values.vehicleType);
+      const registrationDate = clampDate(values.registrationYear, values.registrationMonth, values.registrationDay);
+      const inputExpiryDate = clampDate(values.expiryYear, values.expiryMonth, values.expiryDay);
+      const firstExpiryDate = addUtcDays(addMonthsClampedUtc(registrationDate, rule.firstMonths), -1);
+      const currentExpiryDate = values.calculationMode === 1 ? firstExpiryDate : inputExpiryDate;
+      const ageYears = vehicleAgeYears(registrationDate, currentExpiryDate);
+      const recurringMonths = rule.recurringMonths(ageYears);
+      const inspectionStartDate = addUtcDays(currentExpiryDate, -90);
+      const inspectionEndDate = addUtcDays(currentExpiryDate, 31);
+      const nextExpiryDate = addMonthsClampedUtc(currentExpiryDate, recurringMonths);
+      const daysToStart = utcDaysBetween(today, inspectionStartDate);
+      const daysToEnd = utcDaysBetween(today, inspectionEndDate);
+      const overdueDays = Math.max(utcDaysBetween(inspectionEndDate, today), 0);
+      const fineEstimate = vehicleInspectionFineEstimate(overdueDays);
+      const periodStatus = today < inspectionStartDate
+        ? `검사기간 전 · 시작까지 D-${Math.max(daysToStart, 0).toLocaleString("ko-KR")}`
+        : today <= inspectionEndDate
+          ? `검사 가능 · 종료까지 D-${Math.max(daysToEnd, 0).toLocaleString("ko-KR")}`
+          : `검사기간 경과 · ${overdueDays.toLocaleString("ko-KR")}일 지연`;
+      const headline = today <= inspectionEndDate
+        ? formatKoreanDate(inspectionEndDate)
+        : `${overdueDays.toLocaleString("ko-KR")}일 지연`;
+
+      return {
+        headline,
+        subline: `${rule.label} · ${formatVehicleInspectionMonths(recurringMonths)} 주기 · ${periodStatus}`,
+        rows: [
+          { label: "계산 기준일", value: formatKoreanDate(today) },
+          { label: "차종·용도", value: rule.label, tone: "strong" },
+          { label: "신규등록일", value: formatKoreanDate(registrationDate) },
+          { label: "적용 검사 주기", value: formatVehicleInspectionMonths(recurringMonths), tone: "strong" },
+          { label: "검사유효기간 만료일", value: formatKoreanDate(currentExpiryDate), tone: "strong" },
+          { label: "검사 가능 시작일", value: formatKoreanDate(inspectionStartDate) },
+          { label: "정상 검사 마지막 날", value: formatKoreanDate(inspectionEndDate), tone: "strong" },
+          { label: "현재 상태", value: periodStatus, tone: today > inspectionEndDate ? "muted" : "strong" },
+          { label: "다음 예상 만료일", value: formatKoreanDate(nextExpiryDate) },
+          { label: "주기 참고", value: rule.note },
+          { label: "지연 과태료 참고액", value: fineEstimate > 0 ? formatWon(fineEstimate) : "지연 없음" }
+        ],
+        chart: [
+          { name: "만료일까지", value: Math.max(utcDaysBetween(today, currentExpiryDate), 0) },
+          { name: "검사기간", value: 122 },
+          { name: "지연일수", value: overdueDays }
         ]
       };
     }

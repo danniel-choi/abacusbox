@@ -54,6 +54,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "속도위반, 신호위반, 주정차 위반 등 주요 교통법규 위반의 과태료·범칙금·벌점과 감경 가능성을 추정합니다.",
     tags: ["교통과태료", "범칙금", "벌점"]
   },
+  "vehicle-inspection-period": {
+    title: "자동차 검사 기간 계산기",
+    category: "생활 가이드",
+    audience: "정기검사·종합검사 일정을 확인하는 운전자",
+    description: "차종, 사업용 여부, 신규등록일, 검사유효기간 만료일을 기준으로 자동차 검사 가능 기간과 다음 만료일을 계산합니다.",
+    tags: ["자동차검사", "정기검사", "검사만료일"],
+    hubLabel: "생활 도구 계산기",
+    relatedTitles: ["자동차 과태료·범칙금 계산기", "유류비 계산기"]
+  },
   "draw-probability": {
     title: "뽑기 확률 계산기",
     category: "생활 가이드",
@@ -571,7 +580,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
   ["stock-return", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
-  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "draw-probability", "moving-cost", "mobile-plan", "gpa"],
+  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "draw-probability", "moving-cost", "mobile-plan", "gpa"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];
