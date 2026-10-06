@@ -12,6 +12,7 @@ const navItems = [
   { href: "/tax", label: "세금" },
   { href: "/stock", label: "주식" },
   { href: "/health", label: "건강" },
+  { href: "/daily", label: "일상" },
   { href: "/blog", label: "블로그" },
   { href: "/resources", label: "참고" },
   { href: "/about", label: "소개" },

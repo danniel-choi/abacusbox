@@ -145,7 +145,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/random-number", label: "랜덤 숫자 생성기", text: "추첨이나 번호 뽑기에 사용할 무작위 숫자를 생성합니다." },
       { href: "/calculators/percent", label: "퍼센트 계산기", text: "확률과 비율을 다른 방식으로 계산해 볼 수 있습니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "날짜, 단위, 할인율, 생활 도구 계산기를 함께 확인합니다." }
+      { href: "/daily", label: "일상 도구 계산기 모음", text: "날짜, 단위, 할인율, 퍼센트 계산기를 함께 확인합니다." }
     ]
   },
   "gold-price-calculator": {
@@ -589,7 +589,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/car-maintenance", label: "자동차 유지비 계산기", text: "보험료, 자동차세, 유류비 같은 월 차량 비용도 함께 확인할 수 있습니다." },
       { href: "/calculators/date-diff", label: "날짜 차이 계산기", text: "고지서 납부기한과 경과일을 계산할 때 활용할 수 있습니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "차량, 날짜, 단위 변환 같은 생활 도구를 함께 제공합니다." }
+      { href: "/life", label: "생활 도구 계산기 모음", text: "교통, 차량, 이동비 관련 생활 계산기를 함께 제공합니다." }
     ]
   },
   "pet-age": {
@@ -622,7 +622,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/date-diff", label: "날짜 차이 계산기", text: "입양일이나 생일부터 현재까지의 기간을 계산할 수 있습니다." },
       { href: "/calculators/bmi", label: "BMI 계산기", text: "반려인이 함께 건강 관리를 시작할 때 참고할 수 있습니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "날짜, 단위, 건강 관련 생활 계산기를 함께 제공합니다." }
+      { href: "/life", label: "생활 도구 계산기 모음", text: "반려동물, 교통, 생활비 계산기를 함께 제공합니다." }
     ]
   },
   "zodiac-sign": {
@@ -661,7 +661,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/korean-age", label: "만나이 계산기", text: "생년월일 기준 만나이와 다음 생일까지 남은 기간을 확인합니다." },
       { href: "/calculators/date-diff", label: "날짜 차이 계산기", text: "생일, 기념일, 일정 사이의 날짜 차이를 계산합니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "날짜, 단위, 건강, 생활 도구 계산기를 함께 확인합니다." }
+      { href: "/daily", label: "일상 도구 계산기 모음", text: "날짜, 기념일, 만 나이 계산기를 함께 확인합니다." }
     ]
   },
   "one-rep-max": {
@@ -861,7 +861,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/fuel-cost", label: "유류비 계산기", text: "자동차 이동 비용과 대중교통비를 비교합니다." },
       { href: "/calculators/distance-calculator", label: "거리 계산기", text: "목적지까지의 거리를 확인합니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "교통과 생활 계산기를 함께 확인합니다." }
+      { href: "/life", label: "생활 도구 계산기 모음", text: "교통과 생활비 계산기를 함께 확인합니다." }
     ]
   },
   "childbirth-grant": {
@@ -886,7 +886,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/parental-leave", label: "육아휴직 급여 계산기", text: "육아휴직 중 받을 수 있는 급여를 함께 계산합니다." },
       { href: "/calculators/korean-age", label: "만나이 계산기", text: "아동의 개월 수와 나이를 확인합니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "가족과 생활 계산기를 함께 제공합니다." }
+      { href: "/life", label: "생활 도구 계산기 모음", text: "가족과 지원금 계산기를 함께 제공합니다." }
     ]
   }
 };

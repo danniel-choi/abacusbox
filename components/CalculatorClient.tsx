@@ -5944,10 +5944,10 @@ function getNextActions(slug: CalculatorSlug): NextAction[] {
         label: "날짜 차이 계산"
       },
       {
-        title: "생활 계산기 더 보기",
+        title: "일상 도구 더 보기",
         text: "반려 생활에 함께 쓰기 좋은 날짜, 단위, 거리 계산기를 이어서 확인하세요.",
-        href: "/life",
-        label: "생활 도구 보기",
+        href: "/daily",
+        label: "일상 도구 보기",
         tone: "ink"
       }
     ],

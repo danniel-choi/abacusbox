@@ -1,6 +1,6 @@
 import type { CalculatorGroup } from "@/lib/calculator-directory";
 
-export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "life" | "business" | "math";
+export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "daily" | "life" | "business" | "math";
 
 export type HubContent = {
   key: HubKey;
@@ -141,30 +141,55 @@ export const hubContents: Record<HubKey, HubContent> = {
     ],
     checklist: ["BMI와 체중 범위를 함께 확인", "BMR과 활동량을 구분", "목표 칼로리를 급격히 낮추지 않기", "운동 중량과 러닝 페이스는 현재 기록 기준으로 조정"]
   },
+  daily: {
+    key: "daily",
+    group: "daily",
+    path: "/daily",
+    eyebrow: "일상 도구 허브",
+    title: "날짜, 단위, 퍼센트, 텍스트 계산기",
+    description: "날짜 차이, D-Day, 기념일, 만 나이, 단위변환, 퍼센트, 할인율, 텍스트 세기, 비밀번호 생성처럼 자주 쓰는 빠른 도구를 모았습니다.",
+    featuredSlugs: ["date-diff", "dday", "anniversary-calculator", "unit-converter", "percent", "text-counter"],
+    blogSlugs: ["distance-calculator-how-to-use", "unit-converter-comparison-20261228-05-hourly", "math-notes-classroom-guide"],
+    sections: [
+      {
+        title: "일상 도구는 빠르게 꺼내 쓰는 계산입니다.",
+        body: "D-day, 날짜 차이, 단위 변환, 퍼센트 계산처럼 반복해서 쓰는 계산은 깊은 설명보다 입력과 결과가 빠르게 이어지는 것이 중요합니다. 자주 쓰는 유틸을 한곳에 모아 검색 시간을 줄였습니다."
+      },
+      {
+        title: "기준일과 단위를 먼저 맞추면 실수가 줄어듭니다.",
+        body: "날짜 계산은 시작일 포함 여부, 단위 변환은 원본 단위, 퍼센트 계산은 기준값을 먼저 확인해야 합니다. 작은 기준 차이가 결과를 완전히 바꿀 수 있습니다."
+      },
+      {
+        title: "업무와 공부에도 함께 쓸 수 있습니다.",
+        body: "텍스트 세기, 비밀번호 생성, 스톱워치, 학점 계산 같은 도구는 일상뿐 아니라 문서 작성, 공부, 계정 관리, 일정 정리에 바로 사용할 수 있습니다."
+      }
+    ],
+    checklist: ["기준일과 종료일 확인", "원본 단위 확인", "퍼센트 기준값 확인", "텍스트·비밀번호는 목적에 맞춰 다시 점검"]
+  },
   life: {
     key: "life",
     group: "life",
     path: "/life",
     eyebrow: "생활 계산 허브",
-    title: "날짜, 단위, 거리, 퍼센트 생활 도구",
-    description: "날짜 차이, D-Day, 기념일, 만 나이, 단위변환, 거리계산, 할인율, 퍼센트처럼 매일 쓰는 계산을 빠르게 처리합니다.",
-    featuredSlugs: ["distance-calculator", "date-diff", "dday", "unit-converter", "percent", "discount-rate"],
+    title: "교통, 반려동물, 지원금, 생활비 계산기",
+    description: "반려동물 나이, 교통 과태료, 유류비, K패스 환급, 출산 지원금, 생활비 습관처럼 실제 생활 판단에 필요한 계산을 모았습니다.",
+    featuredSlugs: ["pet-age", "traffic-fine-penalty", "fuel-cost", "kpass-refund", "childbirth-grant", "spending-habit-score"],
     blogSlugs: ["moving-cost-comparison-20260926-02-hourly", "distance-calculator-how-to-use", "car-maintenance-mistakes-20260926-01-hourly"],
     sections: [
       {
-        title: "생활 계산기는 빠른 판단을 줄여줍니다.",
-        body: "약속일 계산, 할인율 비교, 거리 확인, 단위 변환처럼 작은 계산은 자주 반복됩니다. 계산기를 한곳에 모아두면 검색 시간을 줄이고 같은 기준으로 결과를 확인할 수 있습니다."
+        title: "생활 계산기는 실제 선택을 돕는 도구입니다.",
+        body: "교통비, 차량비, 지원금, 반려동물 나이처럼 생활 속 계산은 단순 숫자보다 다음 행동과 연결됩니다. 예상 금액과 조건을 먼저 확인하면 신청, 납부, 비교의 우선순위를 잡기 쉽습니다."
       },
       {
-        title: "결과의 기준을 이해하면 더 정확합니다.",
-        body: "거리계산기는 직선거리와 실제 이동거리가 다를 수 있고, 날짜 계산은 시작일 포함 여부에 따라 결과가 달라질 수 있습니다. 계산기별 안내와 체크포인트를 함께 확인하는 것이 좋습니다."
+        title: "제도형 계산은 조건을 함께 봐야 합니다.",
+        body: "K패스 환급, 출산 지원금, 과태료 감경처럼 제도와 연결된 계산은 지역, 기간, 신청 요건에 따라 달라질 수 있습니다. 계산 결과와 함께 공식 안내를 다시 확인하는 흐름이 필요합니다."
       },
       {
-        title: "실생활 비교에는 여러 도구를 이어서 쓰면 좋습니다.",
-        body: "이사나 출장, 구매 의사결정에서는 거리, 날짜, 할인율, 단위 환산이 함께 필요할 수 있습니다. 목적에 맞게 여러 계산기를 이어 사용하면 빠르게 후보를 좁힐 수 있습니다."
+        title: "생활비와 이동비는 함께 비교하면 좋습니다.",
+        body: "유류비, 대중교통 환급, 차량 유지비, 이동 거리처럼 생활비에 영향을 주는 항목은 서로 연결되어 있습니다. 한 가지 비용만 보지 말고 월 단위 부담으로 환산해 비교해 보세요."
       }
     ],
-    checklist: ["출발지와 목적지 기준 확인", "날짜 계산의 포함 범위 확인", "단위 변환 전 원본 단위 확인", "할인율과 최종 결제금액 함께 비교"]
+    checklist: ["신청·납부 요건 확인", "월 단위 비용으로 환산", "지역별 기준 확인", "공식 안내와 계산 결과 함께 비교"]
   },
   business: {
     key: "business",
@@ -218,4 +243,4 @@ export const hubContents: Record<HubKey, HubContent> = {
   }
 };
 
-export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "life", "business", "math"];
+export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "daily", "life", "business", "math"];
