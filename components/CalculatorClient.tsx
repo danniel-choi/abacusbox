@@ -895,7 +895,7 @@ function ShareActions({
       <button
         type="button"
         onClick={shareResult}
-        className="w-full rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72] sm:w-auto"
+        className="w-full rounded-full bg-[#FEE500] px-5 py-3 text-sm font-extrabold text-[#191919] transition hover:bg-[#f2d900] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FEE500] sm:w-auto"
       >
         카카오/앱 공유
       </button>
