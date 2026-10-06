@@ -91,6 +91,7 @@ export type CalculatorSlug =
   | "savings"
   | "pension-tax"
   | "stock-return"
+  | "coin-profit-calculator"
   | "stock-average-price"
   | "stock-valuation"
   | "crypto-investment-growth"
@@ -7429,6 +7430,79 @@ export const calculators: CalculatorConfig[] = [
         ],
         chart: [
           { name: "매수비용", value: totalCost },
+          { name: "매도실수령", value: netProceeds },
+          { name: profit >= 0 ? "수익" : "손실", value: Math.abs(profit) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "coin-profit-calculator",
+    title: "코인 수익률 계산기",
+    description: "코인 매수가, 매도가, 보유 수량, 거래소 수수료를 입력해 순손익과 실제 수익률을 계산합니다.",
+    category: "금융",
+    keywords: ["코인 수익률 계산기", "비트코인 수익률 계산", "암호화폐 손익 계산기", "코인 수익 계산", "코인 수수료 계산", "가상자산 수익률"],
+    badge: "수수료 반영 손익",
+    audience: "비트코인·이더리움·알트코인 매매 전후 실제 손익과 손익분기 가격을 확인하려는 투자자",
+    fields: [
+      { name: "buyPrice", label: "매수단가", type: "number", unit: "원", min: 0, max: 10000000000, step: 1, defaultValue: 50000000 },
+      { name: "sellPrice", label: "매도단가", type: "number", unit: "원", min: 0, max: 10000000000, step: 1, defaultValue: 58000000 },
+      { name: "quantity", label: "보유 수량", type: "number", unit: "개", min: 0, max: 100000000, step: 0.0001, defaultValue: 0.1 },
+      { name: "buyFeeRate", label: "매수 수수료율", type: "number", unit: "%", min: 0, max: 5, step: 0.001, defaultValue: 0.05 },
+      { name: "sellFeeRate", label: "매도 수수료율", type: "number", unit: "%", min: 0, max: 5, step: 0.001, defaultValue: 0.05 },
+      { name: "taxRate", label: "기타 세금·비용률", type: "number", unit: "%", min: 0, max: 50, step: 0.1, defaultValue: 0 }
+    ],
+    guideTitle: "코인 수익률 계산 기준",
+    guide: [
+      "코인 수익률은 매도 평가금액에서 매수 총비용, 매수 수수료, 매도 수수료, 기타 세금·비용을 차감한 순손익을 기준으로 계산합니다.",
+      "거래소 앱에서 보이는 수익률은 단가 변동만 반영하는 경우가 있어, 실제 매매 전에는 수수료와 출금·환전 비용을 함께 확인하는 것이 좋습니다.",
+      "이 계산기는 원화 기준 단순 손익 계산기입니다. 해외 거래소 이용 시 환율, 스프레드, 입출금 수수료, 세금 적용 여부는 별도로 확인해야 합니다."
+    ],
+    checkpoints: [
+      "수익률은 매수금액과 매수 수수료를 합친 총 투입금 기준으로 계산합니다.",
+      "손익분기 매도단가는 매도 수수료와 기타 비용률을 반영해 순손익이 0원이 되는 가격입니다.",
+      "선물·마진 거래의 레버리지, 펀딩비, 청산가는 반영하지 않습니다.",
+      "가상자산 과세 기준은 시행 시점과 개인 상황에 따라 달라질 수 있으므로 실제 신고 전에는 최신 기준을 확인하세요."
+    ],
+    faqs: [
+      { question: "거래소 수수료는 어떻게 입력하나요?", answer: "사용 중인 거래소의 현물 거래 수수료율을 입력하세요. 예를 들어 0.05%라면 0.05를 입력합니다." },
+      { question: "부분 수량도 계산할 수 있나요?", answer: "네. 비트코인처럼 0.1개, 0.005개 단위로 보유한 코인도 보유 수량에 소수로 입력하면 됩니다." },
+      { question: "세금이 자동 반영되나요?", answer: "기본값은 0%입니다. 세금이나 기타 비용을 반영하고 싶으면 기타 세금·비용률에 직접 입력하세요." }
+    ],
+    calculate(values) {
+      const quantity = Math.max(values.quantity, 0);
+      const buyAmount = values.buyPrice * quantity;
+      const sellAmount = values.sellPrice * quantity;
+      const buyFee = buyAmount * (values.buyFeeRate / 100);
+      const sellFee = sellAmount * (values.sellFeeRate / 100);
+      const extraCost = sellAmount * (values.taxRate / 100);
+      const totalCost = buyAmount + buyFee;
+      const netProceeds = sellAmount - sellFee - extraCost;
+      const profit = netProceeds - totalCost;
+      const returnRate = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+      const priceChangeRate = values.buyPrice > 0 ? ((values.sellPrice - values.buyPrice) / values.buyPrice) * 100 : 0;
+      const sellCostRate = (values.sellFeeRate + values.taxRate) / 100;
+      const breakEvenSellPrice = quantity > 0 && sellCostRate < 1
+        ? (totalCost / quantity) / (1 - sellCostRate)
+        : 0;
+
+      return {
+        headline: `${formatWon(profit)} (${formatPercent(returnRate, 2)})`,
+        subline: `매수 총비용 ${formatWon(totalCost)} · 매도 실수령 ${formatWon(netProceeds)}`,
+        rows: [
+          { label: "보유 수량", value: `${formatNumber(quantity, 8)}개` },
+          { label: "매수금액", value: formatWon(buyAmount) },
+          { label: "매도 평가금액", value: formatWon(sellAmount) },
+          { label: "매수 수수료", value: formatWon(buyFee) },
+          { label: "매도 수수료", value: formatWon(sellFee) },
+          { label: "기타 세금·비용", value: formatWon(extraCost) },
+          { label: "순손익", value: `${profit >= 0 ? "+" : ""}${formatWon(profit)}`, tone: "strong" },
+          { label: "실제 수익률", value: formatPercent(returnRate, 2), tone: "strong" },
+          { label: "단가 변동률", value: formatPercent(priceChangeRate, 2) },
+          { label: "손익분기 매도단가", value: formatWon(breakEvenSellPrice), tone: "strong" }
+        ],
+        chart: [
+          { name: "매수총비용", value: totalCost },
           { name: "매도실수령", value: netProceeds },
           { name: profit >= 0 ? "수익" : "손실", value: Math.abs(profit) }
         ]

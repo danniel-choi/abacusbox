@@ -247,6 +247,39 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/calculators/compound-interest", label: "복리 계산기", text: "복리 수익률과 적립식 투자 결과를 비교합니다." }
     ]
   },
+  "coin-profit-calculator": {
+    title: "코인 수익률 계산기 | 매수가·매도가·수수료 반영 손익 계산",
+    description:
+      "코인 수익률 계산기로 매수단가, 매도단가, 보유 수량, 거래소 수수료를 입력해 실제 순손익과 수익률, 손익분기 매도단가를 확인하세요.",
+    keywords: ["코인 수익률 계산기", "비트코인 수익률 계산", "암호화폐 손익 계산", "코인 수익 계산", "거래소 수수료 계산", "손익분기 매도가"],
+    searchIntents: [
+      "코인 매도 전 실제 수익금과 수익률을 알고 싶을 때",
+      "거래소 수수료를 포함한 손익분기 매도단가를 확인할 때",
+      "비트코인·이더리움·알트코인 보유 수량별 평가손익을 계산할 때"
+    ],
+    sections: [
+      {
+        title: "거래소 수수료를 반영해 순손익을 계산합니다.",
+        body:
+          "매수금액과 매도 평가금액만 비교하면 실제 수익률과 차이가 날 수 있습니다. 이 계산기는 매수 수수료와 매도 수수료를 각각 반영해 매도 후 손에 남는 순손익을 보여줍니다."
+      },
+      {
+        title: "손익분기 매도단가를 함께 확인합니다.",
+        body:
+          "수수료와 기타 비용률을 반영했을 때 순손익이 0원이 되는 매도단가를 계산해, 목표 매도가를 정할 때 참고할 수 있습니다."
+      },
+      {
+        title: "소수점 보유 수량도 입력할 수 있습니다.",
+        body:
+          "비트코인처럼 0.1개, 0.005개 단위로 보유한 자산도 보유 수량에 소수로 입력하면 매수 총비용과 매도 실수령액을 계산합니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/crypto-investment-growth", label: "암호화폐 투자 성장 계산기", text: "적립식 코인 투자 시나리오를 장기 관점에서 비교합니다." },
+      { href: "/calculators/stock-return", label: "주식 수익률 계산기", text: "주식 매매 수수료와 거래세를 반영한 손익도 확인합니다." },
+      { href: "/calculators/stock-average-price", label: "주식 물타기 계산기", text: "추가 매수 후 평균단가 변화를 계산합니다." }
+    ]
+  },
   "year-end-tax-settlement": {
     title: `연말정산 환급액 계산기 | ${legalStandards.year}년 소득공제·세액공제 미리보기`,
     description:
