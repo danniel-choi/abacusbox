@@ -1,6 +1,6 @@
 import type { CalculatorGroup } from "@/lib/calculator-directory";
 
-export type HubKey = "tax" | "labor" | "loan" | "stock" | "life" | "business" | "math";
+export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "life" | "business" | "math";
 
 export type HubContent = {
   key: HubKey;
@@ -116,13 +116,38 @@ export const hubContents: Record<HubKey, HubContent> = {
     ],
     checklist: ["수수료와 거래세를 함께 반영", "평균단가보다 총 투자금 변화 확인", "암호화폐는 손실 시나리오도 함께 확인", "업종 평균 배수와 성장률 차이 비교"]
   },
+  health: {
+    key: "health",
+    group: "health",
+    path: "/health",
+    eyebrow: "건강·운동 허브",
+    title: "BMI, 칼로리, 수면, 운동 계산기",
+    description: "BMI, 기초대사량, 표준체중, 칼로리, 일일 섭취 권장량, 1RM, 러닝 페이스, 수면 시간을 건강·운동 목적별로 모았습니다.",
+    featuredSlugs: ["bmi", "calorie-calculator", "daily-intake", "bmr-calculator", "ideal-weight", "one-rep-max"],
+    blogSlugs: ["bmi-calculator-health-check", "daily-intake-rdi-guide", "calorie-goal-planning-guide"],
+    sections: [
+      {
+        title: "건강 계산은 하나의 숫자로 판단하지 않습니다.",
+        body: "BMI, 표준체중, 기초대사량, 칼로리는 각각 보는 기준이 다릅니다. 체중 상태를 볼 때는 BMI와 표준체중을 함께 보고, 식단 목표를 잡을 때는 BMR과 활동량, 목표 칼로리를 이어서 확인하는 것이 좋습니다."
+      },
+      {
+        title: "운동 목표는 페이스와 강도를 분리해 봅니다.",
+        body: "러닝 페이스는 거리와 시간을 기준으로 훈련 강도를 점검하고, 1RM 계산기는 근력 운동 중량 계획을 돕습니다. 무리한 목표보다 현재 기록에서 조금씩 조정하는 방식이 안전합니다."
+      },
+      {
+        title: "수면과 섭취량은 생활 리듬에 맞춰 조정해야 합니다.",
+        body: "수면 주기와 권장 섭취량 계산은 참고값입니다. 나이, 성별, 활동량, 건강 상태에 따라 필요한 양이 달라질 수 있으므로 결과를 출발점으로 삼아 조정하세요."
+      }
+    ],
+    checklist: ["BMI와 체중 범위를 함께 확인", "BMR과 활동량을 구분", "목표 칼로리를 급격히 낮추지 않기", "운동 중량과 러닝 페이스는 현재 기록 기준으로 조정"]
+  },
   life: {
     key: "life",
     group: "life",
     path: "/life",
     eyebrow: "생활 계산 허브",
-    title: "날짜, 단위, 거리, 퍼센트 생활 계산기",
-    description: "날짜 차이, D-Day, 단위변환, 거리계산, 할인율, 퍼센트처럼 매일 쓰는 계산을 빠르게 처리합니다.",
+    title: "날짜, 단위, 거리, 퍼센트 생활 도구",
+    description: "날짜 차이, D-Day, 기념일, 만 나이, 단위변환, 거리계산, 할인율, 퍼센트처럼 매일 쓰는 계산을 빠르게 처리합니다.",
     featuredSlugs: ["distance-calculator", "date-diff", "dday", "unit-converter", "percent", "discount-rate"],
     blogSlugs: ["moving-cost-comparison-20260926-02-hourly", "distance-calculator-how-to-use", "car-maintenance-mistakes-20260926-01-hourly"],
     sections: [
@@ -193,4 +218,4 @@ export const hubContents: Record<HubKey, HubContent> = {
   }
 };
 
-export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "life", "business", "math"];
+export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "life", "business", "math"];

@@ -9,13 +9,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: "계산의정석",
   title: {
-    default: "계산의정석(계산의 정석) - 노무·금융·생활 계산기 디렉토리",
+    default: "계산의정석(계산의 정석) - 노무·금융·건강·생활 계산기 디렉토리",
     template: "%s | 계산의정석"
   },
-  description: "계산의정석, 계산의 정석은 노무, 금융, 절세, 생활, 사업 계산기와 수학 도구를 검색과 필터로 빠르게 찾고 실행할 수 있는 계산기 디렉토리입니다.",
+  description: "계산의정석, 계산의 정석은 노무, 금융, 절세, 건강, 생활, 사업 계산기와 수학 도구를 검색과 필터로 빠르게 찾고 실행할 수 있는 계산기 디렉토리입니다.",
   keywords: ["계산의정석", "계산의 정석", "계산기", "세금 계산기", "연말정산 계산기", "실수령액 계산기", "대출 계산기"],
   openGraph: {
-    title: "계산의정석(계산의 정석) - 노무·금융·생활 계산기 디렉토리",
+    title: "계산의정석(계산의 정석) - 노무·금융·건강·생활 계산기 디렉토리",
     description: "계산의 정석이라는 이름으로 찾을 수 있는 계산기와 수학 도구 플랫폼. 분야별 계산기와 기준 설명을 함께 제공합니다.",
     type: "website",
     locale: "ko_KR",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "계산의정석(계산의 정석) - 노무·금융·생활 계산기 디렉토리",
+    title: "계산의정석(계산의 정석) - 노무·금융·건강·생활 계산기 디렉토리",
     description: "계산의 정석이라는 이름으로 찾을 수 있는 계산기와 수학 도구 플랫폼. 분야별 계산기와 기준 설명을 함께 제공합니다.",
     images: [DEFAULT_OG_IMAGE]
   },
@@ -85,7 +85,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <div>
                 <p className="font-extrabold text-white">계산의정석 · 계산의 정석</p>
                 <p className="mt-2 leading-6">
-                  노무, 금융, 세금, 생활 계산을 빠르게 비교하고 공식 기준과 해설을 함께 확인하는 계산기 디렉토리입니다.
+                  노무, 금융, 세금, 건강, 생활 계산을 빠르게 비교하고 공식 기준과 해설을 함께 확인하는 계산기 디렉토리입니다.
                   계산 결과는 참고용 추정치이며, 실제 법률·세무·금융 판단은 관할 기관 또는 전문가 확인이 필요합니다.
                 </p>
                 <p className="mt-2 text-xs font-semibold text-white/45">운영 문의: 사이트 문의 게시판을 통해 접수합니다.</p>

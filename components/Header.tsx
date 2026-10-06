@@ -11,6 +11,7 @@ const navItems = [
   { href: "/calculators", label: "계산기" },
   { href: "/tax", label: "세금" },
   { href: "/stock", label: "주식" },
+  { href: "/health", label: "건강" },
   { href: "/blog", label: "블로그" },
   { href: "/resources", label: "참고" },
   { href: "/about", label: "소개" },

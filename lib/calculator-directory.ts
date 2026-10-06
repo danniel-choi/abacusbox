@@ -1,6 +1,6 @@
 import { calculators, type CalculatorConfig, type CalculatorSlug } from "@/lib/calculators";
 
-export type CalculatorGroup = "labor" | "loan" | "tax" | "investment" | "life" | "business" | "math";
+export type CalculatorGroup = "labor" | "loan" | "tax" | "investment" | "health" | "life" | "business" | "math";
 
 export const CALCULATOR_GROUP_META: Record<
   CalculatorGroup,
@@ -34,9 +34,16 @@ export const CALCULATOR_GROUP_META: Record<
     accentClass: "text-[#047857]",
     softClass: "bg-[#dcfce7]"
   },
+  health: {
+    label: "건강·운동",
+    description: "BMI, 칼로리, 기초대사량, 수면, 러닝, 운동 중량 계산기",
+    icon: "＋",
+    accentClass: "text-[#be123c]",
+    softClass: "bg-[#ffe4e6]"
+  },
   life: {
     label: "생활·도구",
-    description: "BMI, 날짜, 단위변환, 퍼센트, 할인율 같은 실용 계산기",
+    description: "날짜, 단위변환, 퍼센트, 할인율, 거리 같은 실용 계산기",
     icon: "🧰",
     accentClass: "text-[#c2410c]",
     softClass: "bg-[#fff0e3]"
@@ -102,14 +109,14 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "money-value-calculator": "investment",
   "roi-calculator": "investment",
   "present-value": "investment",
-  bmi: "life",
-  "bmr-calculator": "life",
-  "ideal-weight": "life",
-  "one-rep-max": "life",
-  "sleep-calculator": "life",
-  "running-pace": "life",
-  "calorie-calculator": "life",
-  "daily-intake": "life",
+  bmi: "health",
+  "bmr-calculator": "health",
+  "ideal-weight": "health",
+  "one-rep-max": "health",
+  "sleep-calculator": "health",
+  "running-pace": "health",
+  "calorie-calculator": "health",
+  "daily-intake": "health",
   "pet-age": "life",
   "korean-age": "life",
   "anniversary-calculator": "life",

@@ -14,7 +14,7 @@ export default function CalculatorsPage() {
         <p className="text-sm font-extrabold text-brand">CALCULATORS</p>
         <h1 className="mt-3 text-3xl font-extrabold md:text-5xl">전체 계산기</h1>
         <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-white/72 md:text-base">
-          노무, 금융, 절세, 생활, 사업 계산기와 수학 도구를 그룹별로 정리하고 검색과 필터로 바로 찾을 수 있게 구성했습니다.
+          노무, 금융, 절세, 건강, 생활, 사업 계산기와 수학 도구를 그룹별로 정리하고 검색과 필터로 바로 찾을 수 있게 구성했습니다.
         </p>
       </section>
 

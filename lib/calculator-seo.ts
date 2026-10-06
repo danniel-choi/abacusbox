@@ -515,7 +515,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/bmi", label: "BMI 계산기", text: "현재 체중 상태와 표준체중을 함께 확인할 수 있습니다." },
       { href: "/calculators/percent", label: "퍼센트 계산기", text: "칼로리 비율과 식단 비중을 빠르게 계산할 수 있습니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "건강, 날짜, 단위 변환 같은 생활 도구를 함께 제공합니다." }
+      { href: "/health", label: "건강 계산기 모음", text: "칼로리, BMI, 운동, 수면 계산기를 함께 제공합니다." }
     ]
   },
   "calorie-calculator": {
@@ -548,7 +548,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/daily-intake", label: "일일 섭취 권장량 계산기", text: "RDI 기준의 하루 권장량도 함께 비교할 수 있습니다." },
       { href: "/calculators/bmi", label: "BMI 계산기", text: "현재 체중 상태와 표준체중을 더 간단히 확인할 수 있습니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "건강, 날짜, 단위 변환 같은 생활 도구를 함께 제공합니다." }
+      { href: "/health", label: "건강 계산기 모음", text: "BMI, 기초대사량, 일일 섭취량 계산기를 함께 제공합니다." }
     ]
   },
   "traffic-fine-penalty": {
@@ -686,7 +686,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/bmr-calculator", label: "BMR 기초대사량 계산기", text: "운동 목표에 맞춰 하루 유지 칼로리를 함께 확인합니다." },
       { href: "/calculators/calorie-calculator", label: "칼로리 계산기", text: "감량·증량 목표별 섭취 칼로리를 계산합니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "건강과 생활 도구 계산기를 함께 제공합니다." }
+      { href: "/health", label: "건강 계산기 모음", text: "운동과 체중 관리 계산기를 함께 제공합니다." }
     ]
   },
   "sleep-calculator": {
@@ -711,7 +711,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/date-diff", label: "날짜 차이 계산기", text: "일정 사이의 기간을 계산합니다." },
       { href: "/calculators/stopwatch", label: "스톱워치", text: "운동이나 학습 시간을 측정할 수 있습니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "생활 도구 계산기를 함께 확인합니다." }
+      { href: "/health", label: "건강 계산기 모음", text: "수면, 운동, 칼로리 계산기를 함께 확인합니다." }
     ]
   },
   "running-pace": {
@@ -736,7 +736,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/one-rep-max", label: "1RM 계산기", text: "근력 운동 중량을 함께 계획합니다." },
       { href: "/calculators/calorie-calculator", label: "칼로리 계산기", text: "운동 목표에 맞는 섭취 칼로리를 확인합니다." },
-      { href: "/life", label: "생활 계산기 모음", text: "건강과 생활 계산기를 함께 제공합니다." }
+      { href: "/health", label: "건강 계산기 모음", text: "러닝, 운동, 칼로리 계산기를 함께 제공합니다." }
     ]
   },
   "auto-installment": {
