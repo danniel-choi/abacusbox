@@ -28,6 +28,8 @@ export type CalculatorSlug =
   | "bmi"
   | "calorie-calculator"
   | "daily-intake"
+  | "ovulation-calculator"
+  | "pregnancy-week-calculator"
   | "pet-age"
   | "korean-age"
   | "anniversary-calculator"
@@ -662,6 +664,34 @@ function kinshipPreset(index: number) {
 function kinshipCategory(personGenerations: number, relativeGenerations: number, degree: number) {
   if (degree === 0) return "인척";
   return personGenerations === 0 || relativeGenerations === 0 ? "직계혈족" : "방계혈족";
+}
+
+function ovulationPhaseLabel(today: Date, fertileStart: Date, ovulationDate: Date, fertileEnd: Date, nextPeriodDate: Date) {
+  if (today < fertileStart) return `가임기 전 · 시작까지 D-${utcDaysBetween(today, fertileStart).toLocaleString("ko-KR")}`;
+  if (today <= fertileEnd) {
+    if (today.getTime() === ovulationDate.getTime()) return "예상 배란일";
+    return `가임기 참고 기간 · 종료까지 D-${Math.max(utcDaysBetween(today, fertileEnd), 0).toLocaleString("ko-KR")}`;
+  }
+  if (today < nextPeriodDate) return `가임기 이후 · 다음 생리 예정까지 D-${utcDaysBetween(today, nextPeriodDate).toLocaleString("ko-KR")}`;
+  return "다음 주기 시작 예정일";
+}
+
+function pregnancyTrimester(days: number) {
+  if (days < 0) return "임신 전 또는 기준일 확인 필요";
+  if (days < 14 * 7) return "임신 초기";
+  if (days < 28 * 7) return "임신 중기";
+  return "임신 후기";
+}
+
+function pregnancyMonthLabel(days: number) {
+  if (days < 0) return "기준일 전";
+  const month = Math.min(Math.floor(days / 28) + 1, 10);
+  return `임신 ${month}개월차`;
+}
+
+function pregnancyWeeksLabel(days: number) {
+  const safeDays = Math.max(Math.floor(days), 0);
+  return `${Math.floor(safeDays / 7).toLocaleString("ko-KR")}주 ${Math.floor(safeDays % 7).toLocaleString("ko-KR")}일`;
 }
 
 function addUtcDays(date: Date, days: number) {
@@ -3624,6 +3654,193 @@ export const calculators: CalculatorConfig[] = [
     }
   },
   {
+    slug: "ovulation-calculator",
+    title: "배란일 계산기",
+    description: "마지막 생리 시작일, 평균 생리주기, 황체기 길이를 입력해 예상 배란일, 가임기, 다음 생리 예정일을 계산합니다.",
+    category: "생활",
+    keywords: ["배란일 계산기", "가임기 계산기", "생리주기 계산기", "임신 가능일 계산", "다음 생리 예정일", "황체기 계산"],
+    badge: "배란일·가임기",
+    audience: "임신 준비나 생리주기 관리를 위해 예상 배란일과 가임기 참고 기간을 확인하려는 사용자",
+    fields: [
+      { name: "lastPeriodYear", label: "마지막 생리 시작 연도", type: "number", unit: "년", min: 1990, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "lastPeriodMonth", label: "마지막 생리 시작 월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 9 },
+      { name: "lastPeriodDay", label: "마지막 생리 시작 일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 24, help: "생리가 끝난 날이 아니라 시작한 첫날을 입력하세요." },
+      { name: "cycleLength", label: "평균 생리주기", type: "number", unit: "일", min: 21, max: 45, step: 1, defaultValue: 28, help: "한 생리 시작일부터 다음 생리 시작일까지의 평균 간격입니다." },
+      { name: "lutealPhaseLength", label: "황체기 길이", type: "number", unit: "일", min: 10, max: 18, step: 1, defaultValue: 14, help: "모르면 일반적으로 많이 쓰는 14일을 그대로 두세요." },
+      { name: "periodLength", label: "평균 생리 기간", type: "number", unit: "일", min: 1, max: 10, step: 1, defaultValue: 5 },
+      {
+        name: "fertileAfterDays",
+        label: "배란 후 가임기 표시",
+        type: "select",
+        defaultValue: 3,
+        options: [
+          { label: "배란 후 1일", value: 1 },
+          { label: "배란 후 2일", value: 2 },
+          { label: "배란 후 3일", value: 3 }
+        ],
+        help: "공공 가이드에서 안내하는 2~3일 후 범위를 넓게 보려면 3일을 선택하세요."
+      }
+    ],
+    guideTitle: "배란일·가임기 계산 기준",
+    guide: [
+      "다음 생리 예정일은 마지막 생리 시작일에 평균 생리주기 일수를 더해 계산합니다. 입력한 날짜가 오래전이면 오늘 기준 현재 주기로 자동 보정해 보여줍니다.",
+      "예상 배란일은 다음 생리 예정일에서 황체기 길이를 빼서 계산합니다. 황체기 값을 모르면 일반적으로 많이 쓰는 14일을 기준으로 봅니다.",
+      "가임기 참고 기간은 예상 배란일 5일 전부터 배란 후 선택한 일수까지 표시합니다. 실제 배란일은 스트레스, 건강 상태, 호르몬 변화에 따라 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "이 계산기는 피임 목적이나 의학적 진단 목적으로 사용하면 안 됩니다.",
+      "주기가 불규칙하거나 임신 준비 기간이 길어진 경우 배란테스트기, 기초체온, 의료기관 상담을 함께 활용하세요.",
+      "생리 시작일은 생리가 끝난 날이 아니라 출혈이 시작된 첫날을 기준으로 입력합니다."
+    ],
+    faqs: [
+      { question: "배란일은 왜 다음 생리 예정일에서 거꾸로 계산하나요?", answer: "배란 후 다음 생리까지의 기간인 황체기가 비교적 일정하다고 보기 때문에, 다음 생리 예정일에서 황체기 길이를 빼 배란일을 추정합니다." },
+      { question: "가임기는 며칠로 보나요?", answer: "이 계산기는 예상 배란일 5일 전부터 배란 후 1~3일까지를 참고 가임기로 표시합니다. 정자와 난자의 생존 기간을 반영한 넓은 추정 범위입니다." },
+      { question: "피임용으로 써도 되나요?", answer: "아니요. 배란일과 가임기는 매달 달라질 수 있어 달력 계산만으로 피임 여부를 판단하면 안 됩니다." }
+    ],
+    calculate(values) {
+      const today = todayKstDate();
+      const firstStart = clampDate(values.lastPeriodYear, values.lastPeriodMonth, values.lastPeriodDay);
+      const cycleLength = Math.min(Math.max(Math.floor(values.cycleLength), 21), 45);
+      const lutealPhaseLength = Math.min(Math.max(Math.floor(values.lutealPhaseLength), 10), 18);
+      const periodLength = Math.min(Math.max(Math.floor(values.periodLength), 1), 10);
+      const fertileAfterDays = Math.min(Math.max(Math.floor(values.fertileAfterDays), 1), 3);
+      const elapsedDays = Math.max(utcDaysBetween(firstStart, today), 0);
+      const currentCycleIndex = Math.floor(elapsedDays / cycleLength);
+      const cycleStart = addUtcDays(firstStart, currentCycleIndex * cycleLength);
+      const periodEnd = addUtcDays(cycleStart, periodLength - 1);
+      const nextPeriod = addUtcDays(cycleStart, cycleLength);
+      const ovulationDate = addUtcDays(nextPeriod, -lutealPhaseLength);
+      const fertileStart = addUtcDays(ovulationDate, -5);
+      const fertileEnd = addUtcDays(ovulationDate, fertileAfterDays);
+      const highChanceStart = addUtcDays(ovulationDate, -2);
+      const pregnancyTestReference = addUtcDays(nextPeriod, 7);
+      const dayOfCycle = utcDaysBetween(cycleStart, today) + 1;
+      const phaseLabel = ovulationPhaseLabel(today, fertileStart, ovulationDate, fertileEnd, nextPeriod);
+      const nextRows = [0, 1, 2].map((offset) => {
+        const start = addUtcDays(cycleStart, offset * cycleLength);
+        const next = addUtcDays(start, cycleLength);
+        const ovulation = addUtcDays(next, -lutealPhaseLength);
+        const fertileFrom = addUtcDays(ovulation, -5);
+        const fertileTo = addUtcDays(ovulation, fertileAfterDays);
+        return `${formatKoreanDate(ovulation)} · 가임기 ${formatKoreanDate(fertileFrom)}~${formatKoreanDate(fertileTo)} · 다음 생리 ${formatKoreanDate(next)}`;
+      });
+
+      return {
+        headline: formatKoreanDate(ovulationDate),
+        subline: `${phaseLabel} · 가임기 ${formatKoreanDate(fertileStart)}~${formatKoreanDate(fertileEnd)}`,
+        rows: [
+          { label: "현재 주기 시작일", value: formatKoreanDate(cycleStart), tone: "strong" },
+          { label: "오늘 기준 주기일", value: `${Math.max(dayOfCycle, 1).toLocaleString("ko-KR")}일차` },
+          { label: "예상 배란일", value: formatKoreanDate(ovulationDate), tone: "strong" },
+          { label: "가임기 참고 시작", value: formatKoreanDate(fertileStart), tone: "strong" },
+          { label: "가임기 참고 종료", value: formatKoreanDate(fertileEnd), tone: "strong" },
+          { label: "임신 가능성 높은 참고 기간", value: `${formatKoreanDate(highChanceStart)}~${formatKoreanDate(ovulationDate)}` },
+          { label: "다음 생리 예정일", value: formatKoreanDate(nextPeriod), tone: "strong" },
+          { label: "예상 생리 종료일", value: formatKoreanDate(periodEnd) },
+          { label: "임신 테스트 참고일", value: formatKoreanDate(pregnancyTestReference) },
+          { label: "다음 1주기", value: nextRows[0] },
+          { label: "다음 2주기", value: nextRows[1] },
+          { label: "다음 3주기", value: nextRows[2] }
+        ],
+        chart: [
+          { name: "생리기간", value: periodLength },
+          { name: "배란 전", value: Math.max(cycleLength - lutealPhaseLength, 0) },
+          { name: "황체기", value: lutealPhaseLength }
+        ]
+      };
+    }
+  },
+  {
+    slug: "pregnancy-week-calculator",
+    title: "임신 주수 계산기",
+    description: "마지막 생리 시작일, 수정일, 출산 예정일 중 하나를 기준으로 현재 임신 주수, 출산 예정일, 삼분기와 주요 시점을 계산합니다.",
+    category: "생활",
+    keywords: ["임신 주수 계산기", "임신주차 계산기", "출산 예정일 계산기", "마지막 생리일 임신 주수", "임신 몇 주", "분만 예정일 계산"],
+    badge: "주수·예정일",
+    audience: "임신 주수와 출산 예정일을 참고로 확인하려는 임신부와 가족",
+    fields: [
+      {
+        name: "calculationMode",
+        label: "계산 기준",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "마지막 생리 시작일 기준", value: 0 },
+          { label: "수정일·배란일 기준", value: 1 },
+          { label: "출산 예정일 기준", value: 2 }
+        ]
+      },
+      { name: "baseYear", label: "기준 연도", type: "number", unit: "년", min: 1990, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "baseMonth", label: "기준 월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 7 },
+      { name: "baseDay", label: "기준 일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 1, help: "선택한 계산 기준에 맞는 날짜를 입력하세요." },
+      { name: "cycleLength", label: "평균 생리주기", type: "number", unit: "일", min: 21, max: 45, step: 1, defaultValue: 28, help: "마지막 생리일 기준일 때 28일과 다른 주기를 보정합니다." },
+      { name: "checkYear", label: "확인할 연도", type: "number", unit: "년", min: 1990, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "checkMonth", label: "확인할 월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 10 },
+      { name: "checkDay", label: "확인할 일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 7 }
+    ],
+    guideTitle: "임신 주수·출산 예정일 계산 기준",
+    guide: [
+      "마지막 생리 시작일 기준은 일반적으로 40주, 즉 280일을 더해 출산 예정일을 추정합니다. 생리주기가 28일과 다르면 주기 차이를 예정일에 보정합니다.",
+      "수정일 또는 배란일을 알고 있다면 수정일에 266일을 더해 출산 예정일을 추정합니다. 이는 마지막 생리 시작일 기준 280일에서 약 14일을 제외한 방식입니다.",
+      "이미 의료진에게 안내받은 출산 예정일이 있다면 예정일 기준으로 임신 주수를 역산할 수 있습니다. 실제 주수와 예정일은 산부인과 초음파와 진료 결과를 우선해야 합니다."
+    ],
+    checkpoints: [
+      "이 계산기는 참고용이며 의학적 진단을 대신하지 않습니다.",
+      "마지막 생리일이 불확실하거나 생리주기가 불규칙하면 초기 초음파 기준 예정일이 더 중요할 수 있습니다.",
+      "출혈, 통증, 태동 변화 등 증상이 있으면 계산 결과와 관계없이 의료기관에 상담하세요."
+    ],
+    faqs: [
+      { question: "임신 주수는 수정일부터 세나요?", answer: "일반적으로는 마지막 생리 시작일부터 계산합니다. 그래서 실제 수정 시점에는 이미 임신 2주 전후로 표시될 수 있습니다." },
+      { question: "출산 예정일은 정확한가요?", answer: "아니요. 마지막 생리일이나 수정일로 계산한 예정일은 추정값이며 실제 분만일은 개인차가 있습니다. 의료진의 초음파 기준 안내를 우선하세요." },
+      { question: "생리주기가 28일이 아니면 어떻게 하나요?", answer: "마지막 생리일 기준 계산에서 평균 생리주기를 입력하면 28일과의 차이를 출산 예정일에 보정합니다." }
+    ],
+    calculate(values) {
+      const baseDate = clampDate(values.baseYear, values.baseMonth, values.baseDay);
+      const checkDate = clampDate(values.checkYear, values.checkMonth, values.checkDay);
+      const cycleLength = Math.min(Math.max(Math.floor(values.cycleLength), 21), 45);
+      const mode = Math.min(Math.max(Math.floor(values.calculationMode), 0), 2);
+      const estimatedDueDate = mode === 1
+        ? addUtcDays(baseDate, 266)
+        : mode === 2
+          ? baseDate
+          : addUtcDays(baseDate, 280 + (cycleLength - 28));
+      const estimatedLmp = addUtcDays(estimatedDueDate, -280);
+      const estimatedConception = addUtcDays(estimatedDueDate, -266);
+      const gestationalDays = utcDaysBetween(estimatedLmp, checkDate);
+      const remainingDays = utcDaysBetween(checkDate, estimatedDueDate);
+      const progress = Math.min(Math.max(gestationalDays / 280 * 100, 0), 100);
+      const fullTermStart = addUtcDays(estimatedLmp, 37 * 7);
+      const trimester = pregnancyTrimester(gestationalDays);
+      const monthLabel = pregnancyMonthLabel(gestationalDays);
+      const modeLabel = mode === 1 ? "수정일·배란일 기준" : mode === 2 ? "출산 예정일 기준" : "마지막 생리 시작일 기준";
+
+      return {
+        headline: pregnancyWeeksLabel(gestationalDays),
+        subline: `${trimester} · 출산 예정일 ${formatKoreanDate(estimatedDueDate)} · ${remainingDays >= 0 ? `D-${remainingDays.toLocaleString("ko-KR")}` : `${Math.abs(remainingDays).toLocaleString("ko-KR")}일 경과`}`,
+        rows: [
+          { label: "계산 기준", value: modeLabel },
+          { label: "확인 기준일", value: formatKoreanDate(checkDate) },
+          { label: "현재 임신 주수", value: pregnancyWeeksLabel(gestationalDays), tone: "strong" },
+          { label: "임신 단계", value: `${trimester} · ${monthLabel}`, tone: "strong" },
+          { label: "추정 출산 예정일", value: formatKoreanDate(estimatedDueDate), tone: "strong" },
+          { label: "예정일까지 남은 기간", value: remainingDays >= 0 ? `${remainingDays.toLocaleString("ko-KR")}일` : `${Math.abs(remainingDays).toLocaleString("ko-KR")}일 경과` },
+          { label: "진행률", value: `${formatNumber(progress, 1)}%` },
+          { label: "추정 마지막 생리 시작일", value: formatKoreanDate(estimatedLmp) },
+          { label: "추정 수정일·배란일", value: formatKoreanDate(estimatedConception) },
+          { label: "만삭 시작 참고일(37주)", value: formatKoreanDate(fullTermStart) },
+          { label: "12주 참고일", value: formatKoreanDate(addUtcDays(estimatedLmp, 12 * 7)) },
+          { label: "20주 참고일", value: formatKoreanDate(addUtcDays(estimatedLmp, 20 * 7)) },
+          { label: "28주 참고일", value: formatKoreanDate(addUtcDays(estimatedLmp, 28 * 7)) }
+        ],
+        chart: [
+          { name: "경과일", value: Math.max(gestationalDays, 0) },
+          { name: "남은일", value: Math.max(remainingDays, 0) },
+          { name: "만삭", value: 280 }
+        ]
+      };
+    }
+  },
+  {
     slug: "korean-age",
     title: "만나이 계산기",
     description: "생년월일과 기준일을 입력해 현재 만나이와 다음 생일까지 남은 기간을 계산합니다.",
@@ -5209,59 +5426,111 @@ export const calculators: CalculatorConfig[] = [
   {
     slug: "gpa",
     title: "학점 계산기",
-    description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.",
-    category: "금융",
-    keywords: ["학점 계산기", "평균평점", "GPA 계산기"],
-    badge: "4.5 만점 기준",
+    description: "과목별 학점과 성적을 입력해 4.5·4.3·4.0 만점 GPA, 총 이수학점, 백분율 참고값을 계산합니다.",
+    category: "생활",
+    keywords: ["학점 계산기", "평균평점", "GPA 계산기", "4.5 학점 계산", "4.3 학점 계산", "백분율 환산"],
+    badge: "4.5·4.3·4.0",
     audience: "대학생, 성적 관리 사용자",
     fields: [
+      {
+        name: "scale",
+        label: "만점 기준",
+        type: "select",
+        defaultValue: 4.5,
+        options: [
+          { label: "4.5 만점", value: 4.5 },
+          { label: "4.3 만점", value: 4.3 },
+          { label: "4.0 만점", value: 4.0 }
+        ]
+      },
+      {
+        name: "passFailCredits",
+        label: "P/F 이수학점",
+        type: "number",
+        unit: "학점",
+        min: 0,
+        max: 60,
+        step: 1,
+        defaultValue: 0,
+        help: "평점 계산에서는 제외하고 총 이수학점에만 더합니다."
+      },
       { name: "course1Credit", label: "과목1 학점", type: "number", unit: "학점", min: 0, max: 6, step: 1, defaultValue: 3 },
-      { name: "course1Grade", label: "과목1 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.5, defaultValue: 4.5 },
+      { name: "course1Grade", label: "과목1 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.1, defaultValue: 4.5 },
       { name: "course2Credit", label: "과목2 학점", type: "number", unit: "학점", min: 0, max: 6, step: 1, defaultValue: 3 },
-      { name: "course2Grade", label: "과목2 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.5, defaultValue: 4 },
+      { name: "course2Grade", label: "과목2 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.1, defaultValue: 4 },
       { name: "course3Credit", label: "과목3 학점", type: "number", unit: "학점", min: 0, max: 6, step: 1, defaultValue: 3 },
-      { name: "course3Grade", label: "과목3 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.5, defaultValue: 3.5 },
+      { name: "course3Grade", label: "과목3 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.1, defaultValue: 3.5 },
       { name: "course4Credit", label: "과목4 학점", type: "number", unit: "학점", min: 0, max: 6, step: 1, defaultValue: 3 },
-      { name: "course4Grade", label: "과목4 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.5, defaultValue: 4 }
+      { name: "course4Grade", label: "과목4 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.1, defaultValue: 4 },
+      { name: "course5Credit", label: "과목5 학점", type: "number", unit: "학점", min: 0, max: 6, step: 1, defaultValue: 0 },
+      { name: "course5Grade", label: "과목5 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.1, defaultValue: 3 },
+      { name: "course6Credit", label: "과목6 학점", type: "number", unit: "학점", min: 0, max: 6, step: 1, defaultValue: 0 },
+      { name: "course6Grade", label: "과목6 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.1, defaultValue: 3 },
+      { name: "course7Credit", label: "과목7 학점", type: "number", unit: "학점", min: 0, max: 6, step: 1, defaultValue: 0 },
+      { name: "course7Grade", label: "과목7 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.1, defaultValue: 3 },
+      { name: "course8Credit", label: "과목8 학점", type: "number", unit: "학점", min: 0, max: 6, step: 1, defaultValue: 0 },
+      { name: "course8Grade", label: "과목8 평점", type: "number", unit: "", min: 0, max: 4.5, step: 0.1, defaultValue: 3 }
     ],
     guideTitle: "학점 계산 기준",
     guide: [
       "평균평점은 과목별 평점의 단순 평균이 아니라, 각 과목 학점을 가중치로 적용한 가중평균으로 계산합니다.",
-      "이 계산기는 4.5 만점 기준으로 4과목까지 빠르게 계산하는 단순 구조입니다.",
-      "P/F 과목, 재수강 반영 규정, 대학별 4.3 만점 체계는 별도 기준이 필요합니다."
+      "4.5·4.3·4.0 만점 기준을 선택할 수 있고, P/F 과목은 평점 계산에서 제외하되 총 이수학점에는 별도로 포함할 수 있습니다.",
+      "백분율 환산은 평점 ÷ 만점 × 100의 단순 참고값입니다. 실제 환산표, 재수강 반영, F 처리, 전공 평점 분리 기준은 학교 학칙을 우선해야 합니다."
     ],
     checkpoints: [
       "학점이 큰 과목의 영향이 더 큽니다.",
-      "단순 과목 평균과 실제 평균평점은 다를 수 있습니다.",
-      "학교별 만점 체계가 다르면 해석에 주의가 필요합니다."
+      "P/F 과목은 보통 평점 계산에서 제외되지만 졸업 이수학점에는 포함될 수 있습니다.",
+      "학교별 만점 체계와 백분위 환산 기준이 다르면 실제 성적표와 차이가 날 수 있습니다."
     ],
     faqs: [
-      { question: "4.3 만점 학교도 쓸 수 있나요?", answer: "현재는 4.5 만점 기준 입력형입니다. 평점을 해당 체계에 맞게 직접 넣어 참고용으로 볼 수 있습니다." },
-      { question: "과목이 4개보다 많으면 어떻게 하나요?", answer: "현재 버전은 4과목 단순 계산입니다. 더 많은 과목 입력형으로 확장 가능합니다." }
+      { question: "4.3 만점 학교도 쓸 수 있나요?", answer: "네. 만점 기준에서 4.3을 선택하고 학교 성적표의 평점을 입력하면 됩니다." },
+      { question: "P/F 과목은 어떻게 입력하나요?", answer: "P/F 이수학점에 따로 입력하세요. 평점 평균 분자와 분모에서는 제외하고 총 이수학점에만 더합니다." },
+      { question: "백분율 환산은 정확한가요?", answer: "아니요. 단순 비례 환산 참고값입니다. 장학금, 편입, 유학 제출용 백분율은 학교 공식 환산표를 확인해야 합니다." }
     ],
     calculate(values) {
+      const scale = [4, 4.3, 4.5].includes(values.scale) ? values.scale : 4.5;
       const items = [
         [values.course1Credit, values.course1Grade],
         [values.course2Credit, values.course2Grade],
         [values.course3Credit, values.course3Grade],
-        [values.course4Credit, values.course4Grade]
-      ];
-      const totalCredits = items.reduce((sum, [credit]) => sum + credit, 0);
-      const totalPoints = items.reduce((sum, [credit, grade]) => sum + credit * grade, 0);
-      const gpa = totalCredits > 0 ? totalPoints / totalCredits : 0;
+        [values.course4Credit, values.course4Grade],
+        [values.course5Credit, values.course5Grade],
+        [values.course6Credit, values.course6Grade],
+        [values.course7Credit, values.course7Grade],
+        [values.course8Credit, values.course8Grade]
+      ]
+        .map(([credit, grade]) => ({
+          credit: Math.max(credit, 0),
+          grade: Math.min(Math.max(grade, 0), scale)
+        }))
+        .filter((item) => item.credit > 0);
+      const gradedCredits = items.reduce((sum, item) => sum + item.credit, 0);
+      const passFailCredits = Math.max(values.passFailCredits, 0);
+      const totalCredits = gradedCredits + passFailCredits;
+      const totalPoints = items.reduce((sum, item) => sum + item.credit * item.grade, 0);
+      const gpa = gradedCredits > 0 ? totalPoints / gradedCredits : 0;
+      const percentage = scale > 0 ? (gpa / scale) * 100 : 0;
+      const converted45 = scale > 0 ? gpa / scale * 4.5 : 0;
+      const converted43 = scale > 0 ? gpa / scale * 4.3 : 0;
+      const converted40 = scale > 0 ? gpa / scale * 4 : 0;
       return {
         headline: gpa.toFixed(2),
-        subline: `총 취득학점 ${totalCredits.toLocaleString("ko-KR")}학점`,
+        subline: `${scale.toFixed(1)} 만점 · 평점 반영 ${gradedCredits.toLocaleString("ko-KR")}학점 · 백분율 ${formatNumber(percentage, 1)}%`,
         rows: [
-          { label: "총 취득학점", value: `${totalCredits.toLocaleString("ko-KR")}학점` },
+          { label: "평균평점", value: `${gpa.toFixed(2)} / ${scale.toFixed(1)}`, tone: "strong" },
+          { label: "백분율 참고값", value: `${formatNumber(percentage, 1)}%`, tone: "strong" },
+          { label: "총 이수학점", value: `${totalCredits.toLocaleString("ko-KR")}학점` },
+          { label: "평점 반영 학점", value: `${gradedCredits.toLocaleString("ko-KR")}학점`, tone: "strong" },
+          { label: "P/F 이수학점", value: `${passFailCredits.toLocaleString("ko-KR")}학점` },
           { label: "총 평점합", value: totalPoints.toFixed(2) },
-          { label: "평균평점", value: gpa.toFixed(2), tone: "strong" }
+          { label: "4.5 만점 환산", value: converted45.toFixed(2) },
+          { label: "4.3 만점 환산", value: converted43.toFixed(2) },
+          { label: "4.0 만점 환산", value: converted40.toFixed(2) }
         ],
         chart: [
-          { name: "과목1", value: values.course1Credit * values.course1Grade },
-          { name: "과목2", value: values.course2Credit * values.course2Grade },
-          { name: "과목3", value: values.course3Credit * values.course3Grade },
-          { name: "과목4", value: values.course4Credit * values.course4Grade }
+          { name: "평균평점", value: gpa },
+          { name: "만점", value: scale },
+          { name: "백분율", value: percentage }
         ]
       };
     }
@@ -5479,49 +5748,117 @@ export const calculators: CalculatorConfig[] = [
   {
     slug: "exchange-rate",
     title: "환율 계산기",
-    description: "환율과 금액을 직접 입력해 원화와 외화 환산 금액을 계산합니다.",
+    description: "매매기준율, 환전 스프레드, 환율 우대율, 고정 수수료를 반영해 외화↔원화 환산액과 실제 적용환율을 계산합니다.",
     category: "금융",
-    keywords: ["환율 계산기", "달러 원화 변환", "환전 계산"],
-    badge: "수동 환율 입력형",
+    keywords: ["환율 계산기", "달러 원화 변환", "환전 계산", "환율 우대 계산", "환전 수수료 계산", "적용환율 계산"],
+    badge: "우대율·수수료",
     audience: "해외결제 사용자, 여행자, 해외구매 사용자",
     fields: [
-      { name: "foreignAmount", label: "외화 금액", type: "number", unit: "", min: 0, max: 1000000000, step: 0.01, defaultValue: 1000 },
-      { name: "exchangeRate", label: "환율", type: "number", unit: "원", min: 0, max: 100000, step: 0.01, defaultValue: 1380 },
-      { name: "feeRate", label: "환전 수수료율", type: "number", unit: "%", min: 0, max: 20, step: 0.1, defaultValue: 1.75 }
+      {
+        name: "transactionType",
+        label: "거래 구분",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "외화 살 때(원화→외화)", value: 0 },
+          { label: "외화 팔 때(외화→원화)", value: 1 },
+          { label: "기준환율 단순 환산", value: 2 }
+        ],
+        help: "현찰 살 때는 스프레드가 더해지고, 팔 때는 스프레드가 차감됩니다."
+      },
+      {
+        name: "currency",
+        label: "통화 참고",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "USD 달러", value: 0 },
+          { label: "JPY 엔", value: 1 },
+          { label: "EUR 유로", value: 2 },
+          { label: "CNY 위안", value: 3 },
+          { label: "기타", value: 4 }
+        ],
+        help: "계산식에는 표시용으로만 사용됩니다. 환율은 직접 입력하세요."
+      },
+      { name: "amount", label: "계산 금액", type: "number", unit: "", min: 0, max: 100000000000, step: 0.01, defaultValue: 1000 },
+      { name: "baseRate", label: "매매기준율", type: "number", unit: "원", min: 0, max: 100000, step: 0.01, defaultValue: 1380 },
+      { name: "spreadRate", label: "스프레드율", type: "number", unit: "%", min: 0, max: 20, step: 0.01, defaultValue: 1.75, help: "은행 고시 환율에서 매매기준율에 더하거나 빼는 폭입니다." },
+      { name: "preferentialRate", label: "환율 우대율", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 90, help: "환율 자체가 아니라 스프레드를 깎아주는 비율입니다." },
+      { name: "fixedFee", label: "고정 수수료", type: "number", unit: "원", min: 0, max: 10000000, step: 100, defaultValue: 0 }
     ],
     guideTitle: "환율 계산 기준",
     guide: [
-      "이 계산기는 실시간 환율 API를 붙이지 않은 수동 입력형 구조입니다. 사용자가 기준 환율을 직접 넣으면 빠르게 환산 금액과 수수료를 계산할 수 있습니다.",
-      "실제 카드 결제, 현찰 매매, 송금 환율은 서로 다를 수 있고, 은행·카드사별 스프레드와 수수료 정책도 차이가 있습니다.",
-      "정확한 결제 예상액이 필요하면 사용 중인 은행이나 카드사의 적용 환율을 확인해야 합니다."
+      "이 계산기는 실시간 환율 API를 붙이지 않은 수동 입력형 구조입니다. 은행 앱이나 고시표의 매매기준율을 직접 입력하면 스프레드와 우대율을 반영한 적용환율을 계산합니다.",
+      "환율 우대율은 매매기준율 전체를 할인하는 것이 아니라, 은행이 붙이는 스프레드 일부를 줄여주는 방식으로 계산합니다. 실효 스프레드율은 스프레드율 × (1 - 우대율)입니다.",
+      "외화를 살 때는 매매기준율에 실효 스프레드를 더하고, 외화를 팔 때는 실효 스프레드를 뺀 환율을 적용합니다. 카드 결제, 송금, 현찰 환전은 실제 수수료 구조가 다를 수 있습니다."
     ],
     checkpoints: [
-      "매매기준율과 실제 결제 환율은 다를 수 있습니다.",
-      "환전 수수료와 카드 해외서비스 수수료는 구조가 다릅니다.",
-      "실시간 환율은 별도 API 연동이 필요합니다."
+      "엔화처럼 100엔 단위로 고시되는 환율은 1엔 기준으로 나눠 입력해야 결과가 맞습니다.",
+      "우대율 90%는 전체 환율이 90% 싸지는 것이 아니라 스프레드의 90%가 줄어드는 뜻입니다.",
+      "해외 카드 결제는 브랜드 수수료, 카드사 수수료, 전표 매입 시점 환율이 별도로 적용될 수 있습니다."
     ],
     faqs: [
       { question: "실시간 환율이 자동 반영되나요?", answer: "아니요. 현재는 기준 환율을 직접 입력하는 방식입니다." },
-      { question: "달러 외 통화도 계산되나요?", answer: "네. 통화 종류와 관계없이 외화 금액과 환율을 직접 넣으면 계산할 수 있습니다." }
+      { question: "환율 우대율은 어떻게 반영되나요?", answer: "스프레드율에 (1 - 우대율)을 곱해 실효 스프레드율을 구합니다. 우대율이 높을수록 적용환율이 매매기준율에 가까워집니다." },
+      { question: "달러 외 통화도 계산되나요?", answer: "네. 통화 종류와 관계없이 외화 금액과 매매기준율을 직접 넣으면 계산할 수 있습니다." }
     ],
     calculate(values) {
-      const baseWon = values.foreignAmount * values.exchangeRate;
-      const fee = baseWon * (values.feeRate / 100);
-      const totalWon = baseWon + fee;
+      const currencyLabels = ["USD", "JPY", "EUR", "CNY", "외화"];
+      const currencyLabel = currencyLabels[Math.min(Math.max(Math.floor(values.currency), 0), currencyLabels.length - 1)];
+      const amount = Math.max(values.amount, 0);
+      const baseRate = Math.max(values.baseRate, 0);
+      const spreadRate = Math.max(values.spreadRate, 0) / 100;
+      const preferentialRate = Math.min(Math.max(values.preferentialRate, 0), 100) / 100;
+      const effectiveSpreadRate = spreadRate * (1 - preferentialRate);
+      const type = Math.min(Math.max(Math.floor(values.transactionType), 0), 2);
+      const appliedRate = type === 0
+        ? baseRate * (1 + effectiveSpreadRate)
+        : type === 1
+          ? baseRate * (1 - effectiveSpreadRate)
+          : baseRate;
+      const noDiscountBuyRate = baseRate * (1 + spreadRate);
+      const noDiscountSellRate = baseRate * (1 - spreadRate);
+      const fixedFee = type === 2 ? 0 : Math.max(values.fixedFee, 0);
+      const spendableWon = Math.max(amount - (type === 0 ? fixedFee : 0), 0);
+      const converted = type === 0
+        ? appliedRate > 0 ? spendableWon / appliedRate : 0
+        : amount * appliedRate;
+      const baseConvertedWon = type === 0 ? spendableWon : amount * baseRate;
+      const spreadFee = type === 0
+        ? appliedRate > 0 ? spendableWon - spendableWon / noDiscountBuyRate * baseRate : 0
+        : type === 1
+          ? amount * (baseRate - appliedRate)
+          : 0;
+      const noDiscountFee = type === 0
+        ? noDiscountBuyRate > 0 ? spendableWon - spendableWon / noDiscountBuyRate * baseRate : 0
+        : type === 1
+          ? amount * (baseRate - noDiscountSellRate)
+          : 0;
+      const savedByDiscount = Math.max(noDiscountFee - spreadFee, 0);
+      const finalWon = type === 0 ? amount + fixedFee : converted - fixedFee;
+      const headline = type === 0
+        ? `${formatNumber(converted, 2)} ${currencyLabel}`
+        : formatWon(finalWon);
       return {
-        headline: formatWon(totalWon),
-        subline: `기준 환산 ${formatWon(baseWon)} + 수수료 ${formatWon(fee)}`,
+        headline,
+        subline: `적용환율 ${formatNumber(appliedRate, 2)}원 · 실효 스프레드 ${formatPercent(effectiveSpreadRate * 100, 2)} · 우대 절감 ${formatWon(savedByDiscount)}`,
         rows: [
-          { label: "외화 금액", value: values.foreignAmount.toLocaleString("ko-KR", { maximumFractionDigits: 2 }) },
-          { label: "적용 환율", value: `${values.exchangeRate.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}원` },
-          { label: "환산 금액", value: formatWon(baseWon), tone: "strong" },
-          { label: "수수료", value: formatWon(fee) },
-          { label: "총 원화 기준", value: formatWon(totalWon), tone: "strong" }
+          { label: "거래 구분", value: type === 0 ? "외화 살 때" : type === 1 ? "외화 팔 때" : "기준환율 단순 환산", tone: "strong" },
+          { label: "입력 금액", value: type === 0 ? formatWon(amount) : `${formatNumber(amount, 2)} ${currencyLabel}` },
+          { label: "매매기준율", value: `${formatNumber(baseRate, 2)}원` },
+          { label: "적용환율", value: `${formatNumber(appliedRate, 2)}원`, tone: "strong" },
+          { label: "스프레드율", value: formatPercent(spreadRate * 100, 2) },
+          { label: "환율 우대율", value: formatPercent(preferentialRate * 100, 0) },
+          { label: "실효 스프레드율", value: formatPercent(effectiveSpreadRate * 100, 2), tone: "strong" },
+          { label: "스프레드 비용", value: formatWon(spreadFee) },
+          { label: "우대로 아낀 금액", value: formatWon(savedByDiscount), tone: "strong" },
+          { label: type === 0 ? "예상 수령 외화" : "예상 수령 원화", value: type === 0 ? `${formatNumber(converted, 2)} ${currencyLabel}` : formatWon(finalWon), tone: "strong" },
+          { label: "고정 수수료", value: formatWon(fixedFee) }
         ],
         chart: [
-          { name: "환산금액", value: baseWon },
-          { name: "수수료", value: fee },
-          { name: "총액", value: totalWon }
+          { name: "기준환산", value: baseConvertedWon },
+          { name: "스프레드비용", value: spreadFee },
+          { name: "우대절감", value: savedByDiscount }
         ]
       };
     }

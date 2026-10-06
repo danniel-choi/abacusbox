@@ -121,9 +121,9 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "health",
     path: "/health",
     eyebrow: "건강·운동 허브",
-    title: "BMI, 칼로리, 수면, 운동 계산기",
-    description: "BMI, 기초대사량, 표준체중, 칼로리, 일일 섭취 권장량, 1RM, 러닝 페이스, 수면 시간을 건강·운동 목적별로 모았습니다.",
-    featuredSlugs: ["bmi", "calorie-calculator", "daily-intake", "bmr-calculator", "ideal-weight", "one-rep-max"],
+    title: "BMI, 칼로리, 임신·배란, 운동 계산기",
+    description: "BMI, 기초대사량, 칼로리, 일일 섭취 권장량, 배란일, 임신 주수, 1RM, 러닝 페이스를 건강·운동 목적별로 모았습니다.",
+    featuredSlugs: ["bmi", "calorie-calculator", "ovulation-calculator", "pregnancy-week-calculator", "daily-intake", "bmr-calculator"],
     blogSlugs: ["bmi-calculator-health-check", "daily-intake-rdi-guide", "calorie-goal-planning-guide"],
     sections: [
       {
@@ -136,10 +136,10 @@ export const hubContents: Record<HubKey, HubContent> = {
       },
       {
         title: "수면과 섭취량은 생활 리듬에 맞춰 조정해야 합니다.",
-        body: "수면 주기와 권장 섭취량 계산은 참고값입니다. 나이, 성별, 활동량, 건강 상태에 따라 필요한 양이 달라질 수 있으므로 결과를 출발점으로 삼아 조정하세요."
+        body: "수면 주기, 권장 섭취량, 배란일, 임신 주수 계산은 참고값입니다. 나이, 성별, 활동량, 건강 상태, 생리주기, 진료 결과에 따라 필요한 판단이 달라질 수 있으므로 결과를 출발점으로 삼아 조정하세요."
       }
     ],
-    checklist: ["BMI와 체중 범위를 함께 확인", "BMR과 활동량을 구분", "목표 칼로리를 급격히 낮추지 않기", "운동 중량과 러닝 페이스는 현재 기록 기준으로 조정"]
+    checklist: ["BMI와 체중 범위를 함께 확인", "BMR과 활동량을 구분", "배란·임신 계산은 의료 판단으로 쓰지 않기", "운동 중량과 러닝 페이스는 현재 기록 기준으로 조정"]
   },
   daily: {
     key: "daily",

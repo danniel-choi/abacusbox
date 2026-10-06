@@ -129,6 +129,24 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     hubLabel: "건강 계산기",
     relatedTitles: ["칼로리 계산기", "BMI 계산기"]
   },
+  "ovulation-calculator": {
+    title: "배란일 계산기",
+    category: "건강 가이드",
+    audience: "배란일과 가임기 참고 기간을 확인하려는 사용자",
+    description: "마지막 생리 시작일, 평균 생리주기, 황체기 길이를 기준으로 예상 배란일, 가임기, 다음 생리 예정일을 계산합니다.",
+    tags: ["배란일", "가임기", "생리주기"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["임신 주수 계산기", "만나이 계산기"]
+  },
+  "pregnancy-week-calculator": {
+    title: "임신 주수 계산기",
+    category: "건강 가이드",
+    audience: "임신 주수와 출산 예정일을 참고로 확인하려는 사용자",
+    description: "마지막 생리 시작일, 수정일, 출산 예정일 기준으로 현재 임신 주수, 삼분기, 주요 시점을 계산합니다.",
+    tags: ["임신주수", "출산예정일", "임신계산"],
+    hubLabel: "건강 계산기",
+    relatedTitles: ["배란일 계산기", "기념일 계산기"]
+  },
   "one-rep-max": {
     title: "1RM 계산기",
     category: "건강 가이드",
@@ -202,8 +220,8 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     title: "학점 계산기",
     category: "생활 가이드",
     audience: "대학생, 성적 관리 사용자",
-    description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.",
-    tags: ["학점", "성적", "GPA"]
+    description: "과목별 학점과 평점, 만점 기준, P/F 이수학점을 반영해 GPA와 백분율 참고값을 계산합니다.",
+    tags: ["학점", "성적", "GPA", "백분율"]
   },
   "school-grade": {
     title: "내신 등급 계산기",
@@ -346,8 +364,8 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     title: "환율 계산기",
     category: "금융 가이드",
     audience: "해외결제 사용자, 여행자, 해외구매 사용자",
-    description: "환율과 금액을 입력해 원화와 외화 환산 금액을 계산합니다.",
-    tags: ["환율", "해외결제", "여행"]
+    description: "매매기준율, 스프레드, 환율 우대율, 고정 수수료를 반영해 적용환율과 환산 금액을 계산합니다.",
+    tags: ["환율", "환율우대", "환전수수료", "여행"]
   },
   savings: {
     title: "예금·적금 실수령액 계산기",
@@ -597,7 +615,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["loan-interest", "loan-dsr", "loan-amortization", "card-installment", "exchange-rate", "savings", "lump-sum-deposit", "compound-interest", "youth-future-savings", "youth-leap-account"],
   ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
   ["stock-return", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
-  ["bmi", "calorie-calculator", "daily-intake", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
+  ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
   ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "draw-probability", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
