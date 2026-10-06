@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import * as THREE from "three";
 import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type ResultRow } from "@/lib/calculators";
-import { CALCULATOR_GROUP_META, getCalculatorGroup, getRelatedCalculators } from "@/lib/calculator-directory";
+import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 
 type FormValues = Record<string, number>;
 
@@ -582,7 +582,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                     className="flex min-w-0 items-center gap-3 rounded-2xl bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-sm"
                   >
                     <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-base ${groupMeta.softClass} ${groupMeta.accentClass}`}>
-                      {groupMeta.icon}
+                      {getCalculatorIcon(item.slug)}
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-extrabold text-ink">{item.title}</span>

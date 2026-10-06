@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { AdSenseAd } from "@/components/AdSenseAd";
 import { CalculatorClient } from "@/components/CalculatorClient";
 import { calculators, getCalculator } from "@/lib/calculators";
-import { CALCULATOR_GROUP_META, getCalculatorGroup, getRelatedCalculators } from "@/lib/calculator-directory";
+import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 import { calculatorSeoContent } from "@/lib/calculator-seo";
 import { blogPosts } from "@/lib/content";
 import { DEFAULT_OG_IMAGE, legalStandards, officialSources, SITE_URL } from "@/lib/constants";
@@ -223,7 +223,7 @@ export default async function CalculatorPage({ params }: Props) {
               {calculator.category} 계산기 · {calculator.badge}
             </p>
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm font-extrabold text-white/84">
-              <span>{groupMeta.icon}</span>
+              <span>{getCalculatorIcon(calculator.slug)}</span>
               <span>{groupMeta.label}</span>
             </div>
             <h1 className="mt-5 text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-tight md:text-5xl md:leading-tight lg:text-6xl">{calculator.title}</h1>
@@ -425,7 +425,7 @@ export default async function CalculatorPage({ params }: Props) {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg ${relatedGroup.softClass} ${relatedGroup.accentClass}`}>
-                        {relatedGroup.icon}
+                        {getCalculatorIcon(item.slug)}
                       </span>
                       <span className="rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-slate-500">{relatedGroup.label}</span>
                     </div>

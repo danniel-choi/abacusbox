@@ -6,6 +6,7 @@ import { calculators, type CalculatorCategory, type CalculatorConfig } from "@/l
 import {
   CALCULATOR_GROUP_META,
   getCalculatorGroup,
+  getCalculatorIcon,
   getCalculatorsByGroup,
   getFeaturedCalculators,
   getRecentCalculators,
@@ -434,7 +435,7 @@ function CalculatorCard({ calculator }: { calculator: CalculatorConfig }) {
           <span className="rounded-full bg-paper px-3 py-1 text-xs font-extrabold text-slate-500">{groupMeta.label}</span>
         </div>
         <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-xl ${groupMeta.softClass} ${groupMeta.accentClass}`}>
-          {groupMeta.icon}
+          {getCalculatorIcon(calculator.slug)}
         </span>
       </div>
       <h3 className="mt-4 text-lg font-extrabold text-ink">{calculator.title}</h3>
@@ -469,7 +470,7 @@ function DirectoryHighlight({
           >
             <span className="flex min-w-0 items-center gap-3">
               <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-base ${CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)].softClass} ${CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)].accentClass}`}>
-                {CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)].icon}
+                {getCalculatorIcon(calculator.slug)}
               </span>
               <span className="block truncate text-sm font-extrabold text-ink">{calculator.title}</span>
               <span className="mt-1 block text-xs font-semibold text-slate-500">{CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)].label}</span>

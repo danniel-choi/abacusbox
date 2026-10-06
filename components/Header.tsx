@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { calculators } from "@/lib/calculators";
-import { CALCULATOR_GROUP_META, getCalculatorGroup } from "@/lib/calculator-directory";
+import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon } from "@/lib/calculator-directory";
 
 const navItems = [
   { href: "/calculators", label: "계산기" },
@@ -13,10 +13,7 @@ const navItems = [
   { href: "/stock", label: "주식" },
   { href: "/health", label: "건강" },
   { href: "/daily", label: "일상" },
-  { href: "/blog", label: "블로그" },
-  { href: "/resources", label: "참고" },
-  { href: "/about", label: "소개" },
-  { href: "/editorial-policy", label: "운영원칙" }
+  { href: "/blog", label: "블로그" }
 ];
 
 export function Header() {
@@ -228,7 +225,7 @@ function CalculatorHeaderSearch({
                 className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-b-0 hover:bg-paper"
               >
                 <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-sm ${groupMeta.softClass} ${groupMeta.accentClass}`}>
-                  {groupMeta.icon}
+                  {getCalculatorIcon(calculator.slug)}
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-extrabold text-ink">{calculator.title}</span>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { calculators } from "@/lib/calculators";
 import {
   CALCULATOR_GROUP_META,
+  getCalculatorIcon,
   getCalculatorsByGroup,
   getFeaturedCalculators,
   getCalculatorGroup,
@@ -161,7 +162,7 @@ export default function HomePage() {
                   <div>
                     <div className="flex items-start justify-between gap-3">
                       <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg ${groupMeta.softClass} ${groupMeta.accentClass}`}>
-                        {groupMeta.icon}
+                        {getCalculatorIcon(calculator.slug)}
                       </span>
                       <span className="rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-slate-500 group-hover:text-brand">결과 카드</span>
                     </div>
