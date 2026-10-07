@@ -66,6 +66,7 @@ export type CalculatorSlug =
   | "pyeong-converter"
   | "random-number"
   | "draw-probability"
+  | "diablo3-gem-calculator"
   | "fc-transfer-fee"
   | "win-rate-calculator"
   | "edpi-calculator"
@@ -6545,6 +6546,154 @@ export const calculators: CalculatorConfig[] = [
           name: `${count}회`,
           value: binomialAtLeastProbability(count, 1, probability) * 100
         }))
+      };
+    }
+  },
+  {
+    slug: "diablo3-gem-calculator",
+    title: "디아블로3 보석 계산기",
+    description: "보유한 등급별 보석과 목표 보석 등급·수량을 입력해 필요한 하위 보석, 골드, 죽음의 숨결, 제작 단계를 계산합니다.",
+    category: "게임",
+    keywords: ["디아블로3 보석 계산기", "디아3 보석 제작", "디아블로 보석 업그레이드", "죽음의 숨결", "완벽한 왕실 보석"],
+    badge: "보석 제작 재료",
+    audience: "디아블로3에서 보석 업그레이드에 필요한 재료와 비용을 미리 계산하려는 플레이어",
+    fields: [
+      {
+        name: "gemType",
+        label: "보석 종류",
+        type: "select",
+        defaultValue: 2,
+        options: [
+          { label: "루비", value: 0 },
+          { label: "황수정", value: 1 },
+          { label: "에메랄드", value: 2 },
+          { label: "다이아몬드", value: 3 },
+          { label: "자수정", value: 4 }
+        ]
+      },
+      { name: "chipped", label: "조각난", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "flawed", label: "결함이 있는", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "normal", label: "일반", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "flawless", label: "완벽한", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "perfect", label: "완벽", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "radiant", label: "빛나는", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "square", label: "정사각형", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "flawlessSquare", label: "완벽한 정사각형", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "perfectSquare", label: "완벽한 정사각형+", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "radiantSquare", label: "빛나는 정사각형", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "marquise", label: "마퀴즈", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 3 },
+      { name: "imperial", label: "제국의", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "flawlessImperial", label: "완벽한 제국의", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "royal", label: "왕실의", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      { name: "flawlessRoyal", label: "완벽한 왕실의", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
+      {
+        name: "targetLevel",
+        label: "목표 보석",
+        type: "select",
+        defaultValue: 14,
+        options: [
+          { label: "조각난", value: 0 },
+          { label: "결함이 있는", value: 1 },
+          { label: "일반", value: 2 },
+          { label: "완벽한", value: 3 },
+          { label: "완벽", value: 4 },
+          { label: "빛나는", value: 5 },
+          { label: "정사각형", value: 6 },
+          { label: "완벽한 정사각형", value: 7 },
+          { label: "완벽한 정사각형+", value: 8 },
+          { label: "빛나는 정사각형", value: 9 },
+          { label: "마퀴즈", value: 10 },
+          { label: "제국의", value: 11 },
+          { label: "완벽한 제국의", value: 12 },
+          { label: "왕실의", value: 13 },
+          { label: "완벽한 왕실의", value: 14 }
+        ]
+      },
+      { name: "targetQuantity", label: "목표 수량", type: "number", unit: "개", min: 1, max: 100000, step: 1, defaultValue: 1 }
+    ],
+    guideTitle: "디아블로3 보석 제작 계산 기준",
+    guide: [
+      "참고 페이지의 보석 등급과 업그레이드 표를 기준으로, 목표 보석을 만들기 위해 필요한 제작 횟수와 골드, 죽음의 숨결을 계산합니다.",
+      "하위 등급 대부분은 2개 또는 3개를 합쳐 상위 보석 1개를 만들며, 마퀴즈 이후 제국의 등급부터 죽음의 숨결이 필요합니다.",
+      "보유한 상위 보석을 먼저 사용하고 부족한 수량만 아래 등급에서 제작한다고 가정합니다. 부족한 조각난 보석이 있으면 추가 필요 수량으로 표시합니다."
+    ],
+    checkpoints: [
+      "보석 종류는 결과 설명과 능력치 안내에 사용하며 제작 비용 자체는 보석 색상과 무관합니다.",
+      "현재 보유한 보석을 등급별로 입력하면 필요 제작 횟수가 줄어듭니다.",
+      "완벽한 왕실의 보석은 최고 등급이라 더 높은 목표로 업그레이드할 수 없습니다.",
+      "게임 버전이나 시즌 설정에 따라 실제 제작 비용이 다를 수 있습니다."
+    ],
+    faqs: [
+      { question: "죽음의 숨결은 언제 필요하나요?", answer: "참고 표 기준 마퀴즈에서 제국의로 올릴 때부터 필요합니다. 이후 상위 단계일수록 더 많은 죽음의 숨결이 필요합니다." },
+      { question: "보유한 상위 보석도 반영되나요?", answer: "네. 목표 등급 이하의 보유 보석을 높은 등급부터 먼저 사용하고 부족한 만큼만 하위 등급에서 제작합니다." },
+      { question: "보석 색상에 따라 비용이 달라지나요?", answer: "이 계산기에서는 색상별 제작 비용 차이를 두지 않습니다. 색상은 헬멧, 무기, 갑옷 효과 안내에 사용합니다." }
+    ],
+    calculate(values) {
+      const names = ["조각난", "결함이 있는", "일반", "완벽한", "완벽", "빛나는", "정사각형", "완벽한 정사각형", "완벽한 정사각형+", "빛나는 정사각형", "마퀴즈", "제국의", "완벽한 제국의", "왕실의", "완벽한 왕실의"];
+      const fieldNames = ["chipped", "flawed", "normal", "flawless", "perfect", "radiant", "square", "flawlessSquare", "perfectSquare", "radiantSquare", "marquise", "imperial", "flawlessImperial", "royal", "flawlessRoyal"];
+      const requiredGems = [2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3];
+      const goldCosts = [500, 750, 1250, 2000, 3500, 7500, 20000, 30000, 40000, 100000, 200000, 300000, 400000, 500000];
+      const deathBreathCosts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4];
+      const gemTypes = [
+        { name: "루비", helm: "킬당 생명력", weapon: "무기 피해", armor: "힘" },
+        { name: "황수정", helm: "마법 발견", weapon: "자원 비용 감소", armor: "지능" },
+        { name: "에메랄드", helm: "추가 금", weapon: "치명타 피해", armor: "민첩성" },
+        { name: "다이아몬드", helm: "쿨다운 감소", weapon: "엘리트 피해", armor: "모든 저항력" },
+        { name: "자수정", helm: "생명력 %", weapon: "적중당 생명력", armor: "활력" }
+      ];
+      const targetLevel = Math.max(0, Math.min(14, Math.floor(values.targetLevel)));
+      const targetQuantity = Math.max(1, Math.floor(values.targetQuantity));
+      const have = fieldNames.map((fieldName) => Math.max(0, Math.floor(values[fieldName] ?? 0)));
+      const need = Array(names.length).fill(0);
+      const craftCounts = Array(requiredGems.length).fill(0);
+      let totalGold = 0;
+      let totalDeathBreaths = 0;
+
+      need[targetLevel] = targetQuantity;
+      for (let level = targetLevel; level > 0; level -= 1) {
+        const shortage = Math.max(need[level] - have[level], 0);
+        craftCounts[level - 1] = shortage;
+        need[level - 1] += shortage * requiredGems[level - 1];
+        totalGold += shortage * goldCosts[level - 1];
+        totalDeathBreaths += shortage * deathBreathCosts[level - 1];
+      }
+
+      const missingBase = Math.max(need[0] - have[0], 0);
+      const availableTargetEquivalent = have.slice(0, targetLevel + 1).reduce((sum, count, level) => {
+        let unit = 1;
+        for (let index = 0; index < level; index += 1) unit *= requiredGems[index];
+        return sum + count * unit;
+      }, 0);
+      let targetUnit = 1;
+      for (let index = 0; index < targetLevel; index += 1) targetUnit *= requiredGems[index];
+      const possibleTargets = targetUnit > 0 ? Math.floor(availableTargetEquivalent / targetUnit) : have[0];
+      const selectedGem = gemTypes[Math.max(0, Math.min(gemTypes.length - 1, Math.floor(values.gemType)))] ?? gemTypes[2];
+      const steps = craftCounts
+        .map((count, index) => ({ count, text: `${names[index]} → ${names[index + 1]}` }))
+        .filter((step) => step.count > 0)
+        .slice(-5)
+        .map((step) => `${step.text} ${formatNumber(step.count)}회`);
+
+      return {
+        headline: `${names[targetLevel]} ${formatNumber(targetQuantity)}개`,
+        subline: `총 금 ${formatNumber(totalGold)} · 죽음의 숨결 ${formatNumber(totalDeathBreaths)}개 · 조각난 추가 필요 ${formatNumber(missingBase)}개`,
+        rows: [
+          { label: "보석 종류", value: selectedGem.name, tone: "strong" },
+          { label: "목표 보석", value: `${names[targetLevel]} ${formatNumber(targetQuantity)}개`, tone: "strong" },
+          { label: "총 금", value: formatNumber(totalGold), tone: "strong" },
+          { label: "총 죽음의 숨결", value: `${formatNumber(totalDeathBreaths)}개`, tone: "strong" },
+          { label: "추가 필요 조각난 보석", value: `${formatNumber(missingBase)}개`, tone: missingBase > 0 ? "strong" : undefined },
+          { label: "현재 보유 기준 제작 가능", value: `${formatNumber(possibleTargets)}개` },
+          { label: "헬멧 효과", value: selectedGem.helm },
+          { label: "무기 효과", value: selectedGem.weapon },
+          { label: "갑옷 효과", value: selectedGem.armor },
+          { label: "주요 제작 단계", value: steps.length ? steps.join(" · ") : "추가 제작 없음" }
+        ],
+        chart: [
+          { name: "금", value: totalGold },
+          { name: "죽음의숨결×100k", value: totalDeathBreaths * 100000 },
+          { name: "부족조각×10k", value: missingBase * 10000 }
+        ]
       };
     }
   },

@@ -200,9 +200,9 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "game",
     path: "/game",
     eyebrow: "게임 계산 허브",
-    title: "가챠, FC온라인 수수료, 승률, eDPI 계산기",
-    description: "뽑기 확률, FC온라인 이적시장 수수료, 포커 승률, 게임 전적 승률, eDPI, FPS 마우스 감도 변환처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
-    featuredSlugs: ["fc-transfer-fee", "draw-probability", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter"],
+    title: "가챠, 디아블로3 보석, FC온라인 수수료 계산기",
+    description: "뽑기 확률, 디아블로3 보석 제작, FC온라인 이적시장 수수료, 포커 승률, 게임 전적 승률, eDPI처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["diablo3-gem-calculator", "fc-transfer-fee", "draw-probability", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator"],
     blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
     sections: [
       {
@@ -212,6 +212,10 @@ export const hubContents: Record<HubKey, HubContent> = {
       {
         title: "이적시장 판매는 수수료 할인 구조를 먼저 봐야 합니다.",
         body: "FC온라인 이적시장처럼 기본 수수료와 PC방, TOP CLASS, 쿠폰 할인이 함께 적용되는 구조는 판매가만 봐서는 실제 수령 BP를 알기 어렵습니다. 최종 수령액과 실효 수수료율을 함께 확인하면 매도 타이밍을 판단하기 쉽습니다."
+      },
+      {
+        title: "제작형 게임은 재료를 역산하면 파밍 목표가 선명해집니다.",
+        body: "디아블로3 보석처럼 하위 재료를 여러 단계로 조합하는 콘텐츠는 목표 등급만 보고는 필요한 골드와 재료가 잘 보이지 않습니다. 보유 보석을 등급별로 나누어 입력하면 부족한 하위 재료와 제작 비용을 더 쉽게 계획할 수 있습니다."
       },
       {
         title: "FPS 감도는 eDPI와 cm/360을 함께 봐야 합니다.",

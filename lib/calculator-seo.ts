@@ -191,6 +191,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 확률, 수수료, 감도 계산기를 함께 확인합니다." }
     ]
   },
+  "diablo3-gem-calculator": {
+    title: "디아블로3 보석 계산기 | 보석 제작 골드·죽음의 숨결 계산",
+    description:
+      "디아블로3 보석 계산기로 보유한 등급별 보석과 목표 보석 등급·수량을 입력해 필요한 하위 보석, 골드, 죽음의 숨결, 제작 단계를 확인하세요.",
+    keywords: ["디아블로3 보석 계산기", "디아3 보석 제작", "디아블로 보석 업그레이드", "죽음의 숨결 계산", "완벽한 왕실 보석"],
+    searchIntents: [
+      "디아블로3 완벽한 왕실 보석 제작 재료를 알고 싶을 때",
+      "보유한 보석으로 목표 등급을 몇 개 만들 수 있는지 확인할 때",
+      "보석 업그레이드에 필요한 골드와 죽음의 숨결을 계산할 때"
+    ],
+    sections: [
+      {
+        title: "등급별 보유 보석을 기준으로 제작 재료를 역산합니다.",
+        body:
+          "조각난 보석부터 완벽한 왕실의 보석까지 보유 수량을 입력하면 목표 보석을 만들기 위해 부족한 하위 보석과 필요한 제작 단계를 계산합니다."
+      },
+      {
+        title: "골드와 죽음의 숨결 비용을 함께 보여줍니다.",
+        body:
+          "참고 표의 업그레이드 비용을 바탕으로 총 골드와 죽음의 숨결 수량을 계산해 파밍 목표를 세우기 쉽게 보여줍니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/draw-probability", label: "뽑기 확률 계산기", text: "게임 이벤트와 랜덤 보상 확률도 함께 계산합니다." },
+      { href: "/calculators/fc-transfer-fee", label: "피파 수수료 계산기", text: "FC온라인 이적시장 수령 BP를 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 확률, 제작, 수수료 계산기를 함께 확인합니다." }
+    ]
+  },
   "edpi-calculator": {
     title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
     description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",

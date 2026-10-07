@@ -79,6 +79,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "1회 성공 확률과 뽑기 횟수를 기준으로 최소 1회 성공 확률, 목표 개수 이상 확률, 기대 성공 횟수와 예상 비용을 계산합니다.",
     tags: ["뽑기확률", "가챠확률", "랜덤박스"]
   },
+  "diablo3-gem-calculator": {
+    title: "디아블로3 보석 계산기",
+    category: "생활 가이드",
+    audience: "디아블로3 보석 제작 재료와 골드를 미리 계산하는 플레이어",
+    description: "보유한 등급별 보석과 목표 보석 등급·수량을 입력해 필요한 하위 보석, 골드, 죽음의 숨결, 제작 단계를 계산합니다.",
+    tags: ["디아블로3", "보석제작", "죽음의숨결"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["피파 수수료 계산기", "뽑기 확률 계산기"]
+  },
   "fc-transfer-fee": {
     title: "피파 수수료 계산기",
     category: "생활 가이드",
@@ -698,7 +707,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
   ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
-  ["draw-probability", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
+  ["draw-probability", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];
