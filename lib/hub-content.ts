@@ -200,9 +200,9 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "game",
     path: "/game",
     eyebrow: "게임 계산 허브",
-    title: "가챠, 디아블로3 보석, FC온라인 수수료 계산기",
-    description: "뽑기 확률, 디아블로3 보석 제작, FC온라인 이적시장 수수료, 포커 승률, 게임 전적 승률, eDPI처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
-    featuredSlugs: ["diablo3-gem-calculator", "fc-transfer-fee", "draw-probability", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator"],
+    title: "가챠, 리니지 축캐, 디아블로3 보석, FC온라인 수수료 계산기",
+    description: "뽑기 확률, 리니지 클래식 축캐 판정, 디아블로3 보석 제작, FC온라인 이적시장 수수료, 포커 승률, 게임 전적 승률, eDPI처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "draw-probability", "poker-equity-calculator", "win-rate-calculator"],
     blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
     sections: [
       {
@@ -215,7 +215,7 @@ export const hubContents: Record<HubKey, HubContent> = {
       },
       {
         title: "제작형 게임은 재료를 역산하면 파밍 목표가 선명해집니다.",
-        body: "디아블로3 보석처럼 하위 재료를 여러 단계로 조합하는 콘텐츠는 목표 등급만 보고는 필요한 골드와 재료가 잘 보이지 않습니다. 보유 보석을 등급별로 나누어 입력하면 부족한 하위 재료와 제작 비용을 더 쉽게 계획할 수 있습니다."
+        body: "리니지 클래식 축캐 판정처럼 성장 수치가 중요한 게임은 직업과 스탯 조건을 같이 봐야 하고, 디아블로3 보석처럼 하위 재료를 여러 단계로 조합하는 콘텐츠는 목표 등급만 보고는 필요한 골드와 재료가 잘 보이지 않습니다."
       },
       {
         title: "FPS 감도는 eDPI와 cm/360을 함께 봐야 합니다.",

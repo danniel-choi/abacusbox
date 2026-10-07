@@ -219,6 +219,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 확률, 제작, 수수료 계산기를 함께 확인합니다." }
     ]
   },
+  "lineage-classic-lucky-character": {
+    title: "리니지 클래식 축캐 계산기 | HP·MP 성장 등급 판정",
+    description:
+      "리니지 클래식 축캐 계산기로 직업, 레벨, CON/WIS, 현재 HP/MP를 입력해 HP 성장과 MP 성장 기준 S/A/B/C/F 등급을 확인하세요.",
+    keywords: ["리니지 클래식 축캐 계산기", "리니지 축캐", "리니지 HP 성장", "리니지 MP 성장", "리니지 클래식 CON WIS"],
+    searchIntents: [
+      "리니지 클래식 내 캐릭터가 축캐인지 확인하고 싶을 때",
+      "같은 직업과 레벨에서 HP/MP 성장 위치를 비교하고 싶을 때",
+      "CON과 WIS 기준 HP·MP 등급 컷을 보고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "직업과 스탯을 함께 반영해 축캐 등급을 계산합니다.",
+        body:
+          "군주, 기사, 요정, 마법사 중 직업을 고르고 레벨, CON, WIS, 현재 HP/MP를 입력하면 HP와 MP 성장 위치를 각각 등급화합니다."
+      },
+      {
+        title: "S/A/B/C/F 컷을 같이 보여줍니다.",
+        body:
+          "입력한 조건에서 S급, A급, B급, C급으로 보기 위한 HP·MP 기준 컷을 함께 표시해 현재 캐릭터가 어느 구간인지 빠르게 비교할 수 있습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/draw-probability", label: "뽑기 확률 계산기", text: "게임 확률과 기대값을 함께 확인합니다." },
+      { href: "/calculators/diablo3-gem-calculator", label: "디아블로3 보석 계산기", text: "보석 제작 재료와 비용을 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 확률, 제작, 수수료 계산기를 함께 확인합니다." }
+    ]
+  },
   "edpi-calculator": {
     title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
     description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",

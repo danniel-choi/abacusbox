@@ -66,6 +66,7 @@ export type CalculatorSlug =
   | "pyeong-converter"
   | "random-number"
   | "draw-probability"
+  | "lineage-classic-lucky-character"
   | "diablo3-gem-calculator"
   | "fc-transfer-fee"
   | "win-rate-calculator"
@@ -6546,6 +6547,115 @@ export const calculators: CalculatorConfig[] = [
           name: `${count}회`,
           value: binomialAtLeastProbability(count, 1, probability) * 100
         }))
+      };
+    }
+  },
+  {
+    slug: "lineage-classic-lucky-character",
+    title: "리니지 클래식 축캐 계산기",
+    description: "직업, 레벨, CON/WIS, 현재 HP/MP를 입력해 HP 성장과 MP 성장 기준으로 내 캐릭터의 축캐 등급을 추정합니다.",
+    category: "게임",
+    keywords: ["리니지 클래식 축캐 계산기", "리니지 축캐", "리니지 HP 성장", "리니지 MP 성장", "리니지 클래식 스탯"],
+    badge: "HP·MP 성장 등급",
+    audience: "리니지 클래식 캐릭터의 HP/MP 성장 운을 같은 직업과 스탯 조건에서 확인하려는 플레이어",
+    fields: [
+      {
+        name: "characterClass",
+        label: "직업",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "군주", value: 0 },
+          { label: "기사", value: 1 },
+          { label: "요정", value: 2 },
+          { label: "마법사", value: 3 }
+        ]
+      },
+      { name: "level", label: "현재 레벨", type: "number", unit: "Lv", min: 1, max: 99, step: 1, defaultValue: 52 },
+      { name: "con", label: "CON (체력)", type: "number", min: 8, max: 25, step: 1, defaultValue: 18, help: "장비·버프를 제외한 캐릭터 기본 CON 기준으로 입력하세요." },
+      { name: "wis", label: "WIS (지혜)", type: "number", min: 8, max: 25, step: 1, defaultValue: 12, help: "장비·버프를 제외한 캐릭터 기본 WIS 기준으로 입력하세요." },
+      { name: "currentHp", label: "현재 HP", type: "number", unit: "HP", min: 0, max: 5000, step: 1, defaultValue: 520 },
+      { name: "currentMp", label: "현재 MP", type: "number", unit: "MP", min: 0, max: 5000, step: 1, defaultValue: 120 }
+    ],
+    guideTitle: "리니지 클래식 축캐 판정 기준",
+    guide: [
+      "참고 페이지처럼 직업, 레벨, CON/WIS, 현재 HP/MP를 입력해 같은 조건 안에서 성장 수치가 어느 위치인지 계산합니다.",
+      "HP는 CON, MP는 WIS 보정을 반영해 기대 최저·최고 성장 범위를 만들고, 입력한 현재 수치의 위치를 S/A/B/C/F 등급으로 표시합니다.",
+      "장비, 버프, 마법, 음식, 혈맹 효과가 포함된 HP/MP를 입력하면 실제 성장보다 높게 판정될 수 있으므로 순수 수치 입력이 중요합니다."
+    ],
+    checkpoints: [
+      "S급은 상위 5%권, A급은 상위 15%권, B급은 상위 35%권, C급은 평균권, F급은 하위권 참고 판정입니다.",
+      "서버 설정, 패치, 이벤트, 표기 방식에 따라 실제 게임 내 성장값과 차이가 있을 수 있습니다.",
+      "기사처럼 HP가 중요한 직업은 HP 등급을, 마법사처럼 MP 의존도가 높은 직업은 MP 등급을 더 비중 있게 보세요.",
+      "HP와 MP 중 하나만 알고 싶어도 둘 다 기본값이 들어가므로, 입력값을 현재 캐릭터 수치로 바꾼 뒤 비교하세요."
+    ],
+    faqs: [
+      { question: "축캐는 무슨 뜻인가요?", answer: "레벨업 과정에서 HP나 MP 성장값이 평균보다 좋게 붙은 캐릭터를 말합니다. 이 계산기는 현재 HP/MP가 기대 범위의 어느 위치인지 등급으로 보여줍니다." },
+      { question: "장비 포함 HP/MP를 넣어도 되나요?", answer: "추천하지 않습니다. 장비, 버프, 음식, 마법 효과가 포함되면 축캐 등급이 과대평가될 수 있어 기본 상태의 순수 HP/MP를 입력하는 편이 좋습니다." },
+      { question: "결과가 실제 게임과 다를 수 있나요?", answer: "네. 공개된 참고 정보와 일반적인 성장 범위를 바탕으로 한 추정 계산이므로 서버 설정이나 패치에 따라 실제 수치와 다를 수 있습니다." }
+    ],
+    calculate(values) {
+      const classes = [
+        { name: "군주", baseHp: 14, baseMp: 2, hpMin: 10, hpMax: 12, mpMin: 1, mpMax: 3, focus: "HP와 MP 균형" },
+        { name: "기사", baseHp: 16, baseMp: 1, hpMin: 14, hpMax: 16, mpMin: 1, mpMax: 2, focus: "HP 성장" },
+        { name: "요정", baseHp: 15, baseMp: 4, hpMin: 11, hpMax: 13, mpMin: 2, mpMax: 4, focus: "HP와 MP 밸런스" },
+        { name: "마법사", baseHp: 12, baseMp: 6, hpMin: 7, hpMax: 9, mpMin: 4, mpMax: 6, focus: "MP 성장" }
+      ];
+      const characterClass = classes[Math.max(0, Math.min(classes.length - 1, Math.floor(values.characterClass)))] ?? classes[1];
+      const level = Math.max(1, Math.min(99, Math.floor(values.level)));
+      const con = Math.max(8, Math.min(25, Math.floor(values.con)));
+      const wis = Math.max(8, Math.min(25, Math.floor(values.wis)));
+      const currentHp = Math.max(0, Math.floor(values.currentHp));
+      const currentMp = Math.max(0, Math.floor(values.currentMp));
+      const growthLevels = Math.max(level - 1, 0);
+      const hpBonus = Math.max(0, Math.floor((con - 10) / 2));
+      const mpBonus = Math.max(0, Math.floor((wis - 11) / 3));
+      const hpMin = characterClass.baseHp + growthLevels * (characterClass.hpMin + hpBonus);
+      const hpMax = characterClass.baseHp + growthLevels * (characterClass.hpMax + hpBonus);
+      const mpMin = characterClass.baseMp + growthLevels * (characterClass.mpMin + mpBonus);
+      const mpMax = characterClass.baseMp + growthLevels * (characterClass.mpMax + mpBonus);
+      const clampRatio = (value: number, min: number, max: number) => {
+        if (max <= min) return 0;
+        return Math.max(0, Math.min(1, (value - min) / (max - min)));
+      };
+      const gradeFromRatio = (ratio: number) => {
+        if (ratio >= 0.95) return { grade: "S급", text: "상위 5%권 극축캐", score: 100 };
+        if (ratio >= 0.85) return { grade: "A급", text: "축캐라고 부르기 좋은 성장", score: 88 };
+        if (ratio >= 0.65) return { grade: "B급", text: "평균보다 좋은 성장", score: 74 };
+        if (ratio >= 0.35) return { grade: "C급", text: "일반적인 평균권 성장", score: 55 };
+        return { grade: "F급", text: "하위권 성장 또는 저주캐 구간", score: 30 };
+      };
+      const cutoff = (min: number, max: number, ratio: number) => Math.ceil(min + (max - min) * ratio);
+      const hpRatio = clampRatio(currentHp, hpMin, hpMax);
+      const mpRatio = clampRatio(currentMp, mpMin, mpMax);
+      const hpGrade = gradeFromRatio(hpRatio);
+      const mpGrade = gradeFromRatio(mpRatio);
+      const focusWeight = characterClass.name === "기사" ? 0.7 : characterClass.name === "마법사" ? 0.35 : 0.55;
+      const totalRatio = hpRatio * focusWeight + mpRatio * (1 - focusWeight);
+      const totalGrade = gradeFromRatio(totalRatio);
+      const hpTopPercent = Math.max(0, Math.min(100, 100 - hpRatio * 100));
+      const mpTopPercent = Math.max(0, Math.min(100, 100 - mpRatio * 100));
+
+      return {
+        headline: `${characterClass.name} ${totalGrade.grade}`,
+        subline: `${level}레벨 · HP ${hpGrade.grade}(${formatPercent(100 - hpTopPercent, 1)} 위치) · MP ${mpGrade.grade}(${formatPercent(100 - mpTopPercent, 1)} 위치)`,
+        rows: [
+          { label: "종합 축캐 등급", value: `${totalGrade.grade} · ${totalGrade.text}`, tone: "strong" },
+          { label: "직업", value: `${characterClass.name} · ${characterClass.focus}`, tone: "strong" },
+          { label: "HP 등급", value: `${hpGrade.grade} · 상위 약 ${formatPercent(hpTopPercent, 1)}`, tone: "strong" },
+          { label: "MP 등급", value: `${mpGrade.grade} · 상위 약 ${formatPercent(mpTopPercent, 1)}`, tone: "strong" },
+          { label: "HP 기대 범위", value: `${formatNumber(hpMin)} ~ ${formatNumber(hpMax)} HP` },
+          { label: "MP 기대 범위", value: `${formatNumber(mpMin)} ~ ${formatNumber(mpMax)} MP` },
+          { label: "HP 컷", value: `S ${formatNumber(cutoff(hpMin, hpMax, 0.95))} · A ${formatNumber(cutoff(hpMin, hpMax, 0.85))} · B ${formatNumber(cutoff(hpMin, hpMax, 0.65))} · C ${formatNumber(cutoff(hpMin, hpMax, 0.35))}` },
+          { label: "MP 컷", value: `S ${formatNumber(cutoff(mpMin, mpMax, 0.95))} · A ${formatNumber(cutoff(mpMin, mpMax, 0.85))} · B ${formatNumber(cutoff(mpMin, mpMax, 0.65))} · C ${formatNumber(cutoff(mpMin, mpMax, 0.35))}` },
+          { label: "입력 스탯", value: `CON ${con} · WIS ${wis}` },
+          { label: "주의", value: "장비·버프·음식 효과를 제외한 순수 HP/MP 기준으로 보세요." }
+        ],
+        chart: [
+          { name: "HP 위치", value: hpRatio * 100 },
+          { name: "MP 위치", value: mpRatio * 100 },
+          { name: "종합", value: totalRatio * 100 }
+        ]
       };
     }
   },

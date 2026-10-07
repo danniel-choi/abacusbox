@@ -88,6 +88,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     hubLabel: "게임 계산기",
     relatedTitles: ["피파 수수료 계산기", "뽑기 확률 계산기"]
   },
+  "lineage-classic-lucky-character": {
+    title: "리니지 클래식 축캐 계산기",
+    category: "생활 가이드",
+    audience: "리니지 클래식 캐릭터의 HP/MP 성장 등급을 확인하는 플레이어",
+    description: "직업, 레벨, CON/WIS, 현재 HP/MP를 입력해 HP 성장과 MP 성장 기준으로 축캐 등급과 S/A/B/C 컷을 계산합니다.",
+    tags: ["리니지클래식", "축캐", "HP성장"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["디아블로3 보석 계산기", "뽑기 확률 계산기"]
+  },
   "fc-transfer-fee": {
     title: "피파 수수료 계산기",
     category: "생활 가이드",
@@ -707,7 +716,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
   ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
-  ["draw-probability", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
+  ["draw-probability", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];
