@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdSenseAd } from "@/components/AdSenseAd";
-import { blogPosts, getBlogPost, getLatestBlogPosts } from "@/lib/content";
+import { blogPosts, getBlogPost, getLatestBlogPosts, type BlogVisual } from "@/lib/content";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { getCalculator } from "@/lib/calculators";
 
@@ -123,6 +123,8 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         )}
 
+        {post.visual && <BlogVisualBlock visual={post.visual} />}
+
         <div className="mt-8 grid min-w-0 gap-5 break-words text-base font-medium leading-8 text-slate-700 [word-break:normal]">
           {post.content.map((paragraph, index) => (
             <div key={paragraph} className="contents">
@@ -181,6 +183,74 @@ export default async function BlogPostPage({ params }: Props) {
         </section>
       )}
     </main>
+  );
+}
+
+function BlogVisualBlock({ visual }: { visual: BlogVisual }) {
+  return (
+    <section className="mt-7 overflow-hidden rounded-[24px] border border-line bg-paper">
+      <div className="grid gap-0 lg:grid-cols-[1fr_1.12fr]">
+        <div className="bg-ink p-5 text-white sm:p-6">
+          <p className="text-sm font-extrabold text-brand">요약 이미지</p>
+          <h2 className="mt-3 break-words text-2xl font-extrabold leading-tight">{visual.headline}</h2>
+          <p className="mt-3 break-words text-sm font-medium leading-6 text-white/70">{visual.subhead}</p>
+          <div className="mt-5 grid gap-3">
+            {visual.cards.map((card) => (
+              <div key={card.label} className="rounded-[18px] border border-white/10 bg-white/8 p-4">
+                <p className="text-xs font-extrabold text-brand">{card.label}</p>
+                <p className="mt-1 break-words text-lg font-extrabold leading-6 text-white">{card.value}</p>
+                <p className="mt-1 break-words text-xs font-bold leading-5 text-white/55">{card.caption}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-4 p-5 sm:p-6">
+          <div className="overflow-hidden rounded-[18px] border border-line bg-white">
+            <div className="border-b border-line px-4 py-3">
+              <h3 className="text-base font-extrabold text-ink">{visual.table.title}</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[620px] text-left text-sm">
+                <thead className="bg-[#f8fafc] text-xs font-extrabold text-slate-500">
+                  <tr>
+                    {visual.table.columns.map((column) => (
+                      <th key={column} className="px-4 py-3">
+                        {column}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {visual.table.rows.map((row) => (
+                    <tr key={row.join("-")} className="align-top">
+                      {row.map((cell, index) => (
+                        <td key={`${cell}-${index}`} className={`px-4 py-3 leading-6 ${index === 0 ? "font-extrabold text-ink" : "font-medium text-slate-600"}`}>
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="rounded-[18px] border border-line bg-white p-4">
+            <h3 className="text-base font-extrabold text-ink">{visual.flow.title}</h3>
+            <div className="mt-4 grid gap-3 sm:grid-cols-4">
+              {visual.flow.steps.map((step, index) => (
+                <div key={step.label} className="relative rounded-[16px] border border-line bg-paper p-4">
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-sm font-extrabold text-white">{index + 1}</span>
+                  <p className="mt-3 text-sm font-extrabold text-ink">{step.label}</p>
+                  <p className="mt-2 break-words text-xs font-semibold leading-5 text-slate-600">{step.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

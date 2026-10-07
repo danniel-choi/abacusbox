@@ -8,6 +8,15 @@ export type BlogPost = {
   tags: string[];
   content: string[];
   calculatorSlug?: string;
+  visual?: BlogVisual;
+};
+
+export type BlogVisual = {
+  headline: string;
+  subhead: string;
+  cards: { label: string; value: string; caption: string }[];
+  table: { title: string; columns: string[]; rows: string[][] };
+  flow: { title: string; steps: { label: string; detail: string }[] };
 };
 
 export type CommunityPost = {
@@ -777,6 +786,7 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
   const hubText = meta.hubLabel
     ? `${meta.hubLabel} 안에서 비슷한 목적의 계산기를 함께 찾아보면 입력 기준을 맞추기 쉽습니다.`
     : "계산기 목록에서 같은 주제의 도구를 함께 찾아보면 입력 기준을 맞추기 쉽습니다.";
+  const visual = buildHourlyAutoBlogVisual(meta, template);
 
   return {
     slug,
@@ -787,6 +797,7 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
     readTime: "5분",
     tags: meta.tags,
     calculatorSlug,
+    visual,
     content: [
       `${meta.title}는 ${meta.audience}가 빠르게 기준값을 확인할 때 유용한 도구입니다. ${meta.description}`,
       `계산 전에는 입력값의 기준을 먼저 맞춰야 합니다. 세전과 세후, 월 단위와 연 단위, 총액과 일부 금액이 섞이면 같은 계산기라도 결과 해석이 달라질 수 있습니다.`,
@@ -797,6 +808,39 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
       `계산의정석의 ${meta.title}는 복잡한 표를 보기 전에 대략적인 범위를 잡는 데 맞춰져 있습니다. 결과가 예상과 다르면 입력 단위, 기간, 포함 항목을 다시 점검해 보세요.`,
       `마지막으로 결과값 하나보다 항목별 구조를 보는 습관이 중요합니다. 어떤 항목이 결과를 크게 움직이는지 알면 절감, 협상, 계획 수정의 우선순위를 더 쉽게 정할 수 있습니다.`
     ]
+  };
+}
+
+function buildHourlyAutoBlogVisual(meta: AutoBlogMeta, template: (typeof hourlyTemplateMeta)[keyof typeof hourlyTemplateMeta]): BlogVisual {
+  const related = meta.relatedTitles?.[0] || "관련 계산기";
+  const shortTitle = meta.title.replace(" 계산기", "");
+
+  return {
+    headline: `${shortTitle} 한눈에 보기`,
+    subhead: `${template.focus}을 표와 흐름도로 정리했습니다.`,
+    cards: [
+      { label: "사용자", value: meta.audience.split(",")[0], caption: "먼저 맞출 기준" },
+      { label: "핵심", value: template.suffix, caption: "이번 글의 관점" },
+      { label: "다음 단계", value: related, caption: "결과 확인 후 이어볼 계산" }
+    ],
+    table: {
+      title: "입력값 점검표",
+      columns: ["확인 항목", "왜 중요한가", "체크 방법"],
+      rows: [
+        ["기준 단위", "월·연, 세전·세후가 섞이면 결과가 흔들립니다.", "입력 전에 단위를 하나로 맞춥니다."],
+        ["포함 범위", "수수료, 세금, 부대비용 누락이 자주 생깁니다.", "결과에 들어간 항목과 빠진 항목을 나눕니다."],
+        ["비교 시나리오", "한 가지 가정만 보면 의사결정이 좁아집니다.", "보수·기준·여유 3가지 값을 비교합니다."]
+      ]
+    },
+    flow: {
+      title: "계산 후 행동 흐름",
+      steps: [
+        { label: "입력", detail: "현재 조건과 기준값을 넣습니다." },
+        { label: "비교", detail: "조건을 2~3개로 바꿔 차이를 봅니다." },
+        { label: "저장", detail: "결과 카드나 링크로 다시 볼 수 있게 남깁니다." },
+        { label: "실행", detail: "계약서, 고지서, 공식 안내문으로 최종 확인합니다." }
+      ]
+    }
   };
 }
 
