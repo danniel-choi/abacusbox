@@ -6564,11 +6564,11 @@ export const calculators: CalculatorConfig[] = [
         type: "select",
         defaultValue: 2,
         options: [
-          { label: "루비", value: 0 },
-          { label: "황수정", value: 1 },
-          { label: "에메랄드", value: 2 },
-          { label: "다이아몬드", value: 3 },
-          { label: "자수정", value: 4 }
+          { label: "◆ 루비", value: 0 },
+          { label: "◆ 황수정", value: 1 },
+          { label: "◆ 에메랄드", value: 2 },
+          { label: "◆ 다이아몬드", value: 3 },
+          { label: "◆ 자수정", value: 4 }
         ]
       },
       { name: "chipped", label: "조각난", type: "number", unit: "개", min: 0, max: 1000000, step: 1, defaultValue: 0 },
@@ -6635,11 +6635,11 @@ export const calculators: CalculatorConfig[] = [
       const goldCosts = [500, 750, 1250, 2000, 3500, 7500, 20000, 30000, 40000, 100000, 200000, 300000, 400000, 500000];
       const deathBreathCosts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4];
       const gemTypes = [
-        { name: "루비", helm: "킬당 생명력", weapon: "무기 피해", armor: "힘" },
-        { name: "황수정", helm: "마법 발견", weapon: "자원 비용 감소", armor: "지능" },
-        { name: "에메랄드", helm: "추가 금", weapon: "치명타 피해", armor: "민첩성" },
-        { name: "다이아몬드", helm: "쿨다운 감소", weapon: "엘리트 피해", armor: "모든 저항력" },
-        { name: "자수정", helm: "생명력 %", weapon: "적중당 생명력", armor: "활력" }
+        { name: "◆ 루비", helm: "킬당 생명력", weapon: "무기 피해", armor: "힘" },
+        { name: "◆ 황수정", helm: "마법 발견", weapon: "자원 비용 감소", armor: "지능" },
+        { name: "◆ 에메랄드", helm: "추가 금", weapon: "치명타 피해", armor: "민첩성" },
+        { name: "◆ 다이아몬드", helm: "쿨다운 감소", weapon: "엘리트 피해", armor: "모든 저항력" },
+        { name: "◆ 자수정", helm: "생명력 %", weapon: "적중당 생명력", armor: "활력" }
       ];
       const targetLevel = Math.max(0, Math.min(14, Math.floor(values.targetLevel)));
       const targetQuantity = Math.max(1, Math.floor(values.targetQuantity));

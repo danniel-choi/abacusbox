@@ -51,6 +51,14 @@ type ActionPlan = {
   }[];
 };
 
+const DIABLO3_GEM_OPTIONS = [
+  { value: 0, icon: "◆", label: "루비", color: "#ef4444", background: "#fef2f2" },
+  { value: 1, icon: "◆", label: "황수정", color: "#f59e0b", background: "#fffbeb" },
+  { value: 2, icon: "◆", label: "에메랄드", color: "#10b981", background: "#ecfdf5" },
+  { value: 3, icon: "◆", label: "다이아몬드", color: "#38bdf8", background: "#f0f9ff" },
+  { value: 4, icon: "◆", label: "자수정", color: "#a855f7", background: "#faf5ff" }
+];
+
 function formStorageKey(slug: CalculatorSlug) {
   return `calcrule:calculator-form:${slug}`;
 }
@@ -330,7 +338,32 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 {field.label}
                 {field.unit && <span className="font-bold text-slate-400">{field.unit}</span>}
               </span>
-              {field.type === "select" ? (
+              {activeCalculator.slug === "diablo3-gem-calculator" && field.name === "gemType" ? (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" role="radiogroup" aria-label="보석 종류">
+                  {DIABLO3_GEM_OPTIONS.map((gem) => {
+                    const selected = Number(values[field.name] ?? field.defaultValue) === gem.value;
+                    return (
+                      <button
+                        key={gem.value}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setValue(field.name, gem.value, { shouldDirty: true })}
+                        className={`min-h-[82px] rounded-2xl border px-3 py-3 text-center transition ${selected ? "border-ink bg-white shadow-sm" : "border-line hover:border-brand"}`}
+                        style={{ backgroundColor: selected ? "#ffffff" : gem.background }}
+                      >
+                        <span
+                          className="mx-auto flex h-9 w-9 rotate-45 items-center justify-center rounded-lg text-2xl shadow-sm"
+                          style={{ backgroundColor: gem.color, color: "#ffffff" }}
+                          aria-hidden="true"
+                        >
+                          <span className="-rotate-45">{gem.icon}</span>
+                        </span>
+                        <span className="mt-3 block text-sm font-extrabold text-ink">{gem.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : field.type === "select" ? (
                 <select
                   className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
                   value={Number(values[field.name] ?? field.defaultValue)}
