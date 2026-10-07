@@ -551,6 +551,39 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/loan", label: "대출·부동산 계산기 모음", text: "금리, 상환, 환율 관련 금융 계산기를 함께 제공합니다." }
     ]
   },
+  "housing-subscription": {
+    title: `청약 가점 계산기 | ${legalStandards.year}년 무주택·부양가족·청약통장 점수`,
+    description:
+      "청약 가점 계산기로 무주택기간, 부양가족 수, 본인·배우자 청약통장 가입기간을 입력해 민영주택 일반공급 가점제 84점 만점 점수를 계산하세요.",
+    keywords: ["청약 가점 계산기", "주택청약 가점", "무주택기간 점수", "부양가족수 점수", "청약통장 가입기간", "민영주택 청약"],
+    searchIntents: [
+      "민영주택 청약 전 내 청약 가점이 몇 점인지 확인할 때",
+      "무주택기간, 부양가족, 청약통장 점수가 각각 얼마인지 나누어 볼 때",
+      "배우자 청약통장 가입기간 합산을 반영해 보고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "청약 가점은 84점 만점입니다.",
+        body:
+          "민영주택 일반공급 가점제는 무주택기간 32점, 부양가족수 35점, 입주자저축 가입기간 17점을 합산해 총 84점 만점으로 계산합니다."
+      },
+      {
+        title: "무주택기간과 부양가족은 입주자모집공고일 기준으로 확인합니다.",
+        body:
+          "무주택기간은 신청자와 배우자의 주택 소유 이력, 만 30세 기준 또는 혼인신고일 기준에 따라 달라질 수 있습니다. 부양가족도 주민등록, 직계존비속 요건, 배우자 분리세대 여부를 함께 확인해야 합니다."
+      },
+      {
+        title: "배우자 청약통장 점수는 제한적으로 합산합니다.",
+        body:
+          "배우자 청약통장 가입기간은 50%로 환산한 뒤 최대 3점까지만 더할 수 있고, 본인과 배우자의 입주자저축 점수 합계는 17점을 넘을 수 없습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/real-estate-acquisition-tax", label: "부동산 취득세 계산기", text: "당첨 이후 주택 취득 비용을 이어서 확인하세요." },
+      { href: "/calculators/loan-dsr", label: "DSR/LTV 계산기", text: "청약 전 자금 조달 가능성을 함께 점검합니다." },
+      { href: "/loan", label: "대출·부동산 계산기 모음", text: "대출, 취득세, 보유세 관련 계산기를 함께 제공합니다." }
+    ]
+  },
   "daily-intake": {
     title: `일일 섭취 권장량 계산기 | ${legalStandards.year}년 하루 칼로리·RDI 계산`,
     description:

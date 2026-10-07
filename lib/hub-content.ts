@@ -72,8 +72,8 @@ export const hubContents: Record<HubKey, HubContent> = {
     path: "/loan",
     eyebrow: "대출·부동산 허브",
     title: "대출 상환과 부동산 비용 계산기",
-    description: "대출이자, DSR, 원리금 상환, 대환대출, 중도상환수수료, 취득세와 보유비용을 비교할 수 있습니다.",
-    featuredSlugs: ["loan-interest", "loan-dsr", "loan-amortization", "refinance-calculator", "loan-prepayment", "real-estate-acquisition-tax"],
+    description: "대출이자, DSR, 원리금 상환, 청약 가점, 대환대출, 중도상환수수료, 취득세와 보유비용을 비교할 수 있습니다.",
+    featuredSlugs: ["loan-interest", "loan-dsr", "housing-subscription", "loan-amortization", "refinance-calculator", "real-estate-acquisition-tax"],
     blogSlugs: ["dsr-ltv-practical-difference", "loan-prepayment-before-refinance", "property-tax-holding-cost-guide"],
     sections: [
       {

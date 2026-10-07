@@ -339,6 +339,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "대출금액, 금리, 기간을 기준으로 월 상환액과 총 이자, 초반·후반 상환 구조를 계산합니다.",
     tags: ["대출상환", "상환스케줄", "총이자"]
   },
+  "housing-subscription": {
+    title: "청약 가점 계산기",
+    category: "금융 가이드",
+    audience: "민영주택 일반공급 가점제 청약을 준비하는 사용자",
+    description: "무주택기간, 부양가족 수, 본인·배우자 청약통장 가입기간을 기준으로 청약 가점 84점 만점 점수를 계산합니다.",
+    tags: ["청약", "청약가점", "무주택기간", "부양가족"],
+    hubLabel: "대출·부동산 계산기",
+    relatedTitles: ["부동산 취득세 계산기", "DSR 계산기"]
+  },
   "real-estate-acquisition-tax": {
     title: "부동산 취득세 계산기",
     category: "세금 가이드",
@@ -612,7 +621,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
 
 const hourlyAutoBlogCalculatorGroups = [
   ["minimum-wage", "unpaid-wage", "unemployment", "severance", "weekly-holiday", "hourly-wage", "annual-leave", "annual-leave-grant", "parental-leave", "net-salary"],
-  ["loan-interest", "loan-dsr", "loan-amortization", "card-installment", "exchange-rate", "savings", "lump-sum-deposit", "compound-interest", "youth-future-savings", "youth-leap-account"],
+  ["loan-interest", "loan-dsr", "housing-subscription", "loan-amortization", "card-installment", "exchange-rate", "savings", "lump-sum-deposit", "compound-interest", "youth-future-savings", "youth-leap-account"],
   ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
   ["stock-return", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],

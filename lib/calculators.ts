@@ -16,6 +16,7 @@ export type CalculatorSlug =
   | "loan-interest"
   | "loan-dsr"
   | "apr-calculator"
+  | "housing-subscription"
   | "comprehensive-income-tax"
   | "earned-income-tax"
   | "year-end-tax-settlement"
@@ -427,6 +428,35 @@ function creditCardIncomeDeduction(grossPay: number, creditCard: number, checkCa
   const cap = grossPay <= 70000000 ? 3000000 : grossPay <= 120000000 ? 2500000 : 2000000;
 
   return Math.min(rawDeduction, cap);
+}
+
+function housingHomelessScore(years: number, isIneligible = false) {
+  if (isIneligible) return 0;
+  const safeYears = Math.max(Math.floor(years), 0);
+  if (safeYears >= 15) return 32;
+  return Math.min((safeYears + 1) * 2, 30);
+}
+
+function housingDependentScore(dependents: number) {
+  const safeDependents = Math.min(Math.max(Math.floor(dependents), 0), 6);
+  return 5 + safeDependents * 5;
+}
+
+function housingSubscriptionScore(months: number) {
+  const safeMonths = Math.max(Math.floor(months), 0);
+  if (safeMonths < 6) return 1;
+  if (safeMonths < 12) return 2;
+  if (safeMonths >= 180) return 17;
+  return Math.min(Math.floor(safeMonths / 12) + 2, 16);
+}
+
+function housingPeriodLabel(months: number) {
+  const safeMonths = Math.max(Math.floor(months), 0);
+  const years = Math.floor(safeMonths / 12);
+  const remainMonths = safeMonths % 12;
+  if (years === 0) return `${remainMonths.toLocaleString("ko-KR")}개월`;
+  if (remainMonths === 0) return `${years.toLocaleString("ko-KR")}년`;
+  return `${years.toLocaleString("ko-KR")}년 ${remainMonths.toLocaleString("ko-KR")}개월`;
 }
 
 function inheritanceTax(taxBase: number) {
@@ -2277,6 +2307,111 @@ export const calculators: CalculatorConfig[] = [
           { name: "장기요양", value: care },
           { name: "고용보험", value: employment },
           { name: "소득·지방세", value: taxTotal }
+        ]
+      };
+    }
+  },
+  {
+    slug: "housing-subscription",
+    title: "청약 가점 계산기",
+    description: "무주택기간, 부양가족 수, 본인·배우자 청약통장 가입기간을 입력해 민영주택 청약 가점 84점 만점 기준 점수를 계산합니다.",
+    category: "금융",
+    keywords: ["청약 가점 계산기", "주택청약 가점", "무주택기간 점수", "부양가족수 점수", "청약통장 가입기간", "민영주택 청약"],
+    badge: "84점 만점",
+    audience: "민영주택 일반공급 가점제 청약을 준비하는 무주택자와 예비 청약자",
+    fields: [
+      {
+        name: "hasHomeOrIneligible",
+        label: "무주택기간 가점 가능 여부",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "세대원 전원 무주택", value: 0 },
+          { label: "주택 보유 등으로 무주택기간 0점", value: 1 }
+        ],
+        help: "입주자모집공고일 기준 세대원 전원이 무주택이어야 무주택기간 점수를 받을 수 있습니다."
+      },
+      {
+        name: "under30Unmarried",
+        label: "만 30세 미만 미혼 여부",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "아니오", value: 0 },
+          { label: "예, 무주택기간 0점", value: 1 }
+        ],
+        help: "만 30세 미만 미혼자는 무주택기간 가점을 0점으로 봅니다."
+      },
+      { name: "homelessYears", label: "무주택기간", type: "number", unit: "년", min: 0, max: 40, step: 1, defaultValue: 7, help: "만 30세가 된 날 또는 30세 전 혼인신고일 중 해당 기준일부터 계산한 기간입니다." },
+      { name: "dependents", label: "부양가족 수", type: "number", unit: "명", min: 0, max: 10, step: 1, defaultValue: 2, help: "신청자 본인은 제외하고, 청약 기준상 인정되는 부양가족만 입력하세요." },
+      { name: "ownSubscriptionYears", label: "본인 청약통장 가입기간", type: "number", unit: "년", min: 0, max: 40, step: 1, defaultValue: 6 },
+      { name: "ownSubscriptionMonths", label: "본인 추가 가입개월", type: "number", unit: "개월", min: 0, max: 11, step: 1, defaultValue: 0 },
+      { name: "spouseSubscriptionYears", label: "배우자 청약통장 가입기간", type: "number", unit: "년", min: 0, max: 40, step: 1, defaultValue: 0, help: "배우자 통장이 없거나 합산하지 않으면 0으로 두세요." },
+      { name: "spouseSubscriptionMonths", label: "배우자 추가 가입개월", type: "number", unit: "개월", min: 0, max: 11, step: 1, defaultValue: 0 },
+      {
+        name: "showSpouseCombined",
+        label: "배우자 통장 합산",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "합산 반영", value: 1 },
+          { label: "합산하지 않음", value: 0 }
+        ],
+        help: "배우자 가입기간은 50% 환산 점수를 최대 3점까지 더하고, 통장 점수 합계는 17점을 넘지 않습니다."
+      }
+    ],
+    guideTitle: "청약 가점 계산 기준",
+    guide: [
+      "민영주택 일반공급 가점제는 무주택기간 32점, 부양가족수 35점, 입주자저축 가입기간 17점을 합산해 총 84점 만점으로 봅니다.",
+      "무주택기간은 신청자와 배우자를 기준으로 하며, 일반적으로 만 30세가 된 날부터 계속 무주택인 기간을 봅니다. 30세 전에 혼인한 경우 혼인신고일부터 기산할 수 있습니다.",
+      "배우자 청약통장 가입기간을 합산하는 경우 배우자 가입기간의 50%에 해당하는 기간 점수를 최대 3점까지 더하고, 본인 점수와 합쳐도 입주자저축 점수는 17점을 넘지 않습니다."
+    ],
+    checkpoints: [
+      "부양가족 수에는 신청자 본인을 포함하지 않습니다.",
+      "실제 청약은 입주자모집공고일 기준 주민등록, 가족관계, 주택 소유 여부, 통장 순위기산일을 확인해야 합니다.",
+      "특별공급, 공공분양, 추첨제, 노부모부양 특별공급 등은 별도 기준이 적용될 수 있습니다."
+    ],
+    faqs: [
+      { question: "청약 가점 만점은 몇 점인가요?", answer: "민영주택 일반공급 가점제 기준으로 무주택기간 32점, 부양가족수 35점, 입주자저축 가입기간 17점을 합산해 총 84점입니다." },
+      { question: "부양가족 수에 본인도 포함하나요?", answer: "아니요. 청약 가점의 부양가족 수는 신청자 본인을 제외한 인정 부양가족 수를 입력해야 합니다." },
+      { question: "배우자 청약통장 점수는 어떻게 반영되나요?", answer: "배우자 가입기간의 50%에 해당하는 기간 점수를 계산해 최대 3점까지 더합니다. 다만 본인과 배우자 점수를 합친 입주자저축 점수는 17점을 넘을 수 없습니다." }
+    ],
+    calculate(values) {
+      const hasHomeOrIneligible = Math.floor(values.hasHomeOrIneligible) === 1;
+      const under30Unmarried = Math.floor(values.under30Unmarried) === 1;
+      const homelessScore = housingHomelessScore(values.homelessYears, hasHomeOrIneligible || under30Unmarried);
+      const dependents = Math.max(Math.floor(values.dependents), 0);
+      const dependentScore = housingDependentScore(dependents);
+      const ownMonths = Math.max(Math.floor(values.ownSubscriptionYears), 0) * 12 + Math.max(Math.floor(values.ownSubscriptionMonths), 0);
+      const spouseMonths = Math.max(Math.floor(values.spouseSubscriptionYears), 0) * 12 + Math.max(Math.floor(values.spouseSubscriptionMonths), 0);
+      const ownSubscriptionScore = housingSubscriptionScore(ownMonths);
+      const spouseRecognizedMonths = Math.floor(spouseMonths * 0.5);
+      const spouseRawScore = spouseMonths > 0 && Math.floor(values.showSpouseCombined) === 1 ? housingSubscriptionScore(spouseRecognizedMonths) : 0;
+      const spouseSubscriptionScore = Math.min(spouseRawScore, 3);
+      const subscriptionScore = Math.min(ownSubscriptionScore + spouseSubscriptionScore, 17);
+      const totalScore = homelessScore + dependentScore + subscriptionScore;
+      const scoreRate = totalScore / 84 * 100;
+      const bandLabel = totalScore >= 70 ? "고가점권" : totalScore >= 55 ? "중간 이상" : totalScore >= 40 ? "중간권" : "낮은 가점권";
+
+      return {
+        headline: `${totalScore.toLocaleString("ko-KR")}점`,
+        subline: `84점 만점 중 ${formatPercent(scoreRate, 1)} · ${bandLabel}`,
+        rows: [
+          { label: "총 청약 가점", value: `${totalScore.toLocaleString("ko-KR")}점 / 84점`, tone: "strong" },
+          { label: "무주택기간 점수", value: `${homelessScore.toLocaleString("ko-KR")}점 / 32점`, tone: "strong" },
+          { label: "무주택기간 입력", value: hasHomeOrIneligible ? "주택 보유 등 0점" : under30Unmarried ? "만 30세 미만 미혼 0점" : `${Math.max(Math.floor(values.homelessYears), 0).toLocaleString("ko-KR")}년` },
+          { label: "부양가족수 점수", value: `${dependentScore.toLocaleString("ko-KR")}점 / 35점`, tone: "strong" },
+          { label: "부양가족 수", value: `${Math.min(dependents, 6).toLocaleString("ko-KR")}${dependents >= 6 ? "명 이상" : "명"}` },
+          { label: "입주자저축 점수", value: `${subscriptionScore.toLocaleString("ko-KR")}점 / 17점`, tone: "strong" },
+          { label: "본인 통장 가입기간", value: `${housingPeriodLabel(ownMonths)} · ${ownSubscriptionScore.toLocaleString("ko-KR")}점` },
+          { label: "배우자 인정 가입기간", value: spouseMonths > 0 && Math.floor(values.showSpouseCombined) === 1 ? `${housingPeriodLabel(spouseRecognizedMonths)} · ${spouseSubscriptionScore.toLocaleString("ko-KR")}점 반영` : "미반영" },
+          { label: "통장 점수 상한", value: "본인+배우자 합산 최대 17점" }
+        ],
+        chart: [
+          { name: "무주택", value: homelessScore },
+          { name: "부양가족", value: dependentScore },
+          { name: "통장", value: subscriptionScore },
+          { name: "남은점수", value: Math.max(84 - totalScore, 0) }
         ]
       };
     }
