@@ -247,6 +247,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 확률, 제작, 수수료 계산기를 함께 확인합니다." }
     ]
   },
+  "lineage-classic-hunting-efficiency": {
+    title: "리니지 클래식 사냥 효율 계산기 | 시간당 경험치·아데나·ATS 효율",
+    description:
+      "리니지 클래식 사냥 효율 계산기로 사냥 전후 경험치, 사냥 시간, 획득 아데나, 물약비와 버프 비용을 입력해 시간당 경험치, 순수익, ATS 3시간 효율을 확인하세요.",
+    keywords: ["리니지 클래식 사냥 효율 계산기", "리니지 시간당 경험치", "리니지 시간당 아데나", "리니지 ATS 효율", "리니지 사냥터 효율"],
+    searchIntents: [
+      "리니지 클래식 사냥터별 시간당 경험치를 비교하고 싶을 때",
+      "물약비와 버프 비용을 뺀 실제 순수익을 보고 싶을 때",
+      "ATS 3시간 기준 경험치와 아데나 효율을 환산하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "사냥 전후 기록으로 시간당 경험치를 계산합니다.",
+        body:
+          "사냥 전 경험치, 사냥 후 경험치, 레벨업 횟수, 사망 패널티를 입력하면 순진척 경험치와 실제 획득 경험치를 나누어 보여줍니다."
+      },
+      {
+        title: "수익과 비용을 나눠 순수익을 확인합니다.",
+        body:
+          "획득 아데나, 잡템 판매액, 득템 환산액에서 물약비, 버프비, 주문서, 화살, 수리비를 차감해 시간당 순수익과 비용률을 계산합니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/lineage-classic-lucky-character", label: "리니지 클래식 축캐 계산기", text: "HP/MP 성장 등급을 함께 확인합니다." },
+      { href: "/calculators/blox-fruits-calculator", label: "블록스 프루츠 계산기", text: "게임 거래와 성장 계획을 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 사냥, 성장, 확률 계산기를 함께 확인합니다." }
+    ]
+  },
   "blox-fruits-calculator": {
     title: "블록스 프루츠 계산기 | 거래 W/F/L·스탯·마스터리 계산",
     description:

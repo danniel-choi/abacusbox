@@ -67,6 +67,7 @@ export type CalculatorSlug =
   | "random-number"
   | "draw-probability"
   | "lineage-classic-lucky-character"
+  | "lineage-classic-hunting-efficiency"
   | "blox-fruits-calculator"
   | "diablo3-gem-calculator"
   | "fc-transfer-fee"
@@ -6663,6 +6664,136 @@ export const calculators: CalculatorConfig[] = [
           { name: "내 가치", value: demandAdjustedYour },
           { name: "상대 가치", value: demandAdjustedTheir },
           { name: "스탯 사용률", value: totalStatPoints > 0 ? usedStats / totalStatPoints * Math.max(demandAdjustedYour, demandAdjustedTheir, 100) : 0 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "lineage-classic-hunting-efficiency",
+    title: "리니지 클래식 사냥 효율 계산기",
+    description: "사냥 전후 경험치, 사냥 시간, 획득 아데나, 잡템 판매액, 물약비와 버프 비용을 입력해 시간당 경험치와 순수익, 목표까지 예상 시간을 계산합니다.",
+    category: "게임",
+    keywords: ["리니지 클래식 사냥 효율 계산기", "리니지 사냥 효율", "리니지 시간당 경험치", "리니지 시간당 아데나", "ATS 효율"],
+    badge: "경험치·아데나 효율",
+    audience: "리니지 클래식 사냥터별 경험치와 아데나 효율을 직접 기록해 비교하려는 플레이어",
+    fields: [
+      {
+        name: "huntingMode",
+        label: "사냥 방식",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "수동", value: 0 },
+          { label: "ATS", value: 1 },
+          { label: "파티", value: 2 }
+        ]
+      },
+      {
+        name: "characterClass",
+        label: "직업",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "군주", value: 0 },
+          { label: "기사", value: 1 },
+          { label: "요정", value: 2 },
+          { label: "마법사", value: 3 },
+          { label: "기타", value: 4 }
+        ]
+      },
+      { name: "huntingHours", label: "사냥 시간", type: "number", unit: "시간", min: 0, max: 24, step: 1, defaultValue: 1 },
+      { name: "huntingMinutes", label: "사냥 분", type: "number", unit: "분", min: 0, max: 59, step: 1, defaultValue: 0 },
+      { name: "killCount", label: "처치 수", type: "number", unit: "마리", min: 0, max: 1000000, step: 1, defaultValue: 300 },
+      { name: "beforeExp", label: "사냥 전 경험치", type: "number", unit: "%", min: 0, max: 99.999, step: 0.001, defaultValue: 10 },
+      { name: "afterExp", label: "사냥 후 경험치", type: "number", unit: "%", min: 0, max: 99.999, step: 0.001, defaultValue: 13 },
+      { name: "levelUps", label: "사냥 중 레벨업 횟수", type: "number", unit: "회", min: 0, max: 20, step: 1, defaultValue: 0 },
+      { name: "penaltyExp", label: "사망·패널티 손실 경험치", type: "number", unit: "%", min: 0, max: 100, step: 0.001, defaultValue: 0 },
+      { name: "adena", label: "획득 아데나", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 120000 },
+      { name: "junkSale", label: "잡템 판매액", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 30000 },
+      { name: "rareDropValue", label: "득템 환산액", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 0 },
+      { name: "potionCost", label: "물약비", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 45000 },
+      { name: "buffCost", label: "버프·음식·촐기 비용", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 10000 },
+      { name: "scrollCost", label: "주문서·귀환 비용", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 5000 },
+      { name: "ammoCost", label: "화살·정령옥 비용", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 0 },
+      { name: "repairCost", label: "수리비", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 0 },
+      { name: "otherCost", label: "기타 비용", type: "number", unit: "아데나", min: 0, max: 10000000000, step: 100, defaultValue: 0 },
+      { name: "targetRemainingExp", label: "목표까지 남은 경험치", type: "number", unit: "%", min: 0, max: 10000, step: 0.001, defaultValue: 50 },
+      { name: "dailyHours", label: "하루 사냥 시간", type: "number", unit: "시간", min: 0, max: 24, step: 0.5, defaultValue: 3 }
+    ],
+    guideTitle: "리니지 클래식 사냥 효율 계산 기준",
+    guide: [
+      "참고 페이지처럼 사냥 전후 경험치와 레벨업 횟수를 합산해 순진척 경험치를 계산하고, 사망·패널티 손실 경험치를 더해 실제 사냥 획득 경험치도 함께 보여줍니다.",
+      "아데나 수익은 획득 아데나, 잡템 판매액, 득템 환산액을 더하고 물약비, 버프비, 주문서, 화살·정령옥, 수리비, 기타 비용을 차감해 순수익을 계산합니다.",
+      "ATS 사냥은 참고 페이지 기준에 맞춰 입력한 시간당 효율을 3시간 기준으로 환산해 보여줍니다."
+    ],
+    checkpoints: [
+      "경험치가 98%에서 3%가 된 경우 사냥 전 98, 사냥 후 3, 레벨업 횟수 1로 입력하세요.",
+      "목표 레벨까지 걸리는 시간은 사망 패널티를 제외한 순진척 경험치 기준으로 보는 편이 안정적입니다.",
+      "득템 환산액은 주문서, 보석, 장비처럼 판매 가능한 아이템을 아데나로 환산해 입력하세요.",
+      "사냥터 혼잡도, 물약 소모량, 장비 상태에 따라 같은 사냥터도 효율이 크게 달라질 수 있습니다."
+    ],
+    faqs: [
+      { question: "사망해서 경험치를 잃은 경우 어떻게 입력하나요?", answer: "최종 경험치 변화는 사냥 전후 경험치로 입력하고, 잃은 경험치는 사망·패널티 손실 경험치에 따로 입력하면 순진척과 실제 획득 경험치를 나눠 볼 수 있습니다." },
+      { question: "ATS 3시간 환산은 무엇인가요?", answer: "입력한 사냥 기록의 시간당 효율을 기준으로 3시간 동안 같은 효율이 유지된다고 가정한 경험치와 순수익입니다." },
+      { question: "처치 수는 꼭 입력해야 하나요?", answer: "필수는 아니지만 입력하면 1마리당 경험치와 아데나를 계산해 사냥터 밀도나 몬스터 효율을 비교하기 좋습니다." }
+    ],
+    calculate(values) {
+      const modes = ["수동", "ATS", "파티"];
+      const classes = ["군주", "기사", "요정", "마법사", "기타"];
+      const mode = modes[Math.max(0, Math.min(modes.length - 1, Math.floor(values.huntingMode)))] ?? modes[0];
+      const characterClass = classes[Math.max(0, Math.min(classes.length - 1, Math.floor(values.characterClass)))] ?? classes[1];
+      const minutes = Math.max(1, Math.floor(values.huntingHours) * 60 + Math.max(0, Math.floor(values.huntingMinutes)));
+      const hours = minutes / 60;
+      const beforeExp = Math.max(0, Math.min(99.999, values.beforeExp));
+      const afterExp = Math.max(0, Math.min(99.999, values.afterExp));
+      const levelUps = Math.max(0, Math.floor(values.levelUps));
+      const penaltyExp = Math.max(0, values.penaltyExp);
+      const netExp = Math.max(0, afterExp - beforeExp + levelUps * 100);
+      const grossExp = netExp + penaltyExp;
+      const expPerHour = netExp / hours;
+      const grossExpPerHour = grossExp / hours;
+      const revenue = Math.max(0, values.adena) + Math.max(0, values.junkSale) + Math.max(0, values.rareDropValue);
+      const costs = Math.max(0, values.potionCost) + Math.max(0, values.buffCost) + Math.max(0, values.scrollCost) + Math.max(0, values.ammoCost) + Math.max(0, values.repairCost) + Math.max(0, values.otherCost);
+      const netProfit = revenue - costs;
+      const revenuePerHour = revenue / hours;
+      const netProfitPerHour = netProfit / hours;
+      const costRate = revenue > 0 ? costs / revenue * 100 : 0;
+      const killCount = Math.max(0, Math.floor(values.killCount));
+      const expPerKill = killCount > 0 ? grossExp / killCount : 0;
+      const adenaPerKill = killCount > 0 ? netProfit / killCount : 0;
+      const targetRemainingExp = Math.max(0, values.targetRemainingExp);
+      const hoursToTarget = expPerHour > 0 ? targetRemainingExp / expPerHour : 0;
+      const dailyHours = Math.max(0, values.dailyHours);
+      const daysToTarget = dailyHours > 0 && hoursToTarget > 0 ? hoursToTarget / dailyHours : 0;
+      const atsHours = 3;
+      const atsExp = expPerHour * atsHours;
+      const atsProfit = netProfitPerHour * atsHours;
+      const profitTone = netProfitPerHour >= 0 ? "strong" : "muted";
+
+      return {
+        headline: `${formatPercent(expPerHour, 3)}/시간`,
+        subline: `${mode} · ${characterClass} · 시간당 순수익 ${formatWon(Math.round(netProfitPerHour))} · ATS 3시간 ${formatPercent(atsExp, 3)}`,
+        rows: [
+          { label: "사냥 방식", value: `${mode} · ${characterClass}`, tone: "strong" },
+          { label: "순진척 경험치", value: formatPercent(netExp, 3), tone: "strong" },
+          { label: "사냥 획득 경험치", value: formatPercent(grossExp, 3) },
+          { label: "시간당 순진척 경험치", value: formatPercent(expPerHour, 3), tone: "strong" },
+          { label: "시간당 획득 경험치", value: formatPercent(grossExpPerHour, 3) },
+          { label: "총 수익", value: formatWon(Math.round(revenue)) },
+          { label: "총 비용", value: `${formatWon(Math.round(costs))} · 비용률 ${formatPercent(costRate, 1)}` },
+          { label: "순수익", value: formatWon(Math.round(netProfit)), tone: profitTone },
+          { label: "시간당 순수익", value: formatWon(Math.round(netProfitPerHour)), tone: profitTone },
+          { label: "시간당 매출", value: formatWon(Math.round(revenuePerHour)) },
+          { label: "1마리당 경험치", value: killCount > 0 ? formatPercent(expPerKill, 4) : "처치 수 미입력" },
+          { label: "1마리당 순수익", value: killCount > 0 ? formatWon(Math.round(adenaPerKill)) : "처치 수 미입력" },
+          { label: "목표까지 예상 시간", value: hoursToTarget > 0 ? `${formatNumber(hoursToTarget, 1)}시간 · 약 ${formatNumber(daysToTarget, 1)}일` : "계산 불가", tone: "strong" },
+          { label: "ATS 3시간 환산", value: `${formatPercent(atsExp, 3)} · ${formatWon(Math.round(atsProfit))}`, tone: mode === "ATS" ? "strong" : undefined }
+        ],
+        chart: [
+          { name: "시간당 경험치", value: expPerHour },
+          { name: "시간당 순수익/10k", value: netProfitPerHour / 10000 },
+          { name: "ATS3h 경험치", value: atsExp },
+          { name: "비용률", value: costRate }
         ]
       };
     }
