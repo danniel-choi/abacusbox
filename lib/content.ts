@@ -133,6 +133,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     hubLabel: "게임 계산기",
     relatedTitles: ["로블록스 로벅스 계산기", "리니지 클래식 사냥 효율 계산기"]
   },
+  "lol-skill-haste": {
+    title: "리그 오브 레전드 스킬 가속 계산기",
+    category: "생활 가이드",
+    audience: "롤 아이템 빌드별 실제 쿨타임과 목표 스킬 가속을 확인하는 플레이어",
+    description: "기본 쿨타임, 스킬 가속, 궁극기 가속, 고정 쿨타임 감소를 입력해 최종 쿨타임과 기존 쿨감률 환산, 목표 쿨타임 필요 가속을 계산합니다.",
+    tags: ["리그오브레전드", "스킬가속", "쿨타임"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["게임 승률 계산기", "eDPI 계산기"]
+  },
   "fc-transfer-fee": {
     title: "피파 수수료 계산기",
     category: "생활 가이드",
@@ -752,7 +761,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
   ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
-  ["draw-probability", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
+  ["draw-probability", "lol-skill-haste", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];

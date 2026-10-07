@@ -71,6 +71,7 @@ export type CalculatorSlug =
   | "blox-fruits-calculator"
   | "robux-calculator"
   | "clash-of-clans-calculator"
+  | "lol-skill-haste"
   | "diablo3-gem-calculator"
   | "fc-transfer-fee"
   | "win-rate-calculator"
@@ -6905,6 +6906,102 @@ export const calculators: CalculatorConfig[] = [
           { name: "HP 위치", value: hpRatio * 100 },
           { name: "MP 위치", value: mpRatio * 100 },
           { name: "종합", value: totalRatio * 100 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "lol-skill-haste",
+    title: "리그 오브 레전드 스킬 가속 계산기",
+    description: "스킬 가속을 입력해 최종 쿨타임, 기존 쿨타임 감소율 환산, 분당 사용 가능 횟수, 목표 쿨타임에 필요한 스킬 가속을 계산합니다.",
+    category: "게임",
+    keywords: ["리그 오브 레전드 스킬 가속 계산기", "롤 스킬 가속", "롤 쿨타임 계산기", "스킬 가속 쿨감", "궁극기 가속 계산"],
+    badge: "쿨타임·쿨감 환산",
+    audience: "아이템 빌드 변경 전후 실제 스킬 쿨타임과 목표 쿨타임에 필요한 스킬 가속을 확인하려는 LoL 플레이어",
+    fields: [
+      {
+        name: "skillSlot",
+        label: "스킬 선택",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "Q", value: 0 },
+          { label: "W", value: 1 },
+          { label: "E", value: 2 },
+          { label: "R 궁극기", value: 3 }
+        ]
+      },
+      { name: "baseCooldown", label: "기본 쿨타임", type: "number", unit: "초", min: 0.1, max: 600, step: 0.1, defaultValue: 10 },
+      { name: "skillHaste", label: "스킬 가속", type: "number", min: 0, max: 1000, step: 1, defaultValue: 35 },
+      { name: "ultimateHaste", label: "궁극기 가속", type: "number", min: 0, max: 1000, step: 1, defaultValue: 0, help: "R 궁극기를 선택했을 때만 총 스킬 가속에 더해 계산합니다." },
+      { name: "flatCooldownReduction", label: "고정 쿨타임 감소", type: "number", unit: "초", min: 0, max: 600, step: 0.1, defaultValue: 0 },
+      { name: "targetCooldown", label: "목표 쿨타임", type: "number", unit: "초", min: 0.1, max: 600, step: 0.1, defaultValue: 6 },
+      { name: "oldCdr", label: "기존 쿨감률 변환", type: "number", unit: "%", min: 0, max: 95, step: 0.1, defaultValue: 40 },
+      { name: "fightDuration", label: "교전 시간", type: "number", unit: "초", min: 1, max: 3600, step: 1, defaultValue: 60 }
+    ],
+    guideTitle: "스킬 가속 계산 공식",
+    guide: [
+      "참고 페이지의 공식처럼 최종 쿨타임은 기본 쿨타임 × 100 ÷ (100 + 총 스킬 가속)으로 계산합니다.",
+      "R 궁극기를 선택하면 일반 스킬 가속에 궁극기 가속을 더해 같은 공식으로 계산합니다. Q/W/E 선택 시 궁극기 가속은 따로 반영하지 않습니다.",
+      "고정 쿨타임 감소는 스킬 가속 적용 후 초 단위로 차감합니다. 스킬 설명의 특수 환급, 적중 시 감소, 모드별 보정은 별도 확인이 필요합니다."
+    ],
+    checkpoints: [
+      "스킬 가속 100은 쿨타임 100% 감소가 아니라 기존 쿨감률 기준 약 50%입니다.",
+      "스킬 가속은 스킬을 얼마나 더 자주 사용할 수 있는지에 가까운 수치라 높아질수록 체감 효율이 완만해집니다.",
+      "챔피언별 조건부 쿨타임 감소, 궁극기 환급, 아이템 효과는 게임 내 툴팁과 패치 내용을 함께 확인하세요.",
+      "목표 쿨타임 역산은 고정 쿨타임 감소를 먼저 고려한 뒤 필요한 총 스킬 가속을 계산합니다."
+    ],
+    faqs: [
+      { question: "스킬 가속 100이면 쿨타임이 0초가 되나요?", answer: "아니요. 스킬 가속 100은 최종 쿨타임을 절반으로 줄이는 값이라 기존 쿨감률로는 약 50%입니다." },
+      { question: "궁극기 가속은 언제 반영되나요?", answer: "R 궁극기를 선택했을 때만 일반 스킬 가속과 궁극기 가속을 더해 계산합니다." },
+      { question: "기존 쿨감률을 스킬 가속으로 바꾸는 공식은 무엇인가요?", answer: "스킬 가속 = 쿨감률 ÷ (100 - 쿨감률) × 100입니다. 예전 쿨감 40%는 약 66.7 스킬 가속입니다." }
+    ],
+    calculate(values) {
+      const slots = ["Q", "W", "E", "R 궁극기"];
+      const slotIndex = Math.max(0, Math.min(slots.length - 1, Math.floor(values.skillSlot)));
+      const slot = slots[slotIndex] ?? slots[0];
+      const baseCooldown = Math.max(0.1, values.baseCooldown);
+      const skillHaste = Math.max(0, values.skillHaste);
+      const ultimateHaste = slotIndex === 3 ? Math.max(0, values.ultimateHaste) : 0;
+      const totalHaste = skillHaste + ultimateHaste;
+      const hasteCooldown = baseCooldown * 100 / (100 + totalHaste);
+      const flatReduction = Math.max(0, values.flatCooldownReduction);
+      const finalCooldown = Math.max(0.1, hasteCooldown - flatReduction);
+      const cdrEquivalent = (1 - finalCooldown / baseCooldown) * 100;
+      const usesPerMinute = 60 / finalCooldown;
+      const fightDuration = Math.max(1, values.fightDuration);
+      const castsInFight = Math.floor(fightDuration / finalCooldown) + 1;
+      const targetCooldown = Math.max(0.1, values.targetCooldown);
+      const targetAfterFlat = Math.max(0.1, targetCooldown + flatReduction);
+      const requiredTotalHaste = Math.max(0, baseCooldown * 100 / targetAfterFlat - 100);
+      const additionalHaste = Math.max(0, requiredTotalHaste - totalHaste);
+      const oldCdr = Math.max(0, Math.min(95, values.oldCdr));
+      const convertedHaste = oldCdr >= 100 ? Number.POSITIVE_INFINITY : oldCdr / (100 - oldCdr) * 100;
+      const cooldownAtOldCdr = baseCooldown * (1 - oldCdr / 100);
+      const fasterCasts = totalHaste / 100 + 1;
+
+      return {
+        headline: `${formatNumber(finalCooldown, 2)}초`,
+        subline: `${slot} · 총 스킬 가속 ${formatNumber(totalHaste, 0)} · 기존 쿨감률 환산 ${formatPercent(cdrEquivalent, 1)} · 분당 ${formatNumber(usesPerMinute, 1)}회`,
+        rows: [
+          { label: "스킬", value: slot, tone: "strong" },
+          { label: "총 스킬 가속", value: `${formatNumber(totalHaste, 0)} (${formatNumber(fasterCasts, 2)}배 자주 사용)`, tone: "strong" },
+          { label: "최종 쿨타임", value: `${formatNumber(finalCooldown, 2)}초`, tone: "strong" },
+          { label: "스킬 가속 적용 후", value: `${formatNumber(hasteCooldown, 2)}초` },
+          { label: "기존 쿨감률 환산", value: formatPercent(cdrEquivalent, 1), tone: "strong" },
+          { label: "분당 사용 가능 횟수", value: `${formatNumber(usesPerMinute, 1)}회` },
+          { label: `${formatNumber(fightDuration, 0)}초 교전 예상`, value: `${formatNumber(castsInFight, 0)}회 시전 가능` },
+          { label: "목표 쿨타임", value: `${formatNumber(targetCooldown, 2)}초` },
+          { label: "목표 필요 총 스킬 가속", value: `${formatNumber(requiredTotalHaste, 1)}`, tone: "strong" },
+          { label: "추가 필요 스킬 가속", value: `${formatNumber(additionalHaste, 1)}`, tone: additionalHaste > 0 ? "strong" : undefined },
+          { label: `기존 쿨감 ${formatPercent(oldCdr, 1)} 변환`, value: `스킬 가속 ${formatNumber(convertedHaste, 1)} · 쿨타임 ${formatNumber(cooldownAtOldCdr, 2)}초` },
+          { label: "주의", value: "챔피언 특수 환급, 적중 시 감소, 모드별 밸런스는 게임 내 툴팁을 확인하세요." }
+        ],
+        chart: [
+          { name: "최종쿨×10", value: finalCooldown * 10 },
+          { name: "쿨감률", value: cdrEquivalent },
+          { name: "분당횟수×10", value: usesPerMinute * 10 },
+          { name: "필요가속", value: requiredTotalHaste }
         ]
       };
     }

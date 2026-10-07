@@ -200,14 +200,18 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "game",
     path: "/game",
     eyebrow: "게임 계산 허브",
-    title: "가챠, 클래시 오브 클랜즈, 로벅스, 리니지 계산기",
-    description: "뽑기 확률, 클래시 오브 클랜즈 업그레이드 자원·시간, 로블록스 로벅스 원화 환산, 리니지 클래식 사냥 효율과 축캐 판정, 블록스 프루츠 거래 W/F/L처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
-    featuredSlugs: ["clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator"],
+    title: "가챠, 롤 스킬 가속, 클래시 오브 클랜즈, 로벅스 계산기",
+    description: "뽑기 확률, 리그 오브 레전드 스킬 가속과 쿨타임 환산, 클래시 오브 클랜즈 업그레이드 자원·시간, 로블록스 로벅스 원화 환산, 리니지 클래식 사냥 효율처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["lol-skill-haste", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character"],
     blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
     sections: [
       {
         title: "게임 계산은 확률과 체감값을 빠르게 확인하는 데 유용합니다.",
-        body: "가챠 확률, 포커 에쿼티, 블록스 프루츠 거래 가치처럼 확률과 시세 감각이 들어간 게임은 직감만으로 판단하기 어렵습니다. 같은 비용과 횟수라도 성공 확률과 기대값을 숫자로 보면 무리한 지출이나 과한 기대를 줄일 수 있습니다."
+        body: "가챠 확률, 포커 에쿼티, 블록스 프루츠 거래 가치, 롤 스킬 가속처럼 확률과 체감값이 들어간 게임은 직감만으로 판단하기 어렵습니다. 같은 비용과 횟수라도 성공 확률과 기대값을 숫자로 보면 무리한 지출이나 과한 기대를 줄일 수 있습니다."
+      },
+      {
+        title: "전투 체감은 실제 쿨타임으로 바꿔 봐야 합니다.",
+        body: "리그 오브 레전드의 스킬 가속은 예전 쿨감률처럼 그대로 더해지는 값이 아닙니다. 최종 쿨타임, 분당 사용 가능 횟수, 목표 쿨타임에 필요한 추가 가속을 같이 보면 아이템 빌드 선택이 쉬워집니다."
       },
       {
         title: "게임 재화는 실제 결제 단가를 먼저 확인해야 합니다.",

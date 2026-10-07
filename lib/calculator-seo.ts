@@ -359,6 +359,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 자원, 재화, 확률 계산기를 함께 확인합니다." }
     ]
   },
+  "lol-skill-haste": {
+    title: "리그 오브 레전드 스킬 가속 계산기 | 롤 쿨타임·쿨감 환산",
+    description:
+      "리그 오브 레전드 스킬 가속 계산기로 최종 쿨타임, 기존 쿨감률 환산, 분당 사용 가능 횟수, 목표 쿨타임에 필요한 스킬 가속을 확인하세요.",
+    keywords: ["리그 오브 레전드 스킬 가속 계산기", "롤 스킬 가속 계산기", "롤 쿨타임 계산기", "스킬 가속 쿨감", "궁극기 가속 계산"],
+    searchIntents: [
+      "롤 스킬 가속을 실제 쿨타임으로 바꾸고 싶을 때",
+      "예전 쿨감률이 현재 스킬 가속으로 얼마인지 확인할 때",
+      "목표 쿨타임을 만들기 위해 필요한 추가 스킬 가속을 계산할 때"
+    ],
+    sections: [
+      {
+        title: "스킬 가속을 최종 쿨타임으로 환산합니다.",
+        body:
+          "기본 쿨타임과 스킬 가속을 입력하면 공식에 따라 실제 최종 쿨타임과 기존 쿨감률 환산값을 계산합니다."
+      },
+      {
+        title: "궁극기 가속과 목표 쿨타임 역산을 지원합니다.",
+        body:
+          "R 스킬을 선택하면 궁극기 가속을 추가로 반영하고, 원하는 목표 쿨타임에 도달하기 위해 필요한 총 스킬 가속과 추가 가속을 보여줍니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/edpi-calculator", label: "eDPI 계산기", text: "게임 감도 세팅도 함께 계산합니다." },
+      { href: "/calculators/win-rate-calculator", label: "게임 승률 계산기", text: "전적과 목표 승률을 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 전투, 확률, 재화 계산기를 함께 확인합니다." }
+    ]
+  },
   "edpi-calculator": {
     title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
     description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",
