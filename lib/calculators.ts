@@ -7291,14 +7291,16 @@ export const calculators: CalculatorConfig[] = [
         type: "select",
         defaultValue: 0,
         options: [
-          { label: "성기사(팔라딘)", value: 0 },
-          { label: "야만용사(바바리안)", value: 1 },
-          { label: "아마존", value: 2 },
-          { label: "암살자", value: 3 },
-          { label: "드루이드", value: 4 },
-          { label: "액트1 용병", value: 5 },
-          { label: "액트2 용병", value: 6 },
-          { label: "액트5 용병", value: 7 }
+          { label: "아마존", value: 0 },
+          { label: "암살자", value: 1 },
+          { label: "강령술사(네크로맨서)", value: 2 },
+          { label: "야만용사(바바리안)", value: 3 },
+          { label: "성기사(팔라딘)", value: 4 },
+          { label: "원소술사(소서리스)", value: 5 },
+          { label: "드루이드", value: 6 },
+          { label: "액트1 용병", value: 7 },
+          { label: "액트2 용병", value: 8 },
+          { label: "액트5 용병", value: 9 }
         ]
       },
       {
@@ -7376,7 +7378,7 @@ export const calculators: CalculatorConfig[] = [
       { question: "용병 공속도 계산할 수 있나요?", answer: "액트1, 액트2, 액트5 용병의 일반적인 단일 무기 기준 공속을 참고용으로 계산할 수 있습니다. 특수 기술은 별도 규칙이 있을 수 있습니다." }
     ],
     calculate(values) {
-      const combatants = ["성기사", "야만용사", "아마존", "암살자", "드루이드", "액트1 용병", "액트2 용병", "액트5 용병"];
+      const combatants = ["아마존", "암살자", "강령술사", "야만용사", "성기사", "원소술사", "드루이드", "액트1 용병", "액트2 용병", "액트5 용병"];
       const skills = ["일반 공격", "질/연속 타격", "용병 잽(Jab)", "배쉬/스턴"];
       const weaponBases = [
         { name: "페이즈 블레이드", wsm: -30 },
