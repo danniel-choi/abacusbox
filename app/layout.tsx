@@ -95,6 +95,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <div className="flex flex-wrap gap-3 text-white/82">
                   <Link href="/about">소개</Link>
                   <Link href="/blog">블로그</Link>
+                  <Link href="/resources">참고 링크</Link>
                   <Link href="/editorial-policy">운영 원칙</Link>
                   <Link href="/privacy">개인정보처리방침</Link>
                   <Link href="/terms">이용약관</Link>
