@@ -40,7 +40,7 @@ const resourceSections: {
       },
       {
         title: "대법원 종합법률정보",
-        href: "https://glaw.scourt.go.kr",
+        href: "https://portal.scourt.go.kr/pgp/index.on?m=PGP1001M01&l=N&c=900",
         owner: "대한민국 법원",
         summary: "판례, 법령, 문헌, 규칙을 통합 검색할 수 있는 법원 공식 법률정보 서비스입니다.",
         useFor: ["판례 검색", "대법원 판결 확인", "사건 쟁점 참고"]
