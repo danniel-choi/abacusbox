@@ -79,6 +79,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "1회 성공 확률과 뽑기 횟수를 기준으로 최소 1회 성공 확률, 목표 개수 이상 확률, 기대 성공 횟수와 예상 비용을 계산합니다.",
     tags: ["뽑기확률", "가챠확률", "랜덤박스"]
   },
+  "fc-transfer-fee": {
+    title: "FC온라인 이적시장 수수료 계산기",
+    category: "생활 가이드",
+    audience: "FC온라인 선수 판매 전 최종 수령 BP를 확인하는 사용자",
+    description: "선수 판매 금액, 판매 인원, 기본 수수료 40%, 프리미엄 PC방, TOP CLASS, 쿠폰 할인율과 최대 할인 한도를 반영해 최종 수령 BP를 계산합니다.",
+    tags: ["FC온라인", "피파수수료", "이적시장"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["게임 승률 계산기", "뽑기 확률 계산기"]
+  },
   "win-rate-calculator": {
     title: "게임 승률 계산기",
     category: "생활 가이드",
@@ -689,7 +698,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
   ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
-  ["draw-probability", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
+  ["draw-probability", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];

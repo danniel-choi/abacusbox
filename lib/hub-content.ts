@@ -200,14 +200,18 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "game",
     path: "/game",
     eyebrow: "게임 계산 허브",
-    title: "가챠, 승률, eDPI, 마우스 감도 계산기",
-    description: "뽑기 확률, 포커 승률, 게임 전적 승률, eDPI, FPS 마우스 감도 변환처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
-    featuredSlugs: ["draw-probability", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
+    title: "가챠, FC온라인 수수료, 승률, eDPI 계산기",
+    description: "뽑기 확률, FC온라인 이적시장 수수료, 포커 승률, 게임 전적 승률, eDPI, FPS 마우스 감도 변환처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["fc-transfer-fee", "draw-probability", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter"],
     blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
     sections: [
       {
         title: "게임 계산은 확률과 체감값을 빠르게 확인하는 데 유용합니다.",
         body: "가챠 확률, 포커 에쿼티, 랜덤 추첨처럼 확률이 들어간 게임은 직감만으로 판단하기 어렵습니다. 같은 비용과 횟수라도 성공 확률과 기대값을 숫자로 보면 무리한 지출이나 과한 기대를 줄일 수 있습니다."
+      },
+      {
+        title: "이적시장 판매는 수수료 할인 구조를 먼저 봐야 합니다.",
+        body: "FC온라인 이적시장처럼 기본 수수료와 PC방, TOP CLASS, 쿠폰 할인이 함께 적용되는 구조는 판매가만 봐서는 실제 수령 BP를 알기 어렵습니다. 최종 수령액과 실효 수수료율을 함께 확인하면 매도 타이밍을 판단하기 쉽습니다."
       },
       {
         title: "FPS 감도는 eDPI와 cm/360을 함께 봐야 합니다.",

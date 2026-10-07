@@ -163,6 +163,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 확률과 감도 계산기를 함께 확인합니다." }
     ]
   },
+  "fc-transfer-fee": {
+    title: "FC온라인 이적시장 수수료 계산기 | 피파 판매 BP 수령액 계산",
+    description:
+      "FC온라인 이적시장 수수료 계산기로 선수 판매 금액, 기본 수수료 40%, 프리미엄 PC방, TOP CLASS, 쿠폰 할인율과 최대 할인 한도를 반영한 최종 수령 BP를 확인하세요.",
+    keywords: ["피파 수수료 계산기", "FC온라인 수수료 계산기", "FC 이적시장 수수료", "피파 판매 수수료", "TOP CLASS 수수료", "FC온라인 BP 계산"],
+    searchIntents: [
+      "FC온라인 선수를 팔면 최종 BP를 얼마나 받는지 알고 싶을 때",
+      "PC방, TOP CLASS, 쿠폰 할인 적용 후 수수료를 비교하고 싶을 때",
+      "쿠폰 최대 할인 한도가 실제 수령액에 미치는 영향을 확인할 때"
+    ],
+    sections: [
+      {
+        title: "기본 수수료 40%에서 할인액을 차감합니다.",
+        body:
+          "선수 판매 금액에 기본 수수료 40%를 적용한 뒤 프리미엄 PC방, TOP CLASS, 쿠폰 할인액을 차감해 최종 수수료와 수령 BP를 계산합니다."
+      },
+      {
+        title: "쿠폰 최대 할인 한도를 따로 반영합니다.",
+        body:
+          "쿠폰 할인율이 높아도 최대 할인 금액이 있으면 실제 할인액은 한도에서 멈춥니다. 억 BP 단위로 최대 할인 한도를 입력해 더 현실적인 수령액을 확인할 수 있습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/draw-probability", label: "뽑기 확률 계산기", text: "이벤트 뽑기나 랜덤박스 확률도 함께 계산합니다." },
+      { href: "/calculators/win-rate-calculator", label: "게임 승률 계산기", text: "게임 전적과 목표 승률을 확인합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 확률, 수수료, 감도 계산기를 함께 확인합니다." }
+    ]
+  },
   "edpi-calculator": {
     title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
     description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",
