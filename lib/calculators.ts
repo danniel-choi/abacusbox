@@ -7311,10 +7311,23 @@ export const calculators: CalculatorConfig[] = [
         options: [
           { label: "일반 공격", value: 0 },
           { label: "질(Zeal) - 참고용", value: 1 },
-          { label: "용병 잽(Jab)", value: 2 },
+          { label: "잽(Jab)", value: 2 },
           { label: "배쉬(Bash)", value: 3 },
           { label: "스턴(Stun)", value: 4 },
-          { label: "퓨리(Fury) - 참고용", value: 5 }
+          { label: "퓨리(Fury) - 참고용", value: 5 },
+          { label: "스트레이프(Strafe) - 참고용", value: 6 },
+          { label: "펜드(Fend) - 참고용", value: 7 },
+          { label: "스마이트(Smite)", value: 8 },
+          { label: "프렌지(Frenzy) - 참고용", value: 9 },
+          { label: "더블 스윙(Double Swing)", value: 10 },
+          { label: "휠윈드(Whirlwind) - 참고용", value: 11 },
+          { label: "드래곤 탈론(Dragon Talon) - 참고용", value: 12 },
+          { label: "드래곤 클로(Dragon Claw) - 참고용", value: 13 },
+          { label: "페럴 레이지(Feral Rage)", value: 14 },
+          { label: "마울(Maul)", value: 15 },
+          { label: "더블 스로우(Double Throw)", value: 16 },
+          { label: "임페일(Impale)", value: 17 },
+          { label: "가이드 애로우(Guided Arrow)", value: 18 }
         ]
       },
       {
@@ -7384,14 +7397,30 @@ export const calculators: CalculatorConfig[] = [
       const skillModels = [
         { name: "일반 공격", baseFrames: 13, minFrames: 7 },
         { name: "질(Zeal) - 참고용", baseFrames: 11, minFrames: 4 },
-        { name: "용병 잽(Jab)", baseFrames: 13, minFrames: 4 },
+        { name: "잽(Jab)", baseFrames: 13, minFrames: 4 },
         { name: "배쉬(Bash)", baseFrames: 14, minFrames: 8 },
         { name: "스턴(Stun)", baseFrames: 15, minFrames: 8 },
-        { name: "퓨리(Fury) - 참고용", baseFrames: 12, minFrames: 4 }
+        { name: "퓨리(Fury) - 참고용", baseFrames: 12, minFrames: 4 },
+        { name: "스트레이프(Strafe) - 참고용", baseFrames: 13, minFrames: 3 },
+        { name: "펜드(Fend) - 참고용", baseFrames: 12, minFrames: 4 },
+        { name: "스마이트(Smite)", baseFrames: 12, minFrames: 6 },
+        { name: "프렌지(Frenzy) - 참고용", baseFrames: 12, minFrames: 5 },
+        { name: "더블 스윙(Double Swing)", baseFrames: 12, minFrames: 5 },
+        { name: "휠윈드(Whirlwind) - 참고용", baseFrames: 12, minFrames: 4 },
+        { name: "드래곤 탈론(Dragon Talon) - 참고용", baseFrames: 12, minFrames: 4 },
+        { name: "드래곤 클로(Dragon Claw) - 참고용", baseFrames: 12, minFrames: 5 },
+        { name: "페럴 레이지(Feral Rage)", baseFrames: 12, minFrames: 5 },
+        { name: "마울(Maul)", baseFrames: 13, minFrames: 6 },
+        { name: "더블 스로우(Double Throw)", baseFrames: 12, minFrames: 5 },
+        { name: "임페일(Impale)", baseFrames: 16, minFrames: 9 },
+        { name: "가이드 애로우(Guided Arrow)", baseFrames: 13, minFrames: 7 }
       ];
       const skillOptionsByCombatant: Record<number, number[]> = {
-        4: [0, 1],
-        6: [0, 5],
+        0: [0, 2, 6, 7, 17, 18],
+        1: [0, 12, 13],
+        3: [0, 3, 4, 9, 10, 11, 16],
+        4: [0, 1, 8],
+        6: [0, 5, 14, 15],
         8: [0, 2],
         9: [0, 3, 4]
       };
