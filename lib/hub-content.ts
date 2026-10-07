@@ -200,14 +200,14 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "game",
     path: "/game",
     eyebrow: "게임 계산 허브",
-    title: "가챠, 리니지 축캐, 디아블로3 보석, FC온라인 수수료 계산기",
-    description: "뽑기 확률, 리니지 클래식 축캐 판정, 디아블로3 보석 제작, FC온라인 이적시장 수수료, 포커 승률, 게임 전적 승률, eDPI처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
-    featuredSlugs: ["lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "draw-probability", "poker-equity-calculator", "win-rate-calculator"],
+    title: "가챠, 블록스 프루츠, 리니지 축캐, 디아블로3 보석 계산기",
+    description: "뽑기 확률, 블록스 프루츠 거래 W/F/L, 리니지 클래식 축캐 판정, 디아블로3 보석 제작, FC온라인 이적시장 수수료, 포커 승률, eDPI처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "draw-probability", "poker-equity-calculator"],
     blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
     sections: [
       {
         title: "게임 계산은 확률과 체감값을 빠르게 확인하는 데 유용합니다.",
-        body: "가챠 확률, 포커 에쿼티, 랜덤 추첨처럼 확률이 들어간 게임은 직감만으로 판단하기 어렵습니다. 같은 비용과 횟수라도 성공 확률과 기대값을 숫자로 보면 무리한 지출이나 과한 기대를 줄일 수 있습니다."
+        body: "가챠 확률, 포커 에쿼티, 블록스 프루츠 거래 가치처럼 확률과 시세 감각이 들어간 게임은 직감만으로 판단하기 어렵습니다. 같은 비용과 횟수라도 성공 확률과 기대값을 숫자로 보면 무리한 지출이나 과한 기대를 줄일 수 있습니다."
       },
       {
         title: "이적시장 판매는 수수료 할인 구조를 먼저 봐야 합니다.",

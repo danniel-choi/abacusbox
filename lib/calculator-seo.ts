@@ -247,6 +247,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 확률, 제작, 수수료 계산기를 함께 확인합니다." }
     ]
   },
+  "blox-fruits-calculator": {
+    title: "블록스 프루츠 계산기 | 거래 W/F/L·스탯·마스터리 계산",
+    description:
+      "블록스 프루츠 계산기로 과일 거래 가치 W/F/L 판정, 수요 보정, 스탯 포인트 배분, 마스터리 목표까지 필요한 예상 시간을 확인하세요.",
+    keywords: ["블록스 프루츠 계산기", "Blox Fruits calculator", "블록스 프루츠 거래 계산기", "블록스 프루츠 WFL", "블록스 프루츠 마스터리 계산기"],
+    searchIntents: [
+      "블록스 프루츠 거래가 이득인지 손해인지 확인하고 싶을 때",
+      "레벨 기준 남은 스탯 포인트와 초과 배분을 확인할 때",
+      "목표 마스터리까지 필요한 파밍 시간을 대략 계산할 때"
+    ],
+    sections: [
+      {
+        title: "거래 가치를 입력해 W/F/L을 판정합니다.",
+        body:
+          "내 제안과 상대 제안의 가치, 수요 점수를 입력하면 수요 보정 가치를 비교해 Win, Fair, Loss를 빠르게 보여줍니다."
+      },
+      {
+        title: "스탯과 마스터리 성장 계획을 함께 봅니다.",
+        body:
+          "현재 레벨의 전체 스탯 포인트와 사용한 포인트를 비교하고, 목표 레벨과 목표 마스터리까지 필요한 예상 시간을 참고용으로 계산합니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/draw-probability", label: "뽑기 확률 계산기", text: "게임 확률과 기대값을 함께 계산합니다." },
+      { href: "/calculators/lineage-classic-lucky-character", label: "리니지 클래식 축캐 계산기", text: "HP/MP 성장 등급을 비교합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 거래, 확률, 제작, 수수료 계산기를 함께 확인합니다." }
+    ]
+  },
   "edpi-calculator": {
     title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
     description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",

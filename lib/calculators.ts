@@ -67,6 +67,7 @@ export type CalculatorSlug =
   | "random-number"
   | "draw-probability"
   | "lineage-classic-lucky-character"
+  | "blox-fruits-calculator"
   | "diablo3-gem-calculator"
   | "fc-transfer-fee"
   | "win-rate-calculator"
@@ -6547,6 +6548,122 @@ export const calculators: CalculatorConfig[] = [
           name: `${count}회`,
           value: binomialAtLeastProbability(count, 1, probability) * 100
         }))
+      };
+    }
+  },
+  {
+    slug: "blox-fruits-calculator",
+    title: "블록스 프루츠 계산기",
+    description: "블록스 프루츠 거래 가치, W/F/L 판정, 스탯 포인트 배분, 마스터리 목표까지 필요한 예상 플레이 시간을 한 번에 계산합니다.",
+    category: "게임",
+    keywords: ["블록스 프루츠 계산기", "Blox Fruits calculator", "블록스 프루츠 거래", "블록스 프루츠 WFL", "블록스 프루츠 마스터리"],
+    badge: "거래·스탯·마스터리",
+    audience: "블록스 프루츠 거래 가치와 성장 계획을 빠르게 비교하려는 Roblox 플레이어",
+    fields: [
+      { name: "yourTradeValue", label: "내 제안 가치", type: "number", unit: "M", min: 0, max: 10000000, step: 1, defaultValue: 100 },
+      { name: "theirTradeValue", label: "상대 제안 가치", type: "number", unit: "M", min: 0, max: 10000000, step: 1, defaultValue: 110 },
+      { name: "yourDemand", label: "내 제안 수요", type: "number", unit: "/10", min: 0, max: 10, step: 0.5, defaultValue: 6 },
+      { name: "theirDemand", label: "상대 제안 수요", type: "number", unit: "/10", min: 0, max: 10, step: 0.5, defaultValue: 7 },
+      { name: "currentLevel", label: "현재 레벨", type: "number", unit: "Lv", min: 1, max: 2550, step: 1, defaultValue: 1500 },
+      { name: "targetLevel", label: "목표 레벨", type: "number", unit: "Lv", min: 1, max: 2550, step: 1, defaultValue: 2550 },
+      { name: "melee", label: "Melee", type: "number", unit: "pt", min: 0, max: 2550, step: 1, defaultValue: 1500 },
+      { name: "defense", label: "Defense", type: "number", unit: "pt", min: 0, max: 2550, step: 1, defaultValue: 1500 },
+      { name: "sword", label: "Sword", type: "number", unit: "pt", min: 0, max: 2550, step: 1, defaultValue: 0 },
+      { name: "gun", label: "Gun", type: "number", unit: "pt", min: 0, max: 2550, step: 1, defaultValue: 0 },
+      { name: "bloxFruit", label: "Blox Fruit", type: "number", unit: "pt", min: 0, max: 2550, step: 1, defaultValue: 1500 },
+      { name: "currentMastery", label: "현재 마스터리", type: "number", min: 1, max: 600, step: 1, defaultValue: 100 },
+      { name: "targetMastery", label: "목표 마스터리", type: "number", min: 1, max: 600, step: 1, defaultValue: 350 },
+      {
+        name: "grindMethod",
+        label: "파밍 속도",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "느림", value: 0 },
+          { label: "보통", value: 1 },
+          { label: "빠름", value: 2 },
+          { label: "레이드/보스 중심", value: 3 }
+        ]
+      },
+      {
+        name: "doubleXp",
+        label: "2배 경험치",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "미적용", value: 0 },
+          { label: "적용", value: 1 }
+        ]
+      }
+    ],
+    guideTitle: "블록스 프루츠 계산 기준",
+    guide: [
+      "거래 계산은 내 제안과 상대 제안의 커뮤니티 가치 입력값을 비교해 Win, Fair, Loss를 판정합니다.",
+      "스탯 계산은 블록스 프루츠에서 자주 쓰는 최대 레벨 2550과 레벨당 3포인트 구조를 기준으로 남은 포인트와 과투입 여부를 확인합니다.",
+      "마스터리와 레벨업 시간은 입력한 목표와 파밍 속도를 바탕으로 한 추정치입니다. 실제 서버, 부스트, 파티, 보스 루트에 따라 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "거래 가치는 실시간 시세가 아니므로 최신 커뮤니티 가격표와 함께 확인하세요.",
+      "Permanent 과 Physical 과일은 가치 차이가 매우 크므로 같은 기준으로 입력해야 합니다.",
+      "Fair 판정이라도 수요가 낮은 아이템은 실제 거래 체감이 나쁠 수 있습니다.",
+      "스탯은 빌드에 따라 정답이 달라지므로 Fruit main, Sword main, Gun main 여부를 먼저 정하세요."
+    ],
+    faqs: [
+      { question: "W/F/L은 무엇인가요?", answer: "Win, Fair, Loss의 약자로 상대 제안 가치가 내 제안보다 충분히 높으면 Win, 비슷하면 Fair, 낮으면 Loss로 표시합니다." },
+      { question: "거래 가치는 자동으로 불러오나요?", answer: "아니요. 현재 계산기는 사용자가 입력한 가치와 수요를 기준으로 계산합니다. 실시간 시세는 커뮤니티 가격표와 함께 확인하는 것이 좋습니다." },
+      { question: "마스터리 시간은 정확한가요?", answer: "파밍 루트와 부스트 차이가 커서 참고용 추정치입니다. 2배 경험치와 파밍 속도 선택으로 대략적인 목표 시간을 잡는 용도로 사용하세요." }
+    ],
+    calculate(values) {
+      const yourValue = Math.max(0, values.yourTradeValue);
+      const theirValue = Math.max(0, values.theirTradeValue);
+      const yourDemand = Math.max(0, Math.min(10, values.yourDemand));
+      const theirDemand = Math.max(0, Math.min(10, values.theirDemand));
+      const demandAdjustedYour = yourValue * (1 + (yourDemand - 5) * 0.025);
+      const demandAdjustedTheir = theirValue * (1 + (theirDemand - 5) * 0.025);
+      const base = Math.max(demandAdjustedYour, demandAdjustedTheir, 1);
+      const difference = demandAdjustedTheir - demandAdjustedYour;
+      const differenceRate = difference / base * 100;
+      const verdict = differenceRate >= 10 ? "Win" : differenceRate <= -10 ? "Loss" : "Fair";
+      const verdictKo = verdict === "Win" ? "이득 거래" : verdict === "Loss" ? "손해 거래" : "비슷한 거래";
+      const currentLevel = Math.max(1, Math.min(2550, Math.floor(values.currentLevel)));
+      const targetLevel = Math.max(currentLevel, Math.min(2550, Math.floor(values.targetLevel)));
+      const totalStatPoints = currentLevel * 3;
+      const targetStatPoints = targetLevel * 3;
+      const usedStats = ["melee", "defense", "sword", "gun", "bloxFruit"].reduce((sum, key) => sum + Math.max(0, Math.floor(values[key] ?? 0)), 0);
+      const remainingStats = totalStatPoints - usedStats;
+      const additionalLevelPoints = Math.max(0, targetStatPoints - totalStatPoints);
+      const currentMastery = Math.max(1, Math.min(600, Math.floor(values.currentMastery)));
+      const targetMastery = Math.max(currentMastery, Math.min(600, Math.floor(values.targetMastery)));
+      const speedMap = [850, 1400, 2200, 3200];
+      const grindMethod = Math.max(0, Math.min(speedMap.length - 1, Math.floor(values.grindMethod)));
+      const xpPerMinute = speedMap[grindMethod] * (values.doubleXp >= 1 ? 2 : 1);
+      const masteryXp = Math.max(0, (targetMastery ** 2 - currentMastery ** 2) * 18);
+      const masteryMinutes = xpPerMinute > 0 ? masteryXp / xpPerMinute : 0;
+      const levelXp = Math.max(0, (targetLevel ** 2 - currentLevel ** 2) * 22);
+      const levelMinutes = xpPerMinute > 0 ? levelXp / xpPerMinute : 0;
+      const formatMillion = (value: number) => `${formatNumber(value, 1)}M`;
+      const formatHours = (minutes: number) => `${formatNumber(minutes / 60, 1)}시간`;
+
+      return {
+        headline: `${verdict} · ${verdictKo}`,
+        subline: `가치 차이 ${formatMillion(Math.abs(difference))} · 수요 보정 차이 ${formatPercent(differenceRate, 1)} · 남은 스탯 ${formatNumber(remainingStats)}pt`,
+        rows: [
+          { label: "거래 판정", value: `${verdict} · ${verdictKo}`, tone: "strong" },
+          { label: "내 제안 보정 가치", value: formatMillion(demandAdjustedYour), tone: verdict === "Loss" ? "strong" : undefined },
+          { label: "상대 제안 보정 가치", value: formatMillion(demandAdjustedTheir), tone: verdict === "Win" ? "strong" : undefined },
+          { label: "가치 차이", value: `${difference >= 0 ? "+" : "-"}${formatMillion(Math.abs(difference))} (${formatPercent(differenceRate, 1)})`, tone: "strong" },
+          { label: "현재 스탯 포인트", value: `${formatNumber(totalStatPoints)}pt` },
+          { label: "사용한 스탯", value: `${formatNumber(usedStats)}pt` },
+          { label: "남은/초과 스탯", value: remainingStats >= 0 ? `${formatNumber(remainingStats)}pt 남음` : `${formatNumber(Math.abs(remainingStats))}pt 초과`, tone: remainingStats < 0 ? "strong" : undefined },
+          { label: "목표 레벨 추가 포인트", value: `${formatNumber(additionalLevelPoints)}pt` },
+          { label: "마스터리 예상 시간", value: `${formatHours(masteryMinutes)} · XP ${formatNumber(masteryXp)}`, tone: "strong" },
+          { label: "레벨업 예상 시간", value: `${formatHours(levelMinutes)} · XP ${formatNumber(levelXp)}` }
+        ],
+        chart: [
+          { name: "내 가치", value: demandAdjustedYour },
+          { name: "상대 가치", value: demandAdjustedTheir },
+          { name: "스탯 사용률", value: totalStatPoints > 0 ? usedStats / totalStatPoints * Math.max(demandAdjustedYour, demandAdjustedTheir, 100) : 0 }
+        ]
       };
     }
   },
