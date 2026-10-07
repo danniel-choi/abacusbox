@@ -70,6 +70,7 @@ export type CalculatorSlug =
   | "lineage-classic-hunting-efficiency"
   | "blox-fruits-calculator"
   | "robux-calculator"
+  | "clash-of-clans-calculator"
   | "diablo3-gem-calculator"
   | "fc-transfer-fee"
   | "win-rate-calculator"
@@ -6904,6 +6905,119 @@ export const calculators: CalculatorConfig[] = [
           { name: "HP 위치", value: hpRatio * 100 },
           { name: "MP 위치", value: mpRatio * 100 },
           { name: "종합", value: totalRatio * 100 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "clash-of-clans-calculator",
+    title: "클래시 오브 클랜즈 계산기",
+    description: "클래시 오브 클랜 업그레이드에 필요한 골드, 엘릭서, 다크 엘릭서 부족분과 파밍 기간, 장인 시간, 보석 단축 참고값을 계산합니다.",
+    category: "게임",
+    keywords: ["클래시 오브 클랜즈 계산기", "클래시 오브 클랜 계산기", "COC 업그레이드 계산기", "COC 보석 계산기", "COC 자원 계산기"],
+    badge: "업그레이드 자원·시간",
+    audience: "클래시 오브 클랜 업그레이드 전 필요한 자원과 장인 시간을 미리 계산하려는 플레이어",
+    fields: [
+      {
+        name: "upgradeType",
+        label: "업그레이드 종류",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "건물", value: 0 },
+          { label: "연구소", value: 1 },
+          { label: "영웅", value: 2 },
+          { label: "벽", value: 3 },
+          { label: "장비", value: 4 }
+        ]
+      },
+      { name: "townHall", label: "마을회관 레벨", type: "number", unit: "TH", min: 1, max: 18, step: 1, defaultValue: 13 },
+      { name: "goldCost", label: "필요 골드", type: "number", unit: "골드", min: 0, max: 1000000000, step: 1000, defaultValue: 12000000 },
+      { name: "elixirCost", label: "필요 엘릭서", type: "number", unit: "엘릭서", min: 0, max: 1000000000, step: 1000, defaultValue: 0 },
+      { name: "darkCost", label: "필요 다크 엘릭서", type: "number", unit: "다크", min: 0, max: 10000000, step: 100, defaultValue: 0 },
+      { name: "currentGold", label: "현재 골드", type: "number", unit: "골드", min: 0, max: 1000000000, step: 1000, defaultValue: 5000000 },
+      { name: "currentElixir", label: "현재 엘릭서", type: "number", unit: "엘릭서", min: 0, max: 1000000000, step: 1000, defaultValue: 0 },
+      { name: "currentDark", label: "현재 다크 엘릭서", type: "number", unit: "다크", min: 0, max: 10000000, step: 100, defaultValue: 0 },
+      { name: "goldPerDay", label: "하루 골드 수급", type: "number", unit: "골드/일", min: 0, max: 1000000000, step: 1000, defaultValue: 3000000 },
+      { name: "elixirPerDay", label: "하루 엘릭서 수급", type: "number", unit: "엘릭서/일", min: 0, max: 1000000000, step: 1000, defaultValue: 3000000 },
+      { name: "darkPerDay", label: "하루 다크 수급", type: "number", unit: "다크/일", min: 0, max: 10000000, step: 100, defaultValue: 30000 },
+      { name: "upgradeDays", label: "업그레이드 시간", type: "number", unit: "일", min: 0, max: 365, step: 1, defaultValue: 7 },
+      { name: "upgradeHours", label: "추가 시간", type: "number", unit: "시간", min: 0, max: 23, step: 1, defaultValue: 0 },
+      { name: "availableBuilders", label: "사용 가능 장인", type: "number", unit: "명", min: 1, max: 6, step: 1, defaultValue: 5 },
+      { name: "builderPotionCount", label: "장인 포션", type: "number", unit: "개", min: 0, max: 100, step: 1, defaultValue: 0 },
+      { name: "goldPassDiscount", label: "골드 패스 할인", type: "number", unit: "%", min: 0, max: 20, step: 1, defaultValue: 0 },
+      { name: "wallCount", label: "벽 개수", type: "number", unit: "개", min: 0, max: 500, step: 1, defaultValue: 0 }
+    ],
+    guideTitle: "클래시 오브 클랜즈 업그레이드 계산 기준",
+    guide: [
+      "업그레이드 비용과 시간을 직접 입력해 현재 보유 자원 대비 부족분, 하루 수급 기준 파밍 기간, 장인 완료 예상 시간을 계산합니다.",
+      "골드 패스 할인은 자원 비용과 업그레이드 시간에 같은 할인율로 반영합니다. 실제 게임 내 이벤트나 시즌 혜택이 다르면 게임 화면의 값을 우선하세요.",
+      "장인 포션은 참고용으로 1개당 장인 1명 기준 약 9시간의 대기 시간 절감으로 계산합니다. 여러 장인을 동시에 돌리는 전체 계정 효율도 따로 표시합니다."
+    ],
+    checkpoints: [
+      "클래시 오브 클랜은 밸런스 패치로 비용과 시간이 자주 바뀌므로 게임 내 표시값을 입력하는 방식이 가장 안전합니다.",
+      "벽 업그레이드는 여러 개를 한 번에 계산할 수 있도록 벽 개수를 입력하면 비용을 곱해 계산합니다.",
+      "장인 포션, 책, 해머, 룬 같은 마법 아이템은 실제 적용 조건이 다르므로 결과를 계획용 참고값으로 보세요.",
+      "연구소, 영웅, 장비는 서로 다른 자원과 대기열을 쓰므로 업그레이드 종류를 구분해 메모하는 것이 좋습니다."
+    ],
+    faqs: [
+      { question: "공식 API로 내 마을 정보를 불러오나요?", answer: "아니요. 현재 계산기는 게임 화면에 표시된 비용과 시간을 직접 입력해 계산하는 방식입니다." },
+      { question: "장인 포션 계산은 정확한가요?", answer: "장인 포션의 실제 효과는 계정 상황에 따라 달라집니다. 이 계산기는 1개당 약 9시간 절감 기준의 참고값으로 보여줍니다." },
+      { question: "벽 업그레이드는 어떻게 계산하나요?", answer: "벽 개수를 입력하면 골드/엘릭서 비용에 벽 개수를 곱해 총 필요 자원과 부족분을 계산합니다." }
+    ],
+    calculate(values) {
+      const types = ["건물", "연구소", "영웅", "벽", "장비"];
+      const upgradeType = types[Math.max(0, Math.min(types.length - 1, Math.floor(values.upgradeType)))] ?? types[0];
+      const wallCount = Math.max(0, Math.floor(values.wallCount));
+      const multiplier = upgradeType === "벽" && wallCount > 0 ? wallCount : 1;
+      const discountRate = Math.max(0, Math.min(20, values.goldPassDiscount));
+      const discountFactor = 1 - discountRate / 100;
+      const goldCost = Math.max(0, values.goldCost) * multiplier * discountFactor;
+      const elixirCost = Math.max(0, values.elixirCost) * multiplier * discountFactor;
+      const darkCost = Math.max(0, values.darkCost) * multiplier * discountFactor;
+      const goldShortage = Math.max(0, goldCost - Math.max(0, values.currentGold));
+      const elixirShortage = Math.max(0, elixirCost - Math.max(0, values.currentElixir));
+      const darkShortage = Math.max(0, darkCost - Math.max(0, values.currentDark));
+      const goldDays = values.goldPerDay > 0 ? goldShortage / values.goldPerDay : 0;
+      const elixirDays = values.elixirPerDay > 0 ? elixirShortage / values.elixirPerDay : 0;
+      const darkDays = values.darkPerDay > 0 ? darkShortage / values.darkPerDay : 0;
+      const farmDays = Math.max(goldDays, elixirDays, darkDays);
+      const baseHours = (Math.max(0, values.upgradeDays) * 24 + Math.max(0, values.upgradeHours)) * discountFactor;
+      const builders = Math.max(1, Math.min(6, Math.floor(values.availableBuilders)));
+      const potionCount = Math.max(0, Math.floor(values.builderPotionCount));
+      const singleUpgradeSavedHours = Math.min(baseHours, potionCount * 9);
+      const remainingHours = Math.max(0, baseHours - singleUpgradeSavedHours);
+      const accountSavedHours = potionCount * builders * 9;
+      const gemHours = Math.max(0, remainingHours);
+      const estimatedFinishGems = Math.ceil(gemHours * 6);
+      const totalResources = goldCost + elixirCost + darkCost;
+      const totalShortage = goldShortage + elixirShortage + darkShortage;
+      const readyNow = totalShortage <= 0;
+      const formatDays = (days: number) => days <= 0 ? "즉시 가능" : `${formatNumber(days, 1)}일`;
+      const formatDuration = (hours: number) => hours <= 0 ? "즉시 완료" : `${formatNumber(hours / 24, 1)}일 (${formatNumber(hours, 0)}시간)`;
+
+      return {
+        headline: readyNow ? "자원 준비 완료" : `${formatDays(farmDays)} 파밍 필요`,
+        subline: `${upgradeType} · TH${Math.max(1, Math.floor(values.townHall))} · 남은 장인 시간 ${formatDuration(remainingHours)} · 보석 단축 약 ${formatNumber(estimatedFinishGems)}개`,
+        rows: [
+          { label: "업그레이드 종류", value: `${upgradeType}${upgradeType === "벽" && wallCount > 0 ? ` ${formatNumber(wallCount)}개` : ""}`, tone: "strong" },
+          { label: "할인 반영 총 자원", value: `${formatWon(Math.round(totalResources)).replace("원", "")} 자원`, tone: "strong" },
+          { label: "골드 부족분", value: `${formatNumber(Math.round(goldShortage))} 골드` },
+          { label: "엘릭서 부족분", value: `${formatNumber(Math.round(elixirShortage))} 엘릭서` },
+          { label: "다크 엘릭서 부족분", value: `${formatNumber(Math.round(darkShortage))} 다크` },
+          { label: "총 부족 자원", value: `${formatNumber(Math.round(totalShortage))}`, tone: readyNow ? undefined : "strong" },
+          { label: "자원 파밍 예상", value: formatDays(farmDays), tone: readyNow ? undefined : "strong" },
+          { label: "기본 업그레이드 시간", value: formatDuration(baseHours) },
+          { label: "장인 포션 절감", value: `단일 업그레이드 ${formatNumber(singleUpgradeSavedHours, 0)}시간 · 계정 전체 ${formatNumber(accountSavedHours, 0)}장인시간` },
+          { label: "남은 완료 시간", value: formatDuration(remainingHours), tone: "strong" },
+          { label: "보석 즉시 완료 참고", value: `약 ${formatNumber(estimatedFinishGems)}개`, tone: "strong" },
+          { label: "추천 확인", value: "게임 내 실제 비용·시간과 이벤트 할인 적용 여부를 최종 확인하세요." }
+        ],
+        chart: [
+          { name: "골드부족", value: goldShortage },
+          { name: "엘릭서부족", value: elixirShortage },
+          { name: "다크부족×100", value: darkShortage * 100 },
+          { name: "남은시간×10k", value: remainingHours * 10000 }
         ]
       };
     }

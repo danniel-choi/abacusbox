@@ -124,6 +124,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     hubLabel: "게임 계산기",
     relatedTitles: ["블록스 프루츠 계산기", "뽑기 확률 계산기"]
   },
+  "clash-of-clans-calculator": {
+    title: "클래시 오브 클랜즈 계산기",
+    category: "생활 가이드",
+    audience: "클래시 오브 클랜 업그레이드 자원과 장인 시간을 미리 계산하는 플레이어",
+    description: "업그레이드 비용, 보유 자원, 하루 수급량, 장인 시간, 장인 포션, 골드 패스 할인을 입력해 부족 자원과 파밍 기간, 보석 단축 참고값을 계산합니다.",
+    tags: ["클래시오브클랜", "COC", "업그레이드"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["로블록스 로벅스 계산기", "리니지 클래식 사냥 효율 계산기"]
+  },
   "fc-transfer-fee": {
     title: "피파 수수료 계산기",
     category: "생활 가이드",
@@ -743,7 +752,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
   ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
-  ["draw-probability", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
+  ["draw-probability", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];

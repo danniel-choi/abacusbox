@@ -331,6 +331,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 결제, 거래, 사냥, 확률 계산기를 함께 확인합니다." }
     ]
   },
+  "clash-of-clans-calculator": {
+    title: "클래시 오브 클랜즈 계산기 | 업그레이드 자원·시간·보석 계산",
+    description:
+      "클래시 오브 클랜즈 계산기로 업그레이드에 필요한 골드, 엘릭서, 다크 엘릭서 부족분과 파밍 기간, 장인 시간, 보석 단축 참고값을 계산하세요.",
+    keywords: ["클래시 오브 클랜즈 계산기", "클래시 오브 클랜 계산기", "COC 업그레이드 계산기", "COC 자원 계산기", "COC 보석 계산기"],
+    searchIntents: [
+      "클래시 오브 클랜 업그레이드에 부족한 자원을 계산하고 싶을 때",
+      "업그레이드 완료까지 남은 장인 시간과 장인 포션 효율을 보고 싶을 때",
+      "골드 패스 할인과 벽 여러 개 업그레이드 비용을 함께 계산하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "업그레이드 비용과 보유 자원을 비교합니다.",
+        body:
+          "게임 화면에 표시된 골드, 엘릭서, 다크 엘릭서 비용을 입력하면 현재 보유량 대비 부족분과 하루 수급량 기준 파밍 기간을 계산합니다."
+      },
+      {
+        title: "장인 시간과 보석 단축 참고값을 함께 보여줍니다.",
+        body:
+          "업그레이드 시간, 사용 가능 장인 수, 장인 포션 개수를 입력해 남은 완료 시간과 단축 참고값을 확인할 수 있습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/robux-calculator", label: "로블록스 로벅스 계산기", text: "게임 재화 원화 환산도 함께 확인합니다." },
+      { href: "/calculators/lineage-classic-hunting-efficiency", label: "리니지 클래식 사냥 효율 계산기", text: "사냥 효율과 순수익을 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 자원, 재화, 확률 계산기를 함께 확인합니다." }
+    ]
+  },
   "edpi-calculator": {
     title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
     description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",
