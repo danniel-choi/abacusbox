@@ -1,6 +1,6 @@
 import { calculators, type CalculatorConfig, type CalculatorSlug } from "@/lib/calculators";
 
-export type CalculatorGroup = "labor" | "loan" | "tax" | "investment" | "health" | "daily" | "life" | "business" | "math";
+export type CalculatorGroup = "labor" | "loan" | "tax" | "investment" | "health" | "daily" | "life" | "game" | "business" | "math";
 
 export const CALCULATOR_GROUP_META: Record<
   CalculatorGroup,
@@ -54,6 +54,13 @@ export const CALCULATOR_GROUP_META: Record<
     icon: "🧰",
     accentClass: "text-[#c2410c]",
     softClass: "bg-[#fff0e3]"
+  },
+  game: {
+    label: "게임",
+    description: "가챠 확률, 포커 승률, 게임 승률, eDPI, 마우스 감도 변환 도구",
+    icon: "🎮",
+    accentClass: "text-[#7c2d12]",
+    softClass: "bg-[#ffedd5]"
   },
   business: {
     label: "사업·판매",
@@ -143,6 +150,9 @@ export const CALCULATOR_ICON_BY_SLUG: Record<CalculatorSlug, string> = {
   "pyeong-converter": "㎡",
   "random-number": "🎲",
   "draw-probability": "🎰",
+  "win-rate-calculator": "🏆",
+  "edpi-calculator": "🖱",
+  "mouse-sensitivity-converter": "🎯",
   "text-counter": "✍",
   "tip-calculator": "🍽",
   "poker-equity-calculator": "♠",
@@ -267,11 +277,14 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   stopwatch: "daily",
   "internet-speed-test": "daily",
   "pyeong-converter": "daily",
-  "random-number": "daily",
-  "draw-probability": "life",
+  "random-number": "game",
+  "draw-probability": "game",
+  "win-rate-calculator": "game",
+  "edpi-calculator": "game",
+  "mouse-sensitivity-converter": "game",
   "text-counter": "daily",
   "tip-calculator": "life",
-  "poker-equity-calculator": "life",
+  "poker-equity-calculator": "game",
   "spending-habit-score": "life",
   "salary-vanish-calculator": "life",
   "password-generator": "daily",
@@ -395,9 +408,12 @@ export function getFeaturedCalculators() {
     "vehicle-inspection-period",
     "auto-installment",
     "fuel-cost",
+    "win-rate-calculator",
     "kpass-refund",
     "childbirth-grant",
     "draw-probability",
+    "edpi-calculator",
+    "mouse-sensitivity-converter",
     "text-counter",
     "tip-calculator",
     "poker-equity-calculator",
@@ -450,7 +466,10 @@ export function getPopularCalculators() {
     "traffic-fine-penalty",
     "vehicle-inspection-period",
     "fuel-cost",
+    "win-rate-calculator",
     "draw-probability",
+    "edpi-calculator",
+    "mouse-sensitivity-converter",
     "text-counter",
     "tip-calculator",
     "poker-equity-calculator",
@@ -510,7 +529,10 @@ export function getRecentCalculators() {
     "vehicle-inspection-period",
     "auto-installment",
     "fuel-cost",
+    "win-rate-calculator",
     "draw-probability",
+    "edpi-calculator",
+    "mouse-sensitivity-converter",
     "text-counter",
     "tip-calculator",
     "poker-equity-calculator",

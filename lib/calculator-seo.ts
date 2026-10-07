@@ -148,6 +148,51 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/daily", label: "일상 도구 계산기 모음", text: "날짜, 단위, 할인율, 퍼센트 계산기를 함께 확인합니다." }
     ]
   },
+  "win-rate-calculator": {
+    title: "게임 승률 계산기 | 전적 승률·승점·목표 승률 계산",
+    description: "게임 승률 계산기로 승, 무, 패 전적을 입력해 전체 승률, 승패 기준 승률, 승점, 목표 승률까지 필요한 추가 승리 수를 확인하세요.",
+    keywords: ["승률 계산기", "게임 승률 계산", "전적 승률", "목표 승률", "승점 계산기"],
+    searchIntents: ["현재 게임 전적의 승률을 알고 싶을 때", "목표 승률까지 몇 승이 더 필요한지 확인할 때", "승점과 경기당 승점을 함께 계산할 때"],
+    sections: [
+      { title: "승·무·패 전적을 나누어 승률을 계산합니다.", body: "전체 경기 기준 승률과 무승부를 제외한 승패 기준 승률을 함께 보여줘 전적을 더 정확히 해석할 수 있습니다." },
+      { title: "목표 승률까지 필요한 추가 승리 수를 보여줍니다.", body: "앞으로 전부 승리한다고 가정했을 때 목표 승률 이상이 되기 위한 최소 추가 승리 수를 계산합니다." }
+    ],
+    internalLinks: [
+      { href: "/calculators/poker-equity-calculator", label: "포커 승률 계산기", text: "홀덤 핸드와 보드 기준 승률도 확인합니다." },
+      { href: "/calculators/draw-probability", label: "뽑기 확률 계산기", text: "가챠와 랜덤박스 성공 확률을 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 확률과 감도 계산기를 함께 확인합니다." }
+    ]
+  },
+  "edpi-calculator": {
+    title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
+    description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",
+    keywords: ["eDPI 계산기", "DPI 감도 계산", "FPS 감도 계산", "마우스 감도", "인게임 감도"],
+    searchIntents: ["FPS 게임의 eDPI를 계산하고 싶을 때", "DPI를 바꿔도 같은 감도를 유지하고 싶을 때", "목표 eDPI에 맞는 인게임 감도를 찾을 때"],
+    sections: [
+      { title: "DPI와 인게임 감도를 곱해 eDPI를 계산합니다.", body: "eDPI는 같은 게임 안에서 감도 기준을 비교할 때 유용한 값입니다. 장비 DPI를 바꾼 뒤에도 기준값을 유지할 수 있습니다." },
+      { title: "변경할 DPI 기준 새 감도를 바로 보여줍니다.", body: "현재 eDPI를 변경할 DPI로 나누어 같은 체감을 목표로 하는 인게임 감도를 계산합니다." }
+    ],
+    internalLinks: [
+      { href: "/calculators/mouse-sensitivity-converter", label: "마우스 감도 변환 계산기", text: "cm/360 기준으로 감도를 조정합니다." },
+      { href: "/calculators/win-rate-calculator", label: "게임 승률 계산기", text: "게임 전적과 목표 승률을 함께 확인합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 플레이에 필요한 계산기를 모아봅니다." }
+    ]
+  },
+  "mouse-sensitivity-converter": {
+    title: "마우스 감도 변환 계산기 | FPS cm/360·DPI 감도 변환",
+    description: "마우스 감도 변환 계산기로 현재 cm/360, DPI, 인게임 감도를 기준으로 목표 cm/360에 맞는 새 감도와 eDPI를 계산하세요.",
+    keywords: ["마우스 감도 변환", "cm/360 계산기", "FPS 감도 변환", "DPI 변환", "게임 감도 계산기"],
+    searchIntents: ["목표 cm/360에 맞는 게임 감도를 계산할 때", "현재 감도보다 빠르거나 느린 감도를 비교할 때", "DPI 기준 eDPI 변화를 함께 확인할 때"],
+    sections: [
+      { title: "cm/360 기준으로 새 인게임 감도를 계산합니다.", body: "현재 cm/360과 감도를 입력하면 목표 cm/360에 맞는 새 감도를 반비례 관계로 추정합니다." },
+      { title: "감도 변화율과 eDPI를 함께 보여줍니다.", body: "단순 감도값뿐 아니라 현재 eDPI, 새 eDPI, 감도 변화율을 함께 보여줘 조정 폭을 판단하기 쉽습니다." }
+    ],
+    internalLinks: [
+      { href: "/calculators/edpi-calculator", label: "eDPI 계산기", text: "DPI와 인게임 감도 기준 eDPI를 계산합니다." },
+      { href: "/calculators/random-number", label: "랜덤 숫자 생성기", text: "게임 추첨이나 팀 배정에 쓸 숫자를 생성합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 확률과 감도 도구를 함께 확인합니다." }
+    ]
+  },
   "gold-price-calculator": {
     title: "금 시세 계산기 | 순금·18K·14K 금값과 매입가 계산",
     description:

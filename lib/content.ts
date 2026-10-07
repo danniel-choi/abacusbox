@@ -79,6 +79,51 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "1회 성공 확률과 뽑기 횟수를 기준으로 최소 1회 성공 확률, 목표 개수 이상 확률, 기대 성공 횟수와 예상 비용을 계산합니다.",
     tags: ["뽑기확률", "가챠확률", "랜덤박스"]
   },
+  "win-rate-calculator": {
+    title: "게임 승률 계산기",
+    category: "생활 가이드",
+    audience: "랭크 게임, 팀전, 리그 전적을 관리하는 사용자",
+    description: "승, 무, 패 전적을 기준으로 전체 승률, 승패 기준 승률, 승점, 목표 승률까지 필요한 추가 승리 수를 계산합니다.",
+    tags: ["게임승률", "전적관리", "목표승률"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["포커 승률 계산기", "뽑기 확률 계산기"]
+  },
+  "edpi-calculator": {
+    title: "eDPI 계산기",
+    category: "생활 가이드",
+    audience: "FPS 게임에서 DPI와 인게임 감도를 맞추려는 사용자",
+    description: "마우스 DPI와 인게임 감도로 eDPI를 계산하고 DPI 변경 시 같은 감도를 유지할 새 감도를 계산합니다.",
+    tags: ["eDPI", "FPS감도", "마우스DPI"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["마우스 감도 변환 계산기", "에임 테스트"]
+  },
+  "mouse-sensitivity-converter": {
+    title: "마우스 감도 변환 계산기",
+    category: "생활 가이드",
+    audience: "FPS 게임에서 cm/360 기준으로 감도를 조정하는 사용자",
+    description: "현재 cm/360, DPI, 인게임 감도를 기준으로 목표 cm/360에 맞는 새 감도와 eDPI를 계산합니다.",
+    tags: ["마우스감도", "cm360", "FPS"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["eDPI 계산기", "게임 승률 계산기"]
+  },
+  "poker-equity-calculator": {
+    title: "포커 승률 계산기",
+    category: "생활 가이드",
+    audience: "텍사스 홀덤 핸드와 보드 상황의 승률을 확인하는 사용자",
+    description: "플레이어의 핸드와 보드 카드를 기준으로 텍사스 홀덤 승률과 에쿼티를 시뮬레이션합니다.",
+    tags: ["포커", "홀덤", "승률"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["게임 승률 계산기", "뽑기 확률 계산기"]
+  },
+  "random-number": {
+    title: "랜덤 숫자 생성기",
+    category: "생활 가이드",
+    audience: "게임, 추첨, 자리 배정에 무작위 숫자가 필요한 사용자",
+    description: "최소값과 최대값 사이에서 중복 허용 여부를 선택해 임의 숫자를 생성합니다.",
+    tags: ["랜덤", "추첨", "무작위"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["뽑기 확률 계산기", "게임 승률 계산기"]
+  },
   "moving-cost": {
     title: "이사 비용 계산기",
     category: "생활 가이드",
@@ -643,7 +688,8 @@ const hourlyAutoBlogCalculatorGroups = [
   ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
   ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
-  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "draw-probability", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
+  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
+  ["draw-probability", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];

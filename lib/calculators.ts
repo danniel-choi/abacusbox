@@ -66,6 +66,9 @@ export type CalculatorSlug =
   | "pyeong-converter"
   | "random-number"
   | "draw-probability"
+  | "win-rate-calculator"
+  | "edpi-calculator"
+  | "mouse-sensitivity-converter"
   | "text-counter"
   | "tip-calculator"
   | "poker-equity-calculator"
@@ -127,7 +130,7 @@ export type CalculatorSlug =
   | "three-d-calculator"
   | "web-calculator";
 
-export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학";
+export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학" | "게임";
 
 export type InputField = {
   name: string;
@@ -6541,6 +6544,194 @@ export const calculators: CalculatorConfig[] = [
           name: `${count}회`,
           value: binomialAtLeastProbability(count, 1, probability) * 100
         }))
+      };
+    }
+  },
+  {
+    slug: "win-rate-calculator",
+    title: "게임 승률 계산기",
+    description: "승, 무, 패 전적을 입력해 승률, 패배 제외 승률, 승점, 목표 승률까지 필요한 추가 승리 수를 계산합니다.",
+    category: "게임",
+    keywords: ["승률 계산기", "게임 승률", "전적 승률 계산", "목표 승률", "승점 계산기"],
+    badge: "전적·목표 승률",
+    audience: "랭크 게임, 팀전, 리그 전적의 승률과 목표 승률을 확인하려는 사용자",
+    fields: [
+      { name: "wins", label: "승", type: "number", unit: "승", min: 0, max: 100000, step: 1, defaultValue: 48 },
+      { name: "draws", label: "무", type: "number", unit: "무", min: 0, max: 100000, step: 1, defaultValue: 4 },
+      { name: "losses", label: "패", type: "number", unit: "패", min: 0, max: 100000, step: 1, defaultValue: 38 },
+      { name: "targetWinRate", label: "목표 승률", type: "number", unit: "%", min: 0, max: 100, step: 0.1, defaultValue: 55 },
+      { name: "winPoint", label: "승리 승점", type: "number", unit: "점", min: 0, max: 10, step: 1, defaultValue: 3 },
+      { name: "drawPoint", label: "무승부 승점", type: "number", unit: "점", min: 0, max: 10, step: 1, defaultValue: 1 }
+    ],
+    guideTitle: "게임 승률 계산 기준",
+    guide: [
+      "승률은 승리 수를 전체 경기 수로 나누어 계산합니다.",
+      "무승부가 있는 게임은 전체 승률과 함께 무승부를 제외한 승패 기준 승률을 별도로 보여줍니다.",
+      "목표 승률까지 필요한 추가 승리 수는 앞으로 전부 승리한다고 가정한 단순 계산입니다."
+    ],
+    checkpoints: [
+      "무승부가 많은 게임은 전체 승률과 승패 기준 승률을 함께 봐야 합니다.",
+      "목표 승률이 현재보다 낮으면 추가 승리 수는 0으로 표시됩니다.",
+      "MMR, 티어 점수, 연승 보너스 같은 게임별 규칙은 반영하지 않습니다."
+    ],
+    faqs: [
+      { question: "무승부는 승률에 포함되나요?", answer: "전체 승률에는 전체 경기 수에 포함하고, 별도로 무승부를 제외한 승패 기준 승률도 보여줍니다." },
+      { question: "목표 승률까지 필요한 승리는 어떻게 계산하나요?", answer: "현재 전적 이후 추가 경기를 모두 승리한다고 가정하고 목표 승률 이상이 되는 최소 승리 수를 찾습니다." }
+    ],
+    calculate(values) {
+      const wins = Math.max(0, Math.floor(values.wins));
+      const draws = Math.max(0, Math.floor(values.draws));
+      const losses = Math.max(0, Math.floor(values.losses));
+      const total = wins + draws + losses;
+      const decisiveGames = wins + losses;
+      const winRate = total > 0 ? wins / total * 100 : 0;
+      const decisiveWinRate = decisiveGames > 0 ? wins / decisiveGames * 100 : 0;
+      const points = wins * values.winPoint + draws * values.drawPoint;
+      const pointsPerGame = total > 0 ? points / total : 0;
+      const target = Math.min(Math.max(values.targetWinRate, 0), 100) / 100;
+      let neededWins = 0;
+      let neededWinsText = "0승";
+
+      if (target >= 1) {
+        neededWinsText = losses + draws > 0 ? "도달 불가" : "0승";
+      } else {
+        while (total + neededWins > 0 && (wins + neededWins) / (total + neededWins) < target && neededWins < 1000000) {
+          neededWins += 1;
+        }
+        neededWinsText = `${neededWins.toLocaleString("ko-KR")}승`;
+      }
+
+      return {
+        headline: formatPercent(winRate, 2),
+        subline: `${wins}승 ${draws}무 ${losses}패 · 목표 ${formatPercent(values.targetWinRate, 1)}까지 ${neededWinsText === "도달 불가" ? "도달 불가" : `${neededWinsText} 추가 필요`}`,
+        rows: [
+          { label: "전체 경기", value: `${total.toLocaleString("ko-KR")}경기` },
+          { label: "전체 승률", value: formatPercent(winRate, 2), tone: "strong" },
+          { label: "승패 기준 승률", value: formatPercent(decisiveWinRate, 2) },
+          { label: "승점", value: `${points.toLocaleString("ko-KR")}점`, tone: "strong" },
+          { label: "경기당 승점", value: `${formatNumber(pointsPerGame, 2)}점` },
+          { label: "목표 승률까지 추가 승리", value: neededWinsText, tone: "strong" }
+        ],
+        chart: [
+          { name: "승", value: wins },
+          { name: "무", value: draws },
+          { name: "패", value: losses }
+        ]
+      };
+    }
+  },
+  {
+    slug: "edpi-calculator",
+    title: "eDPI 계산기",
+    description: "마우스 DPI와 인게임 감도를 입력해 FPS 게임의 eDPI를 계산하고, DPI 변경 시 같은 감도를 유지할 인게임 감도를 변환합니다.",
+    category: "게임",
+    keywords: ["eDPI 계산기", "DPI 감도 계산", "FPS 감도", "마우스 감도", "발로란트 감도", "오버워치 감도"],
+    badge: "DPI×감도",
+    audience: "FPS 게임에서 마우스 감도를 비교하거나 장비 DPI 변경 후 같은 체감을 유지하려는 사용자",
+    fields: [
+      { name: "dpi", label: "현재 DPI", type: "number", unit: "DPI", min: 1, max: 50000, step: 1, defaultValue: 800 },
+      { name: "sensitivity", label: "현재 인게임 감도", type: "number", min: 0, max: 100, step: 0.001, defaultValue: 0.45 },
+      { name: "newDpi", label: "변경할 DPI", type: "number", unit: "DPI", min: 1, max: 50000, step: 1, defaultValue: 1600 },
+      { name: "targetEdpi", label: "목표 eDPI", type: "number", min: 0, max: 1000000, step: 1, defaultValue: 360 }
+    ],
+    guideTitle: "eDPI 계산 기준",
+    guide: [
+      "eDPI는 마우스 DPI에 게임 내 감도를 곱한 값입니다.",
+      "DPI를 바꿔도 같은 eDPI를 유지하면 대체로 비슷한 마우스 이동감을 유지할 수 있습니다.",
+      "게임마다 감도 스케일과 시야각, 줌 감도 규칙이 다르므로 eDPI는 같은 게임 안에서 비교하는 용도로 보세요."
+    ],
+    checkpoints: [
+      "현재 eDPI = DPI × 인게임 감도입니다.",
+      "새 감도 = 현재 eDPI ÷ 변경할 DPI입니다.",
+      "패드 크기, 윈도우 포인터 설정, 게임별 raw input 여부도 체감에 영향을 줍니다."
+    ],
+    faqs: [
+      { question: "eDPI가 같으면 모든 게임에서 감도가 같나요?", answer: "아니요. eDPI는 같은 게임 또는 같은 감도 체계 안에서 비교할 때 가장 유용합니다." },
+      { question: "DPI를 두 배로 올리면 감도는 어떻게 해야 하나요?", answer: "같은 eDPI를 유지하려면 인게임 감도를 절반으로 낮추면 됩니다." }
+    ],
+    calculate(values) {
+      const dpi = Math.max(values.dpi, 1);
+      const sensitivity = Math.max(values.sensitivity, 0);
+      const newDpi = Math.max(values.newDpi, 1);
+      const edpi = dpi * sensitivity;
+      const convertedSensitivity = edpi / newDpi;
+      const targetSensitivity = Math.max(values.targetEdpi, 0) / dpi;
+      const targetNewDpiSensitivity = Math.max(values.targetEdpi, 0) / newDpi;
+
+      return {
+        headline: formatNumber(edpi, 2),
+        subline: `${formatNumber(dpi)} DPI × ${formatNumber(sensitivity, 3)} 감도 · ${formatNumber(newDpi)} DPI에서는 ${formatNumber(convertedSensitivity, 4)}`,
+        rows: [
+          { label: "현재 eDPI", value: formatNumber(edpi, 2), tone: "strong" },
+          { label: "변경 DPI에서 같은 감도", value: formatNumber(convertedSensitivity, 4), tone: "strong" },
+          { label: "목표 eDPI 현재 DPI 감도", value: formatNumber(targetSensitivity, 4) },
+          { label: "목표 eDPI 변경 DPI 감도", value: formatNumber(targetNewDpiSensitivity, 4) },
+          { label: "DPI 변경 배율", value: `${formatNumber(newDpi / dpi, 2)}배` }
+        ],
+        chart: [
+          { name: "현재 eDPI", value: edpi },
+          { name: "목표 eDPI", value: Math.max(values.targetEdpi, 0) },
+          { name: "변경 DPI", value: newDpi * convertedSensitivity }
+        ]
+      };
+    }
+  },
+  {
+    slug: "mouse-sensitivity-converter",
+    title: "마우스 감도 변환 계산기",
+    description: "현재 cm/360, DPI, 인게임 감도를 기준으로 목표 cm/360에 맞는 새 감도와 eDPI를 계산합니다.",
+    category: "게임",
+    keywords: ["마우스 감도 변환", "cm 360 계산기", "FPS 감도 변환", "DPI 변환", "게임 감도 계산기"],
+    badge: "cm/360 변환",
+    audience: "FPS 게임에서 마우스패드 이동 거리와 인게임 감도를 맞추려는 사용자",
+    fields: [
+      { name: "currentCm360", label: "현재 cm/360", type: "number", unit: "cm", min: 1, max: 300, step: 0.1, defaultValue: 40 },
+      { name: "currentSensitivity", label: "현재 인게임 감도", type: "number", min: 0.001, max: 100, step: 0.001, defaultValue: 0.5 },
+      { name: "targetCm360", label: "목표 cm/360", type: "number", unit: "cm", min: 1, max: 300, step: 0.1, defaultValue: 32 },
+      { name: "dpi", label: "DPI", type: "number", unit: "DPI", min: 1, max: 50000, step: 1, defaultValue: 800 }
+    ],
+    guideTitle: "마우스 감도 변환 기준",
+    guide: [
+      "cm/360은 마우스를 몇 cm 움직였을 때 화면이 360도 회전하는지 나타내는 값입니다.",
+      "같은 게임 안에서는 감도와 cm/360이 대체로 반비례한다고 보고 새 감도를 계산합니다.",
+      "게임 엔진, FOV, 줌 감도, 가속 설정에 따라 실제 체감은 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "목표 cm/360이 낮을수록 더 빠른 감도입니다.",
+      "감도 변환 후에는 훈련장이나 에임 테스트에서 미세 조정하세요.",
+      "마우스 가속이나 윈도우 포인터 보정은 끄고 비교하는 것이 좋습니다."
+    ],
+    faqs: [
+      { question: "cm/360이 낮으면 좋은 감도인가요?", answer: "낮을수록 빠른 감도일 뿐 항상 좋은 것은 아닙니다. 손목·팔 사용 방식과 게임 장르에 맞춰야 합니다." },
+      { question: "다른 게임으로 완벽 변환되나요?", answer: "게임별 감도 스케일이 달라 완벽 변환은 어렵습니다. 이 계산기는 같은 게임 안에서 기준점을 잡는 용도에 가깝습니다." }
+    ],
+    calculate(values) {
+      const currentCm360 = Math.max(values.currentCm360, 1);
+      const currentSensitivity = Math.max(values.currentSensitivity, 0.001);
+      const targetCm360 = Math.max(values.targetCm360, 1);
+      const dpi = Math.max(values.dpi, 1);
+      const newSensitivity = currentSensitivity * (currentCm360 / targetCm360);
+      const currentEdpi = dpi * currentSensitivity;
+      const newEdpi = dpi * newSensitivity;
+      const speedChange = (newSensitivity / currentSensitivity - 1) * 100;
+
+      return {
+        headline: formatNumber(newSensitivity, 4),
+        subline: `${formatNumber(targetCm360, 1)}cm/360 목표 · 감도 변화 ${speedChange >= 0 ? "+" : ""}${formatPercent(speedChange, 1)}`,
+        rows: [
+          { label: "새 인게임 감도", value: formatNumber(newSensitivity, 4), tone: "strong" },
+          { label: "현재 eDPI", value: formatNumber(currentEdpi, 2) },
+          { label: "새 eDPI", value: formatNumber(newEdpi, 2), tone: "strong" },
+          { label: "감도 변화율", value: `${speedChange >= 0 ? "+" : ""}${formatPercent(speedChange, 1)}` },
+          { label: "현재 cm/360", value: `${formatNumber(currentCm360, 1)}cm` },
+          { label: "목표 cm/360", value: `${formatNumber(targetCm360, 1)}cm` }
+        ],
+        chart: [
+          { name: "현재감도", value: currentSensitivity },
+          { name: "새감도", value: newSensitivity },
+          { name: "현재eDPI", value: currentEdpi },
+          { name: "새eDPI", value: newEdpi }
+        ]
       };
     }
   },

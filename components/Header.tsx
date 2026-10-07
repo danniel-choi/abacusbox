@@ -13,6 +13,7 @@ const navItems = [
   { href: "/stock", label: "주식" },
   { href: "/health", label: "건강" },
   { href: "/daily", label: "일상" },
+  { href: "/game", label: "게임" },
   { href: "/blog", label: "블로그" }
 ];
 

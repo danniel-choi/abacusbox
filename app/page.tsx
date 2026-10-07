@@ -51,7 +51,7 @@ export default function HomePage() {
             </p>
             <h1 className="max-w-3xl text-[clamp(2.15rem,10vw,3.75rem)] font-extrabold leading-tight md:text-6xl">계산의정석</h1>
             <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-white/68 md:mt-5 md:text-lg md:leading-8">
-              계산의 정석이라는 이름처럼 복잡한 기준과 숫자를 빠르게 정리할 수 있도록 노무, 금융, 절세, 건강, 일상 도구, 생활, 사업, 수학 도구를 한곳에 모았습니다.
+              계산의 정석이라는 이름처럼 복잡한 기준과 숫자를 빠르게 정리할 수 있도록 노무, 금융, 절세, 건강, 일상 도구, 생활, 게임, 사업, 수학 도구를 한곳에 모았습니다.
               계산 결과만 끝내지 않고, 비교와 기준 설명까지 한 흐름으로 확인할 수 있게 구성했습니다.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">

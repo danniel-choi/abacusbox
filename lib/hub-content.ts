@@ -1,6 +1,6 @@
 import type { CalculatorGroup } from "@/lib/calculator-directory";
 
-export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "daily" | "life" | "business" | "math";
+export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "daily" | "life" | "game" | "business" | "math";
 
 export type HubContent = {
   key: HubKey;
@@ -195,6 +195,31 @@ export const hubContents: Record<HubKey, HubContent> = {
     ],
     checklist: ["신청·납부 요건 확인", "월 단위 비용으로 환산", "지역별 기준 확인", "공식 안내와 계산 결과 함께 비교"]
   },
+  game: {
+    key: "game",
+    group: "game",
+    path: "/game",
+    eyebrow: "게임 계산 허브",
+    title: "가챠, 승률, eDPI, 마우스 감도 계산기",
+    description: "뽑기 확률, 포커 승률, 게임 전적 승률, eDPI, FPS 마우스 감도 변환처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["draw-probability", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
+    blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
+    sections: [
+      {
+        title: "게임 계산은 확률과 체감값을 빠르게 확인하는 데 유용합니다.",
+        body: "가챠 확률, 포커 에쿼티, 랜덤 추첨처럼 확률이 들어간 게임은 직감만으로 판단하기 어렵습니다. 같은 비용과 횟수라도 성공 확률과 기대값을 숫자로 보면 무리한 지출이나 과한 기대를 줄일 수 있습니다."
+      },
+      {
+        title: "FPS 감도는 eDPI와 cm/360을 함께 봐야 합니다.",
+        body: "DPI와 인게임 감도만 보면 장비 변경 후 체감이 흔들릴 수 있습니다. eDPI와 cm/360을 같이 확인하면 같은 게임 안에서 감도 기준을 유지하거나 목표 감도로 이동하기 쉽습니다."
+      },
+      {
+        title: "전적 계산은 목표를 현실적으로 잡는 기준이 됩니다.",
+        body: "승률, 무승부, 패배 수를 나누어 보면 목표 승률까지 필요한 추가 승리 수가 보입니다. 랭크 게임이나 팀전에서는 현재 전적을 기준으로 무리한 목표인지 먼저 확인하는 것이 좋습니다."
+      }
+    ],
+    checklist: ["성공 확률과 횟수 분리", "게임별 특수 규칙 확인", "DPI와 인게임 감도 함께 기록", "목표 승률까지 필요한 경기 수 확인"]
+  },
   business: {
     key: "business",
     group: "business",
@@ -247,4 +272,4 @@ export const hubContents: Record<HubKey, HubContent> = {
   }
 };
 
-export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "daily", "life", "business", "math"];
+export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "daily", "life", "game", "business", "math"];
