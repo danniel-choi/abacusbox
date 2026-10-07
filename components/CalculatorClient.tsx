@@ -61,36 +61,17 @@ const DIABLO3_GEM_OPTIONS = [
 
 const DIABLO2_ATTACK_SKILL_OPTIONS = [
   { label: "일반 공격", value: 0 },
-  { label: "질(Zeal) - 참고용", value: 1 },
   { label: "잽(Jab)", value: 2 },
   { label: "배쉬(Bash)", value: 3 },
-  { label: "스턴(Stun)", value: 4 },
-  { label: "퓨리(Fury) - 참고용", value: 5 },
-  { label: "스트레이프(Strafe) - 참고용", value: 6 },
-  { label: "펜드(Fend) - 참고용", value: 7 },
-  { label: "스마이트(Smite)", value: 8 },
-  { label: "프렌지(Frenzy) - 참고용", value: 9 },
-  { label: "더블 스윙(Double Swing)", value: 10 },
-  { label: "휠윈드(Whirlwind) - 참고용", value: 11 },
-  { label: "드래곤 탈론(Dragon Talon) - 참고용", value: 12 },
-  { label: "드래곤 클로(Dragon Claw) - 참고용", value: 13 },
-  { label: "페럴 레이지(Feral Rage)", value: 14 },
-  { label: "마울(Maul)", value: 15 },
-  { label: "더블 스로우(Double Throw)", value: 16 },
-  { label: "임페일(Impale)", value: 17 },
-  { label: "가이드 애로우(Guided Arrow)", value: 18 }
+  { label: "스턴(Stun)", value: 4 }
 ];
 
 function getDiablo2AttackSkillOptions(combatantValue: number) {
   const combatant = Math.max(0, Math.min(9, Math.floor(combatantValue)));
 
-  if (combatant === 0) return [0, 2, 6, 7, 17, 18].map((index) => DIABLO2_ATTACK_SKILL_OPTIONS[index]);
-  if (combatant === 1) return [0, 12, 13].map((index) => DIABLO2_ATTACK_SKILL_OPTIONS[index]);
-  if (combatant === 3) return [0, 3, 4, 9, 10, 11, 16].map((index) => DIABLO2_ATTACK_SKILL_OPTIONS[index]);
-  if (combatant === 4) return [0, 1, 8].map((index) => DIABLO2_ATTACK_SKILL_OPTIONS[index]);
-  if (combatant === 6) return [0, 5, 14, 15].map((index) => DIABLO2_ATTACK_SKILL_OPTIONS[index]);
-  if (combatant === 8) return [DIABLO2_ATTACK_SKILL_OPTIONS[0], DIABLO2_ATTACK_SKILL_OPTIONS[2]];
-  if (combatant === 9) return [DIABLO2_ATTACK_SKILL_OPTIONS[0], DIABLO2_ATTACK_SKILL_OPTIONS[3], DIABLO2_ATTACK_SKILL_OPTIONS[4]];
+  if (combatant === 7) return [{ label: "활 일반 공격", value: 0 }];
+  if (combatant === 8) return [DIABLO2_ATTACK_SKILL_OPTIONS[0], DIABLO2_ATTACK_SKILL_OPTIONS[1]];
+  if (combatant === 9) return [DIABLO2_ATTACK_SKILL_OPTIONS[0], DIABLO2_ATTACK_SKILL_OPTIONS[2], DIABLO2_ATTACK_SKILL_OPTIONS[3]];
 
   return [DIABLO2_ATTACK_SKILL_OPTIONS[0]];
 }
@@ -414,11 +395,12 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 </div>
               ) : activeCalculator.slug === "diablo2-attack-speed" && field.name === "attackSkill" ? (
                 <select
+                  key={`diablo2-attack-skill-${Number(values.combatant ?? 0)}`}
                   className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
                   value={Number(values[field.name] ?? field.defaultValue)}
                   onChange={(event) => setValue(field.name, Number(event.target.value), { shouldDirty: true })}
                 >
-                  {diablo2AttackSkillOptions.map((option) => (
+                  {getDiablo2AttackSkillOptions(Number(values.combatant ?? 0)).map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
