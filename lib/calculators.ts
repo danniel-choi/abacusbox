@@ -6550,17 +6550,21 @@ export const calculators: CalculatorConfig[] = [
   },
   {
     slug: "fc-transfer-fee",
-    title: "FC온라인 이적시장 수수료 계산기",
-    description: "선수 판매 금액, 판매 인원, 기본 수수료 40%, 프리미엄 PC방, TOP CLASS, 쿠폰 할인율과 최대 할인 한도를 반영해 최종 수령 BP를 계산합니다.",
+    title: "피파 수수료 계산기",
+    description: "EA Sports FC 이적시장에서 선수 판매 시 적용되는 기본 수수료 40%와 프리미엄 PC방, TOP CLASS, 쿠폰 할인율을 적용해 최종 받는 금액을 계산합니다.",
     category: "게임",
     keywords: ["피파 수수료 계산기", "FC온라인 수수료", "FC 이적시장 수수료", "피파 판매 수수료", "TOP CLASS 수수료"],
     badge: "이적시장 BP 수령액",
     audience: "FC온라인 이적시장에서 선수 판매 전 실제 수령 BP와 할인 효과를 확인하려는 사용자",
     fields: [
-      { name: "salePriceEok", label: "선수 1명 판매 예정 금액", type: "number", unit: "억 BP", min: 0, max: 1000000, step: 0.1, defaultValue: 100 },
+      { name: "salePriceEok", label: "판매 예정 금액", type: "number", unit: "억 BP", min: 0, max: 1000000, step: 0.1, defaultValue: 100 },
       { name: "playerCount", label: "판매 인원", type: "number", unit: "명", min: 1, max: 1000, step: 1, defaultValue: 1 },
-      { name: "couponDiscountRate", label: "쿠폰 할인율", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 30 },
-      { name: "couponMaxDiscountEok", label: "쿠폰 최대 할인", type: "number", unit: "억 BP", min: 0, max: 1000000, step: 0.1, defaultValue: 10 },
+      { name: "couponDiscountRate", label: "쿠폰 할인율 1", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 30 },
+      { name: "couponMaxDiscountEok", label: "최대 할인 1", type: "number", unit: "억 BP", min: 0, max: 1000000, step: 0.1, defaultValue: 10 },
+      { name: "couponDiscountRate2", label: "쿠폰 할인율 2", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 0 },
+      { name: "couponMaxDiscountEok2", label: "최대 할인 2", type: "number", unit: "억 BP", min: 0, max: 1000000, step: 0.1, defaultValue: 0 },
+      { name: "couponDiscountRate3", label: "쿠폰 할인율 3", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 0 },
+      { name: "couponMaxDiscountEok3", label: "최대 할인 3", type: "number", unit: "억 BP", min: 0, max: 1000000, step: 0.1, defaultValue: 0 },
       {
         name: "premiumPcRoom",
         label: "프리미엄 PC방",
@@ -6585,7 +6589,8 @@ export const calculators: CalculatorConfig[] = [
     guideTitle: "FC온라인 수수료 계산 기준",
     guide: [
       "이 계산기는 선수 판매 금액에 기본 이적시장 수수료 40%가 적용된다고 보고, 프리미엄 PC방 30%, TOP CLASS 20%, 쿠폰 할인율을 수수료 할인으로 차감합니다.",
-      "쿠폰 할인은 입력한 할인율로 계산하되, 최대 할인 한도를 넘지 않도록 제한합니다. 여러 명을 판매할 때는 선수 1명 판매가에 인원 수를 곱해 총 판매금액을 계산합니다.",
+      "쿠폰 할인은 각 쿠폰의 할인율로 계산하되, 최대 할인 한도를 넘지 않도록 제한합니다. 참고 페이지의 '추가' 기능처럼 최대 3개의 쿠폰 할인 금액을 함께 더해 계산할 수 있습니다.",
+      "여러 명을 판매할 때는 선수 1명 판매가에 인원 수를 곱해 총 판매금액을 계산합니다.",
       "실제 게임 내 이벤트, 멤버십, 쿠폰 종류, 수수료 정책 변경에 따라 결과가 달라질 수 있으므로 최종 판매 전 게임 내 수령 예상액을 함께 확인하세요."
     ],
     checkpoints: [
@@ -6596,7 +6601,7 @@ export const calculators: CalculatorConfig[] = [
     ],
     faqs: [
       { question: "기본 수수료는 몇 퍼센트로 계산하나요?", answer: "기본값은 40%입니다. 프리미엄 PC방, TOP CLASS, 쿠폰은 이 기본 수수료에서 할인되는 구조로 단순 계산합니다." },
-      { question: "쿠폰 최대 할인은 어떻게 입력하나요?", answer: "쿠폰에 적힌 최대 할인 금액을 억 BP 단위로 입력하세요. 예를 들어 최대 10억 BP라면 10을 입력합니다." },
+      { question: "쿠폰 최대 할인은 어떻게 입력하나요?", answer: "쿠폰에 적힌 최대 할인 금액을 억 BP 단위로 입력하세요. 예를 들어 최대 10억 BP라면 10을 입력합니다. 쿠폰이 여러 개라면 2번, 3번 슬롯도 함께 입력하세요." },
       { question: "여러 명 판매도 계산되나요?", answer: "네. 선수 1명 판매 예정 금액에 판매 인원을 곱해 총 판매금액과 총 수수료를 계산합니다." }
     ],
     calculate(values) {
@@ -6608,10 +6613,19 @@ export const calculators: CalculatorConfig[] = [
       const baseFee = totalSale * baseFeeRate;
       const pcRoomDiscount = values.premiumPcRoom === 1 ? baseFee * 0.3 : 0;
       const topClassDiscount = values.topClass === 1 ? baseFee * 0.2 : 0;
-      const couponRateDiscount = baseFee * (Math.min(Math.max(values.couponDiscountRate, 0), 100) / 100);
-      const couponMaxDiscount = Math.max(values.couponMaxDiscountEok, 0) * oneEok;
-      const couponDiscount = couponMaxDiscount > 0 ? Math.min(couponRateDiscount, couponMaxDiscount) : couponRateDiscount;
-      const totalDiscount = Math.min(baseFee, pcRoomDiscount + topClassDiscount + couponDiscount);
+      const couponInputs = [
+        { rate: values.couponDiscountRate, maxEok: values.couponMaxDiscountEok },
+        { rate: values.couponDiscountRate2, maxEok: values.couponMaxDiscountEok2 },
+        { rate: values.couponDiscountRate3, maxEok: values.couponMaxDiscountEok3 }
+      ];
+      const couponDiscounts = couponInputs.map((coupon) => {
+        const rateDiscount = baseFee * (Math.min(Math.max(coupon.rate, 0), 100) / 100);
+        const maxDiscount = Math.max(coupon.maxEok, 0) * oneEok;
+        return maxDiscount > 0 ? Math.min(rateDiscount, maxDiscount) : rateDiscount;
+      });
+      const couponDiscount = couponDiscounts.reduce((sum, discount) => sum + discount, 0);
+      const rawDiscount = pcRoomDiscount + topClassDiscount + couponDiscount;
+      const totalDiscount = Math.min(baseFee, rawDiscount);
       const finalFee = Math.max(baseFee - totalDiscount, 0);
       const netReceived = Math.max(totalSale - finalFee, 0);
       const effectiveFeeRate = totalSale > 0 ? finalFee / totalSale * 100 : 0;
@@ -6623,9 +6637,12 @@ export const calculators: CalculatorConfig[] = [
         rows: [
           { label: "총 판매 금액", value: `${formatNumber(totalSale / oneEok, 2)}억 BP`, tone: "strong" },
           { label: "기본 수수료 40%", value: `${formatNumber(baseFee / oneEok, 2)}억 BP` },
+          { label: "수수료 할인 금액", value: `${formatNumber(rawDiscount / oneEok, 2)}억 BP`, tone: "strong" },
           { label: "프리미엄 PC방 할인", value: `${formatNumber(pcRoomDiscount / oneEok, 2)}억 BP` },
           { label: "TOP CLASS 할인", value: `${formatNumber(topClassDiscount / oneEok, 2)}억 BP` },
-          { label: "쿠폰 할인", value: `${formatNumber(couponDiscount / oneEok, 2)}억 BP` },
+          { label: "쿠폰 할인 1", value: `${formatNumber(couponDiscounts[0] / oneEok, 2)}억 BP` },
+          { label: "쿠폰 할인 2", value: `${formatNumber(couponDiscounts[1] / oneEok, 2)}억 BP` },
+          { label: "쿠폰 할인 3", value: `${formatNumber(couponDiscounts[2] / oneEok, 2)}억 BP` },
           { label: "총 할인 금액", value: `${formatNumber(totalDiscount / oneEok, 2)}억 BP`, tone: "strong" },
           { label: "최종 수수료", value: `${formatNumber(finalFee / oneEok, 2)}억 BP`, tone: "strong" },
           { label: "최종 수령액", value: `${formatNumber(netReceived / oneEok, 2)}억 BP`, tone: "strong" },

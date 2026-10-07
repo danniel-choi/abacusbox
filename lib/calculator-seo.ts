@@ -164,9 +164,9 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     ]
   },
   "fc-transfer-fee": {
-    title: "FC온라인 이적시장 수수료 계산기 | 피파 판매 BP 수령액 계산",
+    title: "피파 수수료 계산기 | FC온라인 이적시장 판매 BP 수령액 계산",
     description:
-      "FC온라인 이적시장 수수료 계산기로 선수 판매 금액, 기본 수수료 40%, 프리미엄 PC방, TOP CLASS, 쿠폰 할인율과 최대 할인 한도를 반영한 최종 수령 BP를 확인하세요.",
+      "피파 수수료 계산기로 EA Sports FC 이적시장 판매 예정 금액, 기본 수수료 40%, 프리미엄 PC방, TOP CLASS, 쿠폰 할인율과 최대 할인 한도를 반영한 최종 수령 BP를 확인하세요.",
     keywords: ["피파 수수료 계산기", "FC온라인 수수료 계산기", "FC 이적시장 수수료", "피파 판매 수수료", "TOP CLASS 수수료", "FC온라인 BP 계산"],
     searchIntents: [
       "FC온라인 선수를 팔면 최종 BP를 얼마나 받는지 알고 싶을 때",
@@ -177,12 +177,12 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       {
         title: "기본 수수료 40%에서 할인액을 차감합니다.",
         body:
-          "선수 판매 금액에 기본 수수료 40%를 적용한 뒤 프리미엄 PC방, TOP CLASS, 쿠폰 할인액을 차감해 최종 수수료와 수령 BP를 계산합니다."
+          "판매 예정 금액에 기본 수수료 40%를 적용한 뒤 프리미엄 PC방, TOP CLASS, 쿠폰 할인액을 차감해 최종 수수료와 수령 BP를 계산합니다."
       },
       {
         title: "쿠폰 최대 할인 한도를 따로 반영합니다.",
         body:
-          "쿠폰 할인율이 높아도 최대 할인 금액이 있으면 실제 할인액은 한도에서 멈춥니다. 억 BP 단위로 최대 할인 한도를 입력해 더 현실적인 수령액을 확인할 수 있습니다."
+          "쿠폰 할인율이 높아도 최대 할인 금액이 있으면 실제 할인액은 한도에서 멈춥니다. 최대 3개의 쿠폰 할인율과 최대 할인 한도를 입력해 수수료 할인 금액을 함께 계산할 수 있습니다."
       }
     ],
     internalLinks: [
