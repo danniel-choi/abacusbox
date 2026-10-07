@@ -72,6 +72,7 @@ export type CalculatorSlug =
   | "robux-calculator"
   | "clash-of-clans-calculator"
   | "lol-skill-haste"
+  | "diablo2-attack-speed"
   | "diablo3-gem-calculator"
   | "fc-transfer-fee"
   | "win-rate-calculator"
@@ -7271,6 +7272,189 @@ export const calculators: CalculatorConfig[] = [
           { name: "기준패키지", value: selectedPackage.price },
           { name: "환산금액", value: direction === "robuxToKrw" ? convertedKrw : krwAmount },
           { name: "조합금액", value: bestPrice }
+        ]
+      };
+    }
+  },
+  {
+    slug: "diablo2-attack-speed",
+    title: "디아블로2 공속 계산기",
+    description: "디아블로2 레저렉션 캐릭터와 용병의 WSM, 무기 IAS, 장비 IAS, 스킬 공속을 입력해 EIAS, 공격 프레임, 초당 공격 횟수, 다음 브레이크포인트를 계산합니다.",
+    category: "게임",
+    keywords: ["디아블로2 공속 계산기", "D2R IAS 계산기", "디아2 공속 프레임", "디아블로2 EIAS", "디아2 브레이크포인트"],
+    badge: "IAS·EIAS·프레임",
+    audience: "디아블로2 레저렉션에서 무기 베이스와 장비 IAS가 실제 공격 프레임을 줄이는지 확인하려는 플레이어",
+    fields: [
+      {
+        name: "combatant",
+        label: "전투원",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "성기사(팔라딘)", value: 0 },
+          { label: "야만용사(바바리안)", value: 1 },
+          { label: "아마존", value: 2 },
+          { label: "암살자", value: 3 },
+          { label: "드루이드", value: 4 },
+          { label: "액트1 용병", value: 5 },
+          { label: "액트2 용병", value: 6 },
+          { label: "액트5 용병", value: 7 }
+        ]
+      },
+      {
+        name: "attackSkill",
+        label: "공격/기술",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "일반 공격", value: 0 },
+          { label: "질/연속 타격", value: 1 },
+          { label: "용병 잽(Jab)", value: 2 },
+          { label: "배쉬/스턴", value: 3 }
+        ]
+      },
+      {
+        name: "weaponBase",
+        label: "무기 베이스",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "페이즈 블레이드 [-30]", value: 0 },
+          { label: "쓰레셔 [-10]", value: 1 },
+          { label: "자이언트 쓰레셔 [-10]", value: 2 },
+          { label: "버서커 액스 [0]", value: 3 },
+          { label: "크립틱 액스 [10]", value: 4 },
+          { label: "콜로서스 불즈 [10]", value: 5 },
+          { label: "워 파이크 [20]", value: 6 },
+          { label: "직접 입력", value: 7 }
+        ]
+      },
+      { name: "customWsm", label: "WSM 직접 입력", type: "number", min: -60, max: 60, step: 5, defaultValue: -30, help: "무기 베이스에서 직접 입력을 선택했을 때 사용합니다. 낮을수록 빠릅니다." },
+      { name: "weaponIas", label: "무기 IAS", type: "number", unit: "%", min: 0, max: 300, step: 1, defaultValue: 20 },
+      { name: "gearIas", label: "기타 장비 IAS", type: "number", unit: "%", min: 0, max: 300, step: 1, defaultValue: 40 },
+      { name: "fanaticismLevel", label: "광신 레벨", type: "number", min: 0, max: 40, step: 1, defaultValue: 0 },
+      { name: "burstOfSpeedLevel", label: "폭발적인 속도 레벨", type: "number", min: 0, max: 40, step: 1, defaultValue: 0 },
+      { name: "extraSias", label: "기타 스킬 공속", type: "number", unit: "EIAS", min: 0, max: 200, step: 1, defaultValue: 0 },
+      { name: "holyFreezeLevel", label: "적 신성한 빙결 레벨", type: "number", min: 0, max: 40, step: 1, defaultValue: 0 },
+      { name: "otherSlow", label: "기타 감속", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 0 },
+      {
+        name: "decrepify",
+        label: "노화(Decrepify)",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "미적용", value: 0 },
+          { label: "적용", value: 1 }
+        ]
+      },
+      {
+        name: "chilled",
+        label: "빙결(Chilled)",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "미적용", value: 0 },
+          { label: "적용", value: 1 }
+        ]
+      }
+    ],
+    guideTitle: "디아블로2 공속 계산 기준",
+    guide: [
+      "참고 페이지의 공식처럼 무기 IAS와 장비 IAS를 합산한 뒤 IEIAS = floor(120 × IAS ÷ (120 + IAS))로 변환합니다.",
+      "EIAS는 스킬 공속(SIAS), 무기 베이스 속도(WSM), IEIAS, 감속 효과를 함께 반영해 계산합니다. WSM은 낮을수록 빠른 무기입니다.",
+      "디아블로2 레저렉션은 25 FPS 애니메이션 구조라 공격 프레임이 줄어드는 브레이크포인트를 넘겨야 실제 체감 공속이 빨라집니다."
+    ],
+    checkpoints: [
+      "질, 퓨리, 휠윈드, 드래곤 탈론, 프렌지처럼 특수 시퀀스가 있는 기술은 실제 게임 규칙과 차이가 있을 수 있습니다.",
+      "액트2 용병 잽은 평균 프레임 기준의 간이 계산으로 보세요. 정확한 세팅은 게임 내 실측과 전용 표를 함께 확인하는 편이 좋습니다.",
+      "노화, 빙결, 신성한 빙결 같은 감속 효과는 입력한 전투 상황에서만 반영되는 참고값입니다.",
+      "다음 브레이크포인트까지 필요한 추가 IAS가 0이면 이미 더 빠른 구간에 도달했거나 선택한 모델의 최저 프레임에 가까운 상태입니다."
+    ],
+    faqs: [
+      { question: "IAS와 EIAS는 무엇이 다른가요?", answer: "장비에 표시되는 IAS는 그대로 최종 속도에 더해지지 않고 IEIAS로 변환됩니다. 여기에 스킬 공속과 WSM을 반영한 값이 EIAS입니다." },
+      { question: "공속 20%를 더 올렸는데 프레임이 그대로인 이유는 무엇인가요?", answer: "디아블로2는 브레이크포인트 방식이라 다음 프레임 기준을 넘지 못하면 IAS가 올라가도 실제 공격 프레임은 유지될 수 있습니다." },
+      { question: "용병 공속도 계산할 수 있나요?", answer: "액트1, 액트2, 액트5 용병의 일반적인 단일 무기 기준 공속을 참고용으로 계산할 수 있습니다. 특수 기술은 별도 규칙이 있을 수 있습니다." }
+    ],
+    calculate(values) {
+      const combatants = ["성기사", "야만용사", "아마존", "암살자", "드루이드", "액트1 용병", "액트2 용병", "액트5 용병"];
+      const skills = ["일반 공격", "질/연속 타격", "용병 잽(Jab)", "배쉬/스턴"];
+      const weaponBases = [
+        { name: "페이즈 블레이드", wsm: -30 },
+        { name: "쓰레셔", wsm: -10 },
+        { name: "자이언트 쓰레셔", wsm: -10 },
+        { name: "버서커 액스", wsm: 0 },
+        { name: "크립틱 액스", wsm: 10 },
+        { name: "콜로서스 불즈", wsm: 10 },
+        { name: "워 파이크", wsm: 20 },
+        { name: "직접 입력", wsm: Math.max(-60, Math.min(60, values.customWsm)) }
+      ];
+      const baseFramesBySkill = [13, 11, 13, 14];
+      const minimumFramesBySkill = [7, 4, 4, 8];
+      const combatant = combatants[Math.max(0, Math.min(combatants.length - 1, Math.floor(values.combatant)))] ?? combatants[0];
+      const skillIndex = Math.max(0, Math.min(skills.length - 1, Math.floor(values.attackSkill)));
+      const skill = skills[skillIndex] ?? skills[0];
+      const weaponBase = weaponBases[Math.max(0, Math.min(weaponBases.length - 1, Math.floor(values.weaponBase)))] ?? weaponBases[0];
+      const itemIas = Math.max(0, values.weaponIas) + Math.max(0, values.gearIas);
+      const ieias = Math.floor(120 * itemIas / (120 + itemIas));
+      const fanaticismTable = [0, 14, 18, 20, 23, 25, 26, 27, 28, 29, 30, 31, 31, 32, 33, 33, 34, 34, 34, 35, 35];
+      const burstTable = [0, 21, 27, 31, 34, 37, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 51, 52, 53, 54];
+      const fanaticism = fanaticismTable[Math.min(fanaticismTable.length - 1, Math.max(0, Math.floor(values.fanaticismLevel)))] ?? 35;
+      const burst = burstTable[Math.min(burstTable.length - 1, Math.max(0, Math.floor(values.burstOfSpeedLevel)))] ?? 54;
+      const holyFreezeSlow = Math.max(0, Math.floor(values.holyFreezeLevel)) > 0 ? Math.min(50, 25 + Math.floor(values.holyFreezeLevel)) : 0;
+      const slow = holyFreezeSlow + Math.max(0, values.otherSlow) + (values.decrepify >= 1 ? 50 : 0) + (values.chilled >= 1 ? 50 : 0);
+      const sias = fanaticism + burst + Math.max(0, values.extraSias);
+      const eias = Math.max(-85, Math.min(175, sias - weaponBase.wsm + ieias - slow));
+      const baseFrames = baseFramesBySkill[skillIndex] ?? 13;
+      const minFrames = minimumFramesBySkill[skillIndex] ?? 7;
+      const frames = Math.max(minFrames, Math.ceil(baseFrames * 100 / (100 + eias)));
+      const attacksPerSecond = 25 / frames;
+      const attacksPerMinute = attacksPerSecond * 60;
+      const currentIas = itemIas;
+      let nextIas = currentIas;
+      let nextFrames = frames;
+      for (let ias = Math.ceil(currentIas); ias <= 600; ias += 1) {
+        const candidateIeias = Math.floor(120 * ias / (120 + ias));
+        const candidateEias = Math.max(-85, Math.min(175, sias - weaponBase.wsm + candidateIeias - slow));
+        const candidateFrames = Math.max(minFrames, Math.ceil(baseFrames * 100 / (100 + candidateEias)));
+        if (candidateFrames < frames) {
+          nextIas = ias;
+          nextFrames = candidateFrames;
+          break;
+        }
+      }
+      const additionalIas = nextFrames < frames ? Math.max(0, nextIas - currentIas) : 0;
+      const breakpointText = nextFrames < frames
+        ? `${nextFrames}프레임까지 추가 IAS ${formatNumber(additionalIas, 0)}% 필요`
+        : "현재 모델에서 다음 프레임을 찾지 못했습니다";
+      const surrounding = [0, 15, 30, 45, 60, 75, 95, 120, 150, 200].map((ias) => {
+        const candidateIeias = Math.floor(120 * ias / (120 + ias));
+        const candidateEias = Math.max(-85, Math.min(175, sias - weaponBase.wsm + candidateIeias - slow));
+        const candidateFrames = Math.max(minFrames, Math.ceil(baseFrames * 100 / (100 + candidateEias)));
+        return `${ias}%:${candidateFrames}F`;
+      }).join(" · ");
+
+      return {
+        headline: `${frames}프레임`,
+        subline: `${combatant} · ${skill} · ${weaponBase.name} WSM ${formatNumber(weaponBase.wsm, 0)} · 초당 ${formatNumber(attacksPerSecond, 2)}회`,
+        rows: [
+          { label: "현재 공격 프레임", value: `${frames}프레임`, tone: "strong" },
+          { label: "초당 공격 횟수", value: `${formatNumber(attacksPerSecond, 2)}회`, tone: "strong" },
+          { label: "분당 공격 횟수", value: `${formatNumber(attacksPerMinute, 1)}회` },
+          { label: "전투원/기술", value: `${combatant} · ${skill}` },
+          { label: "무기 베이스", value: `${weaponBase.name} · WSM ${formatNumber(weaponBase.wsm, 0)}`, tone: "strong" },
+          { label: "아이템 IAS", value: `${formatNumber(itemIas, 0)}% · IEIAS ${formatNumber(ieias, 0)}` },
+          { label: "스킬 공속(SIAS)", value: `${formatNumber(sias, 0)} · 광신 ${formatNumber(fanaticism, 0)} · 폭속 ${formatNumber(burst, 0)}` },
+          { label: "감속 합계", value: `${formatNumber(slow, 0)}%` },
+          { label: "최종 EIAS", value: `${formatNumber(eias, 0)}`, tone: "strong" },
+          { label: "다음 브레이크포인트", value: breakpointText, tone: additionalIas > 0 ? "strong" : undefined },
+          { label: "주변 IAS 프레임", value: surrounding },
+          { label: "주의", value: "질·퓨리·휠윈드·프렌지 등 특수 시퀀스 기술은 전용 규칙과 차이가 있을 수 있습니다." }
+        ],
+        chart: [
+          { name: "현재프레임×10", value: frames * 10 },
+          { name: "초당공격×20", value: attacksPerSecond * 20 },
+          { name: "EIAS", value: Math.max(0, eias) },
+          { name: "추가IAS", value: additionalIas }
         ]
       };
     }

@@ -387,6 +387,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 전투, 확률, 재화 계산기를 함께 확인합니다." }
     ]
   },
+  "diablo2-attack-speed": {
+    title: "디아블로2 공속 계산기 | IAS·EIAS·공격 프레임 브레이크포인트",
+    description:
+      "디아블로2 공속 계산기로 WSM, 무기 IAS, 장비 IAS, 광신·폭발적인 속도, 감속 효과를 입력해 EIAS, 공격 프레임, 초당 공격 횟수와 다음 브레이크포인트를 확인하세요.",
+    keywords: ["디아블로2 공속 계산기", "디아2 공속 계산기", "D2R IAS 계산기", "디아블로2 EIAS", "디아2 공속 프레임"],
+    searchIntents: [
+      "디아블로2 레저렉션 공속 프레임을 계산하고 싶을 때",
+      "무기 WSM과 장비 IAS가 다음 브레이크포인트를 넘는지 확인할 때",
+      "용병 공속과 초당 공격 횟수를 참고하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "IAS를 IEIAS로 변환해 EIAS를 계산합니다.",
+        body:
+          "무기 IAS와 장비 IAS를 합산한 뒤 디아블로2 공속 공식에 따라 IEIAS로 변환하고, 스킬 공속과 WSM, 감속 효과를 반영합니다."
+      },
+      {
+        title: "현재 프레임과 다음 브레이크포인트를 함께 봅니다.",
+        body:
+          "디아블로2는 25 FPS 기반의 브레이크포인트 구조라 IAS가 조금 늘어도 프레임이 그대로일 수 있습니다. 다음 프레임까지 필요한 추가 IAS를 함께 확인할 수 있습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/diablo3-gem-calculator", label: "디아블로3 보석 계산기", text: "디아블로 시리즈 제작 재료도 함께 계산합니다." },
+      { href: "/calculators/lol-skill-haste", label: "롤 스킬 가속 계산기", text: "쿨타임과 사용 횟수를 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 전투, 자원, 확률 계산기를 함께 확인합니다." }
+    ]
+  },
   "edpi-calculator": {
     title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
     description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",

@@ -142,6 +142,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     hubLabel: "게임 계산기",
     relatedTitles: ["게임 승률 계산기", "eDPI 계산기"]
   },
+  "diablo2-attack-speed": {
+    title: "디아블로2 공속 계산기",
+    category: "생활 가이드",
+    audience: "디아블로2 레저렉션에서 IAS와 WSM 기준 공격 프레임을 확인하는 플레이어",
+    description: "무기 베이스 WSM, 무기 IAS, 장비 IAS, 광신·폭발적인 속도, 감속 효과를 입력해 EIAS, 공격 프레임, 초당 공격 횟수와 다음 브레이크포인트를 계산합니다.",
+    tags: ["디아블로2", "공속", "IAS"],
+    hubLabel: "게임 계산기",
+    relatedTitles: ["디아블로3 보석 계산기", "리그 오브 레전드 스킬 가속 계산기"]
+  },
   "fc-transfer-fee": {
     title: "피파 수수료 계산기",
     category: "생활 가이드",
@@ -761,7 +770,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
   ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
-  ["draw-probability", "lol-skill-haste", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
+  ["draw-probability", "diablo2-attack-speed", "lol-skill-haste", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
   ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
 ];

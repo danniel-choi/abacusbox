@@ -200,9 +200,9 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "game",
     path: "/game",
     eyebrow: "게임 계산 허브",
-    title: "가챠, 롤 스킬 가속, 클래시 오브 클랜즈, 로벅스 계산기",
-    description: "뽑기 확률, 리그 오브 레전드 스킬 가속과 쿨타임 환산, 클래시 오브 클랜즈 업그레이드 자원·시간, 로블록스 로벅스 원화 환산, 리니지 클래식 사냥 효율처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
-    featuredSlugs: ["lol-skill-haste", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character"],
+    title: "가챠, 디아블로2 공속, 롤 스킬 가속, 클래시 계산기",
+    description: "뽑기 확률, 디아블로2 공속 프레임과 IAS 브레이크포인트, 리그 오브 레전드 스킬 가속과 쿨타임 환산, 클래시 오브 클랜즈 업그레이드 자원·시간, 로블록스 로벅스 원화 환산처럼 게임 플레이 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["diablo2-attack-speed", "lol-skill-haste", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator"],
     blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
     sections: [
       {
@@ -211,7 +211,7 @@ export const hubContents: Record<HubKey, HubContent> = {
       },
       {
         title: "전투 체감은 실제 쿨타임으로 바꿔 봐야 합니다.",
-        body: "리그 오브 레전드의 스킬 가속은 예전 쿨감률처럼 그대로 더해지는 값이 아닙니다. 최종 쿨타임, 분당 사용 가능 횟수, 목표 쿨타임에 필요한 추가 가속을 같이 보면 아이템 빌드 선택이 쉬워집니다."
+        body: "리그 오브 레전드의 스킬 가속이나 디아블로2의 IAS는 표시 수치가 그대로 체감 속도로 이어지지 않습니다. 최종 쿨타임, 공격 프레임, 분당 사용 가능 횟수, 다음 브레이크포인트를 같이 보면 아이템 빌드 선택이 쉬워집니다."
       },
       {
         title: "게임 재화는 실제 결제 단가를 먼저 확인해야 합니다.",
