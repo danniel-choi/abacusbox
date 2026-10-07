@@ -7310,9 +7310,11 @@ export const calculators: CalculatorConfig[] = [
         defaultValue: 0,
         options: [
           { label: "일반 공격", value: 0 },
-          { label: "질/연속 타격", value: 1 },
+          { label: "질(Zeal) - 참고용", value: 1 },
           { label: "용병 잽(Jab)", value: 2 },
-          { label: "배쉬/스턴", value: 3 }
+          { label: "배쉬(Bash)", value: 3 },
+          { label: "스턴(Stun)", value: 4 },
+          { label: "퓨리(Fury) - 참고용", value: 5 }
         ]
       },
       {
@@ -7379,7 +7381,20 @@ export const calculators: CalculatorConfig[] = [
     ],
     calculate(values) {
       const combatants = ["아마존", "암살자", "강령술사", "야만용사", "성기사", "원소술사", "드루이드", "액트1 용병", "액트2 용병", "액트5 용병"];
-      const skills = ["일반 공격", "질/연속 타격", "용병 잽(Jab)", "배쉬/스턴"];
+      const skillModels = [
+        { name: "일반 공격", baseFrames: 13, minFrames: 7 },
+        { name: "질(Zeal) - 참고용", baseFrames: 11, minFrames: 4 },
+        { name: "용병 잽(Jab)", baseFrames: 13, minFrames: 4 },
+        { name: "배쉬(Bash)", baseFrames: 14, minFrames: 8 },
+        { name: "스턴(Stun)", baseFrames: 15, minFrames: 8 },
+        { name: "퓨리(Fury) - 참고용", baseFrames: 12, minFrames: 4 }
+      ];
+      const skillOptionsByCombatant: Record<number, number[]> = {
+        4: [0, 1],
+        6: [0, 5],
+        8: [0, 2],
+        9: [0, 3, 4]
+      };
       const weaponBases = [
         { name: "페이즈 블레이드", wsm: -30 },
         { name: "쓰레셔", wsm: -10 },
@@ -7390,11 +7405,13 @@ export const calculators: CalculatorConfig[] = [
         { name: "워 파이크", wsm: 20 },
         { name: "직접 입력", wsm: Math.max(-60, Math.min(60, values.customWsm)) }
       ];
-      const baseFramesBySkill = [13, 11, 13, 14];
-      const minimumFramesBySkill = [7, 4, 4, 8];
-      const combatant = combatants[Math.max(0, Math.min(combatants.length - 1, Math.floor(values.combatant)))] ?? combatants[0];
-      const skillIndex = Math.max(0, Math.min(skills.length - 1, Math.floor(values.attackSkill)));
-      const skill = skills[skillIndex] ?? skills[0];
+      const combatantIndex = Math.max(0, Math.min(combatants.length - 1, Math.floor(values.combatant)));
+      const combatant = combatants[combatantIndex] ?? combatants[0];
+      const allowedSkillIds = skillOptionsByCombatant[combatantIndex] ?? [0];
+      const rawSkillId = Math.max(0, Math.min(skillModels.length - 1, Math.floor(values.attackSkill)));
+      const skillId = allowedSkillIds.includes(rawSkillId) ? rawSkillId : allowedSkillIds[0];
+      const skillModel = skillModels[skillId] ?? skillModels[0];
+      const skill = skillModel.name;
       const weaponBase = weaponBases[Math.max(0, Math.min(weaponBases.length - 1, Math.floor(values.weaponBase)))] ?? weaponBases[0];
       const itemIas = Math.max(0, values.weaponIas) + Math.max(0, values.gearIas);
       const ieias = Math.floor(120 * itemIas / (120 + itemIas));
@@ -7406,8 +7423,8 @@ export const calculators: CalculatorConfig[] = [
       const slow = holyFreezeSlow + Math.max(0, values.otherSlow) + (values.decrepify >= 1 ? 50 : 0) + (values.chilled >= 1 ? 50 : 0);
       const sias = fanaticism + burst + Math.max(0, values.extraSias);
       const eias = Math.max(-85, Math.min(175, sias - weaponBase.wsm + ieias - slow));
-      const baseFrames = baseFramesBySkill[skillIndex] ?? 13;
-      const minFrames = minimumFramesBySkill[skillIndex] ?? 7;
+      const baseFrames = skillModel.baseFrames;
+      const minFrames = skillModel.minFrames;
       const frames = Math.max(minFrames, Math.ceil(baseFrames * 100 / (100 + eias)));
       const attacksPerSecond = 25 / frames;
       const attacksPerMinute = attacksPerSecond * 60;

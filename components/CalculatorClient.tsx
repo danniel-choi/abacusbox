@@ -59,6 +59,26 @@ const DIABLO3_GEM_OPTIONS = [
   { value: 4, icon: "◆", label: "자수정", color: "#a855f7", background: "#faf5ff" }
 ];
 
+const DIABLO2_ATTACK_SKILL_OPTIONS = [
+  { label: "일반 공격", value: 0 },
+  { label: "질(Zeal) - 참고용", value: 1 },
+  { label: "용병 잽(Jab)", value: 2 },
+  { label: "배쉬(Bash)", value: 3 },
+  { label: "스턴(Stun)", value: 4 },
+  { label: "퓨리(Fury) - 참고용", value: 5 }
+];
+
+function getDiablo2AttackSkillOptions(combatantValue: number) {
+  const combatant = Math.max(0, Math.min(9, Math.floor(combatantValue)));
+
+  if (combatant === 4) return [DIABLO2_ATTACK_SKILL_OPTIONS[0], DIABLO2_ATTACK_SKILL_OPTIONS[1]];
+  if (combatant === 6) return [DIABLO2_ATTACK_SKILL_OPTIONS[0], DIABLO2_ATTACK_SKILL_OPTIONS[5]];
+  if (combatant === 8) return [DIABLO2_ATTACK_SKILL_OPTIONS[0], DIABLO2_ATTACK_SKILL_OPTIONS[2]];
+  if (combatant === 9) return [DIABLO2_ATTACK_SKILL_OPTIONS[0], DIABLO2_ATTACK_SKILL_OPTIONS[3], DIABLO2_ATTACK_SKILL_OPTIONS[4]];
+
+  return [DIABLO2_ATTACK_SKILL_OPTIONS[0]];
+}
+
 function formStorageKey(slug: CalculatorSlug) {
   return `calcrule:calculator-form:${slug}`;
 }
@@ -154,6 +174,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const relatedCalculators = useMemo(() => getRelatedCalculators(activeCalculator.slug, 4), [activeCalculator.slug]);
   const nextActions = useMemo(() => getNextActions(activeCalculator.slug), [activeCalculator.slug]);
   const actionPlan = useMemo(() => getActionPlan(activeCalculator.slug), [activeCalculator.slug]);
+  const diablo2AttackSkillOptions = useMemo(() => {
+    if (activeCalculator.slug !== "diablo2-attack-speed") return [];
+    return getDiablo2AttackSkillOptions(Number(values.combatant ?? 0));
+  }, [activeCalculator.slug, values.combatant]);
   const visibleFields = useMemo(() => {
     return activeCalculator.fields.filter((field) => {
       if (activeCalculator.slug === "pet-age" && field.name === "dogSize") {
@@ -167,6 +191,15 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     label: field.label,
     value: formatInputValue(field, Number(values[field.name] ?? field.defaultValue))
   }));
+
+  useEffect(() => {
+    if (activeCalculator.slug !== "diablo2-attack-speed" || diablo2AttackSkillOptions.length === 0) return;
+
+    const currentSkill = Number(values.attackSkill ?? 0);
+    if (!diablo2AttackSkillOptions.some((option) => option.value === currentSkill)) {
+      setValue("attackSkill", diablo2AttackSkillOptions[0].value, { shouldDirty: true });
+    }
+  }, [activeCalculator.slug, diablo2AttackSkillOptions, setValue, values.attackSkill]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -363,6 +396,18 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                     );
                   })}
                 </div>
+              ) : activeCalculator.slug === "diablo2-attack-speed" && field.name === "attackSkill" ? (
+                <select
+                  className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
+                  value={Number(values[field.name] ?? field.defaultValue)}
+                  onChange={(event) => setValue(field.name, Number(event.target.value), { shouldDirty: true })}
+                >
+                  {diablo2AttackSkillOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               ) : field.type === "select" ? (
                 <select
                   className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
