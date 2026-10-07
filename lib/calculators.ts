@@ -404,6 +404,14 @@ function earnedIncomeTaxCredit(incomeTax: number, grossPay: number) {
   return Math.min(baseCredit, cap);
 }
 
+function childWithholdingReductionMonthly(children: number) {
+  const count = Math.max(Math.floor(children), 0);
+  if (count <= 0) return 0;
+  if (count === 1) return 20830;
+  if (count === 2) return 45830;
+  return 45830 + (count - 2) * 33330;
+}
+
 function creditCardIncomeDeduction(grossPay: number, creditCard: number, checkCash: number, marketTransit: number) {
   let threshold = grossPay * 0.25;
   const applyAfterThreshold = (amount: number, rate: number) => {
@@ -2146,54 +2154,129 @@ export const calculators: CalculatorConfig[] = [
   },
   {
     slug: "net-salary",
-    title: "4대 보험 실수령액 계산기",
-    description: "월 급여에서 국민연금, 건강보험, 장기요양, 고용보험 근로자 부담분을 계산합니다.",
+    title: "연봉 실수령액 계산기",
+    description: "연봉 또는 월급에서 비과세, 4대보험, 소득세, 지방소득세를 반영해 월 실수령액과 연간 실수령액을 계산합니다.",
     category: "노무",
-    keywords: ["4대보험 계산기", "실수령액 계산기", "월급 공제"],
-    badge: "근로자 부담분 기준",
-    audience: "직장인, 급여 담당자",
+    keywords: ["연봉 실수령액 계산기", "월급 실수령액 계산기", "4대보험 계산기", "세후 월급 계산", "급여 공제", "연봉 계산기"],
+    badge: "연봉·월급 세후",
+    audience: "직장인, 이직·연봉 협상 준비자, 급여 담당자",
     fields: [
-      { name: "monthlyPay", label: "월 과세 급여", type: "number", unit: "원", min: 500000, max: 30000000, step: 100000, defaultValue: 3500000 },
-      { name: "taxFree", label: "월 비과세 금액", type: "number", unit: "원", min: 0, max: 1000000, step: 10000, defaultValue: 200000 }
+      {
+        name: "payType",
+        label: "입력 기준",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "연봉 기준", value: 0 },
+          { label: "월급 기준", value: 1 }
+        ]
+      },
+      { name: "grossPay", label: "세전 금액", type: "number", unit: "원", min: 500000, max: 1000000000, step: 1000000, defaultValue: 40000000, help: "연봉 기준이면 연간 총액, 월급 기준이면 월 세전 급여를 입력하세요." },
+      { name: "taxFreeMonthly", label: "월 비과세 금액", type: "number", unit: "원", min: 0, max: 1000000, step: 10000, defaultValue: 200000, help: "식대 등 매월 비과세로 처리되는 금액입니다." },
+      { name: "dependents", label: "부양가족 수", type: "number", unit: "명", min: 1, max: 11, step: 1, defaultValue: 1, help: "본인을 포함한 공제대상 가족 수입니다." },
+      { name: "children", label: "8~20세 자녀 수", type: "number", unit: "명", min: 0, max: 10, step: 1, defaultValue: 0, help: "부양가족 수에 포함된 자녀 중 해당 연령대만 입력하세요." },
+      {
+        name: "retirementIncluded",
+        label: "퇴직금 포함 여부",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "퇴직금 별도", value: 0 },
+          { label: "퇴직금 포함 연봉", value: 1 }
+        ],
+        help: "퇴직금 포함 연봉은 월 급여를 연봉 ÷ 13으로 추정합니다."
+      },
+      {
+        name: "withholdingRate",
+        label: "소득세 원천징수 비율",
+        type: "select",
+        defaultValue: 100,
+        options: [
+          { label: "80%", value: 80 },
+          { label: "100%", value: 100 },
+          { label: "120%", value: 120 }
+        ],
+        help: "회사에 신청 가능한 간이세액 원천징수 비율 참고값입니다."
+      }
     ],
-    guideTitle: "2026년 4대 보험 공제 기준",
+    guideTitle: "2026년 연봉 실수령액 계산 기준",
     guide: [
-      "근로자 급여에서 주로 공제되는 사회보험은 국민연금, 건강보험, 장기요양보험, 고용보험입니다. 산재보험은 사업주가 부담하므로 근로자 실수령액 계산에서는 제외합니다.",
+      "연봉 기준은 퇴직금 별도일 때 연봉을 12로 나누고, 퇴직금 포함 연봉일 때는 월 급여를 연봉의 12/13 구조로 보아 연봉 ÷ 13으로 추정합니다. 월급 기준은 입력한 금액을 그대로 세전 월급으로 봅니다.",
       "2026년 7월부터 국민연금 기준소득월액은 하한 41만원, 상한 659만원이 적용됩니다. 건강보험료율은 7.19%이며 근로자와 사업주가 각각 3.595%씩 부담합니다. 장기요양보험료는 건강보험료에 장기요양보험료율을 곱해 계산합니다.",
-      "이 계산기는 소득세와 지방소득세를 제외한 4대 보험 기준 실수령액입니다. 연말정산, 부양가족, 비과세 항목에 따라 실제 급여명세서와 차이가 날 수 있습니다."
+      "소득세는 연간 근로소득세 구조를 월 단위로 환산해 추정하고, 지방소득세는 소득세의 10%로 계산합니다. 실제 원천징수는 국세청 근로소득 간이세액표, 회사 급여 설정, 부양가족 자료에 따라 달라질 수 있습니다."
     ],
     checkpoints: [
-      "소득세·지방소득세는 별도라 실제 실수령액보다 높게 보일 수 있습니다.",
-      "비과세 항목을 분리 입력해야 보험료 기준 급여가 정확해집니다.",
-      "국민연금은 하한·상한 기준소득월액이 적용됩니다."
+      "비과세 식대 등은 월 비과세 금액으로 분리 입력해야 보험료와 세금 기준 급여가 낮아집니다.",
+      "부양가족 수와 8~20세 자녀 수는 4대보험이 아니라 소득세 추정액에 영향을 줍니다.",
+      "상여금, 성과급, 입퇴사 월 일할 계산, 회사별 공제 항목은 별도로 반영되지 않습니다."
     ],
     faqs: [
-      { question: "소득세까지 계산하나요?", answer: "아니요. 이 페이지는 4대 보험 공제액 중심입니다. 소득세는 간이세액표, 부양가족 수, 비과세 항목에 따라 별도 계산해야 합니다." },
-      { question: "비과세 식대는 어떻게 넣나요?", answer: "식대 등 비과세 항목을 월 비과세 금액에 입력하면 보험료 산정 기준 급여에서 제외합니다." }
+      { question: "연봉 4,000만원 실수령액도 계산할 수 있나요?", answer: "네. 입력 기준을 연봉으로 두고 40,000,000원을 입력하면 월 실수령액, 연간 실수령액, 4대보험과 세금 공제액을 나누어 볼 수 있습니다." },
+      { question: "간이세액표와 완전히 같나요?", answer: "아니요. 이 계산기는 연간 근로소득세 구조를 월 단위로 환산한 추정값입니다. 실제 급여명세서는 국세청 간이세액표 구간, 회사 자료, 원천징수 비율에 따라 달라질 수 있습니다." },
+      { question: "비과세 식대는 어떻게 넣나요?", answer: "식대 등 비과세 항목을 월 비과세 금액에 입력하면 4대보험과 세금 산정 기준 급여에서 제외해 계산합니다." }
     ],
     calculate(values) {
-      const taxable = Math.max(values.monthlyPay - values.taxFree, 0);
-      const pensionBase = Math.min(Math.max(taxable, legalStandards.nationalPensionMinMonthlyIncome), legalStandards.nationalPensionMaxMonthlyIncome);
+      const payType = Math.floor(values.payType) === 1 ? 1 : 0;
+      const retirementIncluded = Math.floor(values.retirementIncluded) === 1;
+      const divisor = payType === 0 ? (retirementIncluded ? 13 : 12) : 1;
+      const monthlyGross = Math.floor(Math.max(values.grossPay, 0) / divisor);
+      const annualGross = payType === 0 ? Math.max(values.grossPay, 0) : monthlyGross * 12;
+      const taxFreeMonthly = Math.min(Math.max(values.taxFreeMonthly, 0), monthlyGross);
+      const taxable = Math.max(monthlyGross - taxFreeMonthly, 0);
+      const annualTaxable = taxable * 12;
+      const pensionBaseRaw = Math.floor(taxable / 1000) * 1000;
+      const pensionBase = Math.min(Math.max(pensionBaseRaw, legalStandards.nationalPensionMinMonthlyIncome), legalStandards.nationalPensionMaxMonthlyIncome);
       const pension = floorToTen(pensionBase * legalStandards.nationalPensionEmployeeRate);
       const health = floorToTen(taxable * legalStandards.healthEmployeeRate);
       const care = floorToTen(health * legalStandards.longTermCareRateOfHealth);
       const employment = floorToTen(taxable * legalStandards.employmentEmployeeRate);
-      const deductions = pension + health + care + employment;
+      const socialInsurance = pension + health + care + employment;
+      const dependents = Math.min(Math.max(Math.floor(values.dependents), 1), 11);
+      const children = Math.min(Math.max(Math.floor(values.children), 0), dependents);
+      const workDeduction = earnedIncomeDeduction(annualTaxable);
+      const earnedIncomeAmount = Math.max(annualTaxable - workDeduction, 0);
+      const personalDeduction = dependents * 1500000;
+      const annualInsuranceDeduction = (pension + health + care + employment) * 12;
+      const taxBase = Math.max(earnedIncomeAmount - personalDeduction - annualInsuranceDeduction, 0);
+      const calculatedTax = comprehensiveIncomeTax(taxBase);
+      const earnedCredit = earnedIncomeTaxCredit(calculatedTax, annualTaxable);
+      const annualIncomeTaxBase = Math.max(calculatedTax - earnedCredit, 0);
+      const monthlyChildReduction = childWithholdingReductionMonthly(children);
+      const withholdingMultiplier = Math.min(Math.max(values.withholdingRate, 80), 120) / 100;
+      const incomeTax = floorToTen(Math.max(annualIncomeTaxBase / 12 - monthlyChildReduction, 0) * withholdingMultiplier);
+      const localTax = floorToTen(incomeTax * 0.1);
+      const taxTotal = incomeTax + localTax;
+      const deductions = socialInsurance + taxTotal;
+      const monthlyNet = monthlyGross - deductions;
+      const annualNet = monthlyNet * 12;
+      const deductionRate = monthlyGross > 0 ? deductions / monthlyGross * 100 : 0;
       return {
-        headline: formatWon(values.monthlyPay - deductions),
-        subline: `4대 보험 공제 ${formatWon(deductions)} 차감 후`,
+        headline: formatWon(monthlyNet),
+        subline: `세전 월급 ${formatWon(monthlyGross)} · 공제 ${formatWon(deductions)} (${formatPercent(deductionRate, 1)})`,
         rows: [
+          { label: "입력 기준", value: payType === 0 ? (retirementIncluded ? "연봉 · 퇴직금 포함" : "연봉 · 퇴직금 별도") : "월급 기준", tone: "strong" },
+          { label: "연봉 기준 금액", value: formatWon(annualGross) },
+          { label: "세전 월급", value: formatWon(monthlyGross), tone: "strong" },
+          { label: "월 비과세 금액", value: formatWon(taxFreeMonthly) },
+          { label: "4대보험 산정 월급", value: formatWon(taxable) },
           { label: "국민연금", value: formatWon(pension) },
           { label: "건강보험", value: formatWon(health) },
           { label: "장기요양보험", value: formatWon(care) },
           { label: "고용보험", value: formatWon(employment) },
-          { label: "공제 합계", value: formatWon(deductions), tone: "strong" }
+          { label: "4대보험 합계", value: formatWon(socialInsurance), tone: "strong" },
+          { label: "소득세", value: formatWon(incomeTax) },
+          { label: "지방소득세", value: formatWon(localTax) },
+          { label: "세금 합계", value: formatWon(taxTotal), tone: "strong" },
+          { label: "공제 합계", value: formatWon(deductions), tone: "strong" },
+          { label: "월 실수령액", value: formatWon(monthlyNet), tone: "strong" },
+          { label: "연간 실수령액", value: formatWon(annualNet), tone: "strong" }
         ],
         chart: [
           { name: "국민연금", value: pension },
-          { name: "건강", value: health },
+          { name: "건강보험", value: health },
           { name: "장기요양", value: care },
-          { name: "고용", value: employment }
+          { name: "고용보험", value: employment },
+          { name: "소득·지방세", value: taxTotal }
         ]
       };
     }

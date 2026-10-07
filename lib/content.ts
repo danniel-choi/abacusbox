@@ -305,11 +305,11 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     tags: ["육아휴직", "급여", "고용보험"]
   },
   "net-salary": {
-    title: "4대 보험 실수령액 계산기",
+    title: "연봉 실수령액 계산기",
     category: "노무 가이드",
-    audience: "직장인, 급여 담당자",
-    description: "월 급여에서 국민연금, 건강보험, 장기요양, 고용보험 근로자 부담분을 계산합니다.",
-    tags: ["실수령액", "4대보험", "급여명세서"]
+    audience: "직장인, 이직·연봉 협상 준비자, 급여 담당자",
+    description: "연봉 또는 월급에서 비과세, 4대보험, 소득세, 지방소득세를 반영해 월 실수령액과 연간 실수령액을 계산합니다.",
+    tags: ["연봉", "실수령액", "4대보험", "급여명세서"]
   },
   "military-discharge-date": {
     title: "전역일 계산기",
