@@ -303,6 +303,34 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/game", label: "게임 계산기 모음", text: "게임 거래, 확률, 제작, 수수료 계산기를 함께 확인합니다." }
     ]
   },
+  "robux-calculator": {
+    title: "로블록스 로벅스 계산기 | 1 Robux 원화 환산·구매 조합",
+    description:
+      "로블록스 로벅스 계산기로 구매 경로와 패키지별 1 Robux 원화 단가, Robux ↔ 원화 환산, 목표 Robux 이상 최소 구매 조합을 확인하세요.",
+    keywords: ["로벅스 계산기", "로블록스 로벅스 계산기", "1 로벅스 가격", "Robux 원화 환산", "로벅스 가격표"],
+    searchIntents: [
+      "1 로벅스가 한국 돈으로 얼마인지 알고 싶을 때",
+      "Robux를 원화로 환산하거나 원화로 살 수 있는 Robux를 계산할 때",
+      "목표 Robux 이상을 구매하기 위한 패키지 조합을 확인할 때"
+    ],
+    sections: [
+      {
+        title: "구매 경로와 패키지에 따라 1 Robux 단가를 계산합니다.",
+        body:
+          "웹·PC·기프트카드와 모바일 앱·콘솔은 같은 금액에서도 제공 Robux가 달라질 수 있으므로 경로별 패키지 수량을 나누어 계산합니다."
+      },
+      {
+        title: "실제 구매 패키지 조합을 함께 보여줍니다.",
+        body:
+          "단순 환산값뿐 아니라 목표 Robux 이상을 확보하기 위한 최소 결제금액과 패키지 조합을 함께 표시해 실제 구매 계획을 세우기 쉽습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/blox-fruits-calculator", label: "블록스 프루츠 계산기", text: "Roblox 게임 거래 가치와 성장 계획을 함께 계산합니다." },
+      { href: "/calculators/draw-probability", label: "뽑기 확률 계산기", text: "게임 확률과 기대값을 확인합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 결제, 거래, 사냥, 확률 계산기를 함께 확인합니다." }
+    ]
+  },
   "edpi-calculator": {
     title: "eDPI 계산기 | DPI×감도 FPS 마우스 감도 계산",
     description: "eDPI 계산기로 마우스 DPI와 인게임 감도를 곱해 현재 eDPI를 확인하고, DPI 변경 시 같은 감도를 유지할 새 감도를 계산하세요.",

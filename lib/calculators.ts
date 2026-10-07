@@ -69,6 +69,7 @@ export type CalculatorSlug =
   | "lineage-classic-lucky-character"
   | "lineage-classic-hunting-efficiency"
   | "blox-fruits-calculator"
+  | "robux-calculator"
   | "diablo3-gem-calculator"
   | "fc-transfer-fee"
   | "win-rate-calculator"
@@ -6903,6 +6904,162 @@ export const calculators: CalculatorConfig[] = [
           { name: "HP 위치", value: hpRatio * 100 },
           { name: "MP 위치", value: mpRatio * 100 },
           { name: "종합", value: totalRatio * 100 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "robux-calculator",
+    title: "로블록스 로벅스 계산기",
+    description: "Robux가 한국 돈으로 얼마인지 구매 경로와 패키지 기준으로 환산하고, 목표 Robux 이상을 구매하기 위한 최소 패키지 조합을 계산합니다.",
+    category: "게임",
+    keywords: ["로벅스 계산기", "로블록스 로벅스 계산기", "Robux 원화", "1 로벅스 가격", "로벅스 가격표"],
+    badge: "Robux 원화 환산",
+    audience: "로블록스 로벅스 구매 전 원화 환산 금액과 패키지 조합을 확인하려는 사용자",
+    fields: [
+      {
+        name: "purchaseChannel",
+        label: "구매 경로",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "웹·PC·기프트카드", value: 0 },
+          { label: "모바일 앱·콘솔", value: 1 }
+        ]
+      },
+      {
+        name: "packageIndex",
+        label: "환산 기준 패키지",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "4,400원 패키지", value: 0 },
+          { label: "7,500원 패키지", value: 1 },
+          { label: "15,000원 패키지", value: 2 },
+          { label: "22,000원 패키지", value: 3 },
+          { label: "30,000원 패키지", value: 4 },
+          { label: "49,000원 패키지", value: 5 },
+          { label: "79,000원 패키지", value: 6 },
+          { label: "149,000원 패키지", value: 7 },
+          { label: "299,000원 패키지", value: 8 }
+        ]
+      },
+      {
+        name: "conversionDirection",
+        label: "환산 방향",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "Robux → 원화", value: 0 },
+          { label: "원화 → Robux", value: 1 }
+        ]
+      },
+      { name: "robuxAmount", label: "Robux", type: "number", unit: "Robux", min: 0, max: 10000000, step: 1, defaultValue: 1000 },
+      { name: "krwAmount", label: "원화", type: "number", unit: "원", min: 0, max: 1000000000, step: 100, defaultValue: 15000 },
+      { name: "targetRobux", label: "구매 목표 Robux", type: "number", unit: "Robux", min: 0, max: 10000000, step: 1, defaultValue: 1000 },
+      { name: "discountRate", label: "결제 할인율", type: "number", unit: "%", min: 0, max: 100, step: 0.1, defaultValue: 0 }
+    ],
+    guideTitle: "로벅스 원화 환산 기준",
+    guide: [
+      "참고 페이지의 한국 원화 패키지 표를 기준으로 웹·PC·기프트카드와 모바일 앱·콘솔 구매 경로를 나누어 계산합니다.",
+      "1 Robux당 원화는 선택한 패키지 가격을 해당 경로의 제공 Robux로 나눈 값입니다. Robux에는 고정 환율이 없으므로 패키지에 따라 단가가 달라집니다.",
+      "목표 Robux 이상 구매 조합은 같은 경로의 판매 패키지를 조합해 목표 수량 이상을 확보하는 최소 결제금액을 찾습니다."
+    ],
+    checkpoints: [
+      "실제 판매 가격과 Robux 수량은 플랫폼, 계정, 지역, 프로모션에 따라 바뀔 수 있습니다.",
+      "원화 → Robux 결과는 선택한 패키지 단가를 적용한 단순 환산값이며, 실제 결제는 패키지 단위로만 가능합니다.",
+      "기프트카드 할인, 앱스토어 쿠폰, 결제수단 할인은 할인율에 직접 입력해 참고값으로만 보세요.",
+      "최종 결제 전에는 Roblox 공식 구매 화면의 가격과 제공 Robux를 우선 확인하세요."
+    ],
+    faqs: [
+      { question: "1 로벅스는 한국 돈으로 얼마인가요?", answer: "고정 가격은 없습니다. 예를 들어 웹 기준 7,500원에 500 Robux 패키지는 1 Robux가 약 15원입니다." },
+      { question: "모바일과 웹 가격이 왜 다른가요?", answer: "구매 경로에 따라 같은 결제금액에서도 제공 Robux 수량이 달라질 수 있어 이 계산기에서는 경로를 분리해 계산합니다." },
+      { question: "계산 결과만큼 정확히 구매할 수 있나요?", answer: "환산 결과는 참고값입니다. 실제 구매는 판매 중인 패키지 단위로 이루어지므로 구매 조합 결과를 함께 확인하세요." }
+    ],
+    calculate(values) {
+      const packages = [
+        { price: 4400, web: 270, mobile: 240 },
+        { price: 7500, web: 500, mobile: 400 },
+        { price: 15000, web: 1000, mobile: 800 },
+        { price: 22000, web: 1500, mobile: 1200 },
+        { price: 30000, web: 2000, mobile: 1700 },
+        { price: 49000, web: 3625, mobile: 3150 },
+        { price: 79000, web: 5250, mobile: 4500 },
+        { price: 149000, web: 11000, mobile: 10000 },
+        { price: 299000, web: 24000, mobile: 22500 }
+      ];
+      const channel = Math.floor(values.purchaseChannel) === 1 ? "mobile" : "web";
+      const channelLabel = channel === "web" ? "웹·PC·기프트카드" : "모바일 앱·콘솔";
+      const packageIndex = Math.max(0, Math.min(packages.length - 1, Math.floor(values.packageIndex)));
+      const selectedPackage = packages[packageIndex] ?? packages[1];
+      const selectedRobux = selectedPackage[channel];
+      const discountRate = Math.max(0, Math.min(100, values.discountRate));
+      const discountedPrice = selectedPackage.price * (1 - discountRate / 100);
+      const unitPrice = selectedRobux > 0 ? discountedPrice / selectedRobux : 0;
+      const direction = Math.floor(values.conversionDirection) === 1 ? "krwToRobux" : "robuxToKrw";
+      const robuxAmount = Math.max(0, Math.floor(values.robuxAmount));
+      const krwAmount = Math.max(0, values.krwAmount);
+      const convertedKrw = robuxAmount * unitPrice;
+      const convertedRobux = unitPrice > 0 ? krwAmount / unitPrice : 0;
+      const targetRobux = Math.max(0, Math.floor(values.targetRobux));
+      const maxPackageRobux = Math.max(...packages.map((item) => item[channel]));
+      const limit = Math.max(targetRobux + maxPackageRobux, maxPackageRobux);
+      const dp = Array.from({ length: limit + 1 }, () => Number.POSITIVE_INFINITY);
+      const prev = Array.from({ length: limit + 1 }, () => -1);
+      dp[0] = 0;
+      for (let amount = 0; amount <= limit; amount += 1) {
+        if (!Number.isFinite(dp[amount])) continue;
+        packages.forEach((item, index) => {
+          const nextAmount = Math.min(limit, amount + item[channel]);
+          const nextPrice = dp[amount] + item.price * (1 - discountRate / 100);
+          if (nextPrice < dp[nextAmount]) {
+            dp[nextAmount] = nextPrice;
+            prev[nextAmount] = index;
+          }
+        });
+      }
+      let bestAmount = targetRobux;
+      for (let amount = targetRobux; amount <= limit; amount += 1) {
+        if (dp[amount] < dp[bestAmount]) bestAmount = amount;
+      }
+      const counts = Array(packages.length).fill(0) as number[];
+      let cursor = bestAmount;
+      while (cursor > 0 && prev[cursor] >= 0) {
+        const index = prev[cursor];
+        counts[index] += 1;
+        cursor = Math.max(0, cursor - packages[index][channel]);
+      }
+      const bestPrice = Number.isFinite(dp[bestAmount]) ? dp[bestAmount] : 0;
+      const extraRobux = Math.max(0, bestAmount - targetRobux);
+      const packageSummary = counts
+        .map((count, index) => count > 0 ? `${formatWon(packages[index].price)}×${count}` : "")
+        .filter(Boolean)
+        .join(" + ") || "목표 Robux 없음";
+      const quick500 = 500 * unitPrice;
+      const quick1000 = 1000 * unitPrice;
+      const quick10000 = 10000 * unitPrice;
+
+      return {
+        headline: direction === "robuxToKrw" ? formatWon(Math.round(convertedKrw)) : `${formatNumber(Math.floor(convertedRobux))} Robux`,
+        subline: `${channelLabel} · 1 Robux 약 ${formatNumber(unitPrice, 2)}원 · 기준 ${formatWon(selectedPackage.price)} / ${formatNumber(selectedRobux)} Robux`,
+        rows: [
+          { label: "구매 경로", value: channelLabel, tone: "strong" },
+          { label: "기준 패키지", value: `${formatWon(selectedPackage.price)} / ${formatNumber(selectedRobux)} Robux`, tone: "strong" },
+          { label: "1 Robux 단가", value: `${formatNumber(unitPrice, 2)}원`, tone: "strong" },
+          { label: "Robux → 원화", value: `${formatNumber(robuxAmount)} Robux ≈ ${formatWon(Math.round(convertedKrw))}` },
+          { label: "원화 → Robux", value: `${formatWon(Math.round(krwAmount))} ≈ ${formatNumber(Math.floor(convertedRobux))} Robux` },
+          { label: "목표 구매 Robux", value: `${formatNumber(targetRobux)} Robux`, tone: "strong" },
+          { label: "최소 구매 조합", value: packageSummary },
+          { label: "조합 결제금액", value: formatWon(Math.round(bestPrice)), tone: "strong" },
+          { label: "확보 Robux", value: `${formatNumber(bestAmount)} Robux · 초과 ${formatNumber(extraRobux)} Robux` },
+          { label: "빠른 환산 500 Robux", value: formatWon(Math.round(quick500)) },
+          { label: "빠른 환산 1,000 Robux", value: formatWon(Math.round(quick1000)) },
+          { label: "빠른 환산 10,000 Robux", value: formatWon(Math.round(quick10000)) }
+        ],
+        chart: [
+          { name: "기준패키지", value: selectedPackage.price },
+          { name: "환산금액", value: direction === "robuxToKrw" ? convertedKrw : krwAmount },
+          { name: "조합금액", value: bestPrice }
         ]
       };
     }

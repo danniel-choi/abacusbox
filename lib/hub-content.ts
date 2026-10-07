@@ -200,14 +200,18 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "game",
     path: "/game",
     eyebrow: "게임 계산 허브",
-    title: "가챠, 리니지 사냥 효율, 블록스 프루츠, 디아블로3 계산기",
-    description: "뽑기 확률, 리니지 클래식 사냥 효율과 축캐 판정, 블록스 프루츠 거래 W/F/L, 디아블로3 보석 제작, FC온라인 이적시장 수수료, 포커 승률, eDPI처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
-    featuredSlugs: ["lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "draw-probability"],
+    title: "가챠, 로벅스, 리니지 사냥 효율, 블록스 프루츠 계산기",
+    description: "뽑기 확률, 로블록스 로벅스 원화 환산, 리니지 클래식 사냥 효율과 축캐 판정, 블록스 프루츠 거래 W/F/L, 디아블로3 보석 제작, FC온라인 이적시장 수수료처럼 게임 플레이와 이벤트 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee"],
     blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
     sections: [
       {
         title: "게임 계산은 확률과 체감값을 빠르게 확인하는 데 유용합니다.",
         body: "가챠 확률, 포커 에쿼티, 블록스 프루츠 거래 가치처럼 확률과 시세 감각이 들어간 게임은 직감만으로 판단하기 어렵습니다. 같은 비용과 횟수라도 성공 확률과 기대값을 숫자로 보면 무리한 지출이나 과한 기대를 줄일 수 있습니다."
+      },
+      {
+        title: "게임 재화는 실제 결제 단가를 먼저 확인해야 합니다.",
+        body: "로블록스 로벅스처럼 패키지 단위로 판매되는 재화는 1개당 가격이 고정되어 있지 않습니다. 구매 경로와 패키지를 나누어 보면 같은 Robux라도 실제 원화 단가와 최소 결제금액이 달라질 수 있습니다."
       },
       {
         title: "사냥 효율은 경험치와 순수익을 같이 봐야 합니다.",
