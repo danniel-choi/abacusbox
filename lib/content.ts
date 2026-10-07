@@ -509,6 +509,15 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     hubLabel: "투자 계산기",
     relatedTitles: ["주식 물타기 계산기", "코인 수익률 계산기"]
   },
+  "kr-etf": {
+    title: "국내 ETF 장기투자 계산기",
+    category: "금융 가이드",
+    audience: "국내상장 ETF를 장기 적립식으로 모아가는 투자자",
+    description: "초기 투자금, 월 적립금, 기대수익률, 분배금, 총보수와 ETF 세금 유형으로 세후 예상 자산을 계산합니다.",
+    tags: ["국내ETF", "장기투자", "분배금"],
+    hubLabel: "투자 계산기",
+    relatedTitles: ["복리 투자 수익 계산기", "주식 수익률 계산기"]
+  },
   "coin-profit-calculator": {
     title: "코인 수익률 계산기",
     category: "금융 가이드",
@@ -623,7 +632,7 @@ const hourlyAutoBlogCalculatorGroups = [
   ["minimum-wage", "unpaid-wage", "unemployment", "severance", "weekly-holiday", "hourly-wage", "annual-leave", "annual-leave-grant", "parental-leave", "net-salary"],
   ["loan-interest", "loan-dsr", "housing-subscription", "loan-amortization", "card-installment", "exchange-rate", "savings", "lump-sum-deposit", "compound-interest", "youth-future-savings", "youth-leap-account"],
   ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
-  ["stock-return", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
+  ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
   ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
   ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "draw-probability", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
   ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],

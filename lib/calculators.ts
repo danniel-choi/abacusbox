@@ -97,6 +97,7 @@ export type CalculatorSlug =
   | "savings"
   | "pension-tax"
   | "survivor-pension"
+  | "kr-etf"
   | "stock-return"
   | "coin-profit-calculator"
   | "stock-average-price"
@@ -8393,6 +8394,149 @@ export const calculators: CalculatorConfig[] = [
           { name: "재산세", value: propertyTax },
           { name: "교육세", value: localEducationTax },
           { name: "종부세", value: compTax }
+        ]
+      };
+    }
+  },
+  {
+    slug: "kr-etf",
+    title: "국내 ETF 장기투자 계산기",
+    description: "초기 투자금, 월 적립금, 기대수익률, 분배금, 총보수와 ETF 세금 유형을 반영해 국내 ETF 장기투자 예상 자산을 계산합니다.",
+    category: "금융",
+    keywords: ["국내 ETF 계산기", "ETF 장기투자 계산기", "ETF 적립식 투자", "ETF 분배금 세금", "국내상장 ETF 세금"],
+    badge: "분배금·세금 반영",
+    audience: "국내상장 ETF를 장기 적립식으로 투자할 때 세후 예상 자산과 분배금 영향을 확인하려는 투자자",
+    fields: [
+      { name: "initialInvestment", label: "초기 투자금", type: "number", unit: "원", min: 0, max: 10000000000, step: 100000, defaultValue: 10000000 },
+      { name: "monthlyContribution", label: "월 적립금", type: "number", unit: "원", min: 0, max: 1000000000, step: 10000, defaultValue: 500000 },
+      { name: "years", label: "투자 기간", type: "number", unit: "년", min: 1, max: 50, step: 1, defaultValue: 20 },
+      { name: "annualReturnRate", label: "연 기대수익률", type: "number", unit: "%", min: -80, max: 80, step: 0.1, defaultValue: 6 },
+      { name: "distributionYield", label: "연 분배금 수익률", type: "number", unit: "%", min: 0, max: 20, step: 0.1, defaultValue: 2 },
+      { name: "expenseRatio", label: "총보수·기타비용", type: "number", unit: "%", min: 0, max: 5, step: 0.01, defaultValue: 0.2 },
+      {
+        name: "distributionReinvest",
+        label: "분배금 처리",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "세후 분배금 재투자", value: 1 },
+          { label: "세후 분배금 현금 수령", value: 0 }
+        ]
+      },
+      {
+        name: "etfTaxType",
+        label: "ETF 세금 유형",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "국내주식형 ETF", value: 0 },
+          { label: "기타 국내상장 ETF", value: 1 }
+        ]
+      },
+      { name: "distributionTaxRate", label: "분배금 배당소득세율", type: "number", unit: "%", min: 0, max: 50, step: 0.1, defaultValue: 15.4 },
+      { name: "capitalGainsTaxRate", label: "기타 ETF 매매차익 과세율", type: "number", unit: "%", min: 0, max: 50, step: 0.1, defaultValue: 15.4 },
+      { name: "annualStepUpRate", label: "월 적립금 연 증가율", type: "number", unit: "%", min: 0, max: 30, step: 0.5, defaultValue: 0 }
+    ],
+    guideTitle: "국내 ETF 장기투자 계산 기준",
+    guide: [
+      "초기 투자금과 매월 말 적립금을 기준으로 ETF 가격 상승, 분배금, 총보수·기타비용을 월 단위로 단순 시뮬레이션합니다.",
+      "국내주식형 ETF는 매매차익 과세를 0원으로 보고, 기타 국내상장 ETF는 최종 평가차익에 입력한 과세율을 적용해 단순 추정합니다. 분배금은 ETF 유형과 관계없이 입력한 배당소득세율을 적용합니다.",
+      "연금저축, IRP, ISA, 해외 ETF, 금융소득 종합과세, 과표기준가 변동, 실제 분배락과 거래 수수료는 반영하지 않습니다. 투자 판단 전에는 상품 설명서와 최신 세법을 함께 확인하세요."
+    ],
+    checkpoints: [
+      "연 기대수익률은 가격 상승률과 분배금 수익률을 합친 총수익률 가정으로 입력하세요.",
+      "분배금을 재투자하면 평가금액이 커지지만, 분배금 세금은 매월 먼저 차감한다고 가정합니다.",
+      "국내주식형 ETF와 채권·해외·원자재형 ETF는 매매차익 과세 방식이 달라질 수 있습니다.",
+      "장기투자는 수익률보다 납입 지속 가능성과 비용률 차이를 함께 보는 것이 중요합니다."
+    ],
+    faqs: [
+      { question: "국내주식형 ETF도 세금이 없나요?", answer: "매매차익은 일반적으로 비과세로 보지만, 분배금은 배당소득세가 과세될 수 있습니다. 계좌 유형과 상품 구조에 따라 달라질 수 있습니다." },
+      { question: "기타 국내상장 ETF는 어떻게 계산하나요?", answer: "이 계산기는 최종 평가차익에서 재투자된 세후 분배금을 제외한 금액을 과세 대상 차익으로 보고 입력한 세율을 적용합니다. 실제 과세표준 기준과는 차이가 날 수 있습니다." },
+      { question: "연 기대수익률에는 분배금도 포함하나요?", answer: "네. 총수익률 가정으로 입력하고, 분배금 수익률은 그중 현금으로 발생하는 비중으로 입력하면 가격 상승분과 분배금 효과를 나누어 계산합니다." }
+    ],
+    calculate(values) {
+      const years = Math.max(Math.floor(values.years), 1);
+      const months = years * 12;
+      const initialInvestment = Math.max(values.initialInvestment, 0);
+      const baseMonthlyContribution = Math.max(values.monthlyContribution, 0);
+      const totalAnnualReturnRate = values.annualReturnRate / 100;
+      const distributionYield = Math.max(values.distributionYield, 0) / 100;
+      const priceAnnualReturn = Math.max(totalAnnualReturnRate - distributionYield, -0.95);
+      const monthlyPriceReturn = Math.pow(1 + priceAnnualReturn, 1 / 12) - 1;
+      const monthlyExpenseRate = Math.max(values.expenseRatio, 0) / 100 / 12;
+      const monthlyDistributionRate = distributionYield / 12;
+      const distributionTaxRate = Math.max(values.distributionTaxRate, 0) / 100;
+      const capitalGainsTaxRate = Math.max(values.capitalGainsTaxRate, 0) / 100;
+      const stepUpRate = Math.max(values.annualStepUpRate, 0) / 100;
+
+      let balance = initialInvestment;
+      let totalContributions = initialInvestment;
+      let grossDistributions = 0;
+      let distributionTax = 0;
+      let reinvestedDistributions = 0;
+      let cashDistributions = 0;
+      let expenseCost = 0;
+      let currentMonthlyContribution = baseMonthlyContribution;
+
+      for (let month = 1; month <= months; month += 1) {
+        if (month > 1 && (month - 1) % 12 === 0) {
+          currentMonthlyContribution *= 1 + stepUpRate;
+        }
+
+        balance += currentMonthlyContribution;
+        totalContributions += currentMonthlyContribution;
+        balance *= 1 + monthlyPriceReturn;
+
+        const monthlyExpense = Math.max(balance * monthlyExpenseRate, 0);
+        expenseCost += monthlyExpense;
+        balance = Math.max(balance - monthlyExpense, 0);
+
+        const grossDistribution = Math.max(balance * monthlyDistributionRate, 0);
+        const tax = grossDistribution * distributionTaxRate;
+        const netDistribution = grossDistribution - tax;
+        grossDistributions += grossDistribution;
+        distributionTax += tax;
+
+        if (values.distributionReinvest === 1) {
+          balance += netDistribution;
+          reinvestedDistributions += netDistribution;
+        } else {
+          cashDistributions += netDistribution;
+        }
+      }
+
+      const taxableGainBase = Math.max(balance - totalContributions - reinvestedDistributions, 0);
+      const capitalGainsTax = values.etfTaxType === 1 ? taxableGainBase * capitalGainsTaxRate : 0;
+      const finalInvestmentValue = Math.max(balance - capitalGainsTax, 0);
+      const finalAfterTaxAssets = finalInvestmentValue + cashDistributions;
+      const totalProfit = finalAfterTaxAssets - totalContributions;
+      const totalReturnRate = totalContributions > 0 ? (totalProfit / totalContributions) * 100 : 0;
+      const simpleAnnualizedReturn = totalContributions > 0 && finalAfterTaxAssets > 0
+        ? (Math.pow(finalAfterTaxAssets / totalContributions, 1 / years) - 1) * 100
+        : 0;
+
+      return {
+        headline: `${formatWon(finalAfterTaxAssets)} (${formatPercent(totalReturnRate, 1)})`,
+        subline: `총 납입 ${formatWon(totalContributions)} · 세후 손익 ${totalProfit >= 0 ? "+" : ""}${formatWon(totalProfit)}`,
+        rows: [
+          { label: "세후 총자산", value: formatWon(finalAfterTaxAssets), tone: "strong" },
+          { label: "ETF 평가금액", value: formatWon(balance), tone: "strong" },
+          { label: "총 투자원금", value: formatWon(totalContributions) },
+          { label: "세후 투자손익", value: `${totalProfit >= 0 ? "+" : ""}${formatWon(totalProfit)}`, tone: "strong" },
+          { label: "누적 수익률", value: formatPercent(totalReturnRate, 1), tone: "strong" },
+          { label: "연환산 참고수익률", value: formatPercent(simpleAnnualizedReturn, 2) },
+          { label: "세전 분배금 합계", value: formatWon(grossDistributions) },
+          { label: "분배금 세금", value: formatWon(distributionTax) },
+          { label: values.distributionReinvest === 1 ? "세후 분배금 재투자" : "세후 분배금 현금", value: formatWon(values.distributionReinvest === 1 ? reinvestedDistributions : cashDistributions), tone: "strong" },
+          { label: "총보수·기타비용 추정", value: formatWon(expenseCost) },
+          { label: "매매차익 과세 추정", value: formatWon(capitalGainsTax) },
+          { label: "마지막 월 적립금", value: formatWon(currentMonthlyContribution) }
+        ],
+        chart: [
+          { name: "투자원금", value: totalContributions },
+          { name: "세후손익", value: Math.abs(totalProfit) },
+          { name: "분배금세금", value: distributionTax },
+          { name: "매매차익세", value: capitalGainsTax }
         ]
       };
     }

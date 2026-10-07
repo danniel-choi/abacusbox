@@ -96,14 +96,18 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "investment",
     path: "/stock",
     eyebrow: "투자·주식 허브",
-    title: "주식·암호화폐 투자 계산기",
-    description: "주식 매매 손익, 추가 매수 후 평균단가, PER/PBR 가치평가, 암호화폐 적립식 투자 성장 시나리오를 한곳에서 비교할 수 있습니다.",
-    featuredSlugs: ["stock-return", "crypto-investment-growth", "stock-average-price", "stock-valuation", "compound-interest", "exchange-rate"],
+    title: "주식·ETF·암호화폐 투자 계산기",
+    description: "국내 ETF 장기투자, 주식 매매 손익, 추가 매수 후 평균단가, PER/PBR 가치평가, 암호화폐 적립식 투자 성장 시나리오를 한곳에서 비교할 수 있습니다.",
+    featuredSlugs: ["kr-etf", "stock-return", "crypto-investment-growth", "stock-average-price", "stock-valuation", "compound-interest"],
     blogSlugs: ["stock-calculator-before-trading", "irp-tax-credit-strategy-2026", "dsr-ltv-practical-difference"],
     sections: [
       {
         title: "투자 계산은 수익률보다 실제 손익이 먼저입니다.",
         body: "수익률은 보기 쉬운 숫자지만, 실제 판단에는 매수 총비용, 매도 실수령액, 수수료, 거래세, 환율, 투자 기간이 함께 필요합니다. 특히 단기 매매와 변동성이 큰 자산은 작은 비용 차이도 누적 손익에 영향을 줍니다."
+      },
+      {
+        title: "ETF 장기투자는 분배금과 비용을 함께 봐야 합니다.",
+        body: "국내상장 ETF는 같은 수익률 가정이라도 분배금 재투자 여부, 총보수·기타비용, 국내주식형인지 기타 ETF인지에 따라 세후 결과가 달라집니다. 장기 적립식 투자는 매월 넣을 수 있는 금액과 비용률을 함께 점검하는 것이 좋습니다."
       },
       {
         title: "암호화폐 적립식 투자는 여러 시나리오를 함께 봐야 합니다.",
