@@ -2,7 +2,7 @@ export type BlogPost = {
   slug: string;
   title: string;
   excerpt: string;
-  category: "노무 가이드" | "금융 가이드" | "세금 가이드" | "건강 가이드" | "생활 가이드" | "사업 가이드" | "수학 도구" | "운영";
+  category: "노무 가이드" | "금융 가이드" | "세금 가이드" | "건강 가이드" | "생활 가이드" | "게임 가이드" | "사업 가이드" | "수학 도구" | "운영";
   publishedAt: string;
   readTime: string;
   tags: string[];
@@ -74,14 +74,14 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "draw-probability": {
     title: "뽑기 확률 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "게임 가챠, 랜덤박스, 이벤트 추첨 확률을 확인하는 사용자",
     description: "1회 성공 확률과 뽑기 횟수를 기준으로 최소 1회 성공 확률, 목표 개수 이상 확률, 기대 성공 횟수와 예상 비용을 계산합니다.",
     tags: ["뽑기확률", "가챠확률", "랜덤박스"]
   },
   "diablo3-gem-calculator": {
     title: "디아블로3 보석 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "디아블로3 보석 제작 재료와 골드를 미리 계산하는 플레이어",
     description: "보유한 등급별 보석과 목표 보석 등급·수량을 입력해 필요한 하위 보석, 골드, 죽음의 숨결, 제작 단계를 계산합니다.",
     tags: ["디아블로3", "보석제작", "죽음의숨결"],
@@ -90,7 +90,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "lineage-classic-lucky-character": {
     title: "리니지 클래식 축캐 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "리니지 클래식 캐릭터의 HP/MP 성장 등급을 확인하는 플레이어",
     description: "직업, 레벨, CON/WIS, 현재 HP/MP를 입력해 HP 성장과 MP 성장 기준으로 축캐 등급과 S/A/B/C 컷을 계산합니다.",
     tags: ["리니지클래식", "축캐", "HP성장"],
@@ -99,7 +99,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "lineage-classic-hunting-efficiency": {
     title: "리니지 클래식 사냥 효율 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "리니지 클래식 사냥터별 경험치와 아데나 효율을 비교하는 플레이어",
     description: "사냥 전후 경험치, 사냥 시간, 획득 아데나, 잡템 판매액, 물약비·버프비를 입력해 시간당 경험치와 순수익, ATS 3시간 효율을 계산합니다.",
     tags: ["리니지클래식", "사냥효율", "ATS"],
@@ -108,7 +108,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "blox-fruits-calculator": {
     title: "블록스 프루츠 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "블록스 프루츠 거래 가치와 성장 계획을 비교하는 Roblox 플레이어",
     description: "내 제안과 상대 제안의 가치·수요를 비교해 W/F/L 거래 판정을 보고, 레벨별 스탯 포인트와 마스터리 예상 시간을 계산합니다.",
     tags: ["블록스프루츠", "BloxFruits", "WFL"],
@@ -117,7 +117,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "robux-calculator": {
     title: "로블록스 로벅스 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "Robux 구매 전 원화 환산과 패키지 조합을 확인하려는 Roblox 사용자",
     description: "구매 경로와 패키지별 1 Robux 원화 단가를 계산하고, Robux ↔ 원화 환산과 목표 Robux 이상 최소 구매 조합을 확인합니다.",
     tags: ["로벅스", "Robux", "로블록스"],
@@ -126,7 +126,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "clash-of-clans-calculator": {
     title: "클래시 오브 클랜즈 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "클래시 오브 클랜 업그레이드 자원과 장인 시간을 미리 계산하는 플레이어",
     description: "업그레이드 비용, 보유 자원, 하루 수급량, 장인 시간, 장인 포션, 골드 패스 할인을 입력해 부족 자원과 파밍 기간, 보석 단축 참고값을 계산합니다.",
     tags: ["클래시오브클랜", "COC", "업그레이드"],
@@ -135,7 +135,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "lol-skill-haste": {
     title: "리그 오브 레전드 스킬 가속 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "롤 아이템 빌드별 실제 쿨타임과 목표 스킬 가속을 확인하는 플레이어",
     description: "기본 쿨타임, 스킬 가속, 궁극기 가속, 고정 쿨타임 감소를 입력해 최종 쿨타임과 기존 쿨감률 환산, 목표 쿨타임 필요 가속을 계산합니다.",
     tags: ["리그오브레전드", "스킬가속", "쿨타임"],
@@ -144,7 +144,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "diablo2-attack-speed": {
     title: "디아블로2 공속 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "디아블로2 레저렉션에서 IAS와 WSM 기준 공격 프레임을 확인하는 플레이어",
     description: "무기 베이스 WSM, 무기 IAS, 장비 IAS, 광신·폭발적인 속도, 감속 효과를 입력해 EIAS, 공격 프레임, 초당 공격 횟수와 다음 브레이크포인트를 계산합니다.",
     tags: ["디아블로2", "공속", "IAS"],
@@ -153,7 +153,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "fc-transfer-fee": {
     title: "피파 수수료 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "FC온라인 선수 판매 전 최종 수령 BP를 확인하는 사용자",
     description: "판매 예정 금액, 판매 인원, 기본 수수료 40%, 프리미엄 PC방, TOP CLASS, 쿠폰 할인율과 최대 할인 한도를 반영해 최종 수령 BP를 계산합니다.",
     tags: ["FC온라인", "피파수수료", "이적시장"],
@@ -162,7 +162,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "win-rate-calculator": {
     title: "게임 승률 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "랭크 게임, 팀전, 리그 전적을 관리하는 사용자",
     description: "승, 무, 패 전적을 기준으로 전체 승률, 승패 기준 승률, 승점, 목표 승률까지 필요한 추가 승리 수를 계산합니다.",
     tags: ["게임승률", "전적관리", "목표승률"],
@@ -171,7 +171,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "edpi-calculator": {
     title: "eDPI 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "FPS 게임에서 DPI와 인게임 감도를 맞추려는 사용자",
     description: "마우스 DPI와 인게임 감도로 eDPI를 계산하고 DPI 변경 시 같은 감도를 유지할 새 감도를 계산합니다.",
     tags: ["eDPI", "FPS감도", "마우스DPI"],
@@ -180,7 +180,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "mouse-sensitivity-converter": {
     title: "마우스 감도 변환 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "FPS 게임에서 cm/360 기준으로 감도를 조정하는 사용자",
     description: "현재 cm/360, DPI, 인게임 감도를 기준으로 목표 cm/360에 맞는 새 감도와 eDPI를 계산합니다.",
     tags: ["마우스감도", "cm360", "FPS"],
@@ -189,7 +189,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "poker-equity-calculator": {
     title: "포커 승률 계산기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "텍사스 홀덤 핸드와 보드 상황의 승률을 확인하는 사용자",
     description: "플레이어의 핸드와 보드 카드를 기준으로 텍사스 홀덤 승률과 에쿼티를 시뮬레이션합니다.",
     tags: ["포커", "홀덤", "승률"],
@@ -198,7 +198,7 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   },
   "random-number": {
     title: "랜덤 숫자 생성기",
-    category: "생활 가이드",
+    category: "게임 가이드",
     audience: "게임, 추첨, 자리 배정에 무작위 숫자가 필요한 사용자",
     description: "최소값과 최대값 사이에서 중복 허용 여부를 선택해 임의 숫자를 생성합니다.",
     tags: ["랜덤", "추첨", "무작위"],
@@ -907,12 +907,38 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
   const template = hourlyTemplateMeta[templateKey];
   const publishedAt = `${dateCode.slice(0, 4)}-${dateCode.slice(4, 6)}-${dateCode.slice(6, 8)}`;
   const plainTitle = meta.title.replace(" 계산기", "");
+  const isGameGuide = meta.category === "게임 가이드";
   const relatedText = meta.relatedTitles?.length
-    ? `함께 보면 좋은 계산기는 ${meta.relatedTitles.join(", ")}입니다. 하나의 결과만 보는 것보다 관련 계산기를 이어서 사용하면 비용, 기간, 세금, 건강 지표처럼 서로 영향을 주는 항목을 더 입체적으로 볼 수 있습니다.`
-    : "계산 결과를 더 잘 해석하려면 같은 분야의 다른 계산기도 함께 확인하는 것이 좋습니다. 금액, 기간, 비율, 조건을 나눠서 보면 결과가 달라지는 이유가 더 선명해집니다.";
+    ? isGameGuide
+      ? `함께 보면 좋은 게임 계산기는 ${meta.relatedTitles.join(", ")}입니다. 하나의 결과만 보는 것보다 관련 계산기를 이어서 사용하면 승률, 재화, 세팅, 확률처럼 서로 영향을 주는 항목을 더 입체적으로 볼 수 있습니다.`
+      : `함께 보면 좋은 계산기는 ${meta.relatedTitles.join(", ")}입니다. 하나의 결과만 보는 것보다 관련 계산기를 이어서 사용하면 비용, 기간, 세금, 건강 지표처럼 서로 영향을 주는 항목을 더 입체적으로 볼 수 있습니다.`
+    : isGameGuide
+      ? "계산 결과를 더 잘 해석하려면 같은 게임·세팅 분야의 다른 계산기도 함께 확인하는 것이 좋습니다. 확률, 재화, 프레임, 쿨타임을 나눠서 보면 결과가 달라지는 이유가 더 선명해집니다."
+      : "계산 결과를 더 잘 해석하려면 같은 분야의 다른 계산기도 함께 확인하는 것이 좋습니다. 금액, 기간, 비율, 조건을 나눠서 보면 결과가 달라지는 이유가 더 선명해집니다.";
   const hubText = meta.hubLabel
     ? `${meta.hubLabel} 안에서 비슷한 목적의 계산기를 함께 찾아보면 입력 기준을 맞추기 쉽습니다.`
     : "계산기 목록에서 같은 주제의 도구를 함께 찾아보면 입력 기준을 맞추기 쉽습니다.";
+  const content = isGameGuide
+    ? [
+        `${meta.title}는 ${meta.audience}가 패치, 세팅, 비용, 확률을 숫자로 비교할 때 유용한 도구입니다. ${meta.description}`,
+        "게임 계산은 공식 툴팁, 패치노트, 서버·시즌 조건을 먼저 맞춰야 합니다. 같은 수치라도 버전, 이벤트, 장비, 버프 적용 여부가 달라지면 결과가 크게 바뀔 수 있습니다.",
+        `${template.focus}을 볼 때는 기준 세팅 하나만 보지 말고 현재 세팅, 목표 세팅, 보수적인 세팅을 함께 비교하는 편이 좋습니다. 작은 옵션 차이가 프레임, 쿨타임, 수익, 확률에서는 크게 체감될 수 있습니다.`,
+        relatedText,
+        hubText,
+        "계산 결과는 플레이 판단을 돕는 참고값입니다. 실제 적용 전에는 게임 내 툴팁, 패치노트, 이벤트 공지, 거래 시세처럼 최신 원자료를 함께 확인해야 합니다.",
+        `계산의정석의 ${meta.title}는 복잡한 표나 커뮤니티 글을 보기 전에 대략적인 범위를 잡는 데 맞춰져 있습니다. 결과가 예상과 다르면 입력 단위, 패치 버전, 버프 적용 여부를 다시 점검해 보세요.`,
+        "마지막으로 결과값 하나보다 항목별 구조를 보는 습관이 중요합니다. 어떤 옵션이 결과를 크게 움직이는지 알면 파밍, 세팅 변경, 구매, 거래 판단의 우선순위를 더 쉽게 정할 수 있습니다."
+      ]
+    : [
+        `${meta.title}는 ${meta.audience}가 빠르게 기준값을 확인할 때 유용한 도구입니다. ${meta.description}`,
+        `계산 전에는 입력값의 기준을 먼저 맞춰야 합니다. 세전과 세후, 월 단위와 연 단위, 총액과 일부 금액이 섞이면 같은 계산기라도 결과 해석이 달라질 수 있습니다.`,
+        `${template.focus}을 볼 때는 기준 시나리오 하나만 두지 말고 보수적인 경우와 여유 있는 경우를 함께 비교하는 편이 좋습니다. 작은 입력 차이가 월 비용이나 예상 금액에서는 크게 벌어질 수 있습니다.`,
+        relatedText,
+        hubText,
+        `계산 결과는 의사결정을 돕는 참고값입니다. 실제 계약, 신고, 구매, 급여 정산, 비용 집행 전에는 견적서, 명세서, 약정서, 공식 안내문처럼 원자료를 함께 확인해야 합니다.`,
+        `계산의정석의 ${meta.title}는 복잡한 표를 보기 전에 대략적인 범위를 잡는 데 맞춰져 있습니다. 결과가 예상과 다르면 입력 단위, 기간, 포함 항목을 다시 점검해 보세요.`,
+        `마지막으로 결과값 하나보다 항목별 구조를 보는 습관이 중요합니다. 어떤 항목이 결과를 크게 움직이는지 알면 절감, 협상, 계획 수정의 우선순위를 더 쉽게 정할 수 있습니다.`
+      ];
   const visual = buildHourlyAutoBlogVisual(meta, template);
 
   return {
@@ -925,22 +951,14 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
     tags: meta.tags,
     calculatorSlug,
     visual,
-    content: [
-      `${meta.title}는 ${meta.audience}가 빠르게 기준값을 확인할 때 유용한 도구입니다. ${meta.description}`,
-      `계산 전에는 입력값의 기준을 먼저 맞춰야 합니다. 세전과 세후, 월 단위와 연 단위, 총액과 일부 금액이 섞이면 같은 계산기라도 결과 해석이 달라질 수 있습니다.`,
-      `${template.focus}을 볼 때는 기준 시나리오 하나만 두지 말고 보수적인 경우와 여유 있는 경우를 함께 비교하는 편이 좋습니다. 작은 입력 차이가 월 비용이나 예상 금액에서는 크게 벌어질 수 있습니다.`,
-      relatedText,
-      hubText,
-      `계산 결과는 의사결정을 돕는 참고값입니다. 실제 계약, 신고, 구매, 급여 정산, 비용 집행 전에는 견적서, 명세서, 약정서, 공식 안내문처럼 원자료를 함께 확인해야 합니다.`,
-      `계산의정석의 ${meta.title}는 복잡한 표를 보기 전에 대략적인 범위를 잡는 데 맞춰져 있습니다. 결과가 예상과 다르면 입력 단위, 기간, 포함 항목을 다시 점검해 보세요.`,
-      `마지막으로 결과값 하나보다 항목별 구조를 보는 습관이 중요합니다. 어떤 항목이 결과를 크게 움직이는지 알면 절감, 협상, 계획 수정의 우선순위를 더 쉽게 정할 수 있습니다.`
-    ]
+    content
   };
 }
 
 function buildHourlyAutoBlogVisual(meta: AutoBlogMeta, template: (typeof hourlyTemplateMeta)[keyof typeof hourlyTemplateMeta]): BlogVisual {
   const related = meta.relatedTitles?.[0] || "관련 계산기";
   const shortTitle = meta.title.replace(" 계산기", "");
+  const isGameGuide = meta.category === "게임 가이드";
 
   return {
     headline: `${shortTitle} 한눈에 보기`,
@@ -953,20 +971,33 @@ function buildHourlyAutoBlogVisual(meta: AutoBlogMeta, template: (typeof hourlyT
     table: {
       title: "입력값 점검표",
       columns: ["확인 항목", "왜 중요한가", "체크 방법"],
-      rows: [
-        ["기준 단위", "월·연, 세전·세후가 섞이면 결과가 흔들립니다.", "입력 전에 단위를 하나로 맞춥니다."],
-        ["포함 범위", "수수료, 세금, 부대비용 누락이 자주 생깁니다.", "결과에 들어간 항목과 빠진 항목을 나눕니다."],
-        ["비교 시나리오", "한 가지 가정만 보면 의사결정이 좁아집니다.", "보수·기준·여유 3가지 값을 비교합니다."]
-      ]
+      rows: isGameGuide
+        ? [
+            ["패치/시즌 기준", "버전이 달라지면 수치가 바뀔 수 있습니다.", "게임 내 툴팁과 패치노트를 먼저 맞춥니다."],
+            ["세팅 조건", "장비·버프·수요·확률 조건이 결과를 크게 바꿉니다.", "현재 세팅과 목표 세팅을 나눠 입력합니다."],
+            ["비교 시나리오", "한 가지 값만 보면 체감 차이를 놓치기 쉽습니다.", "현재·목표·보수 3가지 값을 비교합니다."]
+          ]
+        : [
+            ["기준 단위", "월·연, 세전·세후가 섞이면 결과가 흔들립니다.", "입력 전에 단위를 하나로 맞춥니다."],
+            ["포함 범위", "수수료, 세금, 부대비용 누락이 자주 생깁니다.", "결과에 들어간 항목과 빠진 항목을 나눕니다."],
+            ["비교 시나리오", "한 가지 가정만 보면 의사결정이 좁아집니다.", "보수·기준·여유 3가지 값을 비교합니다."]
+          ]
     },
     flow: {
       title: "계산 후 행동 흐름",
-      steps: [
-        { label: "입력", detail: "현재 조건과 기준값을 넣습니다." },
-        { label: "비교", detail: "조건을 2~3개로 바꿔 차이를 봅니다." },
-        { label: "저장", detail: "결과 카드나 링크로 다시 볼 수 있게 남깁니다." },
-        { label: "실행", detail: "계약서, 고지서, 공식 안내문으로 최종 확인합니다." }
-      ]
+      steps: isGameGuide
+        ? [
+            { label: "조건", detail: "캐릭터, 장비, 패치 기준을 맞춥니다." },
+            { label: "계산", detail: "현재 값과 목표 값을 입력합니다." },
+            { label: "비교", detail: "세팅을 바꿔 차이를 봅니다." },
+            { label: "확인", detail: "게임 내 툴팁과 공지를 최종 확인합니다." }
+          ]
+        : [
+            { label: "입력", detail: "현재 조건과 기준값을 넣습니다." },
+            { label: "비교", detail: "조건을 2~3개로 바꿔 차이를 봅니다." },
+            { label: "저장", detail: "결과 카드나 링크로 다시 볼 수 있게 남깁니다." },
+            { label: "실행", detail: "계약서, 고지서, 공식 안내문으로 최종 확인합니다." }
+          ]
     }
   };
 }
