@@ -175,7 +175,8 @@ export type CalculatorSlug =
   | "woldeok-gwiin-calculator"
   | "bokseong-gwiin-calculator"
   | "mungok-gwiin-calculator"
-  | "gwangwi-hakgwan-calculator";
+  | "gwangwi-hakgwan-calculator"
+  | "tarot-birth-card-calculator";
 
 export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학" | "게임" | "사주";
 
@@ -1205,6 +1206,90 @@ function branchHitText(profile: SajuProfile, branchIndex: number) {
   return matches.length ? `${matches.join(", ")}에 위치` : "주요 지지에는 없음";
 }
 
+const tarotMajorArcana: Record<number, { ko: string; en: string; keyword: string }> = {
+  1: { ko: "마법사", en: "The Magician", keyword: "시작, 의지, 표현력" },
+  2: { ko: "여사제", en: "The High Priestess", keyword: "직관, 내면, 통찰" },
+  3: { ko: "여황제", en: "The Empress", keyword: "창조성, 풍요, 돌봄" },
+  4: { ko: "황제", en: "The Emperor", keyword: "질서, 책임, 리더십" },
+  5: { ko: "교황", en: "The Hierophant", keyword: "가르침, 전통, 신념" },
+  6: { ko: "연인", en: "The Lovers", keyword: "선택, 관계, 조화" },
+  7: { ko: "전차", en: "The Chariot", keyword: "추진력, 승부, 방향성" },
+  8: { ko: "힘", en: "Strength", keyword: "용기, 인내, 자기 조절" },
+  9: { ko: "은둔자", en: "The Hermit", keyword: "성찰, 탐구, 지혜" },
+  10: { ko: "운명의 수레바퀴", en: "Wheel of Fortune", keyword: "전환, 흐름, 기회" },
+  11: { ko: "정의", en: "Justice", keyword: "균형, 판단, 공정함" },
+  12: { ko: "매달린 사람", en: "The Hanged Man", keyword: "관점 전환, 멈춤, 수용" },
+  13: { ko: "죽음", en: "Death", keyword: "끝맺음, 변화, 재탄생" },
+  14: { ko: "절제", en: "Temperance", keyword: "조율, 회복, 중용" },
+  15: { ko: "악마", en: "The Devil", keyword: "욕망, 집착, 현실 감각" },
+  16: { ko: "탑", en: "The Tower", keyword: "충격, 해체, 새 기준" },
+  17: { ko: "별", en: "The Star", keyword: "희망, 영감, 치유" },
+  18: { ko: "달", en: "The Moon", keyword: "감정, 무의식, 불확실성" },
+  19: { ko: "태양", en: "The Sun", keyword: "활력, 성공, 명료함" },
+  20: { ko: "심판", en: "Judgement", keyword: "각성, 부름, 재평가" },
+  21: { ko: "세계", en: "The World", keyword: "완성, 통합, 성취" }
+};
+
+function tarotReductionSteps(total: number) {
+  const steps: { from: number; to: number; expression: string }[] = [];
+  let current = total;
+  while (current > 21) {
+    const text = String(current);
+    const parts = text.length >= 3 ? [text.slice(0, -1), text.slice(-1)] : text.split("");
+    const next = parts.reduce((sum, part) => sum + Number(part), 0);
+    steps.push({ from: current, to: next, expression: `${parts.join(" + ")} = ${next}` });
+    current = next;
+  }
+  return { firstReduced: current, steps };
+}
+
+function tarotBirthCards(total: number) {
+  const { firstReduced, steps } = tarotReductionSteps(total);
+  if (firstReduced === 19) return { numbers: [19, 10, 1], firstReduced, steps };
+  if (firstReduced >= 10 && firstReduced <= 21) {
+    const finalNumber = firstReduced >= 10 ? String(firstReduced).split("").reduce((sum, digit) => sum + Number(digit), 0) : firstReduced;
+    return { numbers: finalNumber === firstReduced ? [firstReduced] : [firstReduced, finalNumber], firstReduced, steps };
+  }
+  return { numbers: [firstReduced + 9, firstReduced], firstReduced, steps };
+}
+
+function calculateTarotBirthCard(values: Record<string, number>): CalculatorResult {
+  const birthDate = clampDate(values.birthYear ?? 1992, values.birthMonth ?? 6, values.birthDay ?? 11);
+  const year = birthDate.getUTCFullYear();
+  const month = birthDate.getUTCMonth() + 1;
+  const day = birthDate.getUTCDate();
+  const centuryPart = Math.floor(year / 100);
+  const yearPart = year % 100;
+  const total = month + day + centuryPart + yearPart;
+  const { numbers, firstReduced, steps } = tarotBirthCards(total);
+  const cards = numbers.map((number) => tarotMajorArcana[number]).filter(Boolean);
+  const cardTitle = cards.map((card) => card.ko).join(" · ");
+  const cardNumbers = numbers.join(" / ");
+  const firstCard = cards[0];
+  const soulCard = cards[cards.length - 1];
+  const firstLine = `${String(month).padStart(2, "0")} + ${String(day).padStart(2, "0")} + ${centuryPart} + ${String(yearPart).padStart(2, "0")} = ${total}`;
+  const reductionLine = steps.length
+    ? steps.map((step) => `${step.from} → ${step.expression}`).join(" / ")
+    : "이미 21 이하라 추가 축약 없음";
+
+  return {
+    headline: `탄생 카드는 ${cardTitle}입니다`,
+    subline: `${formatKoreanDate(birthDate)} 양력 기준 · 카드 번호 ${cardNumbers}`,
+    rows: [
+      { label: "입력 생년월일", value: `${formatKoreanDate(birthDate)} (양력)`, tone: "strong" },
+      { label: "기본 계산식", value: firstLine },
+      { label: "축약 과정", value: reductionLine },
+      { label: "탄생 카드 조합", value: `${cardTitle} (${cards.map((card) => card.en).join(" · ")})`, tone: "strong" },
+      { label: "카드 번호", value: cardNumbers },
+      { label: "대표 키워드", value: cards.map((card) => card.keyword).join(" / ") },
+      { label: "성격 카드", value: firstCard ? `${numbers[0]}번 ${firstCard.ko} · ${firstCard.keyword}` : "확인 필요" },
+      { label: "영혼 카드", value: soulCard ? `${numbers[numbers.length - 1]}번 ${soulCard.ko} · ${soulCard.keyword}` : "확인 필요" },
+      { label: "계산 기준", value: `첫 축약값 ${firstReduced} 기준으로 10~21번 조합을 우선 확인합니다.` }
+    ],
+    chart: numbers.map((number) => ({ name: `${number} ${tarotMajorArcana[number]?.ko ?? ""}`.trim(), value: number }))
+  };
+}
+
 function usesSajuBirthDateBasis(mode: string) {
   return [
     "jisal",
@@ -1681,6 +1766,36 @@ function makeSajuCalculator(config: {
 }
 
 const sajuCalculators: CalculatorConfig[] = [
+  {
+    slug: "tarot-birth-card-calculator",
+    title: "타로 탄생 카드 계산기",
+    description: "양력 생년월일을 기준으로 타로 메이저 아르카나 탄생 카드 조합과 성격·영혼 카드 키워드를 계산합니다.",
+    category: "사주",
+    keywords: ["타로 탄생 카드", "birth card", "타로 생일 카드", "메이저 아르카나", "성격 카드", "영혼 카드"],
+    badge: "타로",
+    audience: "생년월일로 나의 타로 탄생 카드와 핵심 키워드를 가볍게 확인하려는 사용자",
+    fields: [
+      { name: "birthYear", label: "출생연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 1992 },
+      { name: "birthMonth", label: "출생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 6 },
+      { name: "birthDay", label: "출생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 11 }
+    ],
+    actionLabel: "탄생 카드 계산하기",
+    guideTitle: "타로 탄생 카드 계산 방법",
+    guide: [
+      "양력 생년월일을 기준으로 월, 일, 연도의 앞 두 자리, 뒤 두 자리를 더합니다.",
+      "합계가 21보다 크면 세 자리 수는 앞부분과 마지막 한 자리를 더하고, 두 자리 수는 각 자리 수를 더해 21 이하로 줄입니다.",
+      "예를 들어 1992년 6월 11일은 06 + 11 + 19 + 92 = 128, 128은 12 + 8 = 20, 20은 2 + 0 = 2가 되어 심판·여사제 조합으로 봅니다.",
+      "음력 생일은 먼저 양력 날짜로 변환한 뒤 입력하면 같은 방식으로 계산할 수 있습니다."
+    ],
+    checkpoints: ["양력 생년월일로 입력", "음력 생일은 양력 변환 후 입력", "탄생 카드 조합과 키워드 함께 확인", "타로 해석은 재미와 자기성찰용으로 활용"],
+    faqs: [
+      { question: "음력 생일도 바로 입력할 수 있나요?", answer: "이 계산기는 양력 기준입니다. 음력 생일은 음력 양력 변환기로 실제 양력 생년월일을 확인한 뒤 입력해 주세요." },
+      { question: "카드가 두 장 또는 세 장으로 나오는 이유는 무엇인가요?", answer: "메이저 아르카나 번호를 줄여 가며 서로 연결되는 번호를 함께 보기 때문입니다. 19/10/1처럼 세 장 조합이 나올 수도 있습니다." },
+      { question: "0번 바보 카드는 나오지 않나요?", answer: "참조한 탄생 카드 방식은 생년월일 합계를 1~21번 메이저 아르카나 조합으로 줄여 계산하므로 0번 카드는 결과 조합에 포함하지 않습니다." },
+      { question: "결과가 운명을 뜻하나요?", answer: "아니요. 타로 탄생 카드는 성향과 자기성찰을 위한 상징적 참고값이며 미래를 단정하는 기준으로 보기는 어렵습니다." }
+    ],
+    calculate: calculateTarotBirthCard
+  },
   makeSajuCalculator({ slug: "korean-zodiac", title: "띠 계산기", description: "태어난 해를 기준으로 쥐띠부터 돼지띠까지 내 띠와 연도 간지를 계산합니다.", badge: "띠", mode: "zodiac", keywords: ["띠 계산", "태어난 해 띠"] }),
   makeSajuCalculator({ slug: "samjae-calculator", title: "삼재 계산기", description: "태어난 해와 확인 연도를 기준으로 들삼재, 눌삼재, 날삼재 여부를 계산합니다.", badge: "삼재", mode: "samjae", extraFields: [{ name: "targetYear", label: "확인 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }] }),
   makeSajuCalculator({ slug: "sexagenary-cycle", title: "육십갑자(간지) 계산기", description: "생년 또는 날짜 기준 연도 간지와 60갑자 순번을 계산합니다.", badge: "간지", mode: "ganji" }),

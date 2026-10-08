@@ -249,9 +249,9 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "saju",
     path: "/saju",
     eyebrow: "사주 계산 허브",
-    title: "띠, 삼재, 만세력, 오행 사주 계산기",
-    description: "띠, 삼재, 육십갑자, 만세력, 사주 오행, 일간, 시주, 별자리 궁합, 신살·귀인 계산기를 한곳에 모았습니다.",
-    featuredSlugs: ["manse-ryeok", "saju-five-elements", "samjae-calculator", "korean-zodiac", "saju-day-master", "zodiac-compatibility"],
+    title: "띠, 삼재, 만세력, 오행, 타로 탄생 카드 계산기",
+    description: "띠, 삼재, 육십갑자, 만세력, 사주 오행, 일간, 시주, 타로 탄생 카드, 별자리 궁합, 신살·귀인 계산기를 한곳에 모았습니다.",
+    featuredSlugs: ["tarot-birth-card-calculator", "manse-ryeok", "saju-five-elements", "samjae-calculator", "korean-zodiac", "zodiac-compatibility"],
     blogSlugs: ["calcrule-content-hub-launch", "zodiac-sign-guide-20260901-17-hourly", "lunar-solar-converter-checklist-20260902-21-hourly"],
     sections: [
       {
@@ -265,9 +265,13 @@ export const hubContents: Record<HubKey, HubContent> = {
       {
         title: "신살과 귀인은 위치 확인용으로 가볍게 봅니다.",
         body: "화개살, 역마살, 천을귀인, 문창귀인 같은 항목은 해석 체계가 다양합니다. 계산의정석에서는 위치와 간단한 판정을 보여주는 참고 도구로 제공하며, 운세 판단은 재미와 기록용으로 활용하는 편이 좋습니다."
+      },
+      {
+        title: "타로 탄생 카드는 양력 생일 기준으로 봅니다.",
+        body: "타로 탄생 카드 계산기는 생년월일을 메이저 아르카나 번호로 줄여 성격 카드와 영혼 카드 조합을 보여줍니다. 음력 생일은 먼저 양력으로 변환한 뒤 입력하면 같은 기준으로 비교할 수 있습니다."
       }
     ],
-    checklist: ["양력·음력 기준 확인", "출생시각 입력 여부 확인", "입춘 경계일은 전문 만세력과 비교", "신살·귀인은 위치 확인용으로 보기"]
+    checklist: ["양력·음력 기준 확인", "출생시각 입력 여부 확인", "입춘 경계일은 전문 만세력과 비교", "타로 탄생 카드는 양력 날짜로 입력", "신살·귀인은 위치 확인용으로 보기"]
   },
   business: {
     key: "business",

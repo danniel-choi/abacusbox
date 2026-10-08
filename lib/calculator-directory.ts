@@ -259,10 +259,12 @@ export const CALCULATOR_ICON_BY_SLUG: Record<CalculatorSlug, string> = {
   "woldeok-gwiin-calculator": "🌙",
   "bokseong-gwiin-calculator": "🍀",
   "mungok-gwiin-calculator": "🎨",
-  "gwangwi-hakgwan-calculator": "🎓"
+  "gwangwi-hakgwan-calculator": "🎓",
+  "tarot-birth-card-calculator": "🃏"
 };
 
 const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
+  "tarot-birth-card-calculator": "saju",
   "korean-zodiac": "saju",
   "samjae-calculator": "saju",
   "sexagenary-cycle": "saju",
@@ -526,6 +528,7 @@ export function getFeaturedCalculators() {
     "edpi-calculator",
     "mouse-sensitivity-converter",
     "manse-ryeok",
+    "tarot-birth-card-calculator",
     "saju-five-elements",
     "samjae-calculator",
     "korean-zodiac",
@@ -595,6 +598,7 @@ export function getPopularCalculators() {
     "edpi-calculator",
     "mouse-sensitivity-converter",
     "manse-ryeok",
+    "tarot-birth-card-calculator",
     "saju-day-master",
     "zodiac-compatibility",
     "birth-tree",
@@ -671,6 +675,7 @@ export function getRecentCalculators() {
     "edpi-calculator",
     "mouse-sensitivity-converter",
     "manse-ryeok",
+    "tarot-birth-card-calculator",
     "saju-five-elements",
     "ipchun-calculator",
     "age-nine-calculator",
