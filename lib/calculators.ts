@@ -7310,9 +7310,25 @@ export const calculators: CalculatorConfig[] = [
         defaultValue: 0,
         options: [
           { label: "일반 공격", value: 0 },
+          { label: "질(Zeal) - 참고용", value: 1 },
           { label: "잽(Jab)", value: 2 },
           { label: "배쉬(Bash)", value: 3 },
-          { label: "스턴(Stun)", value: 4 }
+          { label: "스턴(Stun)", value: 4 },
+          { label: "퓨리(Fury) - 참고용", value: 5 },
+          { label: "스트레이프(Strafe) - 참고용", value: 6 },
+          { label: "펜드(Fend) - 참고용", value: 7 },
+          { label: "스마이트(Smite) - 참고용", value: 8 },
+          { label: "프렌지(Frenzy) - 참고용", value: 9 },
+          { label: "더블 스윙(Double Swing) - 참고용", value: 10 },
+          { label: "휠윈드(Whirlwind) - 참고용", value: 11 },
+          { label: "드래곤 탈론(Dragon Talon) - 참고용", value: 12 },
+          { label: "드래곤 클로(Dragon Claw) - 참고용", value: 13 },
+          { label: "페럴 레이지(Feral Rage) - 참고용", value: 14 },
+          { label: "마울(Maul) - 참고용", value: 15 },
+          { label: "더블 스로우(Double Throw) - 참고용", value: 16 },
+          { label: "임페일(Impale) - 참고용", value: 17 },
+          { label: "가이드 애로우(Guided Arrow)", value: 18 },
+          { label: "투척 일반 공격", value: 19 }
         ]
       },
       {
@@ -7328,7 +7344,12 @@ export const calculators: CalculatorConfig[] = [
           { label: "크립틱 액스 [10]", value: 4 },
           { label: "콜로서스 불즈 [10]", value: 5 },
           { label: "워 파이크 [20]", value: 6 },
-          { label: "직접 입력", value: 7 }
+          { label: "메이트리어컬 자벨린 [-10]", value: 7 },
+          { label: "그랜드 메이트런 보우 [10]", value: 8 },
+          { label: "메이트리어컬 보우 [-10]", value: 9 },
+          { label: "그레이터 탈론 [-30]", value: 10 },
+          { label: "루닉 탈론 [-30]", value: 11 },
+          { label: "직접 입력", value: 12 }
         ]
       },
       { name: "customWsm", label: "WSM 직접 입력", type: "number", min: -60, max: 60, step: 5, defaultValue: -30, help: "무기 베이스에서 직접 입력을 선택했을 때 사용합니다. 낮을수록 빠릅니다." },
@@ -7379,13 +7400,34 @@ export const calculators: CalculatorConfig[] = [
     ],
     calculate(values) {
       const combatants = ["아마존", "암살자", "강령술사", "야만용사", "성기사", "원소술사", "드루이드", "액트1 용병", "액트2 용병", "액트5 용병"];
-      const skillModels: Record<number, { name: string; baseFrames: number; minFrames: number }> = {
+      const skillModels: Record<number, { name: string; baseFrames: number; minFrames: number; precision?: "reference" }> = {
         0: { name: "일반 공격", baseFrames: 13, minFrames: 7 },
+        1: { name: "질(Zeal) - 참고용", baseFrames: 11, minFrames: 4, precision: "reference" },
         2: { name: "잽(Jab)", baseFrames: 13, minFrames: 4 },
         3: { name: "배쉬(Bash)", baseFrames: 14, minFrames: 8 },
-        4: { name: "스턴(Stun)", baseFrames: 15, minFrames: 8 }
+        4: { name: "스턴(Stun)", baseFrames: 15, minFrames: 8 },
+        5: { name: "퓨리(Fury) - 참고용", baseFrames: 12, minFrames: 4, precision: "reference" },
+        6: { name: "스트레이프(Strafe) - 참고용", baseFrames: 13, minFrames: 3, precision: "reference" },
+        7: { name: "펜드(Fend) - 참고용", baseFrames: 12, minFrames: 4, precision: "reference" },
+        8: { name: "스마이트(Smite) - 참고용", baseFrames: 12, minFrames: 6, precision: "reference" },
+        9: { name: "프렌지(Frenzy) - 참고용", baseFrames: 12, minFrames: 5, precision: "reference" },
+        10: { name: "더블 스윙(Double Swing) - 참고용", baseFrames: 12, minFrames: 5, precision: "reference" },
+        11: { name: "휠윈드(Whirlwind) - 참고용", baseFrames: 12, minFrames: 4, precision: "reference" },
+        12: { name: "드래곤 탈론(Dragon Talon) - 참고용", baseFrames: 12, minFrames: 4, precision: "reference" },
+        13: { name: "드래곤 클로(Dragon Claw) - 참고용", baseFrames: 12, minFrames: 5, precision: "reference" },
+        14: { name: "페럴 레이지(Feral Rage) - 참고용", baseFrames: 12, minFrames: 5, precision: "reference" },
+        15: { name: "마울(Maul) - 참고용", baseFrames: 13, minFrames: 6, precision: "reference" },
+        16: { name: "더블 스로우(Double Throw) - 참고용", baseFrames: 12, minFrames: 5, precision: "reference" },
+        17: { name: "임페일(Impale) - 참고용", baseFrames: 16, minFrames: 9, precision: "reference" },
+        18: { name: "가이드 애로우(Guided Arrow)", baseFrames: 13, minFrames: 7 },
+        19: { name: "투척 일반 공격", baseFrames: 13, minFrames: 7 }
       };
       const skillOptionsByCombatant: Record<number, number[]> = {
+        0: [0, 19, 2, 7, 17, 18, 6],
+        1: [0, 12, 13],
+        3: [0, 19, 3, 4, 9, 10, 11, 16],
+        4: [0, 1, 8],
+        6: [0, 5, 14, 15],
         8: [0, 2],
         9: [0, 3, 4]
       };
@@ -7397,6 +7439,11 @@ export const calculators: CalculatorConfig[] = [
         { name: "크립틱 액스", wsm: 10 },
         { name: "콜로서스 불즈", wsm: 10 },
         { name: "워 파이크", wsm: 20 },
+        { name: "메이트리어컬 자벨린", wsm: -10 },
+        { name: "그랜드 메이트런 보우", wsm: 10 },
+        { name: "메이트리어컬 보우", wsm: -10 },
+        { name: "그레이터 탈론", wsm: -30 },
+        { name: "루닉 탈론", wsm: -30 },
         { name: "직접 입력", wsm: Math.max(-60, Math.min(60, values.customWsm)) }
       ];
       const combatantIndex = Math.max(0, Math.min(combatants.length - 1, Math.floor(values.combatant)));
@@ -7406,6 +7453,7 @@ export const calculators: CalculatorConfig[] = [
       const skillId = allowedSkillIds.includes(rawSkillId) ? rawSkillId : allowedSkillIds[0];
       const skillModel = skillModels[skillId] ?? skillModels[0];
       const skill = combatantIndex === 7 && skillId === 0 ? "활 일반 공격" : skillModel.name;
+      const precisionLabel = skillModel.precision === "reference" ? "참고용 특수 기술" : "기본 공속 모델";
       const weaponBase = weaponBases[Math.max(0, Math.min(weaponBases.length - 1, Math.floor(values.weaponBase)))] ?? weaponBases[0];
       const itemIas = Math.max(0, values.weaponIas) + Math.max(0, values.gearIas);
       const ieias = Math.floor(120 * itemIas / (120 + itemIas));
@@ -7454,6 +7502,7 @@ export const calculators: CalculatorConfig[] = [
           { label: "초당 공격 횟수", value: `${formatNumber(attacksPerSecond, 2)}회`, tone: "strong" },
           { label: "분당 공격 횟수", value: `${formatNumber(attacksPerMinute, 1)}회` },
           { label: "전투원/기술", value: `${combatant} · ${skill}` },
+          { label: "계산 범위", value: precisionLabel, tone: skillModel.precision === "reference" ? "muted" : undefined },
           { label: "무기 베이스", value: `${weaponBase.name} · WSM ${formatNumber(weaponBase.wsm, 0)}`, tone: "strong" },
           { label: "아이템 IAS", value: `${formatNumber(itemIas, 0)}% · IEIAS ${formatNumber(ieias, 0)}` },
           { label: "스킬 공속(SIAS)", value: `${formatNumber(sias, 0)} · 광신 ${formatNumber(fanaticism, 0)} · 폭속 ${formatNumber(burst, 0)}` },
@@ -7461,7 +7510,7 @@ export const calculators: CalculatorConfig[] = [
           { label: "최종 EIAS", value: `${formatNumber(eias, 0)}`, tone: "strong" },
           { label: "다음 브레이크포인트", value: breakpointText, tone: additionalIas > 0 ? "strong" : undefined },
           { label: "주변 IAS 프레임", value: surrounding },
-          { label: "주의", value: "질·퓨리·휠윈드·프렌지 등 특수 시퀀스 기술은 전용 규칙과 차이가 있을 수 있습니다." }
+          { label: "주의", value: "참고용 특수 기술은 첫 타/후속 타, 쌍수, 변신, 발차기 등 전용 시퀀스 규칙과 차이가 있을 수 있습니다." }
         ],
         chart: [
           { name: "현재프레임×10", value: frames * 10 },
