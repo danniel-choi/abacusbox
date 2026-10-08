@@ -1205,8 +1205,23 @@ function branchHitText(profile: SajuProfile, branchIndex: number) {
   return matches.length ? `${matches.join(", ")}에 위치` : "주요 지지에는 없음";
 }
 
+function usesSajuBirthDateBasis(mode: string) {
+  return [
+    "munchang",
+    "hwang",
+    "hakdang",
+    "cheonju",
+    "cheoneul",
+    "cheondeok",
+    "woldeok",
+    "bokseong",
+    "mungok",
+    "gwangwi"
+  ].includes(mode);
+}
+
 function makeSimpleSajuResult(title: string, values: Record<string, number>, mode: string): CalculatorResult {
-  const usesBirthDateBasis = mode === "bokseong" || mode === "gwangwi";
+  const usesBirthDateBasis = usesSajuBirthDateBasis(mode);
   const dateBasis = Math.floor(values.dateBasis ?? 0);
   const inputDate = clampDate(values.year ?? 1990, values.month ?? 1, values.day ?? 1);
   const convertedSolarDate = usesBirthDateBasis && dateBasis === 1
@@ -1442,10 +1457,17 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
   if (salOffsetByMode[mode] !== undefined) {
     const branchIndex = twelveSalBranch(profile.yearBranchIndex, salOffsetByMode[mode]);
     const hit = branchHitText(profile, branchIndex);
+    const basisRows: ResultRow[] = usesBirthDateBasis
+      ? [
+          { label: "생년월일 기준", value: birthBasisLabel },
+          ...(dateBasis === 1 ? [{ label: "변환 양력", value: convertedDateLabel }] : [])
+        ]
+      : [];
     return {
       headline: `${earthlyBranches[branchIndex]} 지지를 중심으로 확인`,
       subline: `${title}은 연지 기준의 간이 신살 위치를 보여줍니다.`,
       rows: [
+        ...basisRows,
         { label: "기준 띠", value: `${animal}띠` },
         { label: "해당 지지", value: earthlyBranches[branchIndex], tone: "strong" },
         { label: "내 사주 위치", value: hit }
@@ -1530,7 +1552,7 @@ function makeSajuCalculator(config: {
   keywords?: string[];
 }): CalculatorConfig {
   const isBokseong = config.mode === "bokseong";
-  const usesBirthDateBasis = config.mode === "bokseong" || config.mode === "gwangwi";
+  const usesBirthDateBasis = usesSajuBirthDateBasis(config.mode);
   const birthDateBasisFields: InputField[] = [
     {
       name: "dateBasis",
@@ -1576,14 +1598,14 @@ function makeSajuCalculator(config: {
         ]
       : [
           "양력 생년월일을 기준으로 간단한 사주 정보를 계산합니다.",
-          ...(config.mode === "gwangwi" ? ["생년월일 기준에서 양력 또는 음력을 선택할 수 있고, 음력인 경우 평달·윤달 여부를 함께 입력합니다."] : []),
+          ...(usesBirthDateBasis ? ["생년월일 기준에서 양력 또는 음력을 선택할 수 있고, 음력인 경우 평달·윤달 여부를 함께 입력합니다."] : []),
           "입춘, 절기, 지역 시차처럼 정밀 만세력에 필요한 조건은 간이 처리됩니다.",
           "결과는 재미와 참고용이며 중요한 의사결정의 근거로 단독 사용하지 않는 것이 좋습니다."
         ],
     checkpoints: isBokseong
       ? ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "일간과 복성귀인 대상 지지 확인", "연지·월지·일지·시지 위치 비교"]
-      : config.mode === "gwangwi"
-        ? ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "일간과 연간 확인", "관귀학관 판정은 참고용으로 활용"]
+      : usesBirthDateBasis
+        ? ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "일간과 연간 확인", "귀인 판정은 참고용으로 활용"]
         : ["양력/음력 기준을 확인했는지 점검", "출생시각을 모르면 정오 12시로 먼저 확인", "입춘 경계일 출생자는 전문 만세력과 비교", "신살·귀인은 해석보다 위치 확인용으로 활용"],
     faqs: isBokseong
       ? [
@@ -1594,7 +1616,7 @@ function makeSajuCalculator(config: {
         ]
       : [
           { question: "정확한 만세력과 완전히 같나요?", answer: "아니요. 브라우저에서 빠르게 보는 간이 계산기이며 절기 경계와 음력 윤달은 전문 역법 데이터와 차이가 날 수 있습니다." },
-          { question: "음력 생일도 입력할 수 있나요?", answer: config.mode === "gwangwi" ? "네. 생년월일 기준에서 음력을 선택하고 평달 또는 윤달을 지정하면 양력 날짜로 변환한 뒤 계산합니다." : "현재는 양력 기준 입력을 우선 지원합니다. 음력 생일은 음력 양력 변환기로 양력 날짜를 먼저 확인해 주세요." }
+          { question: "음력 생일도 입력할 수 있나요?", answer: usesBirthDateBasis ? "네. 생년월일 기준에서 음력을 선택하고 평달 또는 윤달을 지정하면 양력 날짜로 변환한 뒤 계산합니다." : "현재는 양력 기준 입력을 우선 지원합니다. 음력 생일은 음력 양력 변환기로 양력 날짜를 먼저 확인해 주세요." }
         ],
     calculate: (values) => makeSimpleSajuResult(config.title, values, config.mode)
   };
