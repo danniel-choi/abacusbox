@@ -1402,7 +1402,6 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
     hakdang: [2, 4, 8],
     cheonju: [4, 5],
     cheoneul: [0, 1, 6, 7],
-    bokseong: [2, 3, 8, 9],
     mungok: [0, 2, 5, 7],
     gwangwi: [3, 6, 9]
   };
@@ -1419,6 +1418,48 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
         { label: "내 사주 위치", value: hit }
       ],
       chart: [{ name: earthlyBranches[branchIndex], value: hit.includes("없음") ? 25 : 85 }]
+    };
+  }
+
+  if (mode === "bokseong") {
+    const bokseongTargetsByDayStem: Record<number, number[]> = {
+      0: [2, 0],
+      1: [3, 1],
+      2: [2, 0],
+      3: [11],
+      4: [8],
+      5: [7],
+      6: [6],
+      7: [5],
+      8: [4],
+      9: [3, 1]
+    };
+    const targets = bokseongTargetsByDayStem[profile.dayStemIndex] ?? [];
+    const branchPositions = [
+      { label: "연지", branchIndex: profile.yearBranchIndex, area: "성장 환경·가족 배경·초년기 기반" },
+      { label: "월지", branchIndex: profile.monthBranchIndex, area: "학교·직장·사회생활 기반" },
+      { label: "일지", branchIndex: profile.dayBranchIndex, area: "나의 일상·가까운 관계·생활 안정" },
+      { label: "시지", branchIndex: profile.hourBranchIndex, area: "후반기·자녀·장래 기반" }
+    ];
+    const matches = branchPositions.filter((position) => targets.includes(position.branchIndex));
+    const targetNames = targets.map((target) => earthlyBranches[target]).join(" · ");
+    const positionText = matches.length
+      ? matches.map((match) => `${match.label}(${earthlyBranches[match.branchIndex]})`).join(", ")
+      : "연지·월지·일지·시지에 없음";
+
+    return {
+      headline: matches.length ? `복성귀인이 ${matches.length}곳에 있습니다` : "확인 가능한 지지에는 복성귀인이 없습니다",
+      subline: `일간 ${heavenlyStems[profile.dayStemIndex]} 기준 복성귀인 지지는 ${targetNames}입니다.`,
+      rows: [
+        { label: "일간", value: `${heavenlyStems[profile.dayStemIndex]}(${stemElements[profile.dayStemIndex]})`, tone: "strong" },
+        { label: "복성귀인 지지", value: targetNames },
+        { label: "확인 위치", value: positionText },
+        { label: "자리 해석", value: matches.length ? matches.map((match) => `${match.label}: ${match.area}`).join(" / ") : "해당 지지가 없으면 복성귀인 없음으로 참고" }
+      ],
+      chart: branchPositions.map((position) => ({
+        name: position.label,
+        value: targets.includes(position.branchIndex) ? 100 : 20
+      }))
     };
   }
 
@@ -1446,6 +1487,7 @@ function makeSajuCalculator(config: {
   extraFields?: InputField[];
   keywords?: string[];
 }): CalculatorConfig {
+  const isBokseong = config.mode === "bokseong";
   return {
     slug: config.slug,
     title: config.title,
@@ -1456,17 +1498,31 @@ function makeSajuCalculator(config: {
     audience: "사주, 띠, 간지, 신살·귀인 정보를 간단히 확인하려는 사용자",
     fields: [...sajuCommonFields(Boolean(config.includeHour)), ...(config.extraFields ?? [])],
     actionLabel: "사주 계산하기",
-    guideTitle: `${config.title} 사용 기준`,
-    guide: [
-      "양력 생년월일을 기준으로 간단한 사주 정보를 계산합니다.",
-      "입춘, 절기, 실제 음력 윤월, 지역 시차처럼 정밀 만세력에 필요한 조건은 간이 처리됩니다.",
-      "결과는 재미와 참고용이며 중요한 의사결정의 근거로 단독 사용하지 않는 것이 좋습니다."
-    ],
-    checkpoints: ["양력/음력 기준을 확인했는지 점검", "출생시각을 모르면 정오 12시로 먼저 확인", "입춘 경계일 출생자는 전문 만세력과 비교", "신살·귀인은 해석보다 위치 확인용으로 활용"],
-    faqs: [
-      { question: "정확한 만세력과 완전히 같나요?", answer: "아니요. 브라우저에서 빠르게 보는 간이 계산기이며 절기 경계와 음력 윤달은 전문 역법 데이터와 차이가 날 수 있습니다." },
-      { question: "음력 생일도 입력할 수 있나요?", answer: "현재는 양력 기준 입력을 우선 지원합니다. 음력 생일은 음력 양력 변환기로 양력 날짜를 먼저 확인해 주세요." }
-    ],
+    guideTitle: isBokseong ? "복성귀인 계산 방법" : `${config.title} 사용 기준`,
+    guide: isBokseong
+      ? [
+          "복성귀인은 일간(日干)을 먼저 구한 뒤 일간에 대응하는 복성귀인 지지를 연지·월지·일지·시지에서 찾습니다.",
+          "갑·병은 인·자, 을·계는 묘·축, 정은 해, 무는 신, 기는 미, 경은 오, 신은 사, 임은 진을 복성귀인 지지로 봅니다.",
+          "복성귀인은 평안, 복록, 의식주와 생활 기반의 안정을 상징하는 참고 요소이며 사주 전체를 단정하는 기준은 아닙니다."
+        ]
+      : [
+          "양력 생년월일을 기준으로 간단한 사주 정보를 계산합니다.",
+          "입춘, 절기, 실제 음력 윤월, 지역 시차처럼 정밀 만세력에 필요한 조건은 간이 처리됩니다.",
+          "결과는 재미와 참고용이며 중요한 의사결정의 근거로 단독 사용하지 않는 것이 좋습니다."
+        ],
+    checkpoints: isBokseong
+      ? ["일간을 먼저 확인", "복성귀인 대상 지지 확인", "연지·월지·일지·시지 위치 비교", "복성귀인 하나만으로 재물·인생을 단정하지 않기"]
+      : ["양력/음력 기준을 확인했는지 점검", "출생시각을 모르면 정오 12시로 먼저 확인", "입춘 경계일 출생자는 전문 만세력과 비교", "신살·귀인은 해석보다 위치 확인용으로 활용"],
+    faqs: isBokseong
+      ? [
+          { question: "복성귀인은 무엇을 기준으로 계산하나요?", answer: "태어난 날의 천간인 일간을 기준으로 복성귀인 지지를 정한 뒤 연지, 월지, 일지, 시지에 해당 지지가 있는지 확인합니다." },
+          { question: "복성귀인이 여러 자리에 있을 수도 있나요?", answer: "네. 대상 지지가 여러 지지에 반복되면 두 자리 이상에서 확인될 수 있습니다." },
+          { question: "복성귀인이 있으면 부자가 된다는 뜻인가요?", answer: "그렇게 단정하지 않습니다. 복성귀인은 생활 안정과 복록을 보는 참고 요소이며 실제 재물과 삶은 사주 전체와 현실 조건을 함께 봐야 합니다." }
+        ]
+      : [
+          { question: "정확한 만세력과 완전히 같나요?", answer: "아니요. 브라우저에서 빠르게 보는 간이 계산기이며 절기 경계와 음력 윤달은 전문 역법 데이터와 차이가 날 수 있습니다." },
+          { question: "음력 생일도 입력할 수 있나요?", answer: "현재는 양력 기준 입력을 우선 지원합니다. 음력 생일은 음력 양력 변환기로 양력 날짜를 먼저 확인해 주세요." }
+        ],
     calculate: (values) => makeSimpleSajuResult(config.title, values, config.mode)
   };
 }
@@ -1507,7 +1563,7 @@ const sajuCalculators: CalculatorConfig[] = [
   makeSajuCalculator({ slug: "cheoneul-gwiin-calculator", title: "천을귀인 계산기", description: "생년월일시로 천을귀인 여부와 위치를 확인합니다.", badge: "천을", mode: "cheoneul", includeHour: true }),
   makeSajuCalculator({ slug: "cheondeok-gwiin-calculator", title: "천덕귀인 계산기", description: "월지 기준 천덕귀인 여부와 위치를 확인합니다.", badge: "천덕", mode: "cheondeok", includeHour: true }),
   makeSajuCalculator({ slug: "woldeok-gwiin-calculator", title: "월덕귀인 계산기", description: "생년월일·출생시간으로 월덕귀인 위치를 확인합니다.", badge: "월덕", mode: "woldeok", includeHour: true }),
-  makeSajuCalculator({ slug: "bokseong-gwiin-calculator", title: "복성귀인 계산기", description: "생년월일시로 복성귀인 여부와 위치를 확인합니다.", badge: "복성", mode: "bokseong", includeHour: true }),
+  makeSajuCalculator({ slug: "bokseong-gwiin-calculator", title: "복성귀인 계산기", description: "생년월일과 출생시간으로 일간을 구하고, 일간별 복성귀인 지지가 연지·월지·일지·시지 중 어디에 있는지 확인합니다.", badge: "복성", mode: "bokseong", includeHour: true, keywords: ["복성귀인", "복성귀인 조견표", "일간", "연지", "월지", "일지", "시지"] }),
   makeSajuCalculator({ slug: "mungok-gwiin-calculator", title: "문곡귀인 계산기", description: "생년월일시로 문곡귀인 여부와 위치를 확인합니다.", badge: "문곡", mode: "mungok", includeHour: true }),
   makeSajuCalculator({ slug: "gwangwi-hakgwan-calculator", title: "관귀학관 계산기", description: "생년월일로 사주 관귀학관 위치를 계산합니다.", badge: "학관", mode: "gwangwi" })
 ];
