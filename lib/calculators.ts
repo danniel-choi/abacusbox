@@ -1206,14 +1206,14 @@ function branchHitText(profile: SajuProfile, branchIndex: number) {
 }
 
 function makeSimpleSajuResult(title: string, values: Record<string, number>, mode: string): CalculatorResult {
-  const isBokseong = mode === "bokseong";
+  const usesBirthDateBasis = mode === "bokseong" || mode === "gwangwi";
   const dateBasis = Math.floor(values.dateBasis ?? 0);
   const inputDate = clampDate(values.year ?? 1990, values.month ?? 1, values.day ?? 1);
-  const convertedSolarDate = isBokseong && dateBasis === 1
+  const convertedSolarDate = usesBirthDateBasis && dateBasis === 1
     ? findSolarDateFromLunar(inputDate.getUTCFullYear(), inputDate.getUTCMonth() + 1, inputDate.getUTCDate(), Math.floor(values.lunarLeap ?? 0) === 1)
     : inputDate;
 
-  if (isBokseong && !convertedSolarDate) {
+  if (usesBirthDateBasis && !convertedSolarDate) {
     const lunarType = Math.floor(values.lunarLeap ?? 0) === 1 ? "윤달" : "평달";
     return {
       headline: "해당 음력 날짜를 찾지 못했습니다",
@@ -1500,10 +1500,17 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
 
   const stems = gwiinStemByMode[mode] ?? [];
   const hasGwiin = stems.includes(profile.dayStemIndex) || stems.includes(profile.yearStemIndex);
+  const basisRows: ResultRow[] = usesBirthDateBasis
+    ? [
+        { label: "생년월일 기준", value: birthBasisLabel },
+        ...(dateBasis === 1 ? [{ label: "변환 양력", value: convertedDateLabel }] : [])
+      ]
+    : [];
   return {
     headline: hasGwiin ? `${title.replace(" 계산기", "")} 기운이 있습니다` : `${title.replace(" 계산기", "")}은 약하게 봅니다`,
     subline: "일간과 연간을 기준으로 한 간이 귀인 판정입니다.",
     rows: [
+      ...basisRows,
       { label: "연간", value: heavenlyStems[profile.yearStemIndex] },
       { label: "일간", value: heavenlyStems[profile.dayStemIndex], tone: "strong" },
       { label: "판정", value: hasGwiin ? "해당 가능" : "해당 약함" }
@@ -1523,7 +1530,8 @@ function makeSajuCalculator(config: {
   keywords?: string[];
 }): CalculatorConfig {
   const isBokseong = config.mode === "bokseong";
-  const bokseongFields: InputField[] = [
+  const usesBirthDateBasis = config.mode === "bokseong" || config.mode === "gwangwi";
+  const birthDateBasisFields: InputField[] = [
     {
       name: "dateBasis",
       label: "생년월일 기준",
@@ -1556,7 +1564,7 @@ function makeSajuCalculator(config: {
     keywords: [config.title.replace(" 계산기", ""), "사주", "만세력", ...(config.keywords ?? [])],
     badge: config.badge,
     audience: "사주, 띠, 간지, 신살·귀인 정보를 간단히 확인하려는 사용자",
-    fields: isBokseong ? bokseongFields : [...sajuCommonFields(Boolean(config.includeHour)), ...(config.extraFields ?? [])],
+    fields: usesBirthDateBasis ? birthDateBasisFields : [...sajuCommonFields(Boolean(config.includeHour)), ...(config.extraFields ?? [])],
     actionLabel: "사주 계산하기",
     guideTitle: isBokseong ? "복성귀인 계산 방법" : `${config.title} 사용 기준`,
     guide: isBokseong
@@ -1568,12 +1576,15 @@ function makeSajuCalculator(config: {
         ]
       : [
           "양력 생년월일을 기준으로 간단한 사주 정보를 계산합니다.",
-          "입춘, 절기, 실제 음력 윤월, 지역 시차처럼 정밀 만세력에 필요한 조건은 간이 처리됩니다.",
+          ...(config.mode === "gwangwi" ? ["생년월일 기준에서 양력 또는 음력을 선택할 수 있고, 음력인 경우 평달·윤달 여부를 함께 입력합니다."] : []),
+          "입춘, 절기, 지역 시차처럼 정밀 만세력에 필요한 조건은 간이 처리됩니다.",
           "결과는 재미와 참고용이며 중요한 의사결정의 근거로 단독 사용하지 않는 것이 좋습니다."
         ],
     checkpoints: isBokseong
       ? ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "일간과 복성귀인 대상 지지 확인", "연지·월지·일지·시지 위치 비교"]
-      : ["양력/음력 기준을 확인했는지 점검", "출생시각을 모르면 정오 12시로 먼저 확인", "입춘 경계일 출생자는 전문 만세력과 비교", "신살·귀인은 해석보다 위치 확인용으로 활용"],
+      : config.mode === "gwangwi"
+        ? ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "일간과 연간 확인", "관귀학관 판정은 참고용으로 활용"]
+        : ["양력/음력 기준을 확인했는지 점검", "출생시각을 모르면 정오 12시로 먼저 확인", "입춘 경계일 출생자는 전문 만세력과 비교", "신살·귀인은 해석보다 위치 확인용으로 활용"],
     faqs: isBokseong
       ? [
           { question: "복성귀인은 무엇을 기준으로 계산하나요?", answer: "태어난 날의 천간인 일간을 기준으로 복성귀인 지지를 정한 뒤 연지, 월지, 일지, 시지에 해당 지지가 있는지 확인합니다." },
@@ -1583,7 +1594,7 @@ function makeSajuCalculator(config: {
         ]
       : [
           { question: "정확한 만세력과 완전히 같나요?", answer: "아니요. 브라우저에서 빠르게 보는 간이 계산기이며 절기 경계와 음력 윤달은 전문 역법 데이터와 차이가 날 수 있습니다." },
-          { question: "음력 생일도 입력할 수 있나요?", answer: "현재는 양력 기준 입력을 우선 지원합니다. 음력 생일은 음력 양력 변환기로 양력 날짜를 먼저 확인해 주세요." }
+          { question: "음력 생일도 입력할 수 있나요?", answer: config.mode === "gwangwi" ? "네. 생년월일 기준에서 음력을 선택하고 평달 또는 윤달을 지정하면 양력 날짜로 변환한 뒤 계산합니다." : "현재는 양력 기준 입력을 우선 지원합니다. 음력 생일은 음력 양력 변환기로 양력 날짜를 먼저 확인해 주세요." }
         ],
     calculate: (values) => makeSimpleSajuResult(config.title, values, config.mode)
   };

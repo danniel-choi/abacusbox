@@ -205,7 +205,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         return Number(values.species ?? 1) === 1;
       }
 
-      if (activeCalculator.slug === "bokseong-gwiin-calculator" && field.name === "lunarLeap") {
+      if ((activeCalculator.slug === "bokseong-gwiin-calculator" || activeCalculator.slug === "gwangwi-hakgwan-calculator") && field.name === "lunarLeap") {
         return Number(values.dateBasis ?? 0) === 1;
       }
 
