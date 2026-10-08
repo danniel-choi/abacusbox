@@ -137,9 +137,47 @@ export type CalculatorSlug =
   | "inequality-calculator"
   | "geometry-tool"
   | "three-d-calculator"
-  | "web-calculator";
+  | "web-calculator"
+  | "korean-zodiac"
+  | "samjae-calculator"
+  | "sexagenary-cycle"
+  | "lunar-leap-month"
+  | "saju-five-elements"
+  | "ipchun-calculator"
+  | "saju-day-master"
+  | "yearly-fortune-keyword"
+  | "saju-time-pillar"
+  | "manse-ryeok"
+  | "birth-tree"
+  | "hwagaesal-calculator"
+  | "hongyeomsal-calculator"
+  | "yeokmasal-calculator"
+  | "banansal-calculator"
+  | "zodiac-compatibility"
+  | "jangseongsal-calculator"
+  | "taegeuk-gwiin-calculator"
+  | "gwimungwan-sal-calculator"
+  | "age-nine-calculator"
+  | "jisal-calculator"
+  | "geopsal-calculator"
+  | "jaesal-calculator"
+  | "cheonsal-calculator"
+  | "nyeonsal-calculator"
+  | "wolsal-calculator"
+  | "mangsinsal-calculator"
+  | "yukhaesal-calculator"
+  | "munchang-gwiin-calculator"
+  | "hwang-eun-daesa-calculator"
+  | "hakdang-gwiin-calculator"
+  | "cheonju-gwiin-calculator"
+  | "cheoneul-gwiin-calculator"
+  | "cheondeok-gwiin-calculator"
+  | "woldeok-gwiin-calculator"
+  | "bokseong-gwiin-calculator"
+  | "mungok-gwiin-calculator"
+  | "gwangwi-hakgwan-calculator";
 
-export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학" | "게임";
+export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학" | "게임" | "사주";
 
 export type InputField = {
   name: string;
@@ -1015,7 +1053,467 @@ function catHumanAge(ageYears: number) {
   return 24 + (ageYears - 2) * 4;
 }
 
+const heavenlyStems = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"];
+const earthlyBranches = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"];
+const zodiacAnimals = ["쥐", "소", "호랑이", "토끼", "용", "뱀", "말", "양", "원숭이", "닭", "개", "돼지"];
+const stemElements = ["목", "목", "화", "화", "토", "토", "금", "금", "수", "수"];
+const branchElements = ["수", "토", "목", "목", "토", "화", "화", "토", "금", "금", "토", "수"];
+const elementEmoji: Record<string, string> = { 목: "🌿", 화: "🔥", 토: "⛰", 금: "⚙", 수: "💧" };
+
+type SajuProfile = {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  yearStemIndex: number;
+  yearBranchIndex: number;
+  monthStemIndex: number;
+  monthBranchIndex: number;
+  dayStemIndex: number;
+  dayBranchIndex: number;
+  hourStemIndex: number;
+  hourBranchIndex: number;
+};
+
+function cycleName(stemIndex: number, branchIndex: number) {
+  return `${heavenlyStems[stemIndex % 10]}${earthlyBranches[branchIndex % 12]}`;
+}
+
+function positiveMod(value: number, divisor: number) {
+  return ((value % divisor) + divisor) % divisor;
+}
+
+function getSajuProfile(values: Record<string, number>): SajuProfile {
+  const date = clampDate(values.year ?? 1990, values.month ?? 1, values.day ?? 1);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const hour = Math.min(Math.max(Math.floor(values.hour ?? 12), 0), 23);
+  const yearStemIndex = positiveMod(year - 4, 10);
+  const yearBranchIndex = positiveMod(year - 4, 12);
+  const monthBranchIndex = positiveMod(month + 0, 12);
+  const monthStemIndex = positiveMod(yearStemIndex * 2 + month, 10);
+  const dayDiff = Math.floor((date.getTime() - Date.UTC(2024, 0, 1)) / 86400000);
+  const dayStemIndex = positiveMod(dayDiff, 10);
+  const dayBranchIndex = positiveMod(dayDiff, 12);
+  const hourBranchIndex = Math.floor(((hour + 1) % 24) / 2);
+  const hourStemIndex = positiveMod((dayStemIndex % 5) * 2 + hourBranchIndex, 10);
+
+  return {
+    year,
+    month,
+    day,
+    hour,
+    yearStemIndex,
+    yearBranchIndex,
+    monthStemIndex,
+    monthBranchIndex,
+    dayStemIndex,
+    dayBranchIndex,
+    hourStemIndex,
+    hourBranchIndex
+  };
+}
+
+function sajuCommonFields(includeHour = false): InputField[] {
+  return [
+    { name: "year", label: "생년", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 1990 },
+    { name: "month", label: "생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 1 },
+    { name: "day", label: "생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 1 },
+    ...(includeHour ? [{ name: "hour", label: "출생시각", type: "number" as const, unit: "시", min: 0, max: 23, step: 1, defaultValue: 12 }] : [])
+  ];
+}
+
+function sajuBaseRows(profile: SajuProfile): ResultRow[] {
+  return [
+    { label: "연주", value: cycleName(profile.yearStemIndex, profile.yearBranchIndex) },
+    { label: "월주", value: cycleName(profile.monthStemIndex, profile.monthBranchIndex) },
+    { label: "일주", value: cycleName(profile.dayStemIndex, profile.dayBranchIndex), tone: "strong" },
+    { label: "시주", value: cycleName(profile.hourStemIndex, profile.hourBranchIndex) }
+  ];
+}
+
+function sajuElementCounts(profile: SajuProfile) {
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  [
+    stemElements[profile.yearStemIndex],
+    branchElements[profile.yearBranchIndex],
+    stemElements[profile.monthStemIndex],
+    branchElements[profile.monthBranchIndex],
+    stemElements[profile.dayStemIndex],
+    branchElements[profile.dayBranchIndex],
+    stemElements[profile.hourStemIndex],
+    branchElements[profile.hourBranchIndex]
+  ].forEach((element) => {
+    counts[element] += 1;
+  });
+  return counts;
+}
+
+function zodiacSignByDate(month: number, day: number) {
+  const mmdd = month * 100 + day;
+  const signs = [
+    { limit: 120, name: "염소자리" },
+    { limit: 219, name: "물병자리" },
+    { limit: 321, name: "물고기자리" },
+    { limit: 420, name: "양자리" },
+    { limit: 521, name: "황소자리" },
+    { limit: 622, name: "쌍둥이자리" },
+    { limit: 723, name: "게자리" },
+    { limit: 823, name: "사자자리" },
+    { limit: 923, name: "처녀자리" },
+    { limit: 1023, name: "천칭자리" },
+    { limit: 1122, name: "전갈자리" },
+    { limit: 1222, name: "사수자리" },
+    { limit: 1232, name: "염소자리" }
+  ];
+  return signs.find((sign) => mmdd < sign.limit)?.name ?? "염소자리";
+}
+
+function birthTree(month: number, day: number) {
+  const trees = ["전나무", "느릅나무", "편백나무", "미루나무", "개암나무", "밤나무", "물푸레나무", "자작나무", "올리브나무", "단풍나무", "호두나무", "무화과나무"];
+  const traits = ["차분한 집중", "관계 조율", "섬세한 관찰", "빠른 적응", "호기심", "꾸준함", "독립성", "새 출발", "균형감", "표현력", "깊은 사고", "따뜻한 배려"];
+  const index = positiveMod(month - 1 + Math.floor((day - 1) / 3), trees.length);
+  return { tree: trees[index], trait: traits[index] };
+}
+
+function samjaeInfo(yearBranchIndex: number, targetYear: number) {
+  const targetBranch = positiveMod(targetYear - 4, 12);
+  const group = yearBranchIndex % 4;
+  const branchesByGroup = [
+    [2, 3, 4],
+    [11, 0, 1],
+    [8, 9, 10],
+    [5, 6, 7]
+  ];
+  const hitIndex = branchesByGroup[group].indexOf(targetBranch);
+  const labels = ["들삼재", "눌삼재", "날삼재"];
+  return hitIndex >= 0 ? labels[hitIndex] : "삼재 아님";
+}
+
+function twelveSalBranch(yearBranchIndex: number, offset: number) {
+  return positiveMod(yearBranchIndex + offset, 12);
+}
+
+function branchHitText(profile: SajuProfile, branchIndex: number) {
+  const matches = [
+    profile.yearBranchIndex === branchIndex ? "연지" : "",
+    profile.monthBranchIndex === branchIndex ? "월지" : "",
+    profile.dayBranchIndex === branchIndex ? "일지" : "",
+    profile.hourBranchIndex === branchIndex ? "시지" : ""
+  ].filter(Boolean);
+  return matches.length ? `${matches.join(", ")}에 위치` : "주요 지지에는 없음";
+}
+
+function makeSimpleSajuResult(title: string, values: Record<string, number>, mode: string): CalculatorResult {
+  const profile = getSajuProfile(values);
+  const yearGanji = cycleName(profile.yearStemIndex, profile.yearBranchIndex);
+  const dayGanji = cycleName(profile.dayStemIndex, profile.dayBranchIndex);
+  const animal = zodiacAnimals[profile.yearBranchIndex];
+  const targetYear = Math.floor(values.targetYear ?? new Date().getFullYear());
+  const counts = sajuElementCounts(profile);
+  const sortedElements = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const mainElement = sortedElements[0]?.[0] ?? "목";
+  const baseRows = sajuBaseRows(profile);
+
+  if (mode === "zodiac") {
+    return {
+      headline: `${profile.year}년생은 ${animal}띠입니다`,
+      subline: `${yearGanji}년 기준 지지는 ${earthlyBranches[profile.yearBranchIndex]}입니다.`,
+      rows: [
+        { label: "띠", value: `${animal}띠`, tone: "strong" },
+        { label: "연도 간지", value: yearGanji },
+        { label: "오행", value: branchElements[profile.yearBranchIndex] }
+      ],
+      chart: [{ name: animal, value: 1 }]
+    };
+  }
+
+  if (mode === "samjae") {
+    const status = samjaeInfo(profile.yearBranchIndex, targetYear);
+    return {
+      headline: `${targetYear}년 기준 ${status}`,
+      subline: `${animal}띠의 삼재 흐름을 태어난 해 기준으로 간단히 확인합니다.`,
+      rows: [
+        { label: "내 띠", value: `${animal}띠` },
+        { label: "확인 연도", value: `${targetYear}년` },
+        { label: "삼재 결과", value: status, tone: "strong" }
+      ],
+      chart: [{ name: "위험도", value: status === "삼재 아님" ? 25 : 80 }]
+    };
+  }
+
+  if (mode === "ganji" || mode === "manse") {
+    return {
+      headline: mode === "manse" ? `${yearGanji} ${cycleName(profile.monthStemIndex, profile.monthBranchIndex)} ${dayGanji} ${cycleName(profile.hourStemIndex, profile.hourBranchIndex)}` : `${profile.year}년은 ${yearGanji}년입니다`,
+      subline: "양력 기준 간이 만세력입니다. 절기 경계일은 전문 만세력과 차이가 날 수 있습니다.",
+      rows: mode === "manse" ? baseRows : [{ label: "연도 간지", value: yearGanji, tone: "strong" }, { label: "띠", value: `${animal}띠` }, { label: "60갑자 순번", value: `${positiveMod(profile.year - 4, 60) + 1}번째` }],
+      chart: baseRows.map((row, index) => ({ name: row.label, value: index + 1 }))
+    };
+  }
+
+  if (mode === "leap-month") {
+    const isLeapLike = profile.month === 2 || profile.month === 5 || profile.month === 8 ? (profile.year + profile.month) % 3 === 0 : false;
+    return {
+      headline: isLeapLike ? "윤달 가능성이 있는 달" : "평달로 보는 달",
+      subline: "정확한 음력 윤월 여부는 음력 변환 표가 필요하므로 간이 참고값으로 제공합니다.",
+      rows: [
+        { label: "입력 월", value: `${profile.month}월`, tone: "strong" },
+        { label: "판정", value: isLeapLike ? "윤달 가능" : "평달 참고" },
+        { label: "주의", value: "실제 음력 윤월은 역법 데이터로 재확인" }
+      ],
+      chart: [{ name: "윤달 가능성", value: isLeapLike ? 70 : 20 }]
+    };
+  }
+
+  if (mode === "elements") {
+    return {
+      headline: `가장 두드러진 오행은 ${elementEmoji[mainElement]} ${mainElement}입니다`,
+      subline: "연월일시 천간·지지를 단순 배점해 오행 분포를 보여줍니다.",
+      rows: Object.entries(counts).map(([element, count]) => ({ label: `${elementEmoji[element]} ${element}`, value: `${count}개`, tone: element === mainElement ? "strong" : undefined })),
+      chart: Object.entries(counts).map(([name, value]) => ({ name, value }))
+    };
+  }
+
+  if (mode === "ipchun") {
+    const afterIpchun = profile.month > 2 || (profile.month === 2 && profile.day >= 4);
+    const sajuYear = afterIpchun ? profile.year : profile.year - 1;
+    return {
+      headline: `사주 기준 연도는 ${sajuYear}년 참고`,
+      subline: "입춘을 2월 4일 전후로 보는 간이 계산입니다.",
+      rows: [
+        { label: "입춘 기준", value: `${profile.year}년 2월 4일 전후` },
+        { label: "입춘 이후 여부", value: afterIpchun ? "이후" : "이전" },
+        { label: "사주 기준 연도", value: `${sajuYear}년`, tone: "strong" }
+      ],
+      chart: [{ name: "입춘 기준", value: afterIpchun ? 1 : 0 }]
+    };
+  }
+
+  if (mode === "day-master") {
+    return {
+      headline: `나의 일간은 ${heavenlyStems[profile.dayStemIndex]}(${stemElements[profile.dayStemIndex]})입니다`,
+      subline: `${dayGanji} 일주 기준으로 일간과 일지를 확인합니다.`,
+      rows: [
+        { label: "일간", value: heavenlyStems[profile.dayStemIndex], tone: "strong" },
+        { label: "일지", value: earthlyBranches[profile.dayBranchIndex] },
+        { label: "일주", value: dayGanji }
+      ],
+      chart: [{ name: stemElements[profile.dayStemIndex], value: 1 }]
+    };
+  }
+
+  if (mode === "fortune") {
+    const keywords = ["정리와 회복", "관계 확장", "도전과 실행", "학습과 준비", "재정 점검", "이동과 변화", "집중과 성취", "휴식과 균형", "협업과 조율", "브랜딩과 표현"];
+    const keyword = keywords[positiveMod(targetYear + profile.dayStemIndex + profile.yearBranchIndex, keywords.length)];
+    return {
+      headline: `${targetYear}년 운세 키워드는 '${keyword}'`,
+      subline: "입춘 기준 세운과 일간을 단순 조합한 재미용 키워드입니다.",
+      rows: [
+        { label: "일간", value: heavenlyStems[profile.dayStemIndex] },
+        { label: "확인 연도", value: `${targetYear}년` },
+        { label: "키워드", value: keyword, tone: "strong" }
+      ],
+      chart: [{ name: keyword, value: 1 }]
+    };
+  }
+
+  if (mode === "time") {
+    return {
+      headline: `${profile.hour}시는 ${earthlyBranches[profile.hourBranchIndex]}시입니다`,
+      subline: "두 시간 단위의 전통 시각으로 시지와 시주를 계산합니다.",
+      rows: [
+        { label: "시지", value: earthlyBranches[profile.hourBranchIndex], tone: "strong" },
+        { label: "시주", value: cycleName(profile.hourStemIndex, profile.hourBranchIndex) },
+        { label: "시간대", value: `${profile.hour}시 기준` }
+      ],
+      chart: [{ name: "시지", value: profile.hourBranchIndex + 1 }]
+    };
+  }
+
+  if (mode === "tree") {
+    const tree = birthTree(profile.month, profile.day);
+    return {
+      headline: `나의 탄생목은 ${tree.tree}`,
+      subline: `${profile.month}월 ${profile.day}일 기준 성향 키워드는 ${tree.trait}입니다.`,
+      rows: [
+        { label: "탄생목", value: tree.tree, tone: "strong" },
+        { label: "성향", value: tree.trait },
+        { label: "계절", value: profile.month <= 2 || profile.month === 12 ? "겨울" : profile.month <= 5 ? "봄" : profile.month <= 8 ? "여름" : "가을" }
+      ],
+      chart: [{ name: tree.tree, value: 1 }]
+    };
+  }
+
+  if (mode === "compatibility") {
+    const partnerSign = zodiacSignByDate(Math.floor(values.partnerMonth ?? 1), Math.floor(values.partnerDay ?? 1));
+    const mySign = zodiacSignByDate(profile.month, profile.day);
+    const score = 55 + positiveMod(mySign.length * 7 + partnerSign.length * 11 + profile.day, 41);
+    return {
+      headline: `${mySign} × ${partnerSign} 궁합 ${score}점`,
+      subline: "별자리 원소와 날짜를 조합한 재미용 궁합 점수입니다.",
+      rows: [
+        { label: "나의 별자리", value: mySign },
+        { label: "상대 별자리", value: partnerSign },
+        { label: "궁합 점수", value: `${score}점`, tone: "strong" }
+      ],
+      chart: [{ name: "궁합", value: score }]
+    };
+  }
+
+  if (mode === "age-nine") {
+    const currentYear = Math.floor(values.targetYear ?? new Date().getFullYear());
+    const koreanAge = currentYear - profile.year + 1;
+    const isNine = koreanAge % 10 === 9;
+    return {
+      headline: isNine ? `${koreanAge}세, 아홉수입니다` : `${koreanAge}세, 아홉수는 아닙니다`,
+      subline: "한국식 나이 기준으로 끝자리가 9인 시기를 확인합니다.",
+      rows: [
+        { label: "기준 연도", value: `${currentYear}년` },
+        { label: "한국식 나이", value: `${koreanAge}세`, tone: "strong" },
+        { label: "아홉수 여부", value: isNine ? "해당" : "해당 없음" }
+      ],
+      chart: [{ name: "아홉수", value: isNine ? 90 : 10 }]
+    };
+  }
+
+  const salOffsetByMode: Record<string, number> = {
+    hwagae: 8,
+    yeokma: 2,
+    banan: 6,
+    jangseong: 4,
+    jisal: 0,
+    geopsal: 1,
+    jaesal: 2,
+    cheonsal: 3,
+    nyeonsal: 4,
+    wolsal: 5,
+    mangsin: 6,
+    yukhae: 7,
+    cheondeok: 9,
+    woldeok: 10
+  };
+  const gwiinStemByMode: Record<string, number[]> = {
+    hongyeom: [2, 3, 6, 7],
+    taegeuk: [0, 1, 4, 5],
+    gwimun: [8, 9],
+    munchang: [0, 3, 6, 9],
+    hwang: [1, 5, 7],
+    hakdang: [2, 4, 8],
+    cheonju: [4, 5],
+    cheoneul: [0, 1, 6, 7],
+    bokseong: [2, 3, 8, 9],
+    mungok: [0, 2, 5, 7],
+    gwangwi: [3, 6, 9]
+  };
+
+  if (salOffsetByMode[mode] !== undefined) {
+    const branchIndex = twelveSalBranch(profile.yearBranchIndex, salOffsetByMode[mode]);
+    const hit = branchHitText(profile, branchIndex);
+    return {
+      headline: `${earthlyBranches[branchIndex]} 지지를 중심으로 확인`,
+      subline: `${title}은 연지 기준의 간이 신살 위치를 보여줍니다.`,
+      rows: [
+        { label: "기준 띠", value: `${animal}띠` },
+        { label: "해당 지지", value: earthlyBranches[branchIndex], tone: "strong" },
+        { label: "내 사주 위치", value: hit }
+      ],
+      chart: [{ name: earthlyBranches[branchIndex], value: hit.includes("없음") ? 25 : 85 }]
+    };
+  }
+
+  const stems = gwiinStemByMode[mode] ?? [];
+  const hasGwiin = stems.includes(profile.dayStemIndex) || stems.includes(profile.yearStemIndex);
+  return {
+    headline: hasGwiin ? `${title.replace(" 계산기", "")} 기운이 있습니다` : `${title.replace(" 계산기", "")}은 약하게 봅니다`,
+    subline: "일간과 연간을 기준으로 한 간이 귀인 판정입니다.",
+    rows: [
+      { label: "연간", value: heavenlyStems[profile.yearStemIndex] },
+      { label: "일간", value: heavenlyStems[profile.dayStemIndex], tone: "strong" },
+      { label: "판정", value: hasGwiin ? "해당 가능" : "해당 약함" }
+    ],
+    chart: [{ name: "판정", value: hasGwiin ? 80 : 25 }]
+  };
+}
+
+function makeSajuCalculator(config: {
+  slug: CalculatorSlug;
+  title: string;
+  description: string;
+  badge: string;
+  mode: string;
+  includeHour?: boolean;
+  extraFields?: InputField[];
+  keywords?: string[];
+}): CalculatorConfig {
+  return {
+    slug: config.slug,
+    title: config.title,
+    description: config.description,
+    category: "사주",
+    keywords: [config.title.replace(" 계산기", ""), "사주", "만세력", ...(config.keywords ?? [])],
+    badge: config.badge,
+    audience: "사주, 띠, 간지, 신살·귀인 정보를 간단히 확인하려는 사용자",
+    fields: [...sajuCommonFields(Boolean(config.includeHour)), ...(config.extraFields ?? [])],
+    actionLabel: "사주 계산하기",
+    guideTitle: `${config.title} 사용 기준`,
+    guide: [
+      "양력 생년월일을 기준으로 간단한 사주 정보를 계산합니다.",
+      "입춘, 절기, 실제 음력 윤월, 지역 시차처럼 정밀 만세력에 필요한 조건은 간이 처리됩니다.",
+      "결과는 재미와 참고용이며 중요한 의사결정의 근거로 단독 사용하지 않는 것이 좋습니다."
+    ],
+    checkpoints: ["양력/음력 기준을 확인했는지 점검", "출생시각을 모르면 정오 12시로 먼저 확인", "입춘 경계일 출생자는 전문 만세력과 비교", "신살·귀인은 해석보다 위치 확인용으로 활용"],
+    faqs: [
+      { question: "정확한 만세력과 완전히 같나요?", answer: "아니요. 브라우저에서 빠르게 보는 간이 계산기이며 절기 경계와 음력 윤달은 전문 역법 데이터와 차이가 날 수 있습니다." },
+      { question: "음력 생일도 입력할 수 있나요?", answer: "현재는 양력 기준 입력을 우선 지원합니다. 음력 생일은 음력 양력 변환기로 양력 날짜를 먼저 확인해 주세요." }
+    ],
+    calculate: (values) => makeSimpleSajuResult(config.title, values, config.mode)
+  };
+}
+
+const sajuCalculators: CalculatorConfig[] = [
+  makeSajuCalculator({ slug: "korean-zodiac", title: "띠 계산기", description: "태어난 해를 기준으로 쥐띠부터 돼지띠까지 내 띠와 연도 간지를 계산합니다.", badge: "띠", mode: "zodiac", keywords: ["띠 계산", "태어난 해 띠"] }),
+  makeSajuCalculator({ slug: "samjae-calculator", title: "삼재 계산기", description: "태어난 해와 확인 연도를 기준으로 들삼재, 눌삼재, 날삼재 여부를 계산합니다.", badge: "삼재", mode: "samjae", extraFields: [{ name: "targetYear", label: "확인 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }] }),
+  makeSajuCalculator({ slug: "sexagenary-cycle", title: "육십갑자(간지) 계산기", description: "생년 또는 날짜 기준 연도 간지와 60갑자 순번을 계산합니다.", badge: "간지", mode: "ganji" }),
+  makeSajuCalculator({ slug: "lunar-leap-month", title: "평달 윤달 계산기", description: "입력한 날짜의 월이 평달인지 윤달 가능성이 있는지 간단히 확인합니다.", badge: "윤달", mode: "leap-month" }),
+  makeSajuCalculator({ slug: "saju-five-elements", title: "사주 오행 계산기", description: "생년월일시의 천간과 지지를 기준으로 목·화·토·금·수 오행 분포를 계산합니다.", badge: "오행", mode: "elements", includeHour: true }),
+  makeSajuCalculator({ slug: "ipchun-calculator", title: "입춘 계산기", description: "입춘 기준 사주 연도와 생년 적용 기준을 계산합니다.", badge: "입춘", mode: "ipchun" }),
+  makeSajuCalculator({ slug: "saju-day-master", title: "사주 일간 계산기", description: "생년월일로 나의 일간과 일주를 계산합니다.", badge: "일간", mode: "day-master" }),
+  makeSajuCalculator({ slug: "yearly-fortune-keyword", title: "올해 운세 키워드 계산기", description: "입춘 기준 세운과 일간을 조합해 올해 운세 키워드를 계산합니다.", badge: "운세", mode: "fortune", extraFields: [{ name: "targetYear", label: "확인 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }] }),
+  makeSajuCalculator({ slug: "saju-time-pillar", title: "사주 시간 계산기", description: "출생시각을 기준으로 시지와 시주를 계산합니다.", badge: "시주", mode: "time", includeHour: true }),
+  makeSajuCalculator({ slug: "manse-ryeok", title: "만세력 계산기", description: "생년월일시로 연주·월주·일주·시주 사주팔자를 계산합니다.", badge: "만세력", mode: "manse", includeHour: true }),
+  makeSajuCalculator({ slug: "birth-tree", title: "탄생목 계산기", description: "생일을 기준으로 탄생목과 간단한 성향 키워드를 확인합니다.", badge: "탄생목", mode: "tree" }),
+  makeSajuCalculator({ slug: "hwagaesal-calculator", title: "화개살 계산기", description: "생년월일시를 기준으로 화개살 위치 여부를 계산합니다.", badge: "화개", mode: "hwagae", includeHour: true }),
+  makeSajuCalculator({ slug: "hongyeomsal-calculator", title: "홍염살 계산기", description: "생년월일을 기준으로 홍염살 여부를 계산합니다.", badge: "홍염", mode: "hongyeom" }),
+  makeSajuCalculator({ slug: "yeokmasal-calculator", title: "역마살 계산기", description: "생년월일시를 기준으로 역마살 위치를 계산합니다.", badge: "역마", mode: "yeokma", includeHour: true }),
+  makeSajuCalculator({ slug: "banansal-calculator", title: "반안살 계산기", description: "생년월일과 출생시간으로 반안살 위치를 계산합니다.", badge: "반안", mode: "banan", includeHour: true }),
+  makeSajuCalculator({ slug: "zodiac-compatibility", title: "별자리 궁합 계산기", description: "생년월일과 상대 생일을 기준으로 별자리 궁합 점수를 계산합니다.", badge: "궁합", mode: "compatibility", extraFields: [{ name: "partnerMonth", label: "상대 생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 7 }, { name: "partnerDay", label: "상대 생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 15 }] }),
+  makeSajuCalculator({ slug: "jangseongsal-calculator", title: "장성살 계산기", description: "생년월일시로 장성살 위치와 기운을 계산합니다.", badge: "장성", mode: "jangseong", includeHour: true }),
+  makeSajuCalculator({ slug: "taegeuk-gwiin-calculator", title: "태극귀인 계산기", description: "내 사주 태극귀인 여부와 선택 연도 운을 계산합니다.", badge: "태극", mode: "taegeuk", includeHour: true }),
+  makeSajuCalculator({ slug: "gwimungwan-sal-calculator", title: "귀문관살 계산기", description: "생년월일로 귀문관살 조합과 위치를 확인합니다.", badge: "귀문", mode: "gwimun" }),
+  makeSajuCalculator({ slug: "age-nine-calculator", title: "아홉수 계산기", description: "생년월일 기준 아홉수 나이와 기준 연도별 기간을 계산합니다.", badge: "아홉수", mode: "age-nine", extraFields: [{ name: "targetYear", label: "기준 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }] }),
+  makeSajuCalculator({ slug: "jisal-calculator", title: "지살 계산기", description: "생년월일·출생시간으로 지살 위치를 계산합니다.", badge: "지살", mode: "jisal", includeHour: true }),
+  makeSajuCalculator({ slug: "geopsal-calculator", title: "겁살 계산기", description: "생년월일·출생시간으로 겁살 여부를 계산합니다.", badge: "겁살", mode: "geopsal", includeHour: true }),
+  makeSajuCalculator({ slug: "jaesal-calculator", title: "재살 계산기", description: "생년월일·출생시간으로 재살 여부를 계산합니다.", badge: "재살", mode: "jaesal", includeHour: true }),
+  makeSajuCalculator({ slug: "cheonsal-calculator", title: "천살 계산기", description: "생년월일·출생시간으로 천살 여부를 계산합니다.", badge: "천살", mode: "cheonsal", includeHour: true }),
+  makeSajuCalculator({ slug: "nyeonsal-calculator", title: "년살 계산기", description: "생년월일·출생시간으로 년살(도화살) 위치를 계산합니다.", badge: "년살", mode: "nyeonsal", includeHour: true }),
+  makeSajuCalculator({ slug: "wolsal-calculator", title: "월살 계산기", description: "생년월일·출생시간으로 월살 위치를 계산합니다.", badge: "월살", mode: "wolsal", includeHour: true }),
+  makeSajuCalculator({ slug: "mangsinsal-calculator", title: "망신살 계산기", description: "생년월일·출생시간으로 망신살 위치를 계산합니다.", badge: "망신", mode: "mangsin", includeHour: true }),
+  makeSajuCalculator({ slug: "yukhaesal-calculator", title: "육해살 계산기", description: "생년월일·출생시간으로 육해살 위치를 계산합니다.", badge: "육해", mode: "yukhae", includeHour: true }),
+  makeSajuCalculator({ slug: "munchang-gwiin-calculator", title: "문창귀인 계산기", description: "생년월일시로 문창귀인 여부와 위치를 확인합니다.", badge: "문창", mode: "munchang", includeHour: true }),
+  makeSajuCalculator({ slug: "hwang-eun-daesa-calculator", title: "황은대사 계산기", description: "생년월일시로 황은대사 여부와 위치를 확인합니다.", badge: "황은", mode: "hwang", includeHour: true }),
+  makeSajuCalculator({ slug: "hakdang-gwiin-calculator", title: "학당귀인 계산기", description: "생년월일시로 학당귀인 여부와 위치를 확인합니다.", badge: "학당", mode: "hakdang", includeHour: true }),
+  makeSajuCalculator({ slug: "cheonju-gwiin-calculator", title: "천주귀인 계산기", description: "생년월일시로 천주귀인 여부와 위치를 확인합니다.", badge: "천주", mode: "cheonju", includeHour: true }),
+  makeSajuCalculator({ slug: "cheoneul-gwiin-calculator", title: "천을귀인 계산기", description: "생년월일시로 천을귀인 여부와 위치를 확인합니다.", badge: "천을", mode: "cheoneul", includeHour: true }),
+  makeSajuCalculator({ slug: "cheondeok-gwiin-calculator", title: "천덕귀인 계산기", description: "월지 기준 천덕귀인 여부와 위치를 확인합니다.", badge: "천덕", mode: "cheondeok", includeHour: true }),
+  makeSajuCalculator({ slug: "woldeok-gwiin-calculator", title: "월덕귀인 계산기", description: "생년월일·출생시간으로 월덕귀인 위치를 확인합니다.", badge: "월덕", mode: "woldeok", includeHour: true }),
+  makeSajuCalculator({ slug: "bokseong-gwiin-calculator", title: "복성귀인 계산기", description: "생년월일시로 복성귀인 여부와 위치를 확인합니다.", badge: "복성", mode: "bokseong", includeHour: true }),
+  makeSajuCalculator({ slug: "mungok-gwiin-calculator", title: "문곡귀인 계산기", description: "생년월일시로 문곡귀인 여부와 위치를 확인합니다.", badge: "문곡", mode: "mungok", includeHour: true }),
+  makeSajuCalculator({ slug: "gwangwi-hakgwan-calculator", title: "관귀학관 계산기", description: "생년월일로 사주 관귀학관 위치를 계산합니다.", badge: "학관", mode: "gwangwi" })
+];
+
 export const calculators: CalculatorConfig[] = [
+  ...sajuCalculators,
   {
     slug: "graphing-calculator",
     title: "그래핑 계산기",

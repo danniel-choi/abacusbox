@@ -1,6 +1,6 @@
 import type { CalculatorGroup } from "@/lib/calculator-directory";
 
-export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "daily" | "life" | "game" | "business" | "math";
+export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "daily" | "life" | "game" | "saju" | "business" | "math";
 
 export type HubContent = {
   key: HubKey;
@@ -244,6 +244,31 @@ export const hubContents: Record<HubKey, HubContent> = {
     ],
     checklist: ["성공 확률과 횟수 분리", "게임별 특수 규칙 확인", "DPI와 인게임 감도 함께 기록", "목표 승률까지 필요한 경기 수 확인"]
   },
+  saju: {
+    key: "saju",
+    group: "saju",
+    path: "/saju",
+    eyebrow: "사주 계산 허브",
+    title: "띠, 삼재, 만세력, 오행 사주 계산기",
+    description: "띠, 삼재, 육십갑자, 만세력, 사주 오행, 일간, 시주, 별자리 궁합, 신살·귀인 계산기를 한곳에 모았습니다.",
+    featuredSlugs: ["manse-ryeok", "saju-five-elements", "samjae-calculator", "korean-zodiac", "saju-day-master", "zodiac-compatibility"],
+    blogSlugs: ["calcrule-content-hub-launch", "zodiac-sign-guide-20260901-17-hourly", "lunar-solar-converter-checklist-20260902-21-hourly"],
+    sections: [
+      {
+        title: "사주 계산은 기준 날짜와 시간이 먼저입니다.",
+        body: "띠와 육십갑자는 태어난 해를 기준으로 빠르게 확인할 수 있지만, 만세력과 오행, 일간, 시주는 생년월일시가 함께 필요합니다. 출생시각을 모를 때는 정오 기준으로 먼저 보고, 결과가 중요한 경우에는 정확한 출생시각으로 다시 계산하는 것이 좋습니다."
+      },
+      {
+        title: "입춘과 절기 경계는 결과를 바꿀 수 있습니다.",
+        body: "사주에서는 양력 1월 1일보다 입춘을 기준으로 연도를 나누는 경우가 많습니다. 입춘 전후 출생자는 띠, 연주, 삼재, 만세력 결과가 달라질 수 있으므로 간이 계산 결과와 전문 만세력을 함께 비교해 보세요."
+      },
+      {
+        title: "신살과 귀인은 위치 확인용으로 가볍게 봅니다.",
+        body: "화개살, 역마살, 천을귀인, 문창귀인 같은 항목은 해석 체계가 다양합니다. 계산의정석에서는 위치와 간단한 판정을 보여주는 참고 도구로 제공하며, 운세 판단은 재미와 기록용으로 활용하는 편이 좋습니다."
+      }
+    ],
+    checklist: ["양력·음력 기준 확인", "출생시각 입력 여부 확인", "입춘 경계일은 전문 만세력과 비교", "신살·귀인은 위치 확인용으로 보기"]
+  },
   business: {
     key: "business",
     group: "business",
@@ -296,4 +321,4 @@ export const hubContents: Record<HubKey, HubContent> = {
   }
 };
 
-export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "daily", "life", "game", "business", "math"];
+export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "daily", "life", "game", "saju", "business", "math"];

@@ -19,6 +19,8 @@ type Props = {
   compact?: boolean;
 };
 
+const calculatorCategories: CalculatorCategory[] = Array.from(new Set(calculators.map((calculator) => calculator.category)));
+
 function getInitialCategory(initialCategory: Props["initialCategory"]) {
   if (typeof window === "undefined") return initialCategory ?? "전체";
   const nextCategory = new URLSearchParams(window.location.search).get("category");
@@ -278,10 +280,11 @@ function FilterControls({
         className="h-12 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
       >
         <option value="전체">전체 분야</option>
-        <option value="노무">노무</option>
-        <option value="금융">금융</option>
-        <option value="생활">생활</option>
-        <option value="수학">수학</option>
+        {calculatorCategories.map((item) => (
+          <option key={item} value={item}>
+            {item}
+          </option>
+        ))}
       </select>
       <select
         value={group}

@@ -14,6 +14,7 @@ const navItems = [
   { href: "/health", label: "건강" },
   { href: "/daily", label: "일상" },
   { href: "/game", label: "게임" },
+  { href: "/saju", label: "사주" },
   { href: "/blog", label: "블로그" }
 ];
 
