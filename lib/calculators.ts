@@ -1206,7 +1206,36 @@ function branchHitText(profile: SajuProfile, branchIndex: number) {
 }
 
 function makeSimpleSajuResult(title: string, values: Record<string, number>, mode: string): CalculatorResult {
-  const profile = getSajuProfile(values);
+  const isBokseong = mode === "bokseong";
+  const dateBasis = Math.floor(values.dateBasis ?? 0);
+  const inputDate = clampDate(values.year ?? 1990, values.month ?? 1, values.day ?? 1);
+  const convertedSolarDate = isBokseong && dateBasis === 1
+    ? findSolarDateFromLunar(inputDate.getUTCFullYear(), inputDate.getUTCMonth() + 1, inputDate.getUTCDate(), Math.floor(values.lunarLeap ?? 0) === 1)
+    : inputDate;
+
+  if (isBokseong && !convertedSolarDate) {
+    const lunarType = Math.floor(values.lunarLeap ?? 0) === 1 ? "윤달" : "평달";
+    return {
+      headline: "해당 음력 날짜를 찾지 못했습니다",
+      subline: "입력한 연도에 해당 음력 날짜 또는 윤달이 없을 수 있습니다.",
+      rows: [
+        { label: "입력 기준", value: `음력 ${lunarType}`, tone: "strong" },
+        { label: "입력 날짜", value: `${inputDate.getUTCFullYear()}년 ${inputDate.getUTCMonth() + 1}월 ${inputDate.getUTCDate()}일` },
+        { label: "확인 방법", value: "평달/윤달 여부와 음력 날짜를 다시 확인해 주세요." }
+      ],
+      chart: [{ name: "변환 실패", value: 1 }]
+    };
+  }
+
+  const calculationValues = convertedSolarDate
+    ? {
+        ...values,
+        year: convertedSolarDate.getUTCFullYear(),
+        month: convertedSolarDate.getUTCMonth() + 1,
+        day: convertedSolarDate.getUTCDate()
+      }
+    : values;
+  const profile = getSajuProfile(calculationValues);
   const yearGanji = cycleName(profile.yearStemIndex, profile.yearBranchIndex);
   const dayGanji = cycleName(profile.dayStemIndex, profile.dayBranchIndex);
   const animal = zodiacAnimals[profile.yearBranchIndex];
@@ -1215,6 +1244,10 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
   const sortedElements = Object.entries(counts).sort((a, b) => b[1] - a[1]);
   const mainElement = sortedElements[0]?.[0] ?? "목";
   const baseRows = sajuBaseRows(profile);
+  const birthBasisLabel = dateBasis === 1
+    ? `음력 ${Math.floor(values.lunarLeap ?? 0) === 1 ? "윤달" : "평달"}`
+    : "양력";
+  const convertedDateLabel = `${profile.year}년 ${profile.month}월 ${profile.day}일`;
 
   if (mode === "zodiac") {
     return {
@@ -1451,6 +1484,8 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
       headline: matches.length ? `복성귀인이 ${matches.length}곳에 있습니다` : "확인 가능한 지지에는 복성귀인이 없습니다",
       subline: `일간 ${heavenlyStems[profile.dayStemIndex]} 기준 복성귀인 지지는 ${targetNames}입니다.`,
       rows: [
+        { label: "생년월일 기준", value: birthBasisLabel },
+        ...(dateBasis === 1 ? [{ label: "변환 양력", value: convertedDateLabel }] : []),
         { label: "일간", value: `${heavenlyStems[profile.dayStemIndex]}(${stemElements[profile.dayStemIndex]})`, tone: "strong" },
         { label: "복성귀인 지지", value: targetNames },
         { label: "확인 위치", value: positionText },
@@ -1488,6 +1523,31 @@ function makeSajuCalculator(config: {
   keywords?: string[];
 }): CalculatorConfig {
   const isBokseong = config.mode === "bokseong";
+  const bokseongFields: InputField[] = [
+    {
+      name: "dateBasis",
+      label: "생년월일 기준",
+      type: "select",
+      defaultValue: 0,
+      options: [
+        { label: "양력", value: 0 },
+        { label: "음력", value: 1 }
+      ]
+    },
+    ...sajuCommonFields(Boolean(config.includeHour)),
+    {
+      name: "lunarLeap",
+      label: "음력 평달/윤달",
+      type: "select",
+      defaultValue: 0,
+      help: "음력 생년월일을 선택한 경우에만 사용합니다.",
+      options: [
+        { label: "평달", value: 0 },
+        { label: "윤달", value: 1 }
+      ]
+    },
+    ...(config.extraFields ?? [])
+  ];
   return {
     slug: config.slug,
     title: config.title,
@@ -1496,11 +1556,12 @@ function makeSajuCalculator(config: {
     keywords: [config.title.replace(" 계산기", ""), "사주", "만세력", ...(config.keywords ?? [])],
     badge: config.badge,
     audience: "사주, 띠, 간지, 신살·귀인 정보를 간단히 확인하려는 사용자",
-    fields: [...sajuCommonFields(Boolean(config.includeHour)), ...(config.extraFields ?? [])],
+    fields: isBokseong ? bokseongFields : [...sajuCommonFields(Boolean(config.includeHour)), ...(config.extraFields ?? [])],
     actionLabel: "사주 계산하기",
     guideTitle: isBokseong ? "복성귀인 계산 방법" : `${config.title} 사용 기준`,
     guide: isBokseong
       ? [
+          "생년월일 기준에서 양력 또는 음력을 선택할 수 있고, 음력인 경우 평달·윤달 여부를 함께 입력합니다.",
           "복성귀인은 일간(日干)을 먼저 구한 뒤 일간에 대응하는 복성귀인 지지를 연지·월지·일지·시지에서 찾습니다.",
           "갑·병은 인·자, 을·계는 묘·축, 정은 해, 무는 신, 기는 미, 경은 오, 신은 사, 임은 진을 복성귀인 지지로 봅니다.",
           "복성귀인은 평안, 복록, 의식주와 생활 기반의 안정을 상징하는 참고 요소이며 사주 전체를 단정하는 기준은 아닙니다."
@@ -1511,11 +1572,12 @@ function makeSajuCalculator(config: {
           "결과는 재미와 참고용이며 중요한 의사결정의 근거로 단독 사용하지 않는 것이 좋습니다."
         ],
     checkpoints: isBokseong
-      ? ["일간을 먼저 확인", "복성귀인 대상 지지 확인", "연지·월지·일지·시지 위치 비교", "복성귀인 하나만으로 재물·인생을 단정하지 않기"]
+      ? ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "일간과 복성귀인 대상 지지 확인", "연지·월지·일지·시지 위치 비교"]
       : ["양력/음력 기준을 확인했는지 점검", "출생시각을 모르면 정오 12시로 먼저 확인", "입춘 경계일 출생자는 전문 만세력과 비교", "신살·귀인은 해석보다 위치 확인용으로 활용"],
     faqs: isBokseong
       ? [
           { question: "복성귀인은 무엇을 기준으로 계산하나요?", answer: "태어난 날의 천간인 일간을 기준으로 복성귀인 지지를 정한 뒤 연지, 월지, 일지, 시지에 해당 지지가 있는지 확인합니다." },
+          { question: "음력 생일도 계산할 수 있나요?", answer: "네. 생년월일 기준에서 음력을 선택하고 평달 또는 윤달을 지정하면 양력 날짜로 변환한 뒤 복성귀인을 계산합니다." },
           { question: "복성귀인이 여러 자리에 있을 수도 있나요?", answer: "네. 대상 지지가 여러 지지에 반복되면 두 자리 이상에서 확인될 수 있습니다." },
           { question: "복성귀인이 있으면 부자가 된다는 뜻인가요?", answer: "그렇게 단정하지 않습니다. 복성귀인은 생활 안정과 복록을 보는 참고 요소이며 실제 재물과 삶은 사주 전체와 현실 조건을 함께 봐야 합니다." }
         ]

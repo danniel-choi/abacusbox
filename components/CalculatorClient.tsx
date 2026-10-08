@@ -205,9 +205,13 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         return Number(values.species ?? 1) === 1;
       }
 
+      if (activeCalculator.slug === "bokseong-gwiin-calculator" && field.name === "lunarLeap") {
+        return Number(values.dateBasis ?? 0) === 1;
+      }
+
       return true;
     });
-  }, [activeCalculator.fields, activeCalculator.slug, values.species]);
+  }, [activeCalculator.fields, activeCalculator.slug, values.dateBasis, values.species]);
   const inputSummary = visibleFields.map((field) => ({
     label: field.label,
     value: formatInputValue(field, Number(values[field.name] ?? field.defaultValue))
