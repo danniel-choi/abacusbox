@@ -1418,18 +1418,53 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
   }
 
   if (mode === "age-nine") {
-    const currentYear = Math.floor(values.targetYear ?? new Date().getFullYear());
-    const koreanAge = currentYear - profile.year + 1;
-    const isNine = koreanAge % 10 === 9;
+    const birth = clampDate(values.year ?? 1990, values.month ?? 1, values.day ?? 1);
+    const base = clampDate(values.baseYear ?? 2026, values.baseMonth ?? 10, values.baseDay ?? 8);
+    const birthYear = birth.getUTCFullYear();
+    const baseYear = base.getUTCFullYear();
+    const birthdayThisYear = clampDate(baseYear, birth.getUTCMonth() + 1, birth.getUTCDate());
+    const hasBirthdayPassed = base >= birthdayThisYear;
+    const countingAge = Math.max(baseYear - birthYear + 1, 0);
+    const yearAge = Math.max(baseYear - birthYear, 0);
+    const fullAge = Math.max(baseYear - birthYear - (hasBirthdayPassed ? 0 : 1), 0);
+    const basis = Math.min(Math.max(Math.floor(values.ageBasis ?? 0), 0), 2);
+    const basisLabels = ["세는나이", "연 나이", "만 나이"];
+    const selectedAge = basis === 0 ? countingAge : basis === 1 ? yearAge : fullAge;
+    const selectedIsNine = selectedAge > 0 && selectedAge % 10 === 9;
+    const nextNineAge = selectedIsNine ? selectedAge : selectedAge + positiveMod(9 - selectedAge, 10);
+    const nextNineYear = basis === 0 ? birthYear + nextNineAge - 1 : basis === 1 ? birthYear + nextNineAge : birthYear + nextNineAge;
+    const nextNineStart = basis === 2 ? clampDate(nextNineYear, birth.getUTCMonth() + 1, birth.getUTCDate()) : makeUtcDate(nextNineYear, 1, 1);
+    const nextNineEnd = basis === 2 ? addUtcDays(clampDate(nextNineYear + 1, birth.getUTCMonth() + 1, birth.getUTCDate()), -1) : makeUtcDate(nextNineYear, 12, 31);
+    const daysUntilStart = utcDaysBetween(base, nextNineStart);
+    const statusText = selectedIsNine ? "현재 아홉수" : `${Math.max(daysUntilStart, 0).toLocaleString("ko-KR")}일 후 시작`;
+
+    const ageRows = [
+      { label: "세는나이", age: countingAge, period: `${birthYear + countingAge - 1}년 1월 1일 ~ 12월 31일` },
+      { label: "연 나이", age: yearAge, period: `${birthYear + yearAge}년 1월 1일 ~ 12월 31일` },
+      { label: "만 나이", age: fullAge, period: `${formatKoreanDate(clampDate(birthYear + fullAge, birth.getUTCMonth() + 1, birth.getUTCDate()))} ~ ${formatKoreanDate(addUtcDays(clampDate(birthYear + fullAge + 1, birth.getUTCMonth() + 1, birth.getUTCDate()), -1))}` }
+    ];
+
     return {
-      headline: isNine ? `${koreanAge}세, 아홉수입니다` : `${koreanAge}세, 아홉수는 아닙니다`,
-      subline: "한국식 나이 기준으로 끝자리가 9인 시기를 확인합니다.",
+      headline: selectedIsNine ? `${basisLabels[basis]} ${selectedAge}세, 아홉수입니다` : `${basisLabels[basis]} ${selectedAge}세, 아홉수는 아닙니다`,
+      subline: `다음 아홉수는 ${nextNineAge}세 · ${formatKoreanDate(nextNineStart)}부터 ${formatKoreanDate(nextNineEnd)}까지`,
       rows: [
-        { label: "기준 연도", value: `${currentYear}년` },
-        { label: "한국식 나이", value: `${koreanAge}세`, tone: "strong" },
-        { label: "아홉수 여부", value: isNine ? "해당" : "해당 없음" }
+        { label: "선택 기준", value: basisLabels[basis] },
+        { label: "기준일", value: formatKoreanDate(base) },
+        { label: "현재 나이", value: `${selectedAge}세`, tone: "strong" },
+        { label: "아홉수 여부", value: selectedIsNine ? "해당" : "해당 없음", tone: "strong" },
+        { label: "다음 아홉수", value: `${nextNineAge}세` },
+        { label: "다음 아홉수 기간", value: `${formatKoreanDate(nextNineStart)} ~ ${formatKoreanDate(nextNineEnd)}` },
+        { label: "시작까지", value: selectedIsNine ? "이미 해당 기간" : statusText },
+        ...ageRows.map((row) => ({
+          label: `${row.label} 비교`,
+          value: `${row.age}세 · ${row.age > 0 && row.age % 10 === 9 ? "아홉수" : "해당 없음"} · ${row.period}`
+        }))
       ],
-      chart: [{ name: "아홉수", value: isNine ? 90 : 10 }]
+      chart: [
+        { name: "세는나이", value: countingAge },
+        { name: "연 나이", value: yearAge },
+        { name: "만 나이", value: fullAge }
+      ]
     };
   }
 
@@ -1560,6 +1595,7 @@ function makeSajuCalculator(config: {
   keywords?: string[];
 }): CalculatorConfig {
   const isBokseong = config.mode === "bokseong";
+  const isAgeNine = config.mode === "age-nine";
   const usesBirthDateBasis = usesSajuBirthDateBasis(config.mode);
   const birthDateBasisFields: InputField[] = [
     {
@@ -1604,6 +1640,12 @@ function makeSajuCalculator(config: {
           "갑·병은 인·자, 을·계는 묘·축, 정은 해, 무는 신, 기는 미, 경은 오, 신은 사, 임은 진을 복성귀인 지지로 봅니다.",
           "복성귀인은 평안, 복록, 의식주와 생활 기반의 안정을 상징하는 참고 요소이며 사주 전체를 단정하는 기준은 아닙니다."
         ]
+      : isAgeNine
+        ? [
+            "아홉수는 나이의 끝자리가 9로 끝나는 시기를 말하며, 세는나이·연 나이·만 나이 기준에 따라 기간이 달라질 수 있습니다.",
+            "세는나이와 연 나이는 해당 연도의 1월 1일부터 12월 31일까지를 한 나이의 기간으로 보고, 만 나이는 생일부터 다음 생일 전날까지를 봅니다.",
+            "아홉수는 전통적·문화적 표현이므로 운세나 미래 사건을 단정하지 말고 일정 점검용 참고 정보로 활용하세요."
+          ]
       : [
           "양력 생년월일을 기준으로 간단한 사주 정보를 계산합니다.",
           ...(usesBirthDateBasis ? ["생년월일 기준에서 양력 또는 음력을 선택할 수 있고, 음력인 경우 평달·윤달 여부를 함께 입력합니다."] : []),
@@ -1612,6 +1654,8 @@ function makeSajuCalculator(config: {
         ],
     checkpoints: isBokseong
       ? ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "일간과 복성귀인 대상 지지 확인", "연지·월지·일지·시지 위치 비교"]
+      : isAgeNine
+        ? ["생년월일과 기준일 확인", "세는나이·연 나이·만 나이 차이 비교", "다음 아홉수 기간 확인", "아홉수만으로 중요한 결정을 단정하지 않기"]
       : usesBirthDateBasis
         ? ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "일간과 연간 확인", "귀인 판정은 참고용으로 활용"]
         : ["양력/음력 기준을 확인했는지 점검", "출생시각을 모르면 정오 12시로 먼저 확인", "입춘 경계일 출생자는 전문 만세력과 비교", "신살·귀인은 해석보다 위치 확인용으로 활용"],
@@ -1622,6 +1666,12 @@ function makeSajuCalculator(config: {
           { question: "복성귀인이 여러 자리에 있을 수도 있나요?", answer: "네. 대상 지지가 여러 지지에 반복되면 두 자리 이상에서 확인될 수 있습니다." },
           { question: "복성귀인이 있으면 부자가 된다는 뜻인가요?", answer: "그렇게 단정하지 않습니다. 복성귀인은 생활 안정과 복록을 보는 참고 요소이며 실제 재물과 삶은 사주 전체와 현실 조건을 함께 봐야 합니다." }
         ]
+      : isAgeNine
+        ? [
+            { question: "아홉수는 몇 살을 말하나요?", answer: "보통 19세, 29세, 39세, 49세처럼 나이 끝자리가 9인 시기를 말합니다. 넓게는 9세, 59세, 69세도 아홉수로 볼 수 있습니다." },
+            { question: "아홉수는 세는나이 기준인가요?", answer: "전통적으로는 세는나이 기준으로 말하는 경우가 많지만, 이 계산기는 세는나이·연 나이·만 나이를 모두 비교해 보여줍니다." },
+            { question: "생일 전이면 결과가 달라지나요?", answer: "만 나이 기준에서는 생일 전후에 나이가 달라지므로 아홉수 기간도 달라질 수 있습니다. 세는나이와 연 나이는 연도 기준입니다." }
+          ]
       : [
           { question: "정확한 만세력과 완전히 같나요?", answer: "아니요. 브라우저에서 빠르게 보는 간이 계산기이며 절기 경계와 음력 윤달은 전문 역법 데이터와 차이가 날 수 있습니다." },
           { question: "음력 생일도 입력할 수 있나요?", answer: usesBirthDateBasis ? "네. 생년월일 기준에서 음력을 선택하고 평달 또는 윤달을 지정하면 양력 날짜로 변환한 뒤 계산합니다." : "현재는 양력 기준 입력을 우선 지원합니다. 음력 생일은 음력 양력 변환기로 양력 날짜를 먼저 확인해 주세요." }
@@ -1650,7 +1700,30 @@ const sajuCalculators: CalculatorConfig[] = [
   makeSajuCalculator({ slug: "jangseongsal-calculator", title: "장성살 계산기", description: "생년월일시로 장성살 위치와 기운을 계산합니다.", badge: "장성", mode: "jangseong", includeHour: true }),
   makeSajuCalculator({ slug: "taegeuk-gwiin-calculator", title: "태극귀인 계산기", description: "내 사주 태극귀인 여부와 선택 연도 운을 계산합니다.", badge: "태극", mode: "taegeuk", includeHour: true }),
   makeSajuCalculator({ slug: "gwimungwan-sal-calculator", title: "귀문관살 계산기", description: "생년월일로 귀문관살 조합과 위치를 확인합니다.", badge: "귀문", mode: "gwimun" }),
-  makeSajuCalculator({ slug: "age-nine-calculator", title: "아홉수 계산기", description: "생년월일 기준 아홉수 나이와 기준 연도별 기간을 계산합니다.", badge: "아홉수", mode: "age-nine", extraFields: [{ name: "targetYear", label: "기준 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }] }),
+  makeSajuCalculator({
+    slug: "age-nine-calculator",
+    title: "아홉수 계산기",
+    description: "생년월일과 기준일을 입력해 세는나이, 연 나이, 만 나이 기준의 현재 아홉수 여부와 다음 아홉수 기간을 계산합니다.",
+    badge: "아홉수",
+    mode: "age-nine",
+    keywords: ["아홉수", "세는나이", "연나이", "만나이", "다음 아홉수"],
+    extraFields: [
+      { name: "baseYear", label: "기준 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "baseMonth", label: "기준 월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 10 },
+      { name: "baseDay", label: "기준 일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 8 },
+      {
+        name: "ageBasis",
+        label: "아홉수 기준",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "세는나이", value: 0 },
+          { label: "연 나이", value: 1 },
+          { label: "만 나이", value: 2 }
+        ]
+      }
+    ]
+  }),
   makeSajuCalculator({ slug: "jisal-calculator", title: "지살 계산기", description: "생년월일·출생시간으로 지살 위치를 계산합니다.", badge: "지살", mode: "jisal", includeHour: true }),
   makeSajuCalculator({ slug: "geopsal-calculator", title: "겁살 계산기", description: "생년월일·출생시간으로 겁살 여부를 계산합니다.", badge: "겁살", mode: "geopsal", includeHour: true }),
   makeSajuCalculator({ slug: "jaesal-calculator", title: "재살 계산기", description: "생년월일·출생시간으로 재살 여부를 계산합니다.", badge: "재살", mode: "jaesal", includeHour: true }),
