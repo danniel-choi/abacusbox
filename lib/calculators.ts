@@ -1207,6 +1207,14 @@ function branchHitText(profile: SajuProfile, branchIndex: number) {
 
 function usesSajuBirthDateBasis(mode: string) {
   return [
+    "jisal",
+    "geopsal",
+    "jaesal",
+    "cheonsal",
+    "nyeonsal",
+    "wolsal",
+    "mangsin",
+    "yukhae",
     "munchang",
     "hwang",
     "hakdang",
