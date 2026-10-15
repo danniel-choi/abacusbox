@@ -1,4 +1,4 @@
-import type { CalculatorCategory, CalculatorConfig, CalculatorSlug } from "@/lib/calculators";
+import type { CalculatorCategory, CalculatorConfig, CalculatorSlug, InputField } from "@/lib/calculators";
 import { getCalculatorGroup, getLocalizedGroupMeta } from "@/lib/calculator-directory";
 import type { Locale } from "@/lib/i18n";
 
@@ -78,6 +78,36 @@ const CATEGORY_LABELS: Record<CalculatorCategory, LocalizedText> = {
   사주: { en: "Saju & fortune", ja: "四柱推命・占い" }
 };
 
+const FIELD_LABELS: Record<string, LocalizedText> = {
+  year: { en: "Year", ja: "年" }, month: { en: "Month", ja: "月" }, day: { en: "Day", ja: "日" },
+  birthYear: { en: "Birth year", ja: "出生年" }, birthMonth: { en: "Birth month", ja: "出生月" }, birthDay: { en: "Birth day", ja: "出生日" },
+  dateBasis: { en: "Calendar type", ja: "暦の種類" }, lunarLeap: { en: "Lunar month type", ja: "旧暦の月区分" },
+  birthTimeKnown: { en: "Birth time known", ja: "出生時刻が分かる" }, hour: { en: "Hour", ja: "時" }, minute: { en: "Minute", ja: "分" },
+  amount: { en: "Amount", ja: "金額" }, monthlyIncome: { en: "Monthly income", ja: "月収" }, annualIncome: { en: "Annual income", ja: "年収" },
+  monthlySalary: { en: "Monthly salary", ja: "月給" }, hourlyWage: { en: "Hourly wage", ja: "時給" }, workingHours: { en: "Working hours", ja: "勤務時間" },
+  interestRate: { en: "Interest rate", ja: "金利" }, annualRate: { en: "Annual rate", ja: "年利" }, months: { en: "Months", ja: "月数" }, years: { en: "Years", ja: "年数" },
+  principal: { en: "Principal", ja: "元金" }, loanAmount: { en: "Loan amount", ja: "借入額" }, term: { en: "Term", ja: "期間" },
+  purchasePrice: { en: "Purchase price", ja: "購入価格" }, salePrice: { en: "Sale price", ja: "売却価格" }, quantity: { en: "Quantity", ja: "数量" },
+  height: { en: "Height", ja: "身長" }, weight: { en: "Weight", ja: "体重" }, age: { en: "Age", ja: "年齢" }, gender: { en: "Gender", ja: "性別" },
+  activity: { en: "Activity level", ja: "活動量" }, target: { en: "Target", ja: "目標" }, distance: { en: "Distance", ja: "距離" }, time: { en: "Time", ja: "時間" },
+  probability: { en: "Probability", ja: "確率" }, trials: { en: "Number of trials", ja: "試行回数" }, price: { en: "Price", ja: "価格" },
+  expenses: { en: "Expenses", ja: "費用" }, cost: { en: "Cost", ja: "コスト" }, savings: { en: "Savings", ja: "貯蓄額" }, rate: { en: "Rate", ja: "割合" }
+};
+
+const OPTION_LABELS: Record<string, LocalizedText> = {
+  "남성": { en: "Male", ja: "男性" }, "여성": { en: "Female", ja: "女性" }, "예": { en: "Yes", ja: "はい" }, "아니오": { en: "No", ja: "いいえ" },
+  "양력": { en: "Solar calendar", ja: "新暦" }, "음력": { en: "Lunar calendar", ja: "旧暦" }, "평달": { en: "Regular month", ja: "平月" }, "윤달": { en: "Leap month", ja: "閏月" },
+  "미혼": { en: "Single", ja: "未婚" }, "기혼": { en: "Married", ja: "既婚" }, "없음": { en: "None", ja: "なし" }, "있음": { en: "Yes", ja: "あり" },
+  "개인": { en: "Individual", ja: "個人" }, "법인": { en: "Corporation", ja: "法人" }, "주간": { en: "Day", ja: "昼" }, "야간": { en: "Night", ja: "夜" }
+};
+
+function humanizeFieldName(name: string, locale: "en" | "ja") {
+  const words = name.replace(/([a-z])([A-Z])/g, "$1 $2").split(/[-_ ]+/).filter(Boolean);
+  const translated = words.map((word) => FIELD_LABELS[word]?.[locale] ?? word);
+  if (locale === "ja") return translated.join("");
+  return translated.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+}
+
 function humanizeSlug(slug: string, locale: "en" | "ja") {
   const words = slug.split("-").map((word) => TOKEN_LABELS[word]?.[locale] ?? word);
   if (locale === "ja") return `${words.join("")}計算機`;
@@ -111,4 +141,20 @@ export function getLocalizedCalculatorPresentation(calculator: CalculatorPresent
     badge: locale === "en" ? "Calculator" : "計算機",
     category
   };
+}
+
+export function getLocalizedFieldLabel(field: InputField, locale: Locale) {
+  if (locale === "ko") return field.label;
+  return FIELD_LABELS[field.name]?.[locale] ?? humanizeFieldName(field.name, locale);
+}
+
+export function getLocalizedFieldHelp(field: InputField, locale: Locale) {
+  if (!field.help || locale === "ko") return field.help;
+  const label = getLocalizedFieldLabel(field, locale);
+  return locale === "en" ? `Enter ${label.toLowerCase()} to update the estimate.` : `${label}を入力すると結果が更新されます。`;
+}
+
+export function getLocalizedOptionLabel(label: string, locale: Locale) {
+  if (locale === "ko") return label;
+  return OPTION_LABELS[label]?.[locale] ?? (label.replace(/[가-힣]+/g, "").trim() || (locale === "en" ? "Option" : "選択肢"));
 }

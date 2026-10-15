@@ -10,7 +10,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type ResultRow } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 import { interpolate, type Locale } from "@/lib/i18n";
-import { getLocalizedCalculatorPresentation } from "@/lib/calculator-i18n";
+import { getLocalizedCalculatorPresentation, getLocalizedFieldHelp, getLocalizedFieldLabel, getLocalizedOptionLabel } from "@/lib/calculator-i18n";
 
 type FormValues = Record<string, number>;
 
@@ -310,8 +310,8 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         ...(isManseRyeok ? [{ label: t("calculator.birthTime"), value: Number(values.birthTimeKnown ?? 1) === 1 ? `${String(Math.floor(Number(values.hour ?? 12))).padStart(2, "0")}:${String(Math.floor(Number(values.minute ?? 0))).padStart(2, "0")}` : t("calculator.timeUnknown") }] : [])
       ]
     : visibleFields.map((field) => ({
-        label: field.label,
-        value: formatInputValue(field, Number(values[field.name] ?? field.defaultValue))
+        label: getLocalizedFieldLabel(field, locale),
+        value: formatInputValue(field, Number(values[field.name] ?? field.defaultValue), locale)
       }));
   const tarotCards = isTarotBirthCard ? getTarotCardsFromResult(result) : [];
 
@@ -514,11 +514,11 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           {renderedFields.map((field) => (
             <label key={field.name} className="grid gap-2">
               <span className="flex items-center justify-between text-sm font-extrabold text-ink">
-                {field.label}
+                {getLocalizedFieldLabel(field, locale)}
                 {field.unit && <span className="font-bold text-slate-400">{field.unit}</span>}
               </span>
               {activeCalculator.slug === "diablo3-gem-calculator" && field.name === "gemType" ? (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" role="radiogroup" aria-label="보석 종류">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" role="radiogroup" aria-label={locale === "en" ? "Gem type" : locale === "ja" ? "宝石の種類" : "보석 종류"}>
                   {DIABLO3_GEM_OPTIONS.map((gem) => {
                     const selected = Number(values[field.name] ?? field.defaultValue) === gem.value;
                     return (
@@ -537,7 +537,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                         >
                           <span className="-rotate-45">{gem.icon}</span>
                         </span>
-                        <span className="mt-3 block text-sm font-extrabold text-ink">{gem.label}</span>
+                        <span className="mt-3 block text-sm font-extrabold text-ink">{getLocalizedOptionLabel(gem.label, locale)}</span>
                       </button>
                     );
                   })}
@@ -551,7 +551,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 >
                   {getDiablo2AttackSkillOptions(Number(values.combatant ?? 0)).map((option) => (
                     <option key={option.value} value={option.value}>
-                      {option.label}
+                      {getLocalizedOptionLabel(option.label, locale)}
                     </option>
                   ))}
                 </select>
@@ -563,7 +563,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 >
                   {field.options?.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {option.label}
+                      {getLocalizedOptionLabel(option.label, locale)}
                     </option>
                   ))}
                 </select>
@@ -580,7 +580,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                   />
                   {field.max !== undefined && field.min !== undefined && (
                     <input
-                      aria-label={interpolate(t("calculator.slider"), { label: field.label })}
+                      aria-label={interpolate(t("calculator.slider"), { label: getLocalizedFieldLabel(field, locale) })}
                       className="h-2 w-full min-w-0"
                       type="range"
                       min={field.min}
@@ -592,7 +592,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                   )}
                 </div>
               )}
-              {field.help && <span className="text-xs font-semibold text-slate-500">{field.help}</span>}
+              {getLocalizedFieldHelp(field, locale) && <span className="text-xs font-semibold text-slate-500">{getLocalizedFieldHelp(field, locale)}</span>}
             </label>
           ))}
           {usesUnifiedBirthDateInput && !isSunriseSunset && (
@@ -6026,16 +6026,19 @@ function factorial(value: number) {
 
 function formatInputValue(
   field: ReturnType<typeof getCalculatorBySlug>["fields"][number],
-  value: number
+  value: number,
+  locale: Locale
 ) {
   if (!Number.isFinite(value)) return "-";
   if (field.type === "select") {
-    return field.options?.find((option) => option.value === value)?.label ?? String(value);
+    const label = field.options?.find((option) => option.value === value)?.label;
+    return label ? getLocalizedOptionLabel(label, locale) : String(value);
   }
 
+  const numberLocale = locale === "en" ? "en-US" : locale === "ja" ? "ja-JP" : "ko-KR";
   const formatted = Number.isInteger(value)
-    ? value.toLocaleString("ko-KR")
-    : value.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
+    ? value.toLocaleString(numberLocale)
+    : value.toLocaleString(numberLocale, { maximumFractionDigits: 2 });
 
   return field.unit ? `${formatted}${field.unit}` : formatted;
 }
