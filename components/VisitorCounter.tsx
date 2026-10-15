@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/components/LanguageProvider";
+import { interpolate } from "@/lib/i18n";
 
 type VisitorStats = {
   activeVisitors: number;
@@ -29,11 +31,12 @@ function getVisitorId() {
   return visitorId;
 }
 
-function formatCount(value: number) {
-  return new Intl.NumberFormat("ko-KR").format(value);
+function formatCount(value: number, locale: string) {
+  return new Intl.NumberFormat(locale === "ja" ? "ja-JP" : locale === "en" ? "en-US" : "ko-KR").format(value);
 }
 
 export function VisitorCounter() {
+  const { locale, t } = useLanguage();
   const [stats, setStats] = useState<VisitorStats | null>(null);
 
   useEffect(() => {
@@ -81,7 +84,7 @@ export function VisitorCounter() {
   if (!stats) {
     return (
       <div className="rounded-2xl border border-white/15 bg-white/8 px-4 py-3 text-sm font-semibold text-white/80">
-        방문 통계를 불러오는 중입니다.
+        {t("visitor.loading")}
       </div>
     );
   }
@@ -89,13 +92,13 @@ export function VisitorCounter() {
   return (
     <div className="rounded-2xl border border-white/15 bg-white/8 px-4 py-4 text-sm text-white/92">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <span className="font-extrabold text-white">실시간 방문자</span>
-        <span className="font-semibold text-white/90">현재 {formatCount(stats.activeVisitors)}명</span>
-        <span className="font-semibold text-white/90">오늘 {formatCount(stats.todayVisitors)}명</span>
-        <span className="font-semibold text-white/90">누적 {formatCount(stats.totalVisitors)}명</span>
+        <span className="font-extrabold text-white">{t("visitor.live")}</span>
+        <span className="font-semibold text-white/90">{interpolate(t("visitor.current"), { count: formatCount(stats.activeVisitors, locale) })}</span>
+        <span className="font-semibold text-white/90">{interpolate(t("visitor.today"), { count: formatCount(stats.todayVisitors, locale) })}</span>
+        <span className="font-semibold text-white/90">{interpolate(t("visitor.total"), { count: formatCount(stats.totalVisitors, locale) })}</span>
       </div>
       <p className="mt-2 text-xs font-medium text-white/68">
-        최근 {stats.activeWindowMinutes}분 내 활동 기준으로 집계합니다.
+        {interpolate(t("visitor.window"), { minutes: stats.activeWindowMinutes })}
       </p>
     </div>
   );

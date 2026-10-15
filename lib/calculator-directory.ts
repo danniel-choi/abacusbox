@@ -1,4 +1,5 @@
 import { calculators, type CalculatorConfig, type CalculatorSlug } from "@/lib/calculators";
+import type { Locale } from "@/lib/i18n";
 
 export type CalculatorGroup = "labor" | "loan" | "tax" | "investment" | "health" | "daily" | "life" | "game" | "saju" | "business" | "math";
 
@@ -84,6 +85,41 @@ export const CALCULATOR_GROUP_META: Record<
     softClass: "bg-[#e0f2fe]"
   }
 };
+
+const LOCALIZED_GROUP_META: Record<Locale, Partial<Record<CalculatorGroup, { label: string; description: string }>>> = {
+  ko: {},
+  en: {
+    labor: { label: "Labor & payroll", description: "Payroll, severance, leave, parental leave, and service calculators" },
+    loan: { label: "Loans & property", description: "Loans, repayments, housing costs, acquisition tax, and finance" },
+    tax: { label: "Tax & savings", description: "Tax, pensions, ISA, savings, and deposits" },
+    investment: { label: "Investing & stocks", description: "Stock returns, crypto growth, averaging down, and valuation" },
+    health: { label: "Health & fitness", description: "BMI, calories, BMR, sleep, running, and training" },
+    daily: { label: "Everyday tools", description: "Dates, D-day, unit conversion, percentages, text, and passwords" },
+    life: { label: "Life tools", description: "Pets, transport, benefits, living costs, and hobbies" },
+    game: { label: "Games", description: "Gacha odds, win rates, eDPI, and game tools" },
+    saju: { label: "Saju & fortune", description: "Zodiac, samjae, ganji, manse-ryeok, elements, and tarot" },
+    business: { label: "Business & sales", description: "Sales profit, cost ratios, break-even, and operating costs" },
+    math: { label: "Math tools", description: "Graphing, scientific, matrix, geometry, 3D, and web tools" }
+  },
+  ja: {
+    labor: { label: "給与・労務", description: "給与、退職、休暇、育児休業、勤務関連の計算機" },
+    loan: { label: "ローン・不動産", description: "ローン、返済、住宅費、取得税、金融費用の計算機" },
+    tax: { label: "節税・貯蓄", description: "税金、年金、ISA、積立、預金の計算機" },
+    investment: { label: "投資・株式", description: "株式収益、暗号資産、平均単価、PER/PBR評価の計算機" },
+    health: { label: "健康・運動", description: "BMI、カロリー、基礎代謝、睡眠、ランニング、運動の計算機" },
+    daily: { label: "日常ツール", description: "日付、D-day、単位変換、割合、テキスト、パスワードのツール" },
+    life: { label: "生活ツール", description: "ペット、交通、支援金、生活費、趣味の計算機" },
+    game: { label: "ゲーム", description: "ガチャ確率、勝率、eDPI、ゲーム関連ツール" },
+    saju: { label: "四柱推命・占い", description: "干支、三災、干支、万歳暦、五行、タロットの計算機" },
+    business: { label: "事業・販売", description: "販売利益、原価率、損益分岐点、運営費の計算機" },
+    math: { label: "数学ツール", description: "グラフ、関数電卓、行列、幾何、3D、Webツール" }
+  }
+};
+
+export function getLocalizedGroupMeta(locale: Locale, group: CalculatorGroup) {
+  const localized = LOCALIZED_GROUP_META[locale][group];
+  return localized ? { ...CALCULATOR_GROUP_META[group], ...localized } : CALCULATOR_GROUP_META[group];
+}
 
 export const CALCULATOR_ICON_BY_SLUG: Record<CalculatorSlug, string> = {
   "minimum-wage": "₩",
@@ -178,11 +214,15 @@ export const CALCULATOR_ICON_BY_SLUG: Record<CalculatorSlug, string> = {
   percent: "%",
   "discount-rate": "🏷",
   "distance-calculator": "📍",
+  "speed-distance-calculator": "속도",
   "traffic-fine-penalty": "🚦",
   "vehicle-inspection-period": "🚗",
   "fuel-cost": "⛽",
+  "estimated-mileage-calculator": "km",
   "kpass-refund": "🚇",
   "childbirth-grant": "🍼",
+  "child-support-calculator": "양육",
+  "divorce-child-support-calculator": "이혼",
   "lotto-generator": "🎟",
   vat: "🧾",
   "car-maintenance": "🔧",
@@ -190,6 +230,8 @@ export const CALCULATOR_ICON_BY_SLUG: Record<CalculatorSlug, string> = {
   "moving-cost": "📦",
   "mobile-plan": "📱",
   "seller-profit": "🛒",
+  "ad-performance-calculator": "KPI",
+  "marketing-budget-calculator": "₩%",
   "adsense-revenue": "Ad",
   "youtube-ad-revenue": "▶",
   "break-even": "⚖",
@@ -260,7 +302,16 @@ export const CALCULATOR_ICON_BY_SLUG: Record<CalculatorSlug, string> = {
   "bokseong-gwiin-calculator": "🍀",
   "mungok-gwiin-calculator": "🎨",
   "gwangwi-hakgwan-calculator": "🎓",
-  "tarot-birth-card-calculator": "🃏"
+  "tarot-birth-card-calculator": "🃏",
+  "orbital-period-calculator": "🪐",
+  "light-year-parsec-converter": "✨",
+  "moon-phase-calculator": "🌙",
+  "albedo-calculator": "◐",
+  "escape-velocity-calculator": "🚀",
+  "asteroid-close-approach-calculator": "☄",
+  "absolute-magnitude-calculator": "★",
+  "apparent-magnitude-calculator": "🔭",
+  "sunrise-sunset-calculator": "☀"
 };
 
 const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
@@ -303,6 +354,15 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "bokseong-gwiin-calculator": "saju",
   "mungok-gwiin-calculator": "saju",
   "gwangwi-hakgwan-calculator": "saju",
+  "orbital-period-calculator": "math",
+  "light-year-parsec-converter": "math",
+  "moon-phase-calculator": "math",
+  "albedo-calculator": "math",
+  "escape-velocity-calculator": "math",
+  "asteroid-close-approach-calculator": "math",
+  "absolute-magnitude-calculator": "math",
+  "apparent-magnitude-calculator": "math",
+  "sunrise-sunset-calculator": "math",
   "minimum-wage": "labor",
   "unpaid-wage": "labor",
   unemployment: "labor",
@@ -395,11 +455,15 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   percent: "daily",
   "discount-rate": "daily",
   "distance-calculator": "daily",
+  "speed-distance-calculator": "daily",
   "traffic-fine-penalty": "life",
   "vehicle-inspection-period": "life",
   "fuel-cost": "life",
+  "estimated-mileage-calculator": "life",
   "kpass-refund": "life",
   "childbirth-grant": "life",
+  "child-support-calculator": "life",
+  "divorce-child-support-calculator": "life",
   "lotto-generator": "tax",
   vat: "business",
   "car-maintenance": "business",
@@ -407,6 +471,8 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "moving-cost": "business",
   "mobile-plan": "business",
   "seller-profit": "business",
+  "ad-performance-calculator": "business",
+  "marketing-budget-calculator": "business",
   "adsense-revenue": "business",
   "youtube-ad-revenue": "business",
   "break-even": "business",
@@ -481,6 +547,8 @@ export function getFeaturedCalculators() {
     "earned-income-tax-credit",
     "kpass-refund",
     "childbirth-grant",
+    "child-support-calculator",
+    "divorce-child-support-calculator",
     "lotto-generator",
     "kr-etf",
     "crypto-investment-growth",
@@ -512,6 +580,7 @@ export function getFeaturedCalculators() {
     "vehicle-inspection-period",
     "auto-installment",
     "fuel-cost",
+    "estimated-mileage-calculator",
     "blox-fruits-calculator",
     "lineage-classic-hunting-efficiency",
     "lineage-classic-lucky-character",
@@ -524,6 +593,8 @@ export function getFeaturedCalculators() {
     "win-rate-calculator",
     "kpass-refund",
     "childbirth-grant",
+    "child-support-calculator",
+    "divorce-child-support-calculator",
     "draw-probability",
     "edpi-calculator",
     "mouse-sensitivity-converter",
@@ -540,6 +611,7 @@ export function getFeaturedCalculators() {
     "fire-retirement-age",
     "password-generator",
     "date-diff",
+    "speed-distance-calculator",
     "vat"
   ];
 
@@ -584,6 +656,8 @@ export function getPopularCalculators() {
     "traffic-fine-penalty",
     "vehicle-inspection-period",
     "fuel-cost",
+    "estimated-mileage-calculator",
+    "speed-distance-calculator",
     "blox-fruits-calculator",
     "lineage-classic-hunting-efficiency",
     "lineage-classic-lucky-character",
@@ -633,6 +707,7 @@ export function getRecentCalculators() {
     "minimum-wage",
     "unpaid-wage",
     "distance-calculator",
+    "speed-distance-calculator",
     "derivative-calculator",
     "integral-calculator",
     "quadratic-formula",
@@ -661,6 +736,7 @@ export function getRecentCalculators() {
     "vehicle-inspection-period",
     "auto-installment",
     "fuel-cost",
+    "estimated-mileage-calculator",
     "blox-fruits-calculator",
     "lineage-classic-hunting-efficiency",
     "lineage-classic-lucky-character",
@@ -705,6 +781,8 @@ export function getRecentCalculators() {
     "earned-income-tax-credit",
     "kpass-refund",
     "childbirth-grant",
+    "child-support-calculator",
+    "divorce-child-support-calculator",
     "isa-tax",
     "card-installment",
     "retirement-income-tax",

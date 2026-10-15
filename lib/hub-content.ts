@@ -252,7 +252,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     title: "띠, 삼재, 만세력, 오행, 타로 탄생 카드 계산기",
     description: "띠, 삼재, 육십갑자, 만세력, 사주 오행, 일간, 시주, 타로 탄생 카드, 별자리 궁합, 신살·귀인 계산기를 한곳에 모았습니다.",
     featuredSlugs: ["tarot-birth-card-calculator", "manse-ryeok", "saju-five-elements", "samjae-calculator", "korean-zodiac", "zodiac-compatibility"],
-    blogSlugs: ["calcrule-content-hub-launch", "zodiac-sign-guide-20260901-17-hourly", "lunar-solar-converter-checklist-20260902-21-hourly"],
+    blogSlugs: ["one-in-eight-billion-life-calculator", "calcrule-content-hub-launch", "zodiac-sign-guide-20260901-17-hourly", "lunar-solar-converter-checklist-20260902-21-hourly"],
     sections: [
       {
         title: "사주 계산은 기준 날짜와 시간이 먼저입니다.",

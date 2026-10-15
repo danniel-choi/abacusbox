@@ -16,9 +16,9 @@ export async function onRequestPost(context) {
 
     const result = await db.prepare(`
       INSERT INTO posts (
-        type, board, slug, title, excerpt, body_md, status, author_id, published_at, featured
+        type, board, slug, title, excerpt, body_md, cover_image_url, status, author_id, published_at, featured
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       String(payload.type),
       payload.board ? String(payload.board) : null,
@@ -26,6 +26,7 @@ export async function onRequestPost(context) {
       String(payload.title),
       payload.excerpt ? String(payload.excerpt) : null,
       String(payload.body_md),
+      payload.cover_image_url ? String(payload.cover_image_url) : `/api/blog-image/${String(payload.slug)}.svg`,
       payload.status ? String(payload.status) : "draft",
       payload.author_id ? Number(payload.author_id) : null,
       payload.published_at ? String(payload.published_at) : null,

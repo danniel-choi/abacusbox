@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { AdSenseAd } from "@/components/AdSenseAd";
-import { ContentListClient, type ContentListItem } from "@/components/ContentListClient";
+import { BlogPageClient } from "@/components/BlogPageClient";
+import type { ContentListItem } from "@/components/ContentListClient";
 import { getLatestBlogPosts } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -27,21 +26,7 @@ export default function BlogPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
-      <section className="rounded-[28px] bg-ink px-6 py-10 text-white shadow-panel">
-        <p className="text-sm font-extrabold text-brand">콘텐츠 허브</p>
-        <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">블로그</h1>
-        <p className="mt-4 max-w-3xl text-base font-medium leading-7 text-white/70">
-          계산 결과를 이해하는 데 필요한 제도 설명, 비교 글, 운영 업데이트를 모아둔 공간입니다.
-        </p>
-      </section>
-
-      <div className="mt-8">
-        <AdSenseAd placement="top" />
-      </div>
-
-      <Suspense fallback={<section className="mt-8 text-sm font-semibold text-slate-500">콘텐츠를 불러오는 중입니다.</section>}>
-        <ContentListClient apiPath="/api/blog" detailBasePath="/blog" fallbackItems={fallbackItems} meta="blog" pageSize={10} detailMode="path" />
-      </Suspense>
+      <BlogPageClient fallbackItems={fallbackItems} />
     </main>
   );
 }

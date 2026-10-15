@@ -29,6 +29,13 @@ const calculatorMeta = {
     description: "1회 성공 확률과 뽑기 횟수를 기준으로 최소 1회 성공 확률, 목표 개수 이상 확률, 기대 성공 횟수와 예상 비용을 계산합니다.",
     tags: ["뽑기확률", "가챠확률", "랜덤박스"]
   },
+  "manse-ryeok": {
+    title: "만세력 계산기",
+    category: "사주 가이드",
+    audience: "생년월일시로 사주팔자 네 기둥을 확인하려는 사용자",
+    description: "생년월일시와 양력·음력 기준을 입력해 연주, 월주, 일주, 시주 사주팔자를 계산합니다.",
+    tags: ["만세력", "사주", "양력음력"]
+  },
   "moving-cost": {
     title: "이사 비용 계산기",
     category: "생활 가이드",
@@ -361,6 +368,28 @@ const templateMeta = {
   scenario: { suffix: "상황별 활용 방법", focus: "실제 상황별 계산 흐름" }
 };
 
+const staticBlogPosts = {
+  "one-in-eight-billion-life-calculator": {
+    slug: "one-in-eight-billion-life-calculator",
+    title: "80억분의 1 인생 계산기",
+    excerpt: "생년월일 하나로 내가 얼마나 희귀한 조합인지, 타로 탄생 카드와 인생 키워드로 가볍게 확인하는 공유용 가이드입니다.",
+    category: "생활 가이드",
+    publishedAt: "2026-10-14",
+    tags: ["80억분의1", "인생계산기", "타로카드", "생년월일", "공유"],
+    calculatorSlug: "tarot-birth-card-calculator",
+    calculatorTitle: "타로 탄생 카드 계산기",
+    calculatorDescription: "생년월일을 기준으로 성격 카드와 영혼 카드 조합을 계산해 나만의 인생 키워드를 확인합니다.",
+    content: [
+      "세상에는 약 80억 명이 살고 있지만, 내 생년월일과 살아온 선택의 조합은 단 하나뿐입니다. 그래서 ‘80억분의 1 인생 계산기’는 정답을 맞히는 도구라기보다, 나를 설명하는 재미있는 첫 문장을 찾는 놀이에 가깝습니다.",
+      "가장 쉬운 시작점은 생년월일입니다. 생일은 누구나 알고 있고, 결과를 친구와 비교하기도 쉽습니다. 같은 달에 태어났어도 날짜가 다르면 카드 조합이 달라지고, 같은 카드가 나와도 받아들이는 키워드는 사람마다 달라집니다.",
+      "계산의정석 타로 탄생 카드 계산기는 생년월일을 메이저 아르카나 번호로 줄여 성격 카드와 영혼 카드 조합을 보여줍니다. 결과가 ‘나를 완전히 설명한다’고 보기보다, 내가 어떤 단어에 반응하는지 확인하는 심리 테스트처럼 보면 좋습니다.",
+      "바이럴로 공유할 때는 긴 해석보다 한 줄이 더 강합니다. 예를 들어 ‘나는 시작을 밀어붙이는 카드’, ‘나는 관계에서 균형을 찾는 카드’, ‘나는 계속 방향을 바꾸며 성장하는 카드’처럼 결과에서 마음에 남는 표현 하나를 고르면 됩니다.",
+      "친구와 비교하면 더 재미있습니다. 같은 카드가 나오면 닮은 점을 찾고, 완전히 다른 카드가 나오면 서로의 선택 방식이 어떻게 다른지 이야기해 보세요. 운세처럼 확정적으로 말하기보다, 대화를 여는 가벼운 질문으로 쓰면 공유 반응이 좋아집니다.",
+      "결국 80억분의 1이라는 말은 거창한 운명을 뜻하지 않습니다. 오늘의 나를 설명하는 작은 단서를 발견하고, 그 단서를 누군가와 나누는 순간에 의미가 생깁니다. 생일 하나로 시작해서 내 인생 키워드를 뽑아 보고 싶다면, 아래 계산기에서 바로 확인해 보세요."
+    ]
+  }
+};
+
 export async function onRequest(context) {
   const { request, env } = context;
   const assetResponse = env.ASSETS ? await env.ASSETS.fetch(request) : new Response(null, { status: 404 });
@@ -370,7 +399,18 @@ export async function onRequest(context) {
 
   const url = new URL(request.url);
   const slug = decodeURIComponent(url.pathname.replace(/^\/blog\//, "").replace(/\/$/, ""));
-  const post = buildAutoBlogPost(slug);
+  const d1Post = await getD1BlogPost(env, slug);
+
+  if (d1Post) {
+    return new Response(renderD1BlogHtml(d1Post), {
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=300, s-maxage=3600"
+      }
+    });
+  }
+
+  const post = staticBlogPosts[slug] || buildAutoBlogPost(slug);
 
   if (post?.redirectTo) {
     return Response.redirect(new URL(post.redirectTo, url), 302);
@@ -386,6 +426,206 @@ export async function onRequest(context) {
       "cache-control": "public, max-age=300, s-maxage=3600"
     }
   });
+}
+
+async function getD1BlogPost(env, slug) {
+  const db = env.calcrule || env.CONTENT_DB || null;
+  if (!db) return null;
+
+  try {
+    const post = await db.prepare(`
+      SELECT
+        p.id,
+        p.slug,
+        p.title,
+        p.excerpt,
+        p.body_md,
+        p.cover_image_url,
+        p.published_at,
+        a.name AS author_name
+      FROM posts p
+      LEFT JOIN authors a ON a.id = p.author_id
+      WHERE p.slug = ?
+        AND p.type = 'blog'
+        AND p.status = 'published'
+      LIMIT 1
+    `).bind(slug).first();
+
+    if (!post?.id) return null;
+
+    const [tagsResult, calculatorsResult] = await Promise.all([
+      db.prepare(`
+        SELECT t.name
+        FROM post_tags pt
+        JOIN tags t ON t.id = pt.tag_id
+        WHERE pt.post_id = ?
+        ORDER BY t.name ASC
+      `).bind(post.id).all(),
+      db.prepare(`
+        SELECT calculator_slug
+        FROM post_calculators
+        WHERE post_id = ?
+        ORDER BY calculator_slug ASC
+      `).bind(post.id).all()
+    ]);
+
+    const calculatorSlug = (calculatorsResult.results || [])[0]?.calculator_slug || "";
+    const calculator = calculatorMeta[calculatorSlug] || null;
+
+    return {
+      ...post,
+      tags: (tagsResult.results || []).map((item) => item.name),
+      calculatorSlug,
+      calculatorTitle: calculator?.title || "관련 계산기",
+      calculatorDescription: calculator?.description || "본문과 연결된 계산기를 열어 입력값을 바꿔가며 결과를 확인합니다.",
+      category: inferD1BlogCategory(post, calculator)
+    };
+  } catch {
+    return null;
+  }
+}
+
+function inferD1BlogCategory(post, calculator) {
+  const text = `${post.title || ""} ${post.excerpt || ""}`;
+  if (/(사주|만세력|타로|띠|삼재|오행|운세)/.test(text)) return "사주 가이드";
+  if (/(게임|승률|가챠|뽑기|로벅스|공속|감도)/.test(text)) return "게임 가이드";
+  if (calculator?.category) return calculator.category;
+  return "블로그";
+}
+
+function markdownToParagraphs(value, title = "") {
+  return String(value || "")
+    .split(/\n{2,}/)
+    .map((block) => block
+      .replace(/^#{1,6}\s+/gm, "")
+      .replace(/^\s*[-*]\s+/gm, "· ")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
+      .trim())
+    .filter((block, index) => !(index === 0 && title && block === title))
+    .map((block) => escapeHtml(block
+      .replace(/^#{1,6}\s+/gm, "")
+      .replace(/^\s*[-*]\s+/gm, "· ")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
+      .trim()).replace(/\n/g, "<br>"))
+    .filter(Boolean);
+}
+
+function renderD1BlogHtml(post) {
+  const title = escapeHtml(`${post.title} | 계산의정석`);
+  const description = escapeHtml(post.excerpt || "");
+  const canonical = `${SITE_URL}/blog/${encodeURIComponent(post.slug)}`;
+  const calculatorUrl = post.calculatorSlug ? `/calculators/${encodeURIComponent(post.calculatorSlug)}` : "/calculators";
+  const imagePath = post.cover_image_url || `/api/blog-image/${post.slug}.svg`;
+  const imageUrl = imagePath.startsWith("http") ? imagePath : `${SITE_URL}${imagePath}`;
+  const tagText = post.tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join("");
+  const paragraphs = markdownToParagraphs(post.body_md, post.title).map((paragraph) => `<p>${paragraph}</p>`).join("");
+  const publishedAt = String(post.published_at || "").slice(0, 10) || new Date().toISOString().slice(0, 10);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt || post.title,
+    datePublished: publishedAt,
+    dateModified: publishedAt,
+    author: {
+      "@type": "Organization",
+      name: post.author_name || "계산의정석",
+      url: SITE_URL
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "계산의정석",
+      url: SITE_URL
+    },
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`
+  };
+
+  return `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <meta name="description" content="${description}">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="${escapeHtml(canonical)}">
+  <meta property="og:title" content="${escapeHtml(post.title)}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="${escapeHtml(canonical)}">
+  <meta property="og:image" content="${escapeHtml(imageUrl)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="${escapeHtml(imageUrl)}">
+  <script type="application/ld+json">${safeJson(jsonLd)}</script>
+  <style>
+    :root { color-scheme: light; --ink:#111827; --muted:#64748b; --line:#e2e8f0; --paper:#f8fafc; --brand:#02b585; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    header { background: #111827; color: #fff; }
+    header div, main, footer { width: min(100% - 32px, 960px); margin: 0 auto; }
+    header div { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; gap: 16px; }
+    a { color: inherit; text-decoration: none; }
+    .brand { font-size: 20px; font-weight: 900; }
+    .nav { color: #dbeafe; font-size: 14px; font-weight: 800; }
+    main { padding: 36px 0 48px; }
+    article { background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: clamp(22px, 4vw, 34px); box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08); }
+    .back { color: var(--brand); font-size: 14px; font-weight: 900; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .meta span, .tags span { border-radius: 999px; background: var(--paper); color: var(--muted); display: inline-flex; font-size: 13px; font-weight: 800; padding: 6px 12px; }
+    .meta span:first-child { background: rgba(2, 181, 133, 0.12); color: #018763; }
+    h1 { margin: 22px 0 12px; font-size: clamp(30px, 5vw, 44px); line-height: 1.18; letter-spacing: 0; }
+    .excerpt { color: var(--muted); font-size: 18px; font-weight: 650; }
+    .cta { margin: 28px 0; border: 1px solid rgba(2, 181, 133, 0.32); border-radius: 20px; background: #f0fffa; padding: 22px; }
+    .cta strong { display: block; font-size: 14px; color: #018763; }
+    .cta h2 { margin: 8px 0 6px; font-size: 24px; line-height: 1.25; }
+    .cta p { margin: 0 0 18px; color: var(--muted); }
+    .button { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--brand); color: #fff; font-weight: 900; padding: 12px 18px; }
+    .content { display: grid; gap: 18px; margin-top: 28px; color: #334155; font-size: 17px; font-weight: 550; }
+    .content p { margin: 0; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+    footer { padding: 0 0 48px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 640px) { header div, main, footer { width: min(100% - 24px, 960px); } article { border-radius: 18px; padding: 20px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <a class="brand" href="/">계산의정석</a>
+      <a class="nav" href="/calculators">계산기 전체 보기</a>
+    </div>
+  </header>
+  <main>
+    <article>
+      <a class="back" href="/blog">← 블로그 목록</a>
+      <div class="meta">
+        <span>${escapeHtml(post.category)}</span>
+        <span>${escapeHtml(publishedAt)}</span>
+        <span>읽는 시간 5분</span>
+        <span>${escapeHtml(post.author_name || "계산의정석")}</span>
+      </div>
+      <h1>${escapeHtml(post.title)}</h1>
+      <p class="excerpt">${description}</p>
+      <img src="${escapeHtml(imagePath)}" alt="" style="margin:28px 0 0;width:100%;border-radius:22px;border:1px solid var(--line);display:block;">
+      <section class="cta">
+        <strong>이 글과 연결된 계산기</strong>
+        <h2>${escapeHtml(post.calculatorTitle)}</h2>
+        <p>${escapeHtml(post.calculatorDescription)}</p>
+        <a class="button" href="${calculatorUrl}">계산기로 바로가기</a>
+      </section>
+      <div class="content">${paragraphs}</div>
+      <section class="cta">
+        <strong>숫자로 바로 확인하기</strong>
+        <p>위 내용을 읽은 뒤 실제 조건을 확인하려면 연결된 계산기에서 입력값을 바꿔가며 비교해 보세요.</p>
+        <a class="button" href="${calculatorUrl}">${escapeHtml(post.calculatorTitle)} 열기</a>
+      </section>
+      <div class="tags">${tagText}</div>
+    </article>
+  </main>
+  <footer>© 계산의정석. 계산 결과와 해석은 참고용이며 실제 판단 전에는 원자료와 공식 안내를 함께 확인하세요.</footer>
+</body>
+</html>`;
 }
 
 function buildAutoBlogPost(slug) {
@@ -445,6 +685,8 @@ function renderBlogHtml(post) {
   const title = escapeHtml(`${post.title} | 계산의정석`);
   const description = escapeHtml(post.excerpt);
   const canonical = `${SITE_URL}/blog/${encodeURIComponent(post.slug)}`;
+  const imagePath = `/api/blog-image/${post.slug}.svg`;
+  const imageUrl = `${SITE_URL}${imagePath}`;
   const calculatorUrl = `/calculators/${encodeURIComponent(post.calculatorSlug)}`;
   const tagText = post.tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join("");
   const paragraphs = post.content.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("");
@@ -481,6 +723,9 @@ function renderBlogHtml(post) {
   <meta property="og:description" content="${description}">
   <meta property="og:type" content="article">
   <meta property="og:url" content="${escapeHtml(canonical)}">
+  <meta property="og:image" content="${escapeHtml(imageUrl)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="${escapeHtml(imageUrl)}">
   <script type="application/ld+json">${safeJson(jsonLd)}</script>
   <style>
     :root { color-scheme: light; --ink:#111827; --muted:#64748b; --line:#e2e8f0; --paper:#f8fafc; --brand:#02b585; }
@@ -530,6 +775,7 @@ function renderBlogHtml(post) {
       </div>
       <h1>${escapeHtml(post.title)}</h1>
       <p class="excerpt">${description}</p>
+      <img src="${escapeHtml(imagePath)}" alt="" style="margin:28px 0 0;width:100%;border-radius:22px;border:1px solid var(--line);display:block;">
       <section class="cta">
         <strong>이 글과 연결된 계산기</strong>
         <h2>${escapeHtml(post.calculatorTitle)}</h2>

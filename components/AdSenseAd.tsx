@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useLanguage } from "@/components/LanguageProvider";
 
 declare global {
   interface Window {
@@ -24,30 +25,31 @@ const SLOT_BY_PLACEMENT: Record<AdPlacement, string | undefined> = {
   bottom: process.env.NEXT_PUBLIC_ADSENSE_BOTTOM_SLOT || process.env.NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT
 };
 
-const LABEL_BY_PLACEMENT: Record<AdPlacement, string> = {
-  top: "추천 광고",
-  calculator: "계산 결과 아래 광고",
-  inArticle: "본문 중간 광고",
-  bottom: "관련 콘텐츠 광고"
-};
-
 export function AdSenseAd({ placement, className = "" }: AdSenseAdProps) {
+  const { t } = useLanguage();
   const slot = SLOT_BY_PLACEMENT[placement];
   const key = useMemo(() => `${placement}-${slot || "display"}`, [placement, slot]);
+  const adRef = useRef<HTMLModElement>(null);
 
   useEffect(() => {
+    const adElement = adRef.current;
+    if (!adElement || adElement.dataset.calcruleAdPushed === "true") return;
+
     try {
+      adElement.dataset.calcruleAdPushed = "true";
       window.adsbygoogle = window.adsbygoogle || [];
       window.adsbygoogle.push({});
     } catch {
+      if (adElement) delete adElement.dataset.calcruleAdPushed;
       // Ad blockers or delayed AdSense loading can throw here; the page should keep working.
     }
   }, [slot, key]);
 
   return (
     <div className={`ad-slot rounded-[20px] border border-line bg-white px-3 py-3 shadow-sm ${className}`}>
-      <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-normal text-slate-400">{LABEL_BY_PLACEMENT[placement]}</p>
+      <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-normal text-slate-400">{t(`ads.${placement}` as "ads.top" | "ads.calculator" | "ads.inArticle" | "ads.bottom")}</p>
       <ins
+        ref={adRef}
         key={key}
         className="adsbygoogle block min-h-[90px] w-full"
         style={{ display: "block" }}

@@ -3,23 +3,26 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/components/LanguageProvider";
 import { Logo } from "@/components/Logo";
 import { calculators } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon } from "@/lib/calculator-directory";
+import type { TranslationKey } from "@/lib/i18n";
 
-const navItems = [
-  { href: "/calculators", label: "계산기" },
-  { href: "/tax", label: "세금" },
-  { href: "/stock", label: "주식" },
-  { href: "/health", label: "건강" },
-  { href: "/daily", label: "일상" },
-  { href: "/game", label: "게임" },
-  { href: "/saju", label: "사주" },
-  { href: "/blog", label: "블로그" }
+const navItems: { href: string; labelKey: TranslationKey }[] = [
+  { href: "/calculators", labelKey: "nav.calculators" },
+  { href: "/tax", labelKey: "nav.tax" },
+  { href: "/stock", labelKey: "nav.stock" },
+  { href: "/health", labelKey: "nav.health" },
+  { href: "/daily", labelKey: "nav.daily" },
+  { href: "/game", labelKey: "nav.game" },
+  { href: "/saju", labelKey: "nav.saju" },
+  { href: "/blog", labelKey: "nav.blog" }
 ];
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -54,20 +57,20 @@ export function Header() {
                 href={item.href}
                 className="rounded-full border border-brand/50 bg-white px-5 py-2.5 text-sm font-extrabold text-ink shadow-[0_6px_18px_rgba(255,255,255,0.12)] transition hover:-translate-y-0.5 hover:border-brand hover:bg-brand hover:text-white"
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
           </nav>
 
           <button
             type="button"
-            aria-label="메뉴 열기"
+            aria-label={t("menu.open")}
             aria-expanded={open}
             aria-controls="mobile-menu-drawer"
             onClick={() => setOpen(true)}
             className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand/40 bg-white text-ink transition hover:border-brand hover:bg-brand hover:text-white md:hidden"
           >
-            <span className="sr-only">메뉴 열기</span>
+            <span className="sr-only">{t("menu.open")}</span>
             <span aria-hidden="true" className="relative block h-5 w-6">
               <span className="absolute left-0 top-0 block h-[2px] w-full rounded-full bg-current" />
               <span className="absolute left-0 top-[8px] block h-[2px] w-full rounded-full bg-current" />
@@ -88,7 +91,7 @@ export function Header() {
 
               <button
                 type="button"
-                aria-label="메뉴 닫기"
+                aria-label={t("menu.close")}
                 onClick={() => setOpen(false)}
                 className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand/40 bg-white px-0 py-0 text-sm font-extrabold text-ink shadow-[0_10px_24px_rgba(255,255,255,0.14)]"
               >
@@ -112,7 +115,7 @@ export function Header() {
                   onClick={() => setOpen(false)}
                   className="rounded-2xl border border-white/12 bg-white px-5 py-4 text-lg font-extrabold leading-tight text-ink shadow-[0_12px_28px_rgba(255,255,255,0.12)] transition hover:border-brand hover:bg-brand hover:text-white"
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               ))}
             </nav>
@@ -133,6 +136,7 @@ function CalculatorHeaderSearch({
   onSearch?: () => void;
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const trimmed = query.trim();
@@ -191,21 +195,21 @@ function CalculatorHeaderSearch({
         className="flex h-11 items-center gap-2 rounded-2xl border border-white/12 bg-white px-3 shadow-[0_8px_24px_rgba(255,255,255,0.1)]"
       >
         <span aria-hidden="true" className="text-sm font-extrabold text-brand">
-          검색
+          {t("search.label")}
         </span>
         <input
           autoFocus={autoFocus}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onFocus={() => setFocused(true)}
-          placeholder="계산기 검색"
+          placeholder={t("search.placeholder")}
           className="min-w-0 flex-1 bg-transparent text-sm font-bold text-ink outline-none placeholder:text-slate-400"
         />
         <button
           type="submit"
           className="shrink-0 rounded-xl bg-ink px-3 py-1.5 text-xs font-extrabold text-white transition hover:bg-brand"
         >
-          이동
+          {t("search.submit")}
         </button>
       </form>
 

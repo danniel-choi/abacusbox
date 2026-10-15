@@ -27,15 +27,71 @@ const CALCULATOR_BLOG_META = {
   "seller-profit": { title: "판매자 수익 계산기", category: "사업", audience: "온라인 셀러, 자사몰 운영자, 마켓 판매자", description: "판매가, 원가, 수수료율, 광고비, 배송비를 기준으로 판매 수익과 마진율을 계산합니다.", family: "business" },
   "break-even": { title: "원가율·손익분기점 계산기", category: "사업", audience: "셀러, 자영업자, 소규모 사업 운영자", description: "판매가, 원가, 월 고정비를 기준으로 원가율과 손익분기 판매수량을 계산합니다.", family: "business" },
   "car-maintenance": { title: "자동차 유지비 계산기", category: "생활비", audience: "차량 보유자, 구매 검토자", description: "주행거리, 연비, 유류비, 보험료, 세금, 주차비를 기준으로 월 자동차 유지비를 계산합니다.", family: "living-cost" },
+  "estimated-mileage-calculator": { title: "예상주행거리 계산기", category: "생활비", audience: "자동차 유지비와 보험 마일리지 특약을 준비하는 운전자", description: "평일과 주말 하루 평균 주행거리를 입력해 연간 예상주행거리와 월평균 주행거리를 계산합니다.", family: "living-cost" },
   "moving-cost": { title: "이사 비용 계산기", category: "생활비", audience: "이사 예정자, 포장이사 비교 사용자", description: "집 크기, 거리, 엘리베이터 여부, 사다리차 여부를 기준으로 이사 비용을 추정합니다.", family: "living-cost" },
   "mobile-plan": { title: "휴대폰 요금 계산기", category: "생활비", audience: "요금제 변경 사용자, 통신비 절감 사용자", description: "기본요금, 데이터 옵션, 선택약정 할인, 가족결합을 반영해 월 통신비를 계산합니다.", family: "living-cost" },
+  "speed-distance-calculator": { title: "속도 거리 계산기", category: "생활", audience: "이동시간, 평균속도, 주행거리를 빠르게 계산하려는 사용자", description: "거리, 속도, 시간 중 두 값을 입력해 나머지 값을 계산하고 속도 변환과 페이스를 확인합니다.", family: "utility" },
+  "child-support-calculator": { title: "자녀 양육비 계산기", category: "생활", audience: "이혼·별거 후 양육비 기준액을 확인하려는 보호자", description: "부모의 월소득, 양육자, 자녀 나이를 입력해 2021년 양육비 산정기준표 기준의 예상 분담액을 계산합니다.", family: "family-law" },
+  "divorce-child-support-calculator": { title: "이혼 시 양육비 계산기", category: "생활", audience: "이혼 협의·조정·소송 전 월 예상 양육비를 확인하려는 보호자", description: "이혼 후 양육자, 부모 월소득, 자녀 나이와 거주지역을 입력해 월 예상 양육비를 계산합니다.", family: "family-law" },
   bmi: { title: "BMI 계산기", category: "건강", audience: "체중 관리 사용자, 건강 정보 확인 사용자", description: "키와 몸무게를 기준으로 BMI 지수와 비만도 구간을 계산합니다.", family: "life-metric" },
   "korean-age": { title: "만나이 계산기", category: "생활", audience: "연령 확인 사용자, 서류 작성 사용자", description: "생년월일과 기준일을 입력해 현재 만나이와 다음 생일까지 남은 기간을 계산합니다.", family: "date-tool" },
   "date-diff": { title: "날짜 차이 계산기", category: "생활", audience: "일정 관리 사용자, 계약 기간 확인 사용자", description: "시작일과 종료일 기준으로 날짜 차이와 주·개월 환산값을 계산합니다.", family: "date-tool" },
   "unit-converter": { title: "단위변환 계산기", category: "생활", audience: "생활 계산 사용자, 부동산·쇼핑·해외 단위 확인 사용자", description: "길이, 무게, 면적 단위를 빠르게 변환합니다.", family: "utility" },
   percent: { title: "퍼센트 계산기", category: "생활", audience: "쇼핑, 업무, 공부, 보고서 작성 사용자", description: "비율, 증가율, 감소율, 일부 값 계산을 한 번에 할 수 있는 퍼센트 계산기입니다.", family: "utility" },
   "discount-rate": { title: "할인율 계산기", category: "생활", audience: "쇼핑 사용자, 판매자, 가격 비교 사용자", description: "정가와 판매가를 기준으로 할인금액과 할인율을 계산합니다.", family: "consumer-cost" },
-  gpa: { title: "학점 계산기", category: "학업", audience: "대학생, 성적 관리 사용자", description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.", family: "study" }
+  gpa: { title: "학점 계산기", category: "학업", audience: "대학생, 성적 관리 사용자", description: "과목 학점과 성적을 기준으로 평균평점과 총 취득학점을 계산합니다.", family: "study" },
+  "draw-probability": { title: "뽑기 확률 계산기", category: "게임", audience: "게임 뽑기, 랜덤박스, 이벤트 추첨 확률을 확인하는 사용자", description: "1회 성공 확률과 뽑기 횟수를 입력해 최소 1회 성공 확률, 목표 개수 이상 성공 확률, 기대 성공 횟수와 예상 비용을 계산합니다.", family: "game-probability" },
+  "blox-fruits-calculator": { title: "블록스 프루츠 계산기", category: "게임", audience: "블록스 프루츠 거래 가치와 성장 계획을 빠르게 비교하려는 Roblox 플레이어", description: "블록스 프루츠 거래 가치, W/F/L 판정, 스탯 포인트 배분, 마스터리 목표까지 필요한 예상 플레이 시간을 한 번에 계산합니다.", family: "game-progress" },
+  "lineage-classic-hunting-efficiency": { title: "리니지 클래식 사냥 효율 계산기", category: "게임", audience: "리니지 클래식 사냥터별 경험치와 아데나 효율을 직접 기록해 비교하려는 플레이어", description: "사냥 전후 경험치, 사냥 시간, 획득 아데나, 잡템 판매액, 물약비와 버프 비용을 입력해 시간당 경험치와 순수익, 목표까지 예상 시간을 계산합니다.", family: "game-progress" },
+  "lineage-classic-lucky-character": { title: "리니지 클래식 행운캐 계산기", category: "게임", audience: "리니지 클래식 캐릭터명, 생일, 생성일 기준의 재미용 행운 점수를 확인하려는 플레이어", description: "캐릭터명, 생년월일, 생성일을 기준으로 사냥·득템·강화 운세와 오늘의 추천 행동을 계산합니다.", family: "game-fun" },
+  "lol-skill-haste": { title: "롤 스킬가속 계산기", category: "게임", audience: "리그 오브 레전드 챔피언 빌드와 쿨타임 체감을 비교하려는 플레이어", description: "스킬가속 값을 입력해 쿨타임 감소율, 실제 쿨타임, 초당 스킬 사용 가능 횟수를 계산합니다.", family: "game-combat" },
+  "clash-of-clans-calculator": { title: "클래시 오브 클랜 계산기", category: "게임", audience: "클래시 오브 클랜 업그레이드 비용과 장인 일정을 정리하려는 플레이어", description: "골드, 엘릭서, 다크엘릭서 비용과 업그레이드 시간을 입력해 장인 일정과 자원 소모를 계산합니다.", family: "game-progress" },
+  "robux-calculator": { title: "로벅스 계산기", category: "게임", audience: "Roblox Robux 구매 비용과 원화 환산을 빠르게 확인하려는 사용자", description: "Robux 수량과 원화 금액을 입력해 Robux당 단가, 구매 가능 Robux, 예상 결제 금액을 계산합니다.", family: "game-economy" },
+  "diablo2-attack-speed": { title: "디아블로2 공속 계산기", category: "게임", audience: "디아블로2 레저렉션 캐릭터별 공속 프레임과 IAS 목표를 확인하려는 플레이어", description: "직업, 무기 속도, 스킬 IAS, 장비 IAS를 입력해 공격 프레임과 다음 브레이크포인트까지 필요한 공속을 계산합니다.", family: "game-combat" },
+  "diablo3-gem-calculator": { title: "디아블로3 보석 계산기", category: "게임", audience: "디아블로3 보석 제작 재료와 비용을 미리 계산하려는 플레이어", description: "보유 보석과 목표 등급을 입력해 필요한 하위 보석, 금, 죽음의 숨결을 계산합니다.", family: "game-progress" },
+  "fc-transfer-fee": { title: "피파 수수료 계산기", category: "게임", audience: "FC온라인 이적시장에서 선수 판매 전 실제 수령 BP와 할인 효과를 확인하려는 사용자", description: "EA Sports FC 이적시장에서 선수 판매 시 적용되는 기본 수수료와 PC방, TOP CLASS, 쿠폰 할인율을 적용해 최종 받는 금액을 계산합니다.", family: "game-economy" },
+  "win-rate-calculator": { title: "게임 승률 계산기", category: "게임", audience: "랭크 게임, 팀전, 리그 전적의 승률과 목표 승률을 확인하려는 사용자", description: "승, 무, 패 전적을 입력해 승률, 패배 제외 승률, 승점, 목표 승률까지 필요한 추가 승리 수를 계산합니다.", family: "game-performance" },
+  "edpi-calculator": { title: "eDPI 계산기", category: "게임", audience: "FPS 게임에서 마우스 감도를 비교하거나 장비 DPI 변경 후 같은 체감을 유지하려는 사용자", description: "마우스 DPI와 인게임 감도를 입력해 FPS 게임의 eDPI를 계산하고, DPI 변경 시 같은 감도를 유지할 인게임 감도를 변환합니다.", family: "game-sensitivity" },
+  "mouse-sensitivity-converter": { title: "마우스 감도 변환 계산기", category: "게임", audience: "FPS 게임에서 마우스패드 이동 거리와 인게임 감도를 맞추려는 사용자", description: "현재 cm/360, DPI, 인게임 감도를 기준으로 목표 cm/360에 맞는 새 감도와 eDPI를 계산합니다.", family: "game-sensitivity" },
+  "tarot-birth-card-calculator": { title: "타로 탄생 카드 계산기", category: "사주", audience: "생년월일로 나의 타로 탄생 카드와 핵심 키워드를 가볍게 확인하려는 사용자", description: "양력 또는 음력 생년월일을 기준으로 타로 메이저 아르카나 탄생 카드 조합과 성격·영혼 카드 키워드를 계산합니다.", family: "tarot" },
+  "korean-zodiac": { title: "띠 계산기", category: "사주", audience: "태어난 해 기준 띠와 연도 간지를 확인하려는 사용자", description: "태어난 해를 기준으로 쥐띠부터 돼지띠까지 내 띠와 연도 간지를 계산합니다.", family: "saju-core" },
+  "samjae-calculator": { title: "삼재 계산기", category: "사주", audience: "출생연도와 확인 연도로 삼재 여부를 가볍게 확인하려는 사용자", description: "태어난 해와 확인 연도를 기준으로 들삼재, 눌삼재, 날삼재 여부를 계산합니다.", family: "saju-fortune" },
+  "sexagenary-cycle": { title: "육십갑자(간지) 계산기", category: "사주", audience: "생년 또는 날짜 기준 간지와 60갑자 순번을 확인하려는 사용자", description: "생년 또는 날짜 기준 연도 간지와 60갑자 순번을 계산합니다.", family: "saju-core" },
+  "lunar-leap-month": { title: "평달 윤달 계산기", category: "사주", audience: "음력 생일과 윤달 여부를 확인하려는 사용자", description: "입력한 날짜의 월이 평달인지 윤달 가능성이 있는지 간단히 확인합니다.", family: "saju-core" },
+  "saju-five-elements": { title: "사주 오행 계산기", category: "사주", audience: "생년월일시 기준 오행 분포를 확인하려는 사용자", description: "생년월일시의 천간과 지지를 기준으로 목·화·토·금·수 오행 분포를 계산합니다.", family: "saju-core" },
+  "ipchun-calculator": { title: "입춘 계산기", category: "사주", audience: "입춘 전후 출생자의 사주 기준 연도를 확인하려는 사용자", description: "입춘 기준 사주 연도와 생년 적용 기준을 계산합니다.", family: "saju-core" },
+  "saju-day-master": { title: "사주 일간 계산기", category: "사주", audience: "생년월일 기준 일간과 일주를 확인하려는 사용자", description: "생년월일로 나의 일간과 일주를 계산합니다.", family: "saju-core" },
+  "yearly-fortune-keyword": { title: "올해 운세 키워드 계산기", category: "사주", audience: "올해 세운과 일간 기준의 운세 키워드를 확인하려는 사용자", description: "입춘 기준 세운과 일간을 조합해 올해 운세 키워드를 계산합니다.", family: "saju-fortune" },
+  "saju-time-pillar": { title: "사주 시간 계산기", category: "사주", audience: "출생시각 기준 시지와 시주를 확인하려는 사용자", description: "출생시각을 기준으로 시지와 시주를 계산합니다.", family: "saju-core" },
+  "manse-ryeok": { title: "만세력 계산기", category: "사주", audience: "생년월일시로 사주팔자 네 기둥을 확인하려는 사용자", description: "생년월일시로 연주·월주·일주·시주 사주팔자를 계산합니다.", family: "saju-core" },
+  "birth-tree": { title: "탄생목 계산기", category: "사주", audience: "생일 기준 탄생목과 성향 키워드를 확인하려는 사용자", description: "생일을 기준으로 탄생목과 간단한 성향 키워드를 확인합니다.", family: "saju-fortune" },
+  "hwagaesal-calculator": { title: "화개살 계산기", category: "사주", audience: "생년월일시 기준 화개살 여부와 위치를 확인하려는 사용자", description: "생년월일시를 기준으로 화개살 위치 여부를 계산합니다.", family: "saju-sal" },
+  "hongyeomsal-calculator": { title: "홍염살 계산기", category: "사주", audience: "생년월일 기준 홍염살 여부를 확인하려는 사용자", description: "생년월일을 기준으로 홍염살 여부를 계산합니다.", family: "saju-sal" },
+  "yeokmasal-calculator": { title: "역마살 계산기", category: "사주", audience: "생년월일시 기준 역마살 위치를 확인하려는 사용자", description: "생년월일시를 기준으로 역마살 위치를 계산합니다.", family: "saju-sal" },
+  "banansal-calculator": { title: "반안살 계산기", category: "사주", audience: "생년월일과 출생시간 기준 반안살 위치를 확인하려는 사용자", description: "생년월일과 출생시간으로 반안살 위치를 계산합니다.", family: "saju-sal" },
+  "zodiac-compatibility": { title: "별자리 궁합 계산기", category: "사주", audience: "나와 상대의 생일 기준 별자리 궁합을 확인하려는 사용자", description: "생년월일과 상대 생일을 기준으로 별자리 궁합 점수를 계산합니다.", family: "saju-fortune" },
+  "jangseongsal-calculator": { title: "장성살 계산기", category: "사주", audience: "생년월일시 기준 장성살 위치와 기운을 확인하려는 사용자", description: "생년월일시로 장성살 위치와 기운을 계산합니다.", family: "saju-sal" },
+  "taegeuk-gwiin-calculator": { title: "태극귀인 계산기", category: "사주", audience: "사주 태극귀인 여부와 선택 연도 운을 확인하려는 사용자", description: "내 사주 태극귀인 여부와 선택 연도 운을 계산합니다.", family: "saju-gwiin" },
+  "gwimungwan-sal-calculator": { title: "귀문관살 계산기", category: "사주", audience: "생년월일 기준 귀문관살 조합과 위치를 확인하려는 사용자", description: "생년월일로 귀문관살 조합과 위치를 확인합니다.", family: "saju-sal" },
+  "age-nine-calculator": { title: "아홉수 계산기", category: "사주", audience: "세는나이, 연 나이, 만 나이 기준 아홉수 여부를 확인하려는 사용자", description: "생년월일과 기준일을 입력해 현재 아홉수 여부와 다음 아홉수 기간을 계산합니다.", family: "saju-fortune" },
+  "jisal-calculator": { title: "지살 계산기", category: "사주", audience: "생년월일·출생시간 기준 지살 위치를 확인하려는 사용자", description: "생년월일·출생시간으로 지살 위치를 계산합니다.", family: "saju-sal" },
+  "geopsal-calculator": { title: "겁살 계산기", category: "사주", audience: "생년월일·출생시간 기준 겁살 여부를 확인하려는 사용자", description: "생년월일·출생시간으로 겁살 여부를 계산합니다.", family: "saju-sal" },
+  "jaesal-calculator": { title: "재살 계산기", category: "사주", audience: "생년월일·출생시간 기준 재살 여부를 확인하려는 사용자", description: "생년월일·출생시간으로 재살 여부를 계산합니다.", family: "saju-sal" },
+  "cheonsal-calculator": { title: "천살 계산기", category: "사주", audience: "생년월일·출생시간 기준 천살 여부를 확인하려는 사용자", description: "생년월일·출생시간으로 천살 여부를 계산합니다.", family: "saju-sal" },
+  "nyeonsal-calculator": { title: "년살 계산기", category: "사주", audience: "생년월일·출생시간 기준 년살과 도화살 위치를 확인하려는 사용자", description: "생년월일·출생시간으로 년살(도화살) 위치를 계산합니다.", family: "saju-sal" },
+  "wolsal-calculator": { title: "월살 계산기", category: "사주", audience: "생년월일·출생시간 기준 월살 위치를 확인하려는 사용자", description: "생년월일·출생시간으로 월살 위치를 계산합니다.", family: "saju-sal" },
+  "mangsinsal-calculator": { title: "망신살 계산기", category: "사주", audience: "생년월일·출생시간 기준 망신살 위치를 확인하려는 사용자", description: "생년월일·출생시간으로 망신살 위치를 계산합니다.", family: "saju-sal" },
+  "yukhaesal-calculator": { title: "육해살 계산기", category: "사주", audience: "생년월일·출생시간 기준 육해살 위치를 확인하려는 사용자", description: "생년월일·출생시간으로 육해살 위치를 계산합니다.", family: "saju-sal" },
+  "munchang-gwiin-calculator": { title: "문창귀인 계산기", category: "사주", audience: "생년월일시 기준 문창귀인 여부와 위치를 확인하려는 사용자", description: "생년월일시로 문창귀인 여부와 위치를 확인합니다.", family: "saju-gwiin" },
+  "hwang-eun-daesa-calculator": { title: "황은대사 계산기", category: "사주", audience: "생년월일시 기준 황은대사 여부와 위치를 확인하려는 사용자", description: "생년월일시로 황은대사 여부와 위치를 확인합니다.", family: "saju-gwiin" },
+  "hakdang-gwiin-calculator": { title: "학당귀인 계산기", category: "사주", audience: "생년월일시 기준 학당귀인 여부와 위치를 확인하려는 사용자", description: "생년월일시로 학당귀인 여부와 위치를 확인합니다.", family: "saju-gwiin" },
+  "cheonju-gwiin-calculator": { title: "천주귀인 계산기", category: "사주", audience: "생년월일시 기준 천주귀인 여부와 위치를 확인하려는 사용자", description: "생년월일시로 천주귀인 여부와 위치를 확인합니다.", family: "saju-gwiin" },
+  "cheoneul-gwiin-calculator": { title: "천을귀인 계산기", category: "사주", audience: "생년월일시 기준 천을귀인 여부와 위치를 확인하려는 사용자", description: "생년월일시로 천을귀인 여부와 위치를 확인합니다.", family: "saju-gwiin" },
+  "cheondeok-gwiin-calculator": { title: "천덕귀인 계산기", category: "사주", audience: "월지 기준 천덕귀인 여부와 위치를 확인하려는 사용자", description: "월지 기준 천덕귀인 여부와 위치를 확인합니다.", family: "saju-gwiin" },
+  "woldeok-gwiin-calculator": { title: "월덕귀인 계산기", category: "사주", audience: "생년월일·출생시간 기준 월덕귀인 위치를 확인하려는 사용자", description: "생년월일·출생시간으로 월덕귀인 위치를 확인합니다.", family: "saju-gwiin" },
+  "bokseong-gwiin-calculator": { title: "복성귀인 계산기", category: "사주", audience: "일간별 복성귀인 지지와 위치를 확인하려는 사용자", description: "생년월일과 출생시간으로 일간을 구하고, 일간별 복성귀인 지지가 연지·월지·일지·시지 중 어디에 있는지 확인합니다.", family: "saju-gwiin" },
+  "mungok-gwiin-calculator": { title: "문곡귀인 계산기", category: "사주", audience: "생년월일시 기준 문곡귀인 여부와 위치를 확인하려는 사용자", description: "생년월일시로 문곡귀인 여부와 위치를 확인합니다.", family: "saju-gwiin" },
+  "gwangwi-hakgwan-calculator": { title: "관귀학관 계산기", category: "사주", audience: "생년월일 기준 관귀학관 위치를 확인하려는 사용자", description: "생년월일로 사주 관귀학관 위치를 계산합니다.", family: "saju-gwiin" }
 };
 
 const FAMILY_PROFILES = {
@@ -116,6 +172,13 @@ const FAMILY_PROFILES = {
     faqs: ["생활비는 작은 항목 누락이 누적되면 차이가 커집니다.", "비교 기준 월이 다르면 절감 효과가 왜곡됩니다."],
     closing: "생활비 계산은 합계보다 항목 구조를 드러내는 데 더 큰 가치가 있습니다."
   },
+  "family-law": {
+    keywords: ["산정 기준", "소득 비율", "자녀 복리"],
+    checkpoints: ["부모 합산 세전 월소득을 먼저 확인합니다.", "양육자와 비양육자를 구분합니다.", "자녀 나이와 자녀 수 보정을 함께 봅니다."],
+    documents: ["소득 자료", "자녀 나이 확인 자료", "양육비 협의 메모"],
+    faqs: ["기준표 금액은 참고자료이며 실제 협의나 법원 판단과 달라질 수 있습니다.", "치료비와 교육비 같은 특별 비용은 별도로 검토해야 합니다."],
+    closing: "양육비 계산은 확정액을 단정하기보다 협의 전에 기준 범위와 분담 구조를 정리하는 용도로 쓰는 것이 좋습니다."
+  },
   "consumer-cost": {
     keywords: ["실구매가", "수수료", "할인 효과"],
     checkpoints: ["정가 기준과 실결제 기준을 나눕니다.", "수수료 포함 총지출을 봅니다.", "환율·할인율 같은 변동값은 시점 기준을 맞춥니다."],
@@ -150,6 +213,90 @@ const FAMILY_PROFILES = {
     documents: ["성적표", "수강 계획", "학점 기준표"],
     faqs: ["과목별 학점 차이가 평균에 크게 작용합니다.", "재수강 반영 규칙은 학교마다 다를 수 있습니다."],
     closing: "학업 계산기는 결과 확인보다 다음 학기 목표를 역산하는 데 더 실용적입니다."
+  },
+  "game-probability": {
+    keywords: ["성공 확률", "시도 횟수", "기대값"],
+    checkpoints: ["1회 확률과 누적 확률을 구분합니다.", "천장·픽업·보정 규칙이 있는지 확인합니다.", "예상 비용은 확정 지출이 아니라 기대값으로 봅니다."],
+    documents: ["게임 내 확률표", "뽑기 횟수 기록", "예산 메모"],
+    faqs: ["확률이 높아 보여도 실패 가능성은 항상 남습니다.", "게임별 천장 규칙이 있으면 단순 독립 시행 결과와 달라질 수 있습니다."],
+    closing: "게임 확률 계산은 결과를 보장하는 도구가 아니라 시도 횟수와 비용의 감을 잡는 참고값으로 보는 편이 맞습니다."
+  },
+  "game-economy": {
+    keywords: ["게임 재화", "수수료", "실수령액"],
+    checkpoints: ["게임 내 표시 단위와 입력 단위를 맞춥니다.", "이벤트·쿠폰·멤버십 적용 여부를 분리합니다.", "최종 결제나 판매 전 게임 화면의 수령액을 다시 확인합니다."],
+    documents: ["게임 내 가격표", "쿠폰 조건", "거래 또는 판매 기록"],
+    faqs: ["게임 재화 정책은 이벤트와 업데이트에 따라 바뀔 수 있습니다.", "표면 금액보다 수수료와 할인 적용 뒤의 실제 수령액을 봐야 합니다."],
+    closing: "게임 재화 계산은 표시 금액보다 실제 결제액과 수령액을 같은 기준으로 맞추는 데 의미가 있습니다."
+  },
+  "game-progress": {
+    keywords: ["성장 목표", "파밍 시간", "자원 소모"],
+    checkpoints: ["현재 상태와 목표 상태를 같은 단위로 입력합니다.", "버프·부스트·파티 여부를 따로 표시합니다.", "실제 플레이 루트에 따라 결과가 달라질 수 있음을 감안합니다."],
+    documents: ["현재 레벨·재화 기록", "업그레이드 조건", "플레이 시간 기록"],
+    faqs: ["파밍 효율은 서버, 장비, 루트에 따라 크게 달라집니다.", "계산 결과는 목표까지의 대략적인 계획표로 쓰는 것이 좋습니다."],
+    closing: "게임 성장 계산은 정확한 예언보다 목표까지 남은 시간과 자원 규모를 정리하는 데 더 유용합니다."
+  },
+  "game-combat": {
+    keywords: ["공격 속도", "쿨타임", "브레이크포인트"],
+    checkpoints: ["캐릭터·무기·스킬 조건을 먼저 고정합니다.", "장비 옵션과 스킬 보정이 중복 적용되는지 확인합니다.", "다음 효율 구간까지 필요한 수치를 따로 봅니다."],
+    documents: ["캐릭터 빌드", "장비 옵션", "스킬 설명"],
+    faqs: ["같은 수치라도 캐릭터와 무기 조건에 따라 체감 효율이 달라질 수 있습니다.", "브레이크포인트형 계산은 다음 구간 도달 여부가 특히 중요합니다."],
+    closing: "전투 수치 계산은 총합보다 다음 효율 구간까지 얼마나 남았는지를 보는 데 강점이 있습니다."
+  },
+  "game-sensitivity": {
+    keywords: ["DPI", "인게임 감도", "cm/360"],
+    checkpoints: ["같은 게임 안에서 비교하는지 먼저 확인합니다.", "마우스 가속과 포인터 보정 설정을 맞춥니다.", "변환 후 훈련장이나 실제 플레이에서 미세 조정합니다."],
+    documents: ["현재 DPI", "현재 인게임 감도", "목표 cm/360 또는 eDPI"],
+    faqs: ["eDPI가 같아도 게임 엔진과 FOV가 다르면 체감은 달라질 수 있습니다.", "DPI를 바꾸면 같은 eDPI를 유지하도록 인게임 감도를 다시 맞춰야 합니다."],
+    closing: "감도 계산은 한 번에 정답을 찾기보다 기준 감도를 보존하고 비교하는 출발점으로 쓰는 것이 좋습니다."
+  },
+  "game-performance": {
+    keywords: ["승률", "전적", "목표 승수"],
+    checkpoints: ["승·무·패 집계 기준을 통일합니다.", "무승부 포함 승률과 제외 승률을 구분합니다.", "목표 승률은 앞으로의 경기 가정에 민감하다는 점을 봅니다."],
+    documents: ["전적 기록", "랭크 목표", "승점 규칙"],
+    faqs: ["목표 승률까지 필요한 승수는 앞으로 모두 이긴다는 가정의 최소값입니다.", "MMR, 티어 보정, 연승 보너스는 게임마다 다르게 적용됩니다."],
+    closing: "전적 계산은 현재 위치와 목표까지 필요한 흐름을 빠르게 점검하는 용도에 적합합니다."
+  },
+  "game-fun": {
+    keywords: ["재미용 점수", "캐릭터 정보", "오늘의 추천"],
+    checkpoints: ["결과를 확정 판단보다 재미 요소로 봅니다.", "캐릭터명과 날짜 입력 기준을 통일합니다.", "실제 플레이 선택은 장비와 상황을 함께 고려합니다."],
+    documents: ["캐릭터명", "생성일", "오늘 플레이 목표"],
+    faqs: ["재미용 계산 결과가 실제 드롭이나 강화 결과를 보장하지 않습니다.", "같은 결과라도 플레이 상황에 따라 해석은 달라질 수 있습니다."],
+    closing: "게임 운세형 계산은 플레이 전 가볍게 분위기를 잡는 참고 콘텐츠로 즐기는 편이 좋습니다."
+  },
+  "saju-core": {
+    keywords: ["생년월일시", "간지", "오행"],
+    checkpoints: ["양력·음력 입력 기준을 먼저 확인합니다.", "출생시간이 필요한 계산인지 구분합니다.", "입춘 기준이 적용되는 항목은 기준 연도를 따로 봅니다."],
+    documents: ["생년월일", "출생시간", "양력·음력 기준"],
+    faqs: ["사주 계산은 날짜 기준이 달라지면 결과가 달라질 수 있습니다.", "출생시간을 모르면 시주가 필요한 항목은 참고값으로만 보는 편이 좋습니다."],
+    closing: "사주 기본 계산은 해석보다 먼저 날짜 기준과 네 기둥의 입력 조건을 정확히 맞추는 것이 중요합니다."
+  },
+  "saju-fortune": {
+    keywords: ["운세 키워드", "연도 기준", "상징 해석"],
+    checkpoints: ["확인하려는 기준 연도를 고정합니다.", "상징 키워드는 단정이 아니라 참고로 봅니다.", "생일·상대 생일 같은 입력값을 정확히 맞춥니다."],
+    documents: ["생년월일", "확인 연도", "상대 생일"],
+    faqs: ["운세 키워드는 미래를 확정하는 값이 아닙니다.", "연도 기준과 입춘 기준을 혼동하면 해석 방향이 달라질 수 있습니다."],
+    closing: "운세형 계산은 결론을 단정하기보다 현재 시기와 상징 키워드를 가볍게 정리하는 데 알맞습니다."
+  },
+  "saju-sal": {
+    keywords: ["신살 위치", "지지 기준", "해석 범위"],
+    checkpoints: ["연지·월지·일지·시지 중 어느 위치를 보는지 확인합니다.", "출생시간이 필요한 항목은 시간을 함께 입력합니다.", "신살 하나만으로 전체 사주를 단정하지 않습니다."],
+    documents: ["생년월일시", "간지표", "확인하려는 신살"],
+    faqs: ["신살은 사주 전체 구조 속에서 참고하는 보조 기준입니다.", "같은 신살도 위치와 조합에 따라 해석이 달라질 수 있습니다."],
+    closing: "신살 계산은 특정 글자나 위치를 찾는 도구로 쓰고, 전체 해석은 다른 요소와 함께 보는 편이 좋습니다."
+  },
+  "saju-gwiin": {
+    keywords: ["귀인 조건", "일간", "지지 위치"],
+    checkpoints: ["일간 기준인지 월지 기준인지 먼저 봅니다.", "연지·월지·일지·시지 위치를 나눠 확인합니다.", "귀인 여부만으로 전체 운을 단정하지 않습니다."],
+    documents: ["생년월일시", "일간 정보", "지지 위치표"],
+    faqs: ["귀인은 사주 해석에서 참고하는 상징 중 하나입니다.", "출생시간이 바뀌면 시지 위치가 달라져 결과가 달라질 수 있습니다."],
+    closing: "귀인 계산은 조건에 맞는 글자와 위치를 확인하는 용도이며, 해석은 사주 전체 흐름과 함께 보는 것이 자연스럽습니다."
+  },
+  tarot: {
+    keywords: ["탄생 카드", "메이저 아르카나", "생년월일"],
+    checkpoints: ["양력·음력 생일 기준을 맞춥니다.", "카드 번호를 줄이는 과정을 함께 확인합니다.", "키워드는 자기성찰용 참고로 봅니다."],
+    documents: ["생년월일", "양력·음력 기준", "탄생 카드 결과"],
+    faqs: ["타로 탄생 카드는 미래를 단정하기보다 상징 키워드를 보는 방식입니다.", "음력 생일은 윤달 여부에 따라 양력 변환 결과가 달라질 수 있습니다."],
+    closing: "타로 탄생 카드 계산은 생일 숫자를 상징 카드로 연결해 성향과 키워드를 가볍게 살펴보는 도구입니다."
   }
 };
 
@@ -588,6 +735,7 @@ export function buildAutoBlogDraft(calculatorSlug, templateKey = "guide", option
     slug,
     excerpt: normalizeAutoDraftText(buildExcerpt(metaWithSlug, profile, templateKey)),
     body_md: normalizeAutoDraftText(buildBody(metaWithSlug, profile, templateKey, relatedCalculators)),
+    coverImageUrl: `/api/blog-image/${slug}.svg`,
     calculatorSlug,
     tags: customTags.length > 0
       ? customTags

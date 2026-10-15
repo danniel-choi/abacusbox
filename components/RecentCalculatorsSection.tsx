@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/components/LanguageProvider";
 import { calculators, type CalculatorSlug } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon } from "@/lib/calculator-directory";
 
@@ -25,6 +26,7 @@ function readRecentSlugs(): CalculatorSlug[] {
 }
 
 export function RecentCalculatorsSection() {
+  const { t } = useLanguage();
   const [recentSlugs, setRecentSlugs] = useState<CalculatorSlug[]>(() => readRecentSlugs());
 
   useEffect(() => {
@@ -59,8 +61,8 @@ export function RecentCalculatorsSection() {
       <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel">
         <div className="section-heading">
           <div>
-            <p className="text-sm font-extrabold text-brand">최근 사용</p>
-            <h2 className="mt-2 text-2xl font-extrabold text-ink md:text-3xl">이어서 계산할 수 있습니다.</h2>
+            <p className="text-sm font-extrabold text-brand">{t("recent.used")}</p>
+            <h2 className="mt-2 text-2xl font-extrabold text-ink md:text-3xl">{t("recent.continue")}</h2>
           </div>
           <button
             type="button"
@@ -70,7 +72,7 @@ export function RecentCalculatorsSection() {
             }}
             className="text-sm font-extrabold text-slate-500 transition hover:text-brand"
           >
-            기록 지우기
+            {t("recent.clear")}
           </button>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -90,7 +92,7 @@ export function RecentCalculatorsSection() {
                 </div>
                 <h3 className="mt-4 text-base font-extrabold text-ink">{calculator.title}</h3>
                 <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{calculator.description}</p>
-                <span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-brand">이어서 계산하기 <span>↗</span></span>
+                <span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-brand">{t("recent.calculate")} <span>↗</span></span>
               </Link>
             );
           })}

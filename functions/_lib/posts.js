@@ -6,6 +6,7 @@ const PUBLIC_POST_FIELDS = `
   p.title,
   p.excerpt,
   p.body_md,
+  p.cover_image_url,
   p.published_at,
   p.featured,
   p.view_count,

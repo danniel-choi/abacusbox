@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/components/LanguageProvider";
 import type { BlogPost } from "@/lib/content";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 const ROLLING_INTERVAL_MS = 4500;
 
 export function HomeBlogRoller({ posts }: Props) {
+  const { t } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export function HomeBlogRoller({ posts }: Props) {
   if (posts.length === 0) {
     return (
       <div className="mt-6 rounded-[24px] border border-dashed border-line bg-paper px-5 py-8 text-sm font-semibold text-slate-500">
-        아직 노출할 블로그 글이 없습니다.
+        {t("blog.loading")}
       </div>
     );
   }
@@ -43,7 +45,7 @@ export function HomeBlogRoller({ posts }: Props) {
           <div className="flex flex-wrap items-center gap-2 text-xs font-extrabold">
             <span className="rounded-full bg-brand/15 px-3 py-1 text-brand">{activePost.category}</span>
             <span className="rounded-full bg-white/8 px-3 py-1 text-white/72">{formatDate(activePost.publishedAt)}</span>
-            <span className="rounded-full bg-white/8 px-3 py-1 text-white/72">읽는 시간 {activePost.readTime}</span>
+            <span className="rounded-full bg-white/8 px-3 py-1 text-white/72">{t("blog.readTime")} {activePost.readTime}</span>
           </div>
           <h3 className="mt-5 max-w-2xl text-2xl font-extrabold leading-tight text-white md:text-[2rem]">
             {activePost.title}
@@ -63,7 +65,7 @@ export function HomeBlogRoller({ posts }: Props) {
               href={`/blog/${encodeURIComponent(activePost.slug)}`}
               className="text-sm font-extrabold text-brand transition hover:text-white"
             >
-              글 보러 가기 <span aria-hidden="true">↗</span>
+              {t("hub.relatedBlog")} <span aria-hidden="true">↗</span>
             </Link>
             <div className="flex items-center gap-2">
               <button
@@ -72,7 +74,7 @@ export function HomeBlogRoller({ posts }: Props) {
                   setActiveIndex((current) => (current - 1 + posts.length) % posts.length);
                 }}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/6 text-sm font-extrabold text-white/82 transition hover:bg-white/12"
-                aria-label="이전 글 보기"
+                aria-label={t("blog.previous")}
               >
                 ←
               </button>
@@ -82,7 +84,7 @@ export function HomeBlogRoller({ posts }: Props) {
                   setActiveIndex((current) => (current + 1) % posts.length);
                 }}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/6 text-sm font-extrabold text-white/82 transition hover:bg-white/12"
-                aria-label="다음 글 보기"
+                aria-label={t("blog.next")}
               >
                 →
               </button>

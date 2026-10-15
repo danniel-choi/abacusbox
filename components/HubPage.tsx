@@ -1,11 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { AdSenseAd } from "@/components/AdSenseAd";
+import { useLanguage } from "@/components/LanguageProvider";
 import { getCalculatorsByGroup } from "@/lib/calculator-directory";
 import { calculators, type CalculatorConfig } from "@/lib/calculators";
 import { blogPosts, type BlogPost } from "@/lib/content";
 import type { HubContent } from "@/lib/hub-content";
 
 export function HubPage({ hub }: { hub: HubContent }) {
+  const { t } = useLanguage();
   const groupCalculators = getCalculatorsByGroup(hub.group);
   const featured = hub.featuredSlugs
     .map((slug) => calculators.find((calculator) => calculator.slug === slug))
@@ -22,10 +26,10 @@ export function HubPage({ hub }: { hub: HubContent }) {
         <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-white/72 md:text-base">{hub.description}</p>
         <div className="mt-7 flex flex-wrap gap-3">
           <Link href={`/calculators?group=${hub.group}`} className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72]">
-            계산기 전체 보기
+            {t("hub.calculators")}
           </Link>
           <Link href="/blog" className="rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand">
-            관련 글 보기
+            {t("hub.relatedBlog")}
           </Link>
         </div>
       </section>
@@ -47,11 +51,11 @@ export function HubPage({ hub }: { hub: HubContent }) {
         <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-sm font-extrabold text-brand">추천 계산기</p>
-              <h2 className="mt-2 text-2xl font-extrabold text-ink">먼저 확인하면 좋은 도구</h2>
+              <p className="text-sm font-extrabold text-brand">{t("hub.featured")}</p>
+              <h2 className="mt-2 text-2xl font-extrabold text-ink">{t("hub.featuredTitle")}</h2>
             </div>
             <Link href={`/calculators?group=${hub.group}`} className="text-sm font-extrabold text-brand">
-              {groupCalculators.length}개 전체 보기
+              {groupCalculators.length}{t("hub.allCount")}
             </Link>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -70,8 +74,8 @@ export function HubPage({ hub }: { hub: HubContent }) {
         </div>
 
         <aside className="rounded-[28px] bg-navy p-6 text-white shadow-panel">
-          <p className="text-sm font-extrabold text-brand">점검 체크리스트</p>
-          <h2 className="mt-2 text-2xl font-extrabold">계산 전 확인할 것</h2>
+          <p className="text-sm font-extrabold text-brand">{t("hub.checklist")}</p>
+          <h2 className="mt-2 text-2xl font-extrabold">{t("hub.checklistTitle")}</h2>
           <div className="mt-5 grid gap-3">
             {hub.checklist.map((item) => (
               <div key={item} className="rounded-2xl border border-white/10 bg-white/6 px-4 py-4 text-sm font-semibold leading-6 text-white/82">
@@ -89,11 +93,11 @@ export function HubPage({ hub }: { hub: HubContent }) {
       <section className="mt-8 rounded-[28px] border border-line bg-white p-6 shadow-panel">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-extrabold text-brand">관련 해설</p>
-            <h2 className="mt-2 text-2xl font-extrabold text-ink">계산 결과를 이해하는 글</h2>
+            <p className="text-sm font-extrabold text-brand">{t("hub.related")}</p>
+            <h2 className="mt-2 text-2xl font-extrabold text-ink">{t("hub.relatedTitle")}</h2>
           </div>
           <Link href="/blog" className="text-sm font-extrabold text-brand">
-            블로그 전체 보기
+            {t("hub.blogAll")}
           </Link>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2">

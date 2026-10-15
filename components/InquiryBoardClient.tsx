@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/components/LanguageProvider";
 
 type InquiryItem = {
   id: number;
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export function InquiryBoardClient({ fallbackItems = [] }: Props) {
+  const { locale, t } = useLanguage();
   const [items, setItems] = useState<InquiryItem[]>(fallbackItems);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
         setError(null);
       } catch {
         if (!active) return;
-        setError("문의 게시판 연결이 없어 기본 목록만 표시합니다.");
+        setError(t("contact.connectionError"));
       } finally {
         if (active) setLoading(false);
       }
@@ -55,7 +57,7 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [t]);
 
   async function handleSubmit() {
     const trimmedAuthor = authorName.trim();
@@ -63,7 +65,7 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
     const trimmedBody = body.trim();
 
     if (!trimmedAuthor || !trimmedTitle || !trimmedBody) {
-      setNotice("이름, 제목, 문의 내용을 모두 입력하세요.");
+      setNotice(t("contact.required"));
       return;
     }
 
@@ -101,9 +103,9 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
       setAuthorName("");
       setTitle("");
       setBody("");
-      setNotice("문의가 등록되었습니다.");
+      setNotice(t("contact.success"));
     } catch {
-      setNotice("문의 등록에 실패했습니다.");
+      setNotice(t("contact.failure"));
     } finally {
       setSubmitting(false);
     }
@@ -114,15 +116,15 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
       <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-extrabold text-brand">문의 게시판</p>
-            {loading && <p className="mt-2 text-sm font-semibold text-slate-500">문의 목록을 불러오는 중입니다.</p>}
+            <p className="text-sm font-extrabold text-brand">{t("contact.board")}</p>
+            {loading && <p className="mt-2 text-sm font-semibold text-slate-500">{t("contact.listLoading")}</p>}
             {!loading && error && <p className="mt-2 text-sm font-semibold text-amber-600">{error}</p>}
           </div>
         </div>
 
         {items.length === 0 ? (
           <div className="mt-6 rounded-[24px] border border-dashed border-line bg-paper p-10 text-center text-sm font-semibold text-slate-500">
-            아직 등록된 문의가 없습니다.
+            {t("contact.empty")}
           </div>
         ) : (
           <div className="mt-6 grid gap-4">
@@ -133,14 +135,14 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
                 className="rounded-[24px] border border-line bg-white p-6 shadow-panel transition hover:-translate-y-1 hover:border-brand hover:shadow-float"
               >
                 <div className="flex flex-wrap items-center gap-2 text-sm font-extrabold">
-                  <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">문의</span>
-                  {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at)}</span>}
+                  <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{t("contact.register")}</span>
+                  {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at, locale)}</span>}
                   {item.author_name && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{item.author_name}</span>}
                 </div>
                 <h2 className="mt-4 text-xl font-extrabold text-ink sm:text-2xl">{item.title}</h2>
                 <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{item.excerpt || ""}</p>
                 <div className="mt-4 flex gap-4 text-sm font-bold text-slate-500">
-                  <span>조회 {item.view_count}</span>
+                  <span>{t("content.views")} {item.view_count}</span>
                 </div>
               </Link>
             ))}
@@ -149,10 +151,10 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
       </div>
 
       <aside className="rounded-[28px] border border-line bg-white p-6 shadow-panel">
-        <p className="text-sm font-extrabold text-brand">문의 등록</p>
-          <h2 className="mt-2 text-xl font-extrabold text-ink sm:text-2xl">게시판에 바로 남기기</h2>
+        <p className="text-sm font-extrabold text-brand">{t("contact.register")}</p>
+          <h2 className="mt-2 text-xl font-extrabold text-ink sm:text-2xl">{t("contact.registerTitle")}</h2>
         <p className="mt-3 text-sm font-medium leading-7 text-slate-600">
-          계산 기준 오류, 기능 요청, 제휴 문의를 게시판 형태로 등록할 수 있습니다.
+          {t("contact.registerDescription")}
         </p>
 
           <div className="mt-6 grid gap-3">
@@ -160,14 +162,14 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
             value={authorName}
             onChange={(event) => setAuthorName(event.target.value)}
             maxLength={50}
-            placeholder="이름"
+            placeholder={t("contact.name")}
             className="h-12 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand"
           />
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             maxLength={120}
-            placeholder="문의 제목"
+            placeholder={t("contact.subject")}
             className="h-12 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand"
           />
           <textarea
@@ -175,18 +177,18 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
             onChange={(event) => setBody(event.target.value)}
             maxLength={5000}
             rows={8}
-            placeholder="문의 내용을 입력하세요."
+            placeholder={t("contact.bodyPlaceholder")}
             className="rounded-2xl border border-line bg-paper px-4 py-3 font-medium text-ink outline-none transition focus:border-brand"
           />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs font-semibold text-slate-500">등록한 문의는 같은 브라우저의 작성자와 관리자만 볼 수 있습니다.</p>
+            <p className="text-xs font-semibold text-slate-500">{t("contact.visibility")}</p>
             <button
               type="button"
               onClick={handleSubmit}
               disabled={submitting}
               className="w-full rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72] disabled:opacity-60 sm:w-auto"
             >
-              {submitting ? "등록 중..." : "문의 등록"}
+              {submitting ? t("contact.submitting") : t("contact.submit")}
             </button>
           </div>
           {notice && <p className="text-sm font-semibold text-slate-600">{notice}</p>}
@@ -196,10 +198,10 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
   );
 }
 
-function formatDate(value: string) {
+function formatDate(value: string, locale: string = "ko") {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ko-KR");
+  return date.toLocaleDateString(locale === "ja" ? "ja-JP" : locale === "en" ? "en-US" : "ko-KR");
 }
 
 function getInquiryToken() {

@@ -19,6 +19,9 @@ const scheduler = {
           draftCreated: result.draftCreated,
           draftSlug: result.draftSlug,
           autoPostAction: result.autoPostAction,
+          calculatorIdeasCreated: result.calculatorIdeasCreated,
+          calculatorIdeasPlanned: result.calculatorIdeasPlanned,
+          calculatorIdeaSeed: result.calculatorIdeaSeed,
           duplicateReason: result.duplicateReason
         })
       );

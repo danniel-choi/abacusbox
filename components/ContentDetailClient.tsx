@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useLanguage } from "@/components/LanguageProvider";
+import type { TranslationKey } from "@/lib/i18n";
 
 type Tag = {
   slug: string;
@@ -45,11 +47,12 @@ type Props = {
 };
 
 export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode }: Props) {
+  const { locale, t } = useLanguage();
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug") || "";
   const [item, setItem] = useState<DetailItem | null>(findFallback(fallbackItems, slug));
   const [loading, setLoading] = useState(Boolean(slug));
-  const [error, setError] = useState<string | null>(slug ? null : "slug 파라미터가 없습니다.");
+  const [error, setError] = useState<string | null>(slug ? null : t("detail.noSlug"));
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState<string | null>(null);
@@ -70,7 +73,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
       if (!slug) {
         setItem(null);
         setLoading(false);
-        setError("slug 파라미터가 없습니다.");
+        setError(t("detail.noSlug"));
         return;
       }
 
@@ -89,7 +92,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
         if (!active) return;
         if (mode === "inquiry" && String(cause).includes("forbidden")) {
           setItem(null);
-          setError("이 문의는 등록한 브라우저 또는 관리자만 볼 수 있습니다.");
+          setError(t("detail.forbidden"));
           return;
         }
         const fallback = findFallback(fallbackItems, slug);
@@ -98,7 +101,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
           setError(null);
         } else {
           setItem(null);
-          setError("콘텐츠를 찾을 수 없습니다.");
+          setError(t("detail.notFound"));
         }
       } finally {
         if (active) setLoading(false);
@@ -109,7 +112,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
     return () => {
       active = false;
     };
-  }, [apiBasePath, fallbackItems, mode, slug]);
+  }, [apiBasePath, fallbackItems, mode, slug, t]);
 
   useEffect(() => {
     if (!commentPostId) {
@@ -132,7 +135,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
       } catch {
         if (!active) return;
         setComments([]);
-        setCommentsError("댓글 API 연결 전이라 목록을 표시하지 못했습니다.");
+        setCommentsError(t("detail.commentApiError"));
       } finally {
         if (active) setCommentsLoading(false);
       }
@@ -142,13 +145,13 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
     return () => {
       active = false;
     };
-  }, [commentPostId]);
+  }, [commentPostId, t]);
 
   const title = useMemo(() => {
-    if (mode === "blog") return "블로그";
-    if (mode === "community") return "커뮤니티";
-    return "문의";
-  }, [mode]);
+    if (mode === "blog") return t("detail.blog");
+    if (mode === "community") return t("detail.community");
+    return t("detail.inquiry");
+  }, [mode, t]);
   const liked = useMemo(() => {
     if (likedOverride !== null && likedOverride.postId === communityPostId) return likedOverride.value;
     if (!communityPostId || typeof window === "undefined") return false;
@@ -166,7 +169,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
     const trimmedBody = commentBody.trim();
 
     if (!trimmedName || !trimmedBody) {
-      setCommentNotice("이름과 댓글 내용을 입력하세요.");
+      setCommentNotice(t("detail.commentRequired"));
       return;
     }
 
@@ -188,10 +191,10 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
       setCommentBody("");
-      setCommentNotice("댓글이 접수되었습니다. 승인 후 노출됩니다.");
+      setCommentNotice(t("detail.commentSuccess"));
       setItem((current) => (current ? { ...current, comment_count: current.comment_count + 1 } : current));
     } catch {
-      setCommentNotice("댓글 등록에 실패했습니다.");
+      setCommentNotice(t("detail.commentFailure"));
     } finally {
       setCommentSubmitting(false);
     }
@@ -231,7 +234,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
           : current
       );
     } catch {
-      setCommentNotice("좋아요 처리에 실패했습니다.");
+      setCommentNotice(t("detail.likeFailure"));
     } finally {
       setLikeLoading(false);
     }
@@ -241,17 +244,17 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
     <main className="mx-auto w-full max-w-4xl min-w-0 px-4 py-8 sm:py-12">
       <article className="readable-content w-full max-w-full min-w-0 overflow-hidden rounded-[28px] border border-line bg-white p-5 shadow-panel sm:p-7">
         <Link href={listPath} className="text-sm font-extrabold text-brand">
-          ← {title} 목록
+          ← {title} {t("detail.list")}
         </Link>
 
-        {loading && <p className="mt-6 text-sm font-semibold text-slate-500">콘텐츠를 불러오는 중입니다.</p>}
+        {loading && <p className="mt-6 text-sm font-semibold text-slate-500">{t("detail.loading")}</p>}
         {!loading && error && <p className="mt-6 text-sm font-semibold text-amber-600">{error}</p>}
 
         {!loading && item && (
           <>
             <div className="mt-5 flex flex-wrap gap-2 text-sm font-extrabold">
-              <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{badgeLabel(item, mode)}</span>
-              {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at)}</span>}
+              <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{badgeLabel(item, mode, t)}</span>
+              {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at, locale)}</span>}
               {item.author_name && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{item.author_name}</span>}
             </div>
 
@@ -261,9 +264,9 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
             {mode === "community" && (
               <>
                 <div className="mt-6 flex flex-wrap items-center gap-4 text-sm font-bold text-slate-500">
-                  <span>댓글 {item.comment_count}</span>
-                  <span>좋아요 {item.like_count}</span>
-                  <span>조회 {item.view_count}</span>
+                  <span>{t("detail.comments")} {item.comment_count}</span>
+                  <span>{t("detail.likes")} {item.like_count}</span>
+                  <span>{t("detail.views")} {item.view_count}</span>
                 </div>
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                   <button
@@ -274,13 +277,13 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
                       liked ? "bg-brand text-white" : "border border-brand text-brand hover:bg-brand hover:text-white"
                     } ${likeLoading ? "opacity-60" : ""}`}
                   >
-                    {likeLoading ? "처리 중..." : liked ? "좋아요 취소" : "좋아요"}
+                    {likeLoading ? t("detail.processing") : liked ? t("detail.cancelLike") : t("detail.likes")}
                   </button>
                   <Link
                     href="#comments"
                     className="w-full rounded-full border border-line px-5 py-3 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand sm:w-auto"
                   >
-                    댓글 보기
+                    {t("detail.viewComments")}
                   </Link>
                 </div>
               </>
@@ -288,10 +291,10 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
 
             {mode === "blog" && (
               <div className="mt-6 flex flex-wrap items-center gap-4 text-sm font-bold text-slate-500">
-                <span>댓글 {item.comment_count}</span>
-                <span>조회 {item.view_count}</span>
+                <span>{t("detail.comments")} {item.comment_count}</span>
+                <span>{t("detail.views")} {item.view_count}</span>
                 <Link href="#comments" className="text-brand transition hover:text-ink">
-                  댓글 쓰기
+                  {t("detail.writeComment")}
                 </Link>
               </div>
             )}
@@ -314,7 +317,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
 
             {item.calculators && item.calculators.length > 0 && (
               <div className="mt-8 rounded-2xl bg-paper p-5">
-                <p className="text-sm font-extrabold text-ink">연결 계산기</p>
+                <p className="text-sm font-extrabold text-ink">{t("detail.relatedCalculators")}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {item.calculators.map((slugItem) => (
                     <Link
@@ -331,15 +334,15 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
 
             {commentsEnabled && (
               <section id="comments" className="mt-8 rounded-[24px] border border-line bg-paper p-5">
-                <h2 className="text-2xl font-extrabold text-ink">댓글</h2>
-                <p className="mt-2 text-sm font-semibold text-slate-500">초기 운영 단계라 승인 후 노출 방식으로 처리합니다.</p>
+                <h2 className="text-2xl font-extrabold text-ink">{t("detail.comments")}</h2>
+                <p className="mt-2 text-sm font-semibold text-slate-500">{t("detail.commentGuidance")}</p>
 
                 <div className="mt-5 grid gap-3">
                   <input
                     value={authorName}
                     onChange={(event) => setAuthorName(event.target.value)}
                     maxLength={50}
-                    placeholder="이름"
+                    placeholder={t("detail.commentName")}
                     className="h-12 rounded-2xl border border-line bg-white px-4 font-bold text-ink outline-none transition focus:border-brand"
                   />
                   <textarea
@@ -347,29 +350,29 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
                     onChange={(event) => setCommentBody(event.target.value)}
                     maxLength={5000}
                     rows={5}
-                    placeholder="댓글 내용을 입력하세요."
+                    placeholder={t("detail.commentPlaceholder")}
                     className="rounded-2xl border border-line bg-white px-4 py-3 font-medium text-ink outline-none transition focus:border-brand"
                   />
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs font-semibold text-slate-500">이름과 댓글 내용만 저장합니다.</p>
+                    <p className="text-xs font-semibold text-slate-500">{t("detail.commentPrivacy")}</p>
                     <button
                       type="button"
                       onClick={handleSubmitComment}
                       disabled={commentSubmitting}
                       className="w-full rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72] disabled:opacity-60 sm:w-auto"
                     >
-                      {commentSubmitting ? "등록 중..." : "댓글 등록"}
+                      {commentSubmitting ? t("detail.submitting") : t("detail.register")}
                     </button>
                   </div>
                   {commentNotice && <p className="text-sm font-semibold text-slate-600">{commentNotice}</p>}
                 </div>
 
                 <div className="mt-8">
-                  {commentsLoading && <p className="text-sm font-semibold text-slate-500">댓글을 불러오는 중입니다.</p>}
+                  {commentsLoading && <p className="text-sm font-semibold text-slate-500">{t("detail.commentLoading")}</p>}
                   {!commentsLoading && commentsError && <p className="text-sm font-semibold text-amber-600">{commentsError}</p>}
                   {!commentsLoading && !commentsError && comments.length === 0 && (
                     <div className="rounded-2xl border border-dashed border-line bg-white px-5 py-8 text-center text-sm font-semibold text-slate-500">
-                      아직 승인된 댓글이 없습니다.
+                      {t("detail.commentEmpty")}
                     </div>
                   )}
                   {!commentsLoading && comments.length > 0 && (
@@ -378,7 +381,7 @@ export function ContentDetailClient({ apiBasePath, listPath, fallbackItems, mode
                         <div key={comment.id} className="rounded-2xl bg-white px-5 py-4 shadow-sm">
                           <div className="flex flex-wrap items-center gap-2 text-sm">
                             <span className="font-extrabold text-ink">{comment.author_name}</span>
-                            <span className="font-semibold text-slate-400">{formatDateTime(comment.created_at)}</span>
+                            <span className="font-semibold text-slate-400">{formatDateTime(comment.created_at, locale)}</span>
                           </div>
                           <p className="mt-3 whitespace-pre-wrap text-sm font-medium leading-7 text-slate-700">{comment.body}</p>
                         </div>
@@ -411,31 +414,31 @@ function markdownToParagraphs(markdown: string) {
     .filter(Boolean);
 }
 
-function badgeLabel(item: DetailItem, mode: "blog" | "community" | "inquiry") {
-  if (mode === "blog") return item.board === "guide" ? "가이드" : "블로그";
-  if (mode === "inquiry") return "문의";
+function badgeLabel(item: DetailItem, mode: "blog" | "community" | "inquiry", t: (key: TranslationKey) => string) {
+  if (mode === "blog") return item.board === "guide" ? t("blog.contentHub") : t("detail.blog");
+  if (mode === "inquiry") return t("detail.inquiryBadge");
   switch (item.board) {
     case "qna":
-      return "질문답변";
+      return t("content.qna");
     case "case":
-      return "사례공유";
+      return t("content.case");
     case "notice":
-      return "공지";
+      return t("content.notice");
     default:
-      return "커뮤니티";
+      return t("detail.community");
   }
 }
 
-function formatDate(value: string) {
+function formatDate(value: string, locale: string = "ko") {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ko-KR");
+  return date.toLocaleDateString(locale === "ja" ? "ja-JP" : locale === "en" ? "en-US" : "ko-KR");
 }
 
-function formatDateTime(value: string) {
+function formatDateTime(value: string, locale: string = "ko") {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString("ko-KR");
+  return date.toLocaleString(locale === "ja" ? "ja-JP" : locale === "en" ? "en-US" : "ko-KR");
 }
 
 function getFingerprint() {

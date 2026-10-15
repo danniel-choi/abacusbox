@@ -45,6 +45,8 @@ export type CalculatorSlug =
   | "moving-cost"
   | "mobile-plan"
   | "seller-profit"
+  | "ad-performance-calculator"
+  | "marketing-budget-calculator"
   | "adsense-revenue"
   | "youtube-ad-revenue"
   | "military-discharge-date"
@@ -58,6 +60,7 @@ export type CalculatorSlug =
   | "vat"
   | "discount-rate"
   | "distance-calculator"
+  | "speed-distance-calculator"
   | "date-diff"
   | "dday"
   | "date-add"
@@ -103,6 +106,8 @@ export type CalculatorSlug =
   | "earned-income-tax-credit"
   | "kpass-refund"
   | "childbirth-grant"
+  | "child-support-calculator"
+  | "divorce-child-support-calculator"
   | "isa-tax"
   | "card-installment"
   | "retirement-income-tax"
@@ -119,6 +124,7 @@ export type CalculatorSlug =
   | "silver-price-calculator"
   | "auto-installment"
   | "fuel-cost"
+  | "estimated-mileage-calculator"
   | "lotto-generator"
   | "cbm-freight"
   | "subscription-revenue"
@@ -176,6 +182,15 @@ export type CalculatorSlug =
   | "bokseong-gwiin-calculator"
   | "mungok-gwiin-calculator"
   | "gwangwi-hakgwan-calculator"
+  | "orbital-period-calculator"
+  | "light-year-parsec-converter"
+  | "moon-phase-calculator"
+  | "albedo-calculator"
+  | "escape-velocity-calculator"
+  | "asteroid-close-approach-calculator"
+  | "absolute-magnitude-calculator"
+  | "apparent-magnitude-calculator"
+  | "sunrise-sunset-calculator"
   | "tarot-birth-card-calculator";
 
 export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학" | "게임" | "사주";
@@ -256,6 +271,53 @@ function monthlyLoanPayment(principal: number, annualRate: number, years: number
   const monthlyRate = annualRate / 100 / 12;
   if (monthlyRate === 0) return principal / months;
   return principal * (monthlyRate * (1 + monthlyRate) ** months) / ((1 + monthlyRate) ** months - 1);
+}
+
+const CHILD_SUPPORT_INCOME_BANDS = [
+  { label: "0~199만원", min: 0, max: 1999999 },
+  { label: "200~299만원", min: 2000000, max: 2999999 },
+  { label: "300~399만원", min: 3000000, max: 3999999 },
+  { label: "400~499만원", min: 4000000, max: 4999999 },
+  { label: "500~599만원", min: 5000000, max: 5999999 },
+  { label: "600~699만원", min: 6000000, max: 6999999 },
+  { label: "700~799만원", min: 7000000, max: 7999999 },
+  { label: "800~899만원", min: 8000000, max: 8999999 },
+  { label: "900~999만원", min: 9000000, max: 9999999 },
+  { label: "1,000~1,199만원", min: 10000000, max: 11999999 },
+  { label: "1,200만원 이상", min: 12000000, max: Infinity }
+];
+
+const CHILD_SUPPORT_AGE_BANDS = [
+  { label: "0~2세", min: 0, max: 2, minimum: 264000, amounts: [621000, 752000, 945000, 1098000, 1245000, 1401000, 1582000, 1789000, 1997000, 2095000, 2207000] },
+  { label: "3~5세", min: 3, max: 5, minimum: 268000, amounts: [631000, 759000, 949000, 1113000, 1266000, 1422000, 1598000, 1807000, 2017000, 2116000, 2245000] },
+  { label: "6~8세", min: 6, max: 8, minimum: 272000, amounts: [648000, 767000, 959000, 1140000, 1292000, 1479000, 1614000, 1850000, 2065000, 2137000, 2312000] },
+  { label: "9~11세", min: 9, max: 11, minimum: 281000, amounts: [667000, 782000, 988000, 1163000, 1318000, 1494000, 1630000, 1887000, 2137000, 2180000, 2405000] },
+  { label: "12~14세", min: 12, max: 14, minimum: 295000, amounts: [679000, 790000, 998000, 1280000, 1423000, 1598000, 1711000, 1984000, 2159000, 2223000, 2476000] },
+  { label: "15~18세", min: 15, max: 18, minimum: 319000, amounts: [703000, 957000, 1227000, 1402000, 1604000, 1794000, 1964000, 2163000, 2246000, 2540000, 2883000] }
+];
+
+function childSupportIncomeBandIndex(monthlyIncome: number) {
+  const safeIncome = Math.max(monthlyIncome, 0);
+  const index = CHILD_SUPPORT_INCOME_BANDS.findIndex((band) => safeIncome >= band.min && safeIncome <= band.max);
+  return index >= 0 ? index : CHILD_SUPPORT_INCOME_BANDS.length - 1;
+}
+
+function childSupportAgeBand(age: number) {
+  const safeAge = Math.min(Math.max(Math.floor(age), 0), 18);
+  return CHILD_SUPPORT_AGE_BANDS.find((band) => safeAge >= band.min && safeAge <= band.max) || CHILD_SUPPORT_AGE_BANDS[0];
+}
+
+function childSupportChildrenFactor(childCount: number, applyAdjustment: boolean) {
+  if (!applyAdjustment) return 1;
+  if (childCount <= 1) return 1.065;
+  if (childCount >= 3) return 0.783;
+  return 1;
+}
+
+function childSupportRegionFactor(regionType: number) {
+  if (regionType === 1) return 1.079;
+  if (regionType === 2) return 0.835;
+  return 1;
 }
 
 function equalPrincipalFirstPayment(principal: number, annualRate: number, years: number) {
@@ -1061,11 +1123,32 @@ const stemElements = ["목", "목", "화", "화", "토", "토", "금", "금", "�
 const branchElements = ["수", "토", "목", "목", "토", "화", "화", "토", "금", "금", "토", "수"];
 const elementEmoji: Record<string, string> = { 목: "🌿", 화: "🔥", 토: "⛰", 금: "⚙", 수: "💧" };
 
+const sajuMajorSolarTerms = [
+  { month: 1, day: 6, branchIndex: 1, label: "소한" },
+  { month: 2, day: 4, branchIndex: 2, label: "입춘" },
+  { month: 3, day: 6, branchIndex: 3, label: "경칩" },
+  { month: 4, day: 5, branchIndex: 4, label: "청명" },
+  { month: 5, day: 6, branchIndex: 5, label: "입하" },
+  { month: 6, day: 6, branchIndex: 6, label: "망종" },
+  { month: 7, day: 7, branchIndex: 7, label: "소서" },
+  { month: 8, day: 8, branchIndex: 8, label: "입추" },
+  { month: 9, day: 8, branchIndex: 9, label: "백로" },
+  { month: 10, day: 8, branchIndex: 10, label: "한로" },
+  { month: 11, day: 7, branchIndex: 11, label: "입동" },
+  { month: 12, day: 7, branchIndex: 0, label: "대설" }
+] as const;
+
 type SajuProfile = {
   year: number;
   month: number;
   day: number;
   hour: number;
+  minute: number;
+  solarYear: number;
+  monthTermLabel: string;
+  nearSolarTermLabel: string | null;
+  dayDateLabel: string;
+  timeKnown: boolean;
   yearStemIndex: number;
   yearBranchIndex: number;
   monthStemIndex: number;
@@ -1084,17 +1167,115 @@ function positiveMod(value: number, divisor: number) {
   return ((value % divisor) + divisor) % divisor;
 }
 
+function solarTermDate(year: number, term: (typeof sajuMajorSolarTerms)[number]) {
+  return makeUtcDate(year, term.month, term.day);
+}
+
+function isBeforeSajuDateTime(month: number, day: number, hour: number, minute: number, targetMonth: number, targetDay: number) {
+  if (month !== targetMonth) return month < targetMonth;
+  if (day !== targetDay) return day < targetDay;
+  return hour * 60 + minute < 0;
+}
+
+function getSajuMonthTerm(year: number, month: number, day: number) {
+  const current = makeUtcDate(year, month, day);
+  let selected = sajuMajorSolarTerms[sajuMajorSolarTerms.length - 1];
+  let selectedYear = year - 1;
+
+  for (const term of sajuMajorSolarTerms) {
+    if (current >= solarTermDate(year, term)) {
+      selected = term;
+      selectedYear = year;
+    }
+  }
+
+  return { ...selected, termYear: selectedYear };
+}
+
+function getNearSolarTermLabel(year: number, month: number, day: number) {
+  const current = makeUtcDate(year, month, day);
+  const candidates = [
+    ...sajuMajorSolarTerms.map((term) => ({ ...term, termYear: year - 1 })),
+    ...sajuMajorSolarTerms.map((term) => ({ ...term, termYear: year })),
+    ...sajuMajorSolarTerms.map((term) => ({ ...term, termYear: year + 1 }))
+  ];
+  const nearest = candidates
+    .map((term) => ({ term, days: Math.abs(utcDaysBetween(current, solarTermDate(term.termYear, term))) }))
+    .sort((a, b) => a.days - b.days)[0];
+
+  if (!nearest || nearest.days > 1) return null;
+  return `${nearest.term.label} 전후 ${nearest.days === 0 ? "당일" : "24시간 이내"}`;
+}
+
+function getAdjacentSolarTerm(year: number, month: number, day: number, direction: "next" | "previous") {
+  const current = makeUtcDate(year, month, day);
+  const candidates = [
+    ...sajuMajorSolarTerms.map((term) => ({ ...term, termYear: year - 1 })),
+    ...sajuMajorSolarTerms.map((term) => ({ ...term, termYear: year })),
+    ...sajuMajorSolarTerms.map((term) => ({ ...term, termYear: year + 1 }))
+  ]
+    .map((term) => ({ term, date: solarTermDate(term.termYear, term) }))
+    .filter((item) => direction === "next" ? item.date > current : item.date < current)
+    .sort((a, b) => direction === "next" ? a.date.getTime() - b.date.getTime() : b.date.getTime() - a.date.getTime());
+
+  return candidates[0] ?? null;
+}
+
+function sajuMonthOrdinalFromBranch(branchIndex: number) {
+  return positiveMod(branchIndex - 2, 12) + 1;
+}
+
+function buildDaewoonRows(profile: SajuProfile, gender: number): ResultRow[] {
+  const isYangYearStem = profile.yearStemIndex % 2 === 0;
+  const genderLabel = gender === 1 ? "남성" : gender === 2 ? "여성" : "성별 선택 안 함";
+
+  if (gender !== 1 && gender !== 2) {
+    return [
+      { label: "대운 간이표", value: "성별을 선택하면 연간 음양 기준으로 순행/역행과 대운 구간을 표시합니다." }
+    ];
+  }
+
+  const isForward = (gender === 1 && isYangYearStem) || (gender === 2 && !isYangYearStem);
+  const adjacentTerm = getAdjacentSolarTerm(profile.year, profile.month, profile.day, isForward ? "next" : "previous");
+  const birthDate = makeUtcDate(profile.year, profile.month, profile.day);
+  const termGapDays = adjacentTerm ? Math.abs(utcDaysBetween(birthDate, adjacentTerm.date)) : 0;
+  const startAge = Math.max(1, Math.round(termGapDays / 3) || 1);
+  const directionLabel = isForward ? "순행" : "역행";
+  const daewoonItems = Array.from({ length: 8 }, (_, index) => {
+    const step = isForward ? index + 1 : -(index + 1);
+    const stemIndex = positiveMod(profile.monthStemIndex + step, 10);
+    const branchIndex = positiveMod(profile.monthBranchIndex + step, 12);
+    const age = startAge + index * 10;
+    return `${age}세 ${cycleName(stemIndex, branchIndex)}`;
+  });
+
+  return [
+    { label: "대운 방향", value: `${genderLabel} · ${heavenlyStems[profile.yearStemIndex]}년(${isYangYearStem ? "양" : "음"}) 기준 ${directionLabel}`, tone: "strong" },
+    { label: "대운 시작", value: adjacentTerm ? `${startAge}세 전후 · ${adjacentTerm.term.label}까지 ${termGapDays}일 기준` : `${startAge}세 전후` },
+    { label: "대운 간이표", value: daewoonItems.slice(0, 4).join(" · ") },
+    { label: "대운 간이표 계속", value: daewoonItems.slice(4).join(" · ") },
+    { label: "대운 계산 기준", value: "생일과 다음/이전 절기 차이를 3으로 나눈 간이값입니다. 실제 대운 시작 시점은 절기 시각·출생지 보정에 따라 달라질 수 있습니다." }
+  ];
+}
+
 function getSajuProfile(values: Record<string, number>): SajuProfile {
   const date = clampDate(values.year ?? 1990, values.month ?? 1, values.day ?? 1);
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth() + 1;
   const day = date.getUTCDate();
   const hour = Math.min(Math.max(Math.floor(values.hour ?? 12), 0), 23);
-  const yearStemIndex = positiveMod(year - 4, 10);
-  const yearBranchIndex = positiveMod(year - 4, 12);
-  const monthBranchIndex = positiveMod(month + 0, 12);
-  const monthStemIndex = positiveMod(yearStemIndex * 2 + month, 10);
-  const dayDiff = Math.floor((date.getTime() - Date.UTC(2024, 0, 1)) / 86400000);
+  const minute = Math.min(Math.max(Math.floor(values.minute ?? 0), 0), 59);
+  const timeKnown = Math.floor(values.birthTimeKnown ?? 1) !== 0;
+  const nightZiApplies = Math.floor(values.nightZi ?? 0) === 1 && timeKnown && hour === 23;
+  const dayPillarDate = nightZiApplies ? addUtcDays(date, 1) : date;
+  const solarYear = isBeforeSajuDateTime(month, day, hour, minute, 2, 4) ? year - 1 : year;
+  const yearStemIndex = positiveMod(solarYear - 4, 10);
+  const yearBranchIndex = positiveMod(solarYear - 4, 12);
+  const monthTerm = getSajuMonthTerm(year, month, day);
+  const monthBranchIndex = monthTerm.branchIndex;
+  const monthOrdinal = sajuMonthOrdinalFromBranch(monthBranchIndex);
+  const monthStemIndex = positiveMod((yearStemIndex % 5) * 2 + monthOrdinal + 1, 10);
+  const dayDiff = Math.floor((dayPillarDate.getTime() - Date.UTC(2024, 0, 1)) / 86400000);
   const dayStemIndex = positiveMod(dayDiff, 10);
   const dayBranchIndex = positiveMod(dayDiff, 12);
   const hourBranchIndex = Math.floor(((hour + 1) % 24) / 2);
@@ -1105,6 +1286,12 @@ function getSajuProfile(values: Record<string, number>): SajuProfile {
     month,
     day,
     hour,
+    minute,
+    solarYear,
+    monthTermLabel: monthTerm.label,
+    nearSolarTermLabel: getNearSolarTermLabel(year, month, day),
+    dayDateLabel: formatKoreanDate(dayPillarDate),
+    timeKnown,
     yearStemIndex,
     yearBranchIndex,
     monthStemIndex,
@@ -1134,18 +1321,18 @@ function sajuBaseRows(profile: SajuProfile): ResultRow[] {
   ];
 }
 
-function sajuElementCounts(profile: SajuProfile) {
+function sajuElementCounts(profile: SajuProfile, includeHour = true) {
   const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
-  [
+  const elements = [
     stemElements[profile.yearStemIndex],
     branchElements[profile.yearBranchIndex],
     stemElements[profile.monthStemIndex],
     branchElements[profile.monthBranchIndex],
     stemElements[profile.dayStemIndex],
     branchElements[profile.dayBranchIndex],
-    stemElements[profile.hourStemIndex],
-    branchElements[profile.hourBranchIndex]
-  ].forEach((element) => {
+    ...(includeHour ? [stemElements[profile.hourStemIndex], branchElements[profile.hourBranchIndex]] : [])
+  ];
+  elements.forEach((element) => {
     counts[element] += 1;
   });
   return counts;
@@ -1254,7 +1441,28 @@ function tarotBirthCards(total: number) {
 }
 
 function calculateTarotBirthCard(values: Record<string, number>): CalculatorResult {
-  const birthDate = clampDate(values.birthYear ?? 1992, values.birthMonth ?? 6, values.birthDay ?? 11);
+  const inputDate = clampDate(values.birthYear ?? 1992, values.birthMonth ?? 6, values.birthDay ?? 11);
+  const dateBasis = Math.floor(values.dateBasis ?? 0);
+  const isLunarInput = dateBasis === 1;
+  const isLeapMonth = Math.floor(values.lunarLeap ?? 0) === 1;
+  const convertedSolarDate = isLunarInput
+    ? findSolarDateFromLunar(inputDate.getUTCFullYear(), inputDate.getUTCMonth() + 1, inputDate.getUTCDate(), isLeapMonth)
+    : null;
+
+  if (isLunarInput && !convertedSolarDate) {
+    return {
+      headline: "해당 음력 날짜를 찾지 못했습니다",
+      subline: "입력한 연도에 해당 음력 날짜 또는 윤달이 없을 수 있습니다.",
+      rows: [
+        { label: "입력 기준", value: `음력 ${isLeapMonth ? "윤달" : "평달"}`, tone: "strong" },
+        { label: "입력 생년월일", value: `${inputDate.getUTCFullYear()}년 ${inputDate.getUTCMonth() + 1}월 ${inputDate.getUTCDate()}일` },
+        { label: "확인 방법", value: "평달/윤달 여부와 음력 날짜를 다시 확인해 주세요." }
+      ],
+      chart: [{ name: "변환 실패", value: 1 }]
+    };
+  }
+
+  const birthDate = convertedSolarDate ?? inputDate;
   const year = birthDate.getUTCFullYear();
   const month = birthDate.getUTCMonth() + 1;
   const day = birthDate.getUTCDate();
@@ -1271,12 +1479,15 @@ function calculateTarotBirthCard(values: Record<string, number>): CalculatorResu
   const reductionLine = steps.length
     ? steps.map((step) => `${step.from} → ${step.expression}`).join(" / ")
     : "이미 21 이하라 추가 축약 없음";
+  const basisLabel = isLunarInput ? `음력 ${isLeapMonth ? "윤달" : "평달"}` : "양력";
 
   return {
     headline: `탄생 카드는 ${cardTitle}입니다`,
     subline: `${formatKoreanDate(birthDate)} 양력 기준 · 카드 번호 ${cardNumbers}`,
     rows: [
-      { label: "입력 생년월일", value: `${formatKoreanDate(birthDate)} (양력)`, tone: "strong" },
+      { label: "입력 기준", value: basisLabel, tone: "strong" },
+      { label: "입력 생년월일", value: `${formatKoreanDate(inputDate)} (${basisLabel})`, tone: "strong" },
+      ...(isLunarInput ? [{ label: "변환 양력", value: formatKoreanDate(birthDate), tone: "strong" as const }] : []),
       { label: "기본 계산식", value: firstLine },
       { label: "축약 과정", value: reductionLine },
       { label: "탄생 카드 조합", value: `${cardTitle} (${cards.map((card) => card.en).join(" · ")})`, tone: "strong" },
@@ -1292,6 +1503,7 @@ function calculateTarotBirthCard(values: Record<string, number>): CalculatorResu
 
 function usesSajuBirthDateBasis(mode: string) {
   return [
+    "manse",
     "jisal",
     "geopsal",
     "jaesal",
@@ -1385,10 +1597,36 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
   }
 
   if (mode === "ganji" || mode === "manse") {
+    if (mode === "manse") {
+      const manseCounts = sajuElementCounts(profile, profile.timeKnown);
+      const daewoonRows = buildDaewoonRows(profile, Math.floor(values.gender ?? 0));
+      const manseRows: ResultRow[] = [
+        { label: "생년월일 기준", value: birthBasisLabel, tone: "strong" },
+        ...(dateBasis === 1 ? [{ label: "변환 양력", value: convertedDateLabel, tone: "strong" as const }] : []),
+        { label: "연주", value: cycleName(profile.yearStemIndex, profile.yearBranchIndex), tone: "strong" },
+        { label: "월주", value: cycleName(profile.monthStemIndex, profile.monthBranchIndex), tone: "strong" },
+        { label: "일주", value: dayGanji, tone: "strong" },
+        { label: "시주", value: profile.timeKnown ? cycleName(profile.hourStemIndex, profile.hourBranchIndex) : "시간 모름" },
+        { label: "입춘 기준 연도", value: `${profile.solarYear}년 ${cycleName(profile.yearStemIndex, profile.yearBranchIndex)}` },
+        { label: "월주 기준 절기", value: `${profile.monthTermLabel} 기준 ${earthlyBranches[profile.monthBranchIndex]}월` },
+        { label: "일주 기준", value: Math.floor(values.nightZi ?? 0) === 1 ? `야자시 적용 · ${profile.dayDateLabel}` : "00시 기준" },
+        { label: "절기 경계", value: profile.nearSolarTermLabel ?? "주요 절기 전후 24시간 밖" },
+        { label: "오행 분포", value: Object.entries(manseCounts).map(([element, count]) => `${element}${count}`).join(" · ") },
+        ...daewoonRows
+      ];
+
+      return {
+        headline: `${cycleName(profile.yearStemIndex, profile.yearBranchIndex)} ${cycleName(profile.monthStemIndex, profile.monthBranchIndex)} ${dayGanji} ${profile.timeKnown ? cycleName(profile.hourStemIndex, profile.hourBranchIndex) : "시주 미상"}`,
+        subline: "KST 기준 간이 만세력입니다. 월주는 음력 월이 아니라 12절기 기준으로 계산합니다.",
+        rows: manseRows,
+        chart: Object.entries(manseCounts).map(([name, value]) => ({ name, value }))
+      };
+    }
+
     return {
-      headline: mode === "manse" ? `${yearGanji} ${cycleName(profile.monthStemIndex, profile.monthBranchIndex)} ${dayGanji} ${cycleName(profile.hourStemIndex, profile.hourBranchIndex)}` : `${profile.year}년은 ${yearGanji}년입니다`,
+      headline: `${profile.year}년은 ${yearGanji}년입니다`,
       subline: "양력 기준 간이 만세력입니다. 절기 경계일은 전문 만세력과 차이가 날 수 있습니다.",
-      rows: mode === "manse" ? baseRows : [{ label: "연도 간지", value: yearGanji, tone: "strong" }, { label: "띠", value: `${animal}띠` }, { label: "60갑자 순번", value: `${positiveMod(profile.year - 4, 60) + 1}번째` }],
+      rows: [{ label: "연도 간지", value: yearGanji, tone: "strong" }, { label: "띠", value: `${animal}띠` }, { label: "60갑자 순번", value: `${positiveMod(profile.year - 4, 60) + 1}번째` }],
       chart: baseRows.map((row, index) => ({ name: row.label, value: index + 1 }))
     };
   }
@@ -1681,6 +1919,7 @@ function makeSajuCalculator(config: {
 }): CalculatorConfig {
   const isBokseong = config.mode === "bokseong";
   const isAgeNine = config.mode === "age-nine";
+  const isManse = config.mode === "manse";
   const usesBirthDateBasis = usesSajuBirthDateBasis(config.mode);
   const birthDateBasisFields: InputField[] = [
     {
@@ -1707,6 +1946,67 @@ function makeSajuCalculator(config: {
     },
     ...(config.extraFields ?? [])
   ];
+  const manseFields: InputField[] = [
+    {
+      name: "dateBasis",
+      label: "날짜 기준",
+      type: "select",
+      defaultValue: 0,
+      options: [
+        { label: "양력", value: 0 },
+        { label: "음력", value: 1 }
+      ]
+    },
+    { name: "year", label: "생년", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 1990 },
+    { name: "month", label: "생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 1 },
+    { name: "day", label: "생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 1 },
+    {
+      name: "lunarLeap",
+      label: "음력 평달/윤달",
+      type: "select",
+      defaultValue: 0,
+      help: "음력 생년월일을 선택한 경우에만 사용합니다.",
+      options: [
+        { label: "평달", value: 0 },
+        { label: "윤달", value: 1 }
+      ]
+    },
+    {
+      name: "birthTimeKnown",
+      label: "출생시각",
+      type: "select",
+      defaultValue: 1,
+      options: [
+        { label: "알고 있음", value: 1 },
+        { label: "시간 모름", value: 0 }
+      ]
+    },
+    { name: "hour", label: "출생 시간", type: "number", unit: "시", min: 0, max: 23, step: 1, defaultValue: 12 },
+    { name: "minute", label: "출생 분", type: "number", unit: "분", min: 0, max: 59, step: 1, defaultValue: 0 },
+    {
+      name: "gender",
+      label: "성별",
+      type: "select",
+      defaultValue: 0,
+      help: "대운 방향 참고에만 사용됩니다.",
+      options: [
+        { label: "선택 안 함", value: 0 },
+        { label: "남성", value: 1 },
+        { label: "여성", value: 2 }
+      ]
+    },
+    {
+      name: "nightZi",
+      label: "일주 기준",
+      type: "select",
+      defaultValue: 0,
+      help: "일반적으로는 00시 기준을 사용하고, 야자시는 23시 이후를 다음 날로 봅니다.",
+      options: [
+        { label: "00시 기준", value: 0 },
+        { label: "야자시 적용", value: 1 }
+      ]
+    }
+  ];
   return {
     slug: config.slug,
     title: config.title,
@@ -1715,7 +2015,7 @@ function makeSajuCalculator(config: {
     keywords: [config.title.replace(" 계산기", ""), "사주", "만세력", ...(config.keywords ?? [])],
     badge: config.badge,
     audience: "사주, 띠, 간지, 신살·귀인 정보를 간단히 확인하려는 사용자",
-    fields: usesBirthDateBasis ? birthDateBasisFields : [...sajuCommonFields(Boolean(config.includeHour)), ...(config.extraFields ?? [])],
+    fields: isManse ? manseFields : usesBirthDateBasis ? birthDateBasisFields : [...sajuCommonFields(Boolean(config.includeHour)), ...(config.extraFields ?? [])],
     actionLabel: "사주 계산하기",
     guideTitle: isBokseong ? "복성귀인 계산 방법" : `${config.title} 사용 기준`,
     guide: isBokseong
@@ -1732,9 +2032,11 @@ function makeSajuCalculator(config: {
             "아홉수는 전통적·문화적 표현이므로 운세나 미래 사건을 단정하지 말고 일정 점검용 참고 정보로 활용하세요."
           ]
       : [
-          "양력 생년월일을 기준으로 간단한 사주 정보를 계산합니다.",
+          isManse ? "양력 또는 음력 생년월일과 출생시각을 기준으로 연주, 월주, 일주, 시주를 계산합니다." : "양력 생년월일을 기준으로 간단한 사주 정보를 계산합니다.",
           ...(usesBirthDateBasis ? ["생년월일 기준에서 양력 또는 음력을 선택할 수 있고, 음력인 경우 평달·윤달 여부를 함께 입력합니다."] : []),
-          "입춘, 절기, 지역 시차처럼 정밀 만세력에 필요한 조건은 간이 처리됩니다.",
+          isManse ? "연주는 입춘 기준, 월주는 음력 월이 아니라 입춘·경칩·청명 등 12절기 기준으로 계산합니다." : "입춘, 절기, 지역 시차처럼 정밀 만세력에 필요한 조건은 간이 처리됩니다.",
+          ...(isManse ? ["야자시 적용을 선택하면 23시 이후 출생의 일주를 다음 날 기준으로 계산합니다."] : []),
+          ...(isManse ? ["대운 간이표는 성별과 연간 음양으로 순행·역행을 정하고, 생일과 다음 또는 이전 절기 차이를 3으로 나누어 시작 나이를 추정합니다."] : []),
           "결과는 재미와 참고용이며 중요한 의사결정의 근거로 단독 사용하지 않는 것이 좋습니다."
         ],
     checkpoints: isBokseong
@@ -1769,12 +2071,33 @@ const sajuCalculators: CalculatorConfig[] = [
   {
     slug: "tarot-birth-card-calculator",
     title: "타로 탄생 카드 계산기",
-    description: "양력 생년월일을 기준으로 타로 메이저 아르카나 탄생 카드 조합과 성격·영혼 카드 키워드를 계산합니다.",
+    description: "양력 또는 음력 생년월일을 기준으로 타로 메이저 아르카나 탄생 카드 조합과 성격·영혼 카드 키워드를 계산합니다.",
     category: "사주",
     keywords: ["타로 탄생 카드", "birth card", "타로 생일 카드", "메이저 아르카나", "성격 카드", "영혼 카드"],
     badge: "타로",
     audience: "생년월일로 나의 타로 탄생 카드와 핵심 키워드를 가볍게 확인하려는 사용자",
     fields: [
+      {
+        name: "dateBasis",
+        label: "생년월일 기준",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "양력", value: 0 },
+          { label: "음력", value: 1 }
+        ]
+      },
+      {
+        name: "lunarLeap",
+        label: "음력 평달/윤달",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "평달", value: 0 },
+          { label: "윤달", value: 1 }
+        ],
+        help: "음력 생년월일을 선택한 경우에만 사용합니다."
+      },
       { name: "birthYear", label: "출생연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 1992 },
       { name: "birthMonth", label: "출생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 6 },
       { name: "birthDay", label: "출생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 11 }
@@ -1783,13 +2106,14 @@ const sajuCalculators: CalculatorConfig[] = [
     guideTitle: "타로 탄생 카드 계산 방법",
     guide: [
       "양력 생년월일을 기준으로 월, 일, 연도의 앞 두 자리, 뒤 두 자리를 더합니다.",
+      "음력 생년월일을 선택하면 평달·윤달 여부를 반영해 양력 날짜로 변환한 뒤 같은 방식으로 계산합니다.",
       "합계가 21보다 크면 세 자리 수는 앞부분과 마지막 한 자리를 더하고, 두 자리 수는 각 자리 수를 더해 21 이하로 줄입니다.",
       "예를 들어 1992년 6월 11일은 06 + 11 + 19 + 92 = 128, 128은 12 + 8 = 20, 20은 2 + 0 = 2가 되어 심판·여사제 조합으로 봅니다.",
-      "음력 생일은 먼저 양력 날짜로 변환한 뒤 입력하면 같은 방식으로 계산할 수 있습니다."
+      "음력 윤달 날짜는 해당 연도에 실제 윤달이 있을 때만 변환됩니다."
     ],
-    checkpoints: ["양력 생년월일로 입력", "음력 생일은 양력 변환 후 입력", "탄생 카드 조합과 키워드 함께 확인", "타로 해석은 재미와 자기성찰용으로 활용"],
+    checkpoints: ["양력/음력 기준 선택", "음력은 평달·윤달 여부 확인", "탄생 카드 조합과 키워드 함께 확인", "타로 해석은 재미와 자기성찰용으로 활용"],
     faqs: [
-      { question: "음력 생일도 바로 입력할 수 있나요?", answer: "이 계산기는 양력 기준입니다. 음력 생일은 음력 양력 변환기로 실제 양력 생년월일을 확인한 뒤 입력해 주세요." },
+      { question: "음력 생일도 바로 입력할 수 있나요?", answer: "네. 생년월일 기준에서 음력을 선택하고 평달 또는 윤달을 지정하면 양력 날짜로 변환한 뒤 타로 탄생 카드를 계산합니다." },
       { question: "카드가 두 장 또는 세 장으로 나오는 이유는 무엇인가요?", answer: "메이저 아르카나 번호를 줄여 가며 서로 연결되는 번호를 함께 보기 때문입니다. 19/10/1처럼 세 장 조합이 나올 수도 있습니다." },
       { question: "0번 바보 카드는 나오지 않나요?", answer: "참조한 탄생 카드 방식은 생년월일 합계를 1~21번 메이저 아르카나 조합으로 줄여 계산하므로 0번 카드는 결과 조합에 포함하지 않습니다." },
       { question: "결과가 운명을 뜻하나요?", answer: "아니요. 타로 탄생 카드는 성향과 자기성찰을 위한 상징적 참고값이며 미래를 단정하는 기준으로 보기는 어렵습니다." }
@@ -1859,8 +2183,567 @@ const sajuCalculators: CalculatorConfig[] = [
   makeSajuCalculator({ slug: "gwangwi-hakgwan-calculator", title: "관귀학관 계산기", description: "생년월일로 사주 관귀학관 위치를 계산합니다.", badge: "학관", mode: "gwangwi" })
 ];
 
+function degreesToRadians(value: number) {
+  return (value * Math.PI) / 180;
+}
+
+function radiansToDegrees(value: number) {
+  return (value * 180) / Math.PI;
+}
+
+function getDayOfYear(date: Date) {
+  const start = Date.UTC(date.getUTCFullYear(), 0, 0);
+  return Math.floor((date.getTime() - start) / 86400000);
+}
+
+function formatClockFromMinutes(minutes: number) {
+  const normalized = positiveMod(Math.round(minutes), 1440);
+  const hours = Math.floor(normalized / 60);
+  const mins = normalized % 60;
+  return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
+}
+
+function formatDayLength(minutes: number) {
+  const rounded = Math.max(0, Math.round(minutes));
+  const hours = Math.floor(rounded / 60);
+  const mins = rounded % 60;
+  return `${hours}시간 ${mins}분`;
+}
+
+function getSolarPositionApproximation(dayOfYear: number) {
+  const gamma = ((2 * Math.PI) / 365) * (dayOfYear - 1);
+  const equationOfTime =
+    229.18 *
+    (0.000075 +
+      0.001868 * Math.cos(gamma) -
+      0.032077 * Math.sin(gamma) -
+      0.014615 * Math.cos(2 * gamma) -
+      0.040849 * Math.sin(2 * gamma));
+  const declination =
+    0.006918 -
+    0.399912 * Math.cos(gamma) +
+    0.070257 * Math.sin(gamma) -
+    0.006758 * Math.cos(2 * gamma) +
+    0.000907 * Math.sin(2 * gamma) -
+    0.002697 * Math.cos(3 * gamma) +
+    0.00148 * Math.sin(3 * gamma);
+
+  return { equationOfTime, declination };
+}
+
+function getSolarEventMinutes(date: Date, latitude: number, longitude: number, utcOffset: number, zenithDegrees: number) {
+  const { equationOfTime, declination } = getSolarPositionApproximation(getDayOfYear(date));
+  const latRad = degreesToRadians(latitude);
+  const zenithRad = degreesToRadians(zenithDegrees);
+  const cosHourAngle =
+    (Math.cos(zenithRad) - Math.sin(latRad) * Math.sin(declination)) /
+    (Math.cos(latRad) * Math.cos(declination));
+  const solarNoon = 720 - 4 * longitude - equationOfTime + utcOffset * 60;
+
+  if (cosHourAngle > 1) {
+    return { solarNoon, status: "below" as const };
+  }
+  if (cosHourAngle < -1) {
+    return { solarNoon, status: "above" as const };
+  }
+
+  const hourAngle = radiansToDegrees(Math.acos(cosHourAngle));
+  return {
+    solarNoon,
+    status: "normal" as const,
+    morning: solarNoon - 4 * hourAngle,
+    evening: solarNoon + 4 * hourAngle
+  };
+}
+
+const astronomyCalculators: CalculatorConfig[] = [
+  {
+    slug: "sunrise-sunset-calculator",
+    title: "일출일몰시각계산",
+    description: "날짜와 위도·경도를 입력해 해뜨는 시각, 남중, 해지는 시각, 낮의 길이와 박명 시간을 계산합니다.",
+    category: "수학",
+    keywords: ["일출일몰시각계산", "일출 시간", "일몰 시간", "시민박명", "항해박명", "천문박명"],
+    badge: "태양 시각",
+    audience: "여행, 촬영, 관측, 생활 계획을 위해 특정 위치의 일출·일몰과 박명 시간을 확인하려는 사용자",
+    fields: [
+      { name: "year", label: "연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "month", label: "월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 10 },
+      { name: "day", label: "일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 12 },
+      { name: "latitude", label: "위도", type: "number", unit: "°", min: -89.9, max: 89.9, step: 0.0001, defaultValue: 37.5665, help: "북위는 양수, 남위는 음수로 입력합니다." },
+      { name: "longitude", label: "경도", type: "number", unit: "°", min: -180, max: 180, step: 0.0001, defaultValue: 126.978, help: "동경은 양수, 서경은 음수로 입력합니다." },
+      { name: "utcOffset", label: "표준시간대", type: "number", unit: "UTC", min: -12, max: 14, step: 0.5, defaultValue: 9, help: "한국 표준시는 UTC+9입니다." }
+    ],
+    guideTitle: "일출일몰 계산 기준",
+    guide: [
+      "날짜와 좌표를 기준으로 태양의 적위와 균시차를 근사 계산해 일출, 남중, 일몰 시각을 구합니다.",
+      "일출·일몰은 태양 중심 고도 -0.833도 기준을 사용해 대기 굴절과 태양 반지름을 간단히 반영합니다.",
+      "시민박명, 항해박명, 천문박명은 각각 태양 고도 -6도, -12도, -18도 기준으로 계산합니다."
+    ],
+    checkpoints: [
+      "기본값은 서울시청 근처 좌표와 한국 표준시(UTC+9)입니다.",
+      "고위도 지역에서는 계절에 따라 해가 뜨지 않거나 지지 않는 날이 있어 일부 시간이 표시되지 않을 수 있습니다.",
+      "지형, 고도, 날씨, 정밀 역서 보정은 반영하지 않는 참고용 계산입니다."
+    ],
+    faqs: [
+      { question: "KASI 결과와 완전히 같은가요?", answer: "입력 항목과 결과 구성을 참고했지만, 이 계산기는 공개 근사식을 사용하므로 공식 역서 기반 값과 약간 차이가 날 수 있습니다." },
+      { question: "주소 입력은 되나요?", answer: "현재는 위도와 경도를 직접 입력하는 방식입니다. 주소를 좌표로 변환한 뒤 입력하면 해당 위치 기준으로 계산할 수 있습니다." }
+    ],
+    calculate(values) {
+      const date = clampDate(values.year ?? 2026, values.month ?? 10, values.day ?? 12);
+      const latitude = Math.min(Math.max(values.latitude ?? 37.5665, -89.9), 89.9);
+      const longitude = Math.min(Math.max(values.longitude ?? 126.978, -180), 180);
+      const utcOffset = Math.min(Math.max(values.utcOffset ?? 9, -12), 14);
+      const sunrise = getSolarEventMinutes(date, latitude, longitude, utcOffset, 90.833);
+      const civil = getSolarEventMinutes(date, latitude, longitude, utcOffset, 96);
+      const nautical = getSolarEventMinutes(date, latitude, longitude, utcOffset, 102);
+      const astronomical = getSolarEventMinutes(date, latitude, longitude, utcOffset, 108);
+      const dateLabel = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+      const formatPair = (event: ReturnType<typeof getSolarEventMinutes>) => {
+        if (event.status === "below") return "해당 고도에 도달하지 않음";
+        if (event.status === "above") return "하루 종일 해당 고도 이상";
+        return `${formatClockFromMinutes(event.morning)} / ${formatClockFromMinutes(event.evening)}`;
+      };
+      const latitudeLabel = `${latitude >= 0 ? "북위" : "남위"} ${formatNumber(Math.abs(latitude), 4)}°`;
+      const longitudeLabel = `${longitude >= 0 ? "동경" : "서경"} ${formatNumber(Math.abs(longitude), 4)}°`;
+      const daylight = sunrise.status === "normal" ? sunrise.evening - sunrise.morning : sunrise.status === "above" ? 1440 : 0;
+      const headline = sunrise.status === "normal" ? `${formatClockFromMinutes(sunrise.morning)} / ${formatClockFromMinutes(sunrise.evening)}` : sunrise.status === "above" ? "해가 지지 않는 날" : "해가 뜨지 않는 날";
+      const subline = sunrise.status === "normal" ? `낮의 길이 ${formatDayLength(daylight)} · 남중 ${formatClockFromMinutes(sunrise.solarNoon)}` : `남중 ${formatClockFromMinutes(sunrise.solarNoon)} · 고위도 특수 조건`;
+
+      return {
+        headline,
+        subline: `${subline} · UTC${utcOffset >= 0 ? "+" : ""}${formatNumber(utcOffset, 1)}`,
+        rows: [
+          { label: "날짜", value: dateLabel },
+          { label: "위치", value: `${longitudeLabel} / ${latitudeLabel}` },
+          { label: "해뜨는 시각(일출)", value: sunrise.status === "normal" ? formatClockFromMinutes(sunrise.morning) : "계산 불가", tone: "strong" },
+          { label: "한낮의 시각(남중)", value: formatClockFromMinutes(sunrise.solarNoon), tone: "strong" },
+          { label: "해지는 시각(일몰)", value: sunrise.status === "normal" ? formatClockFromMinutes(sunrise.evening) : "계산 불가", tone: "strong" },
+          { label: "낮의 길이", value: sunrise.status === "normal" ? formatDayLength(daylight) : sunrise.status === "above" ? "24시간에 가까움" : "0시간에 가까움" },
+          { label: "시민박명(아침/저녁)", value: formatPair(civil) },
+          { label: "항해박명(아침/저녁)", value: formatPair(nautical) },
+          { label: "천문박명(아침/저녁)", value: formatPair(astronomical) },
+          { label: "계산 기준", value: "태양 고도 -0.833° 및 박명 -6°/-12°/-18° 근사" }
+        ],
+        chart: [
+          { name: "낮", value: daylight / 60 },
+          { name: "밤", value: (1440 - daylight) / 60 },
+          { name: "남중", value: positiveMod(sunrise.solarNoon, 1440) / 60 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "orbital-period-calculator",
+    title: "공전 주기 계산기",
+    description: "케플러 제3법칙으로 궤도 장반경과 중심천체 질량을 입력해 공전 주기와 평균 궤도 속도를 계산합니다.",
+    category: "수학",
+    keywords: ["공전 주기 계산기", "케플러 제3법칙", "궤도 주기", "천문 계산기"],
+    badge: "케플러 법칙",
+    audience: "행성, 위성, 소행성의 대략적인 공전 주기를 계산하려는 사용자",
+    fields: [
+      { name: "semiMajorAxisAu", label: "장반경", type: "number", unit: "AU", min: 0.0001, max: 100000, step: 0.01, defaultValue: 1 },
+      { name: "centralMassSolar", label: "중심천체 질량", type: "number", unit: "태양질량", min: 0.000001, max: 100000000, step: 0.01, defaultValue: 1 }
+    ],
+    guideTitle: "공전 주기 계산 기준",
+    guide: [
+      "태양질량과 AU 단위를 쓰면 P² = a³ / M 형태의 케플러 제3법칙으로 공전 주기를 년 단위로 계산할 수 있습니다.",
+      "중심천체 질량이 태양 1개이고 장반경이 1AU이면 결과는 약 1년입니다.",
+      "궤도 이심률, 다른 천체의 중력 섭동, 상대론 효과는 반영하지 않는 기본 2체 문제 근사입니다."
+    ],
+    checkpoints: ["장반경은 평균 거리와 비슷하지만 타원 궤도에서는 정확히 같은 값이 아닙니다.", "중심천체 질량은 태양 질량 단위로 입력합니다.", "정밀 궤도 예측에는 전문 천체력 자료가 필요합니다."],
+    faqs: [
+      { question: "지구를 넣으면 1년이 나오나요?", answer: "네. 장반경 1AU, 중심천체 질량 1태양질량을 입력하면 약 1년이 나옵니다." },
+      { question: "위성도 계산할 수 있나요?", answer: "가능하지만 중심천체 질량을 태양질량 단위로 환산해야 합니다." }
+    ],
+    calculate(values) {
+      const axis = Math.max(values.semiMajorAxisAu, 0.0001);
+      const mass = Math.max(values.centralMassSolar, 0.000001);
+      const years = Math.sqrt(axis ** 3 / mass);
+      const days = years * 365.256;
+      const axisKm = axis * 149597870.7;
+      const speed = (2 * Math.PI * axisKm) / (days * 86400);
+      return {
+        headline: `${formatNumber(years, 4)}년`,
+        subline: `${formatNumber(days, 2)}일 · 평균 궤도 속도 ${formatNumber(speed, 2)}km/s`,
+        rows: [
+          { label: "공전 주기", value: `${formatNumber(years, 4)}년`, tone: "strong" },
+          { label: "공전 주기(일)", value: `${formatNumber(days, 2)}일`, tone: "strong" },
+          { label: "장반경", value: `${formatNumber(axis, 4)}AU` },
+          { label: "중심천체 질량", value: `${formatNumber(mass, 6)}태양질량` },
+          { label: "평균 궤도 속도", value: `${formatNumber(speed, 2)}km/s` }
+        ],
+        chart: [
+          { name: "주기(년)", value: years },
+          { name: "주기(일)/100", value: days / 100 },
+          { name: "속도(km/s)", value: speed }
+        ]
+      };
+    }
+  },
+  {
+    slug: "light-year-parsec-converter",
+    title: "광년 파섹 변환기",
+    description: "광년, 파섹, 천문단위, 킬로미터를 서로 변환해 천문 거리를 비교합니다.",
+    category: "수학",
+    keywords: ["광년 파섹 변환", "천문 거리 변환", "light year parsec", "AU 변환"],
+    badge: "천문 거리",
+    audience: "별과 은하 거리 단위를 빠르게 바꿔 보려는 사용자",
+    fields: [
+      { name: "distance", label: "거리", type: "number", min: 0, max: 1000000000, step: 0.01, defaultValue: 1 },
+      {
+        name: "unit",
+        label: "입력 단위",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "광년", value: 0 },
+          { label: "파섹", value: 1 },
+          { label: "천문단위(AU)", value: 2 },
+          { label: "킬로미터", value: 3 }
+        ]
+      }
+    ],
+    guideTitle: "천문 거리 단위 변환 기준",
+    guide: [
+      "1파섹은 약 3.26156광년입니다.",
+      "1광년은 빛이 율리우스년 1년 동안 이동한 거리로 약 9.4607조 km입니다.",
+      "1AU는 지구와 태양 사이 평균 거리로 약 149,597,870.7km입니다."
+    ],
+    checkpoints: ["입력 단위를 먼저 확인합니다.", "큰 거리에서는 지수 표기 대신 반올림된 일반 숫자로 보여줍니다.", "우주론적 거리 계산의 팽창 효과는 반영하지 않습니다."],
+    faqs: [
+      { question: "파섹과 광년 중 어느 쪽이 더 큰가요?", answer: "1파섹은 약 3.26광년이므로 파섹이 더 큰 단위입니다." },
+      { question: "은하 거리도 변환할 수 있나요?", answer: "단순 단위 변환은 가능하지만 우주론적 적색편이 거리는 별도 모델이 필요합니다." }
+    ],
+    calculate(values) {
+      const distance = Math.max(values.distance, 0);
+      const unit = Math.floor(values.unit ?? 0);
+      const kmByUnit = [9460730472580.8, 30856775814913.672, 149597870.7, 1];
+      const km = distance * (kmByUnit[unit] ?? kmByUnit[0]);
+      const lightYears = km / kmByUnit[0];
+      const parsecs = km / kmByUnit[1];
+      const au = km / kmByUnit[2];
+      return {
+        headline: `${formatNumber(parsecs, 6)} pc`,
+        subline: `${formatNumber(lightYears, 6)}광년 · ${formatNumber(au, 2)}AU`,
+        rows: [
+          { label: "광년", value: `${formatNumber(lightYears, 6)} ly`, tone: "strong" },
+          { label: "파섹", value: `${formatNumber(parsecs, 6)} pc`, tone: "strong" },
+          { label: "천문단위", value: `${formatNumber(au, 2)} AU` },
+          { label: "킬로미터", value: `${formatNumber(km, 2)} km` }
+        ],
+        chart: [
+          { name: "광년", value: lightYears },
+          { name: "파섹", value: parsecs },
+          { name: "AU/100k", value: au / 100000 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "moon-phase-calculator",
+    title: "달의 위상 계산기",
+    description: "날짜를 입력해 삭망월 기준 달의 나이, 조명 비율, 가까운 달 위상을 계산합니다.",
+    category: "수학",
+    keywords: ["달의 위상 계산기", "월령 계산", "보름달", "초승달", "moon phase"],
+    badge: "월령",
+    audience: "오늘 달의 모양과 월령을 간단히 확인하려는 사용자",
+    fields: [
+      { name: "year", label: "연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 },
+      { name: "month", label: "월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 10 },
+      { name: "day", label: "일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 12 }
+    ],
+    guideTitle: "달의 위상 계산 기준",
+    guide: [
+      "2000년 1월 6일 기준 신월과 평균 삭망월 29.530588853일을 사용해 월령을 계산합니다.",
+      "조명 비율은 달-태양 위상각을 단순 코사인식으로 환산합니다.",
+      "정밀 월출·월몰, 지형 관측, 실제 천문력의 신월·보름 시각은 반영하지 않는 간이 계산입니다."
+    ],
+    checkpoints: ["날짜는 UTC 기준 0시 근사로 계산합니다.", "월령 0일 부근은 신월, 14.8일 부근은 보름달입니다.", "정확한 관측 시각은 지역과 시간대에 따라 달라질 수 있습니다."],
+    faqs: [
+      { question: "보름달 날짜를 정확히 알려주나요?", answer: "가까운 위상을 보여주는 간이값입니다. 정확한 보름 시각은 천문력과 지역 시간을 확인해야 합니다." },
+      { question: "월령은 무엇인가요?", answer: "신월 이후 지난 날짜 수입니다. 평균적으로 약 29.53일마다 다시 신월이 됩니다." }
+    ],
+    calculate(values) {
+      const date = clampDate(values.year ?? 2026, values.month ?? 10, values.day ?? 12);
+      const synodic = 29.530588853;
+      const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+      const daysSince = (date.getTime() - knownNewMoon) / 86400000;
+      const age = positiveMod(daysSince, synodic);
+      const illumination = (1 - Math.cos((2 * Math.PI * age) / synodic)) / 2;
+      const phaseLabels = [
+        { limit: 1.84566, label: "신월" },
+        { limit: 5.53699, label: "초승달" },
+        { limit: 9.22831, label: "상현달" },
+        { limit: 12.91963, label: "상현 후 차오르는 달" },
+        { limit: 16.61096, label: "보름달" },
+        { limit: 20.30228, label: "하현 전 기우는 달" },
+        { limit: 23.99361, label: "하현달" },
+        { limit: 27.68493, label: "그믐달" },
+        { limit: synodic, label: "신월 전" }
+      ];
+      const phase = phaseLabels.find((item) => age < item.limit)?.label ?? "신월";
+      const daysToFull = positiveMod(synodic / 2 - age, synodic);
+      const daysToNew = positiveMod(synodic - age, synodic);
+      return {
+        headline: phase,
+        subline: `월령 ${formatNumber(age, 2)}일 · 조명 ${formatPercent(illumination * 100, 1)}`,
+        rows: [
+          { label: "달의 위상", value: phase, tone: "strong" },
+          { label: "월령", value: `${formatNumber(age, 2)}일`, tone: "strong" },
+          { label: "조명 비율", value: formatPercent(illumination * 100, 1) },
+          { label: "보름까지", value: `${formatNumber(daysToFull, 2)}일` },
+          { label: "다음 신월까지", value: `${formatNumber(daysToNew, 2)}일` }
+        ],
+        chart: [
+          { name: "월령", value: age },
+          { name: "조명률", value: illumination * 100 },
+          { name: "다음신월", value: daysToNew }
+        ]
+      };
+    }
+  },
+  {
+    slug: "albedo-calculator",
+    title: "반사율 계산기",
+    description: "입사 복사량과 반사 복사량을 입력해 알베도와 흡수 에너지 비율을 계산합니다.",
+    category: "수학",
+    keywords: ["반사율 계산기", "알베도 계산", "albedo", "행성 반사율"],
+    badge: "알베도",
+    audience: "행성 표면이나 물체의 빛 반사 비율을 계산하려는 사용자",
+    fields: [
+      { name: "incidentRadiation", label: "입사 복사량", type: "number", unit: "W/m²", min: 0.0001, max: 1000000, step: 0.1, defaultValue: 1361 },
+      { name: "reflectedRadiation", label: "반사 복사량", type: "number", unit: "W/m²", min: 0, max: 1000000, step: 0.1, defaultValue: 408.3 }
+    ],
+    guideTitle: "반사율 계산 기준",
+    guide: [
+      "알베도는 반사 복사량을 입사 복사량으로 나눈 값입니다.",
+      "0이면 모두 흡수, 1이면 모두 반사하는 이상적인 상태입니다.",
+      "실제 행성 알베도는 파장, 구름, 표면 상태, 관측 각도에 따라 달라질 수 있습니다."
+    ],
+    checkpoints: ["입사량과 반사량은 같은 단위로 입력합니다.", "반사량이 입사량보다 크면 100%를 초과할 수 있어 입력값을 다시 확인해야 합니다.", "흡수 비율은 1 - 알베도로 계산합니다."],
+    faqs: [
+      { question: "지구 알베도는 어느 정도인가요?", answer: "대표적으로 약 0.3 전후로 설명되는 경우가 많습니다. 구름과 표면 상태에 따라 달라집니다." },
+      { question: "알베도가 높으면 어떤 뜻인가요?", answer: "들어온 빛 중 더 많은 비율을 반사한다는 뜻입니다." }
+    ],
+    calculate(values) {
+      const incident = Math.max(values.incidentRadiation, 0.0001);
+      const reflected = Math.max(values.reflectedRadiation, 0);
+      const albedo = reflected / incident;
+      const absorbed = Math.max(1 - albedo, 0);
+      return {
+        headline: formatPercent(albedo * 100, 2),
+        subline: `흡수 비율 ${formatPercent(absorbed * 100, 2)} · 반사/입사 ${formatNumber(reflected, 2)} / ${formatNumber(incident, 2)}`,
+        rows: [
+          { label: "알베도", value: formatNumber(albedo, 4), tone: "strong" },
+          { label: "반사율", value: formatPercent(albedo * 100, 2), tone: "strong" },
+          { label: "흡수 비율", value: formatPercent(absorbed * 100, 2) },
+          { label: "입사 복사량", value: `${formatNumber(incident, 2)}W/m²` },
+          { label: "반사 복사량", value: `${formatNumber(reflected, 2)}W/m²` }
+        ],
+        chart: [
+          { name: "반사", value: albedo * 100 },
+          { name: "흡수", value: absorbed * 100 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "escape-velocity-calculator",
+    title: "탈출 속도 계산기",
+    description: "천체 질량과 반지름을 입력해 표면에서 벗어나기 위한 탈출 속도를 계산합니다.",
+    category: "수학",
+    keywords: ["탈출 속도 계산기", "escape velocity", "행성 중력", "천체 물리 계산"],
+    badge: "중력",
+    audience: "행성, 위성, 별의 탈출 속도를 비교하려는 사용자",
+    fields: [
+      { name: "massEarth", label: "천체 질량", type: "number", unit: "지구질량", min: 0.000001, max: 100000000, step: 0.01, defaultValue: 1 },
+      { name: "radiusEarth", label: "천체 반지름", type: "number", unit: "지구반지름", min: 0.000001, max: 100000, step: 0.01, defaultValue: 1 }
+    ],
+    guideTitle: "탈출 속도 계산 기준",
+    guide: [
+      "탈출 속도는 v = √(2GM/R) 공식으로 계산합니다.",
+      "입력은 지구 질량과 지구 반지름 단위이며 내부에서 SI 단위로 환산합니다.",
+      "대기 저항, 자전, 고도, 추진 방식은 반영하지 않는 이상적인 표면 탈출 속도입니다."
+    ],
+    checkpoints: ["질량이 클수록 탈출 속도가 커집니다.", "반지름이 클수록 같은 질량에서 표면 중력이 약해져 탈출 속도가 작아질 수 있습니다.", "지구 기본값은 약 11.2km/s입니다."],
+    faqs: [
+      { question: "지구 탈출 속도와 비슷하게 나오나요?", answer: "기본값 1지구질량, 1지구반지름이면 약 11.2km/s가 나옵니다." },
+      { question: "로켓이 실제로 이 속도를 바로 내야 하나요?", answer: "아닙니다. 실제 궤도 진입과 탈출은 추진 시간, 대기, 궤도역학을 함께 고려합니다." }
+    ],
+    calculate(values) {
+      const mass = Math.max(values.massEarth, 0.000001);
+      const radius = Math.max(values.radiusEarth, 0.000001);
+      const earthMass = 5.9722e24;
+      const earthRadius = 6371000;
+      const g = 6.67430e-11;
+      const velocity = Math.sqrt((2 * g * mass * earthMass) / (radius * earthRadius));
+      const kmPerSecond = velocity / 1000;
+      const surfaceGravity = 9.80665 * mass / (radius ** 2);
+      return {
+        headline: `${formatNumber(kmPerSecond, 2)}km/s`,
+        subline: `${formatNumber(velocity, 0)}m/s · 표면중력 ${formatNumber(surfaceGravity, 2)}m/s²`,
+        rows: [
+          { label: "탈출 속도", value: `${formatNumber(kmPerSecond, 2)}km/s`, tone: "strong" },
+          { label: "탈출 속도(m/s)", value: `${formatNumber(velocity, 0)}m/s`, tone: "strong" },
+          { label: "표면 중력", value: `${formatNumber(surfaceGravity, 2)}m/s²` },
+          { label: "질량", value: `${formatNumber(mass, 4)}지구질량` },
+          { label: "반지름", value: `${formatNumber(radius, 4)}지구반지름` }
+        ],
+        chart: [
+          { name: "탈출속도", value: kmPerSecond },
+          { name: "표면중력", value: surfaceGravity }
+        ]
+      };
+    }
+  },
+  {
+    slug: "asteroid-close-approach-calculator",
+    title: "소행성 근접 접근 계산기",
+    description: "소행성의 지구 접근 거리, 상대 속도, 크기를 입력해 달 거리 환산과 간단한 위험 참고값을 계산합니다.",
+    category: "수학",
+    keywords: ["소행성 근접 접근", "NEO 계산기", "달 거리 변환", "소행성 위험도"],
+    badge: "근접 접근",
+    audience: "소행성 접근 거리를 달 거리와 지구 반지름 기준으로 비교하려는 사용자",
+    fields: [
+      { name: "distanceKm", label: "접근 거리", type: "number", unit: "km", min: 0, max: 1000000000, step: 1000, defaultValue: 384400 },
+      { name: "relativeSpeedKms", label: "상대 속도", type: "number", unit: "km/s", min: 0, max: 1000, step: 0.1, defaultValue: 20 },
+      { name: "diameterM", label: "추정 지름", type: "number", unit: "m", min: 0.1, max: 100000, step: 1, defaultValue: 50 }
+    ],
+    guideTitle: "소행성 접근 거리 계산 기준",
+    guide: [
+      "접근 거리를 평균 달 거리 384,400km와 지구 반지름 6,371km 단위로 환산합니다.",
+      "상대 속도와 거리를 사용해 현재 거리에서 지나가는 데 걸리는 시간을 단순 계산합니다.",
+      "궤도 불확실성, 충돌 확률, 중력 초점 효과는 반영하지 않는 거리 비교 도구입니다."
+    ],
+    checkpoints: ["1LD는 평균 달 거리 1배입니다.", "지름과 속도가 크고 거리가 가까울수록 주의 참고값이 커집니다.", "실제 위험 평가는 NASA/JPL 등 공식 NEO 자료를 확인해야 합니다."],
+    faqs: [
+      { question: "충돌 확률을 계산하나요?", answer: "아니요. 이 계산기는 접근 거리와 속도를 비교하는 도구이며 충돌 확률은 공식 궤도 자료가 필요합니다." },
+      { question: "1LD는 무엇인가요?", answer: "평균 지구-달 거리 384,400km를 1 Lunar Distance로 봅니다." }
+    ],
+    calculate(values) {
+      const distance = Math.max(values.distanceKm, 0);
+      const speed = Math.max(values.relativeSpeedKms, 0);
+      const diameter = Math.max(values.diameterM, 0.1);
+      const lunarDistance = distance / 384400;
+      const earthRadii = distance / 6371;
+      const hoursToPass = speed > 0 ? distance / speed / 3600 : 0;
+      const score = Math.min(100, (diameter / 140) * 35 + Math.max(0, 5 - lunarDistance) * 12 + (speed / 20) * 8);
+      const label = lunarDistance < 1 ? "달 궤도 안쪽 접근" : lunarDistance < 5 ? "지구 근접 접근" : "비교적 먼 접근";
+      return {
+        headline: label,
+        subline: `${formatNumber(lunarDistance, 3)}LD · ${formatNumber(earthRadii, 1)}지구반지름 · 참고 점수 ${formatNumber(score, 1)}`,
+        rows: [
+          { label: "달 거리 환산", value: `${formatNumber(lunarDistance, 3)}LD`, tone: "strong" },
+          { label: "지구 반지름 환산", value: `${formatNumber(earthRadii, 1)}R⊕` },
+          { label: "접근 거리", value: `${formatNumber(distance, 0)}km` },
+          { label: "상대 속도", value: `${formatNumber(speed, 2)}km/s` },
+          { label: "현재 거리 통과 시간", value: speed > 0 ? `${formatNumber(hoursToPass, 2)}시간` : "계산 불가" },
+          { label: "근접 참고 점수", value: `${formatNumber(score, 1)} / 100`, tone: "strong" }
+        ],
+        chart: [
+          { name: "LD", value: lunarDistance },
+          { name: "지구반지름/10", value: earthRadii / 10 },
+          { name: "참고점수", value: score }
+        ]
+      };
+    }
+  },
+  {
+    slug: "absolute-magnitude-calculator",
+    title: "절대 등급 계산기",
+    description: "겉보기 등급과 거리 파섹을 입력해 별의 절대 등급과 태양 대비 광도 참고값을 계산합니다.",
+    category: "수학",
+    keywords: ["절대 등급 계산기", "별 등급", "apparent magnitude", "absolute magnitude"],
+    badge: "항성 등급",
+    audience: "별의 밝기를 거리 보정해 비교하려는 사용자",
+    fields: [
+      { name: "apparentMagnitude", label: "겉보기 등급", type: "number", min: -30, max: 40, step: 0.01, defaultValue: 0 },
+      { name: "distanceParsec", label: "거리", type: "number", unit: "pc", min: 0.0001, max: 1000000000, step: 0.01, defaultValue: 10 }
+    ],
+    guideTitle: "절대 등급 계산 기준",
+    guide: [
+      "절대 등급은 별을 10파섹 거리에 두었을 때의 겉보기 등급입니다.",
+      "공식은 M = m - 5 log10(d/10)입니다.",
+      "성간소광과 필터 차이는 반영하지 않습니다."
+    ],
+    checkpoints: ["거리는 파섹 단위로 입력합니다.", "등급 숫자가 작을수록 더 밝습니다.", "태양의 절대등급은 V밴드 기준 약 4.83으로 참고 계산합니다."],
+    faqs: [
+      { question: "절대 등급이 낮으면 무슨 뜻인가요?", answer: "절대 등급 숫자가 낮거나 음수일수록 본질적으로 더 밝은 천체입니다." },
+      { question: "거리 단위가 광년이면 어떻게 하나요?", answer: "광년 파섹 변환기로 파섹을 먼저 구하거나, 1pc ≈ 3.26156광년으로 나누면 됩니다." }
+    ],
+    calculate(values) {
+      const m = values.apparentMagnitude;
+      const distance = Math.max(values.distanceParsec, 0.0001);
+      const absolute = m - 5 * Math.log10(distance / 10);
+      const solarLuminosity = 10 ** ((4.83 - absolute) / 2.5);
+      return {
+        headline: `${formatNumber(absolute, 2)}등급`,
+        subline: `태양 대비 광도 참고값 ${formatNumber(solarLuminosity, 2)}배`,
+        rows: [
+          { label: "절대 등급", value: `${formatNumber(absolute, 2)}등급`, tone: "strong" },
+          { label: "겉보기 등급", value: `${formatNumber(m, 2)}등급` },
+          { label: "거리", value: `${formatNumber(distance, 2)}pc` },
+          { label: "태양 대비 광도", value: `${formatNumber(solarLuminosity, 2)}배`, tone: "strong" },
+          { label: "거리 계수", value: `${formatNumber(5 * Math.log10(distance / 10), 2)}` }
+        ],
+        chart: [
+          { name: "절대등급", value: Math.abs(absolute) },
+          { name: "태양대비", value: Math.min(solarLuminosity, 1000) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "apparent-magnitude-calculator",
+    title: "겉보기 등급 계산기",
+    description: "절대 등급과 거리 파섹을 입력해 관측자에게 보이는 겉보기 등급을 계산합니다.",
+    category: "수학",
+    keywords: ["겉보기 등급 계산기", "별 밝기 계산", "거리 계수", "apparent magnitude"],
+    badge: "관측 밝기",
+    audience: "거리 변화에 따른 별의 관측 밝기를 계산하려는 사용자",
+    fields: [
+      { name: "absoluteMagnitude", label: "절대 등급", type: "number", min: -30, max: 40, step: 0.01, defaultValue: 4.83 },
+      { name: "distanceParsec", label: "거리", type: "number", unit: "pc", min: 0.0001, max: 1000000000, step: 0.01, defaultValue: 10 }
+    ],
+    guideTitle: "겉보기 등급 계산 기준",
+    guide: [
+      "겉보기 등급은 관측자에게 보이는 밝기를 등급으로 나타낸 값입니다.",
+      "공식은 m = M + 5 log10(d/10)입니다.",
+      "성간소광, 대기 감쇠, 관측 필터 차이는 반영하지 않습니다."
+    ],
+    checkpoints: ["거리는 파섹 단위로 입력합니다.", "등급은 작을수록 밝습니다.", "거리 10pc에서는 겉보기 등급과 절대 등급이 같습니다."],
+    faqs: [
+      { question: "거리가 멀어지면 등급은 어떻게 되나요?", answer: "등급 숫자가 커져 더 어둡게 보입니다." },
+      { question: "태양을 10pc에 두면 어떻게 되나요?", answer: "태양 절대등급 약 4.83을 입력하고 거리 10pc를 넣으면 겉보기 등급도 약 4.83입니다." }
+    ],
+    calculate(values) {
+      const absolute = values.absoluteMagnitude;
+      const distance = Math.max(values.distanceParsec, 0.0001);
+      const apparent = absolute + 5 * Math.log10(distance / 10);
+      const brightnessVsVega = 10 ** (-0.4 * apparent);
+      return {
+        headline: `${formatNumber(apparent, 2)}등급`,
+        subline: `거리 계수 ${formatNumber(5 * Math.log10(distance / 10), 2)} · 10pc 기준 대비 밝기 변화`,
+        rows: [
+          { label: "겉보기 등급", value: `${formatNumber(apparent, 2)}등급`, tone: "strong" },
+          { label: "절대 등급", value: `${formatNumber(absolute, 2)}등급` },
+          { label: "거리", value: `${formatNumber(distance, 2)}pc` },
+          { label: "거리 계수", value: `${formatNumber(5 * Math.log10(distance / 10), 2)}` },
+          { label: "0등급 대비 밝기", value: `${formatNumber(brightnessVsVega, 6)}배` }
+        ],
+        chart: [
+          { name: "겉보기등급", value: Math.abs(apparent) },
+          { name: "거리계수", value: Math.abs(5 * Math.log10(distance / 10)) },
+          { name: "밝기×1000", value: brightnessVsVega * 1000 }
+        ]
+      };
+    }
+  }
+];
+
 export const calculators: CalculatorConfig[] = [
   ...sajuCalculators,
+  ...astronomyCalculators,
   {
     slug: "graphing-calculator",
     title: "그래핑 계산기",
@@ -5896,6 +6779,76 @@ export const calculators: CalculatorConfig[] = [
     }
   },
   {
+    slug: "estimated-mileage-calculator",
+    title: "예상주행거리 계산기",
+    description: "평일과 주말 하루 평균 주행거리를 입력해 연간 예상주행거리, 월평균·주평균 주행거리를 계산합니다.",
+    category: "생활",
+    keywords: ["예상주행거리 계산기", "연간 주행거리 계산", "자동차 주행거리 계산", "평일 주말 주행거리", "차량 연간 km"],
+    badge: "연간 주행거리",
+    audience: "자동차 유지비, 보험 마일리지 특약, 중고차 감가, 유류비를 계산하기 전에 연간 주행거리를 추정하려는 운전자",
+    fields: [
+      { name: "weekdayDistance", label: "평일 1일 주행거리", type: "number", unit: "km", min: 0, max: 1000, step: 1, defaultValue: 30 },
+      { name: "weekendDistance", label: "주말·공휴일 1일 주행거리", type: "number", unit: "km", min: 0, max: 1000, step: 1, defaultValue: 50 },
+      { name: "weekdayDays", label: "평일 일수", type: "number", unit: "일/년", min: 0, max: 366, step: 1, defaultValue: 261 },
+      { name: "weekendDays", label: "주말·공휴일 일수", type: "number", unit: "일/년", min: 0, max: 366, step: 1, defaultValue: 104 },
+      { name: "extraAnnualDistance", label: "명절·여행 등 추가거리", type: "number", unit: "km/년", min: 0, max: 100000, step: 10, defaultValue: 0 }
+    ],
+    guideTitle: "예상주행거리 계산 기준",
+    guide: [
+      "참조한 오리터 예상주행거리 계산기처럼 평일 1일 주행거리와 주말 1일 주행거리를 나눠 입력하고, 기본값은 평일 261일·주말 및 공휴일 104일로 계산합니다.",
+      "연간 예상주행거리는 평일 1일 주행거리×평일 일수 + 주말 1일 주행거리×주말 일수 + 추가 연간 주행거리로 계산합니다.",
+      "계산 결과는 자동차 유지비, 유류비, 보험 마일리지 특약, 중고차 감가를 가늠하기 위한 참고값입니다. 실제 주행거리는 계절, 여행, 출퇴근 변화에 따라 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "출퇴근 왕복거리는 하루에 실제 움직이는 총 거리를 입력하세요.",
+      "주말 장거리 운전이 잦다면 주말·공휴일 1일 주행거리를 보수적으로 높게 잡는 편이 좋습니다.",
+      "명절, 휴가, 출장처럼 반복되지 않는 장거리 이동은 추가거리 항목에 따로 넣으면 계산이 덜 흔들립니다."
+    ],
+    faqs: [
+      { question: "평일 261일, 주말 104일은 어디서 온 값인가요?", answer: "참조 페이지의 기본 계산 방식입니다. 일반적인 1년을 평일 261일, 주말·공휴일 104일로 나눠 간편 추정하는 방식입니다." },
+      { question: "보험 마일리지 특약에도 쓸 수 있나요?", answer: "네. 다만 보험사는 실제 계기판 주행거리와 약관 기준을 따르므로, 이 계산기는 가입 전 예상 범위를 잡는 참고용으로 보세요." },
+      { question: "유류비 계산과 어떻게 연결되나요?", answer: "여기서 나온 연간 예상주행거리를 월 단위로 나누거나 그대로 사용해 유류비 계산기의 주행거리 입력값으로 활용할 수 있습니다." }
+    ],
+    calculate(values) {
+      const weekdayDays = Math.min(Math.max(Math.floor(values.weekdayDays), 0), 366);
+      const weekendDays = Math.min(Math.max(Math.floor(values.weekendDays), 0), 366);
+      const weekdayDistance = Math.max(values.weekdayDistance, 0);
+      const weekendDistance = Math.max(values.weekendDistance, 0);
+      const extraAnnualDistance = Math.max(values.extraAnnualDistance, 0);
+      const weekdayTotal = weekdayDistance * weekdayDays;
+      const weekendTotal = weekendDistance * weekendDays;
+      const annualDistance = weekdayTotal + weekendTotal + extraAnnualDistance;
+      const monthlyAverage = annualDistance / 12;
+      const weeklyAverage = annualDistance / 52;
+      const dailyAverage = annualDistance / 365;
+      const activeDays = weekdayDays + weekendDays;
+      const activeDayAverage = activeDays > 0 ? (weekdayTotal + weekendTotal) / activeDays : 0;
+      const weekendShare = annualDistance > 0 ? weekendTotal / annualDistance * 100 : 0;
+      const weekdayShare = annualDistance > 0 ? weekdayTotal / annualDistance * 100 : 0;
+
+      return {
+        headline: `${formatNumber(annualDistance, 0)}km`,
+        subline: `월평균 ${formatNumber(monthlyAverage, 0)}km · 주평균 ${formatNumber(weeklyAverage, 0)}km · 하루평균 ${formatNumber(dailyAverage, 1)}km`,
+        rows: [
+          { label: "연간 예상주행거리", value: `${formatNumber(annualDistance, 0)}km`, tone: "strong" },
+          { label: "평일 주행거리 합계", value: `${formatNumber(weekdayTotal, 0)}km (${formatPercent(weekdayShare, 1)})`, tone: "strong" },
+          { label: "주말·공휴일 주행거리 합계", value: `${formatNumber(weekendTotal, 0)}km (${formatPercent(weekendShare, 1)})`, tone: "strong" },
+          { label: "명절·여행 등 추가거리", value: `${formatNumber(extraAnnualDistance, 0)}km` },
+          { label: "월평균 주행거리", value: `${formatNumber(monthlyAverage, 0)}km`, tone: "strong" },
+          { label: "주평균 주행거리", value: `${formatNumber(weeklyAverage, 0)}km` },
+          { label: "연중 하루평균", value: `${formatNumber(dailyAverage, 1)}km` },
+          { label: "운행일 기준 하루평균", value: `${formatNumber(activeDayAverage, 1)}km` },
+          { label: "계산 일수", value: `평일 ${weekdayDays.toLocaleString("ko-KR")}일 · 주말/공휴일 ${weekendDays.toLocaleString("ko-KR")}일` }
+        ],
+        chart: [
+          { name: "평일", value: weekdayTotal },
+          { name: "주말", value: weekendTotal },
+          { name: "추가", value: extraAnnualDistance }
+        ]
+      };
+    }
+  },
+  {
     slug: "moving-cost",
     title: "이사 비용 계산기",
     description: "집 크기, 거리, 엘리베이터 여부, 사다리차 여부를 기준으로 이사 비용을 추정합니다.",
@@ -6074,6 +7027,188 @@ export const calculators: CalculatorConfig[] = [
           { name: "비용", value: fee + values.adCost + values.shippingCost },
           { name: "이익", value: Math.max(profit, 0) }
         ]
+      };
+    }
+  },
+  {
+    slug: "ad-performance-calculator",
+    title: "광고 성과 계산기",
+    description: "광고비, 노출수, 클릭수, 전환수, 매출을 입력해 CTR, CPC, CPM, CVR, CPA, ROAS, ROI 등 핵심 광고 성과 지표를 계산합니다.",
+    category: "금융",
+    keywords: ["광고 성과 계산기", "ROAS 계산기", "CTR 계산기", "CPC 계산기", "CPA 계산기", "마케팅 성과 분석"],
+    badge: "마케팅 KPI",
+    audience: "퍼포먼스 광고 집행 후 효율성, 전환, 수익성을 한 번에 점검하려는 마케터와 사업자",
+    fields: [
+      { name: "adCost", label: "총 광고비", type: "number", unit: "원", min: 0, max: 100000000000, step: 1000, defaultValue: 1000000 },
+      { name: "impressions", label: "노출수", type: "number", unit: "회", min: 0, max: 100000000000, step: 1000, defaultValue: 500000 },
+      { name: "clicks", label: "클릭수", type: "number", unit: "회", min: 0, max: 1000000000, step: 10, defaultValue: 10000 },
+      { name: "conversions", label: "전환수", type: "number", unit: "건", min: 0, max: 100000000, step: 1, defaultValue: 200 },
+      { name: "revenue", label: "총 매출", type: "number", unit: "원", min: 0, max: 100000000000, step: 10000, defaultValue: 3500000 }
+    ],
+    guideTitle: "광고 성과 계산 기준",
+    guide: [
+      "총 광고비, 노출수, 클릭수, 전환수, 총 매출을 기준으로 효율성 지표, 전환 지표, 재무 지표를 함께 계산합니다.",
+      "효율성 지표는 CTR, CPC, CPM, RPC, RPM을 보여주고, 전환 지표는 CVR, CPA, AOV를 계산합니다.",
+      "재무 지표는 ROAS, ROI, ACOS, 광고 성과 기준 순수익으로 구성해 광고비 대비 매출성과와 손익 구조를 빠르게 비교합니다."
+    ],
+    checkpoints: [
+      "CTR은 소재와 타겟 적합성을 보는 출발점이지만, 전환율과 함께 봐야 실제 성과를 판단할 수 있습니다.",
+      "CPC보다 RPC가 높고 CPA보다 AOV가 높을수록 광고비 회수 가능성이 좋아집니다.",
+      "ROAS는 매출 기준 효율이고 ROI는 광고비를 뺀 순수익률이므로 두 지표를 구분해서 봐야 합니다.",
+      "상품 원가, 배송비, 수수료, 반품비는 제외한 광고 성과 기준 계산입니다."
+    ],
+    faqs: [
+      { question: "ROAS와 ROI는 무엇이 다른가요?", answer: "ROAS는 광고비 대비 매출 비율이고, ROI는 광고비를 뺀 광고 기준 순수익률입니다." },
+      { question: "전환수가 0이면 어떻게 계산되나요?", answer: "전환수로 나누는 CPA와 AOV는 0원으로 처리해 화면이 깨지지 않게 했습니다. 실제로는 추적 설정이나 전환 정의를 먼저 확인해야 합니다." },
+      { question: "순수익이 실제 영업이익인가요?", answer: "아닙니다. 총 매출에서 광고비만 뺀 값이라 원가, 인건비, 수수료, 배송비 등은 별도로 차감해야 합니다." }
+    ],
+    calculate(values) {
+      const adCost = Math.max(values.adCost, 0);
+      const impressions = Math.max(values.impressions, 0);
+      const clicks = Math.max(values.clicks, 0);
+      const conversions = Math.max(values.conversions, 0);
+      const revenue = Math.max(values.revenue, 0);
+      const ctr = impressions > 0 ? clicks / impressions * 100 : 0;
+      const cpc = clicks > 0 ? adCost / clicks : 0;
+      const cpm = impressions > 0 ? adCost / impressions * 1000 : 0;
+      const rpc = clicks > 0 ? revenue / clicks : 0;
+      const rpm = impressions > 0 ? revenue / impressions * 1000 : 0;
+      const cvr = clicks > 0 ? conversions / clicks * 100 : 0;
+      const cpa = conversions > 0 ? adCost / conversions : 0;
+      const aov = conversions > 0 ? revenue / conversions : 0;
+      const roas = adCost > 0 ? revenue / adCost * 100 : 0;
+      const roi = adCost > 0 ? (revenue - adCost) / adCost * 100 : 0;
+      const acos = revenue > 0 ? adCost / revenue * 100 : 0;
+      const profit = revenue - adCost;
+      const performanceLabel = roas >= 350 ? "권장 ROAS 이상" : profit >= 0 ? "광고비 회수 구간" : "손실 구간";
+
+      return {
+        headline: `${formatPercent(roas, 1)} ROAS`,
+        subline: `${performanceLabel} · 순수익 ${formatWon(profit)} · 전환율 ${formatPercent(cvr, 2)}`,
+        rows: [
+          { label: "광고 성과 상태", value: performanceLabel, tone: "strong" },
+          { label: "클릭률(CTR)", value: formatPercent(ctr, 2), tone: "strong" },
+          { label: "클릭당 비용(CPC)", value: formatWon(cpc), tone: "strong" },
+          { label: "노출당 비용(CPM)", value: formatWon(cpm) },
+          { label: "클릭당 수익(RPC)", value: formatWon(rpc) },
+          { label: "노출당 수익(RPM)", value: formatWon(rpm) },
+          { label: "전환율(CVR)", value: formatPercent(cvr, 2), tone: "strong" },
+          { label: "전환당 비용(CPA)", value: formatWon(cpa), tone: "strong" },
+          { label: "객단가(AOV)", value: formatWon(aov) },
+          { label: "ROAS", value: formatPercent(roas, 1), tone: "strong" },
+          { label: "투자 수익률(ROI)", value: formatPercent(roi, 1), tone: "strong" },
+          { label: "광고비 비중(ACOS)", value: formatPercent(acos, 2) },
+          { label: "총 순수익", value: formatWon(profit), tone: profit >= 0 ? "strong" : "muted" }
+        ],
+        chart: [
+          { name: "광고비", value: adCost },
+          { name: "매출", value: revenue },
+          { name: "순수익", value: Math.max(profit, 0) },
+          { name: "클릭/100", value: clicks / 100 },
+          { name: "전환", value: conversions }
+        ]
+      };
+    }
+  },
+  {
+    slug: "marketing-budget-calculator",
+    title: "마케팅 예산 계산기",
+    description: "월 매출 목표, 예산 비율, 목표 신규 고객, CAC, AOV, 매출총이익률과 채널 가중치를 입력해 추천 마케팅 예산과 채널별 배분액을 계산합니다.",
+    category: "금융",
+    keywords: ["마케팅 예산 계산기", "광고 예산 계산기", "CAC 예산", "이커머스 마케팅 예산", "채널 예산 배분"],
+    badge: "예산 플래닝",
+    audience: "이커머스와 온라인 사업에서 월 마케팅 예산, 신규 고객 목표, 채널별 배분을 함께 계획하려는 사용자",
+    fields: [
+      {
+        name: "planningMethod",
+        label: "계획 방식",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "매출 대비 비율", value: 0 },
+          { label: "목표 고객 × CAC", value: 1 },
+          { label: "고정 예산", value: 2 }
+        ]
+      },
+      { name: "monthlyRevenueTarget", label: "월 매출 목표", type: "number", unit: "원", min: 0, max: 100000000000, step: 100000, defaultValue: 50000000 },
+      { name: "budgetRate", label: "매출 대비 예산 비율", type: "number", unit: "%", min: 0, max: 100, step: 0.5, defaultValue: 10 },
+      { name: "fixedBudget", label: "고정 월 예산", type: "number", unit: "원", min: 0, max: 100000000000, step: 100000, defaultValue: 5000000 },
+      { name: "targetNewCustomers", label: "목표 신규 고객", type: "number", unit: "명", min: 0, max: 100000000, step: 1, defaultValue: 500 },
+      { name: "targetCac", label: "목표 CAC", type: "number", unit: "원", min: 0, max: 100000000, step: 1000, defaultValue: 10000 },
+      { name: "averageOrderValue", label: "평균 주문금액(AOV)", type: "number", unit: "원", min: 0, max: 100000000, step: 1000, defaultValue: 70000 },
+      { name: "grossMarginRate", label: "매출총이익률", type: "number", unit: "%", min: 1, max: 100, step: 0.5, defaultValue: 45 },
+      { name: "searchWeight", label: "검색 광고 가중치", type: "number", min: 0, max: 100, step: 1, defaultValue: 35 },
+      { name: "paidSocialWeight", label: "유료 소셜 가중치", type: "number", min: 0, max: 100, step: 1, defaultValue: 30 },
+      { name: "retargetingWeight", label: "리타겟팅 가중치", type: "number", min: 0, max: 100, step: 1, defaultValue: 20 },
+      { name: "contentCrmWeight", label: "콘텐츠/CRM 가중치", type: "number", min: 0, max: 100, step: 1, defaultValue: 15 }
+    ],
+    guideTitle: "마케팅 예산 계산 기준",
+    guide: [
+      "매출 대비 비율 방식은 월 매출 목표에 예산 비율을 곱해 추천 예산을 계산합니다.",
+      "목표 고객 방식은 목표 신규 고객 수에 목표 CAC를 곱해 필요한 예산을 역산합니다.",
+      "고정 예산 방식은 이미 승인된 월 예산을 기준으로 고객 수용량, 예상 매출, 채널별 배분을 계산합니다."
+    ],
+    checkpoints: [
+      "고객 목표가 명확하면 목표 고객 × CAC 방식이 예산 협의에 가장 직관적입니다.",
+      "현금흐름이 제한되어 있으면 고정 예산 방식으로 시작하고, 고객 수용량과 예상 매출을 확인하세요.",
+      "채널 가중치는 확정 규칙이 아니라 초기 배분안입니다. 실제 집행 후 CAC, ROAS, 전환율에 따라 조정해야 합니다.",
+      "손익분기 ROAS는 매출총이익률 기준의 단순값이며 고정비, 반품, 수수료, 재고비는 별도 확인이 필요합니다."
+    ],
+    faqs: [
+      { question: "어떤 계획 방식을 선택해야 하나요?", answer: "안정적인 운영 예산은 매출 대비 비율, 공격적인 신규 고객 목표는 목표 고객 × CAC, 승인된 예산 안에서 배분해야 할 때는 고정 예산 방식을 쓰면 됩니다." },
+      { question: "채널 가중치 합계가 100이 아니어도 되나요?", answer: "네. 입력한 가중치 합계를 기준으로 자동 정규화해 각 채널 배분액을 계산합니다." },
+      { question: "손익분기 ROAS는 어떻게 해석하나요?", answer: "매출총이익률이 40%라면 광고비 1원당 약 2.5원의 매출이 필요하므로 손익분기 ROAS는 약 250%입니다." }
+    ],
+    calculate(values) {
+      const revenueTarget = Math.max(values.monthlyRevenueTarget, 0);
+      const budgetRate = Math.max(values.budgetRate, 0) / 100;
+      const fixedBudget = Math.max(values.fixedBudget, 0);
+      const targetCustomers = Math.max(values.targetNewCustomers, 0);
+      const targetCac = Math.max(values.targetCac, 0);
+      const aov = Math.max(values.averageOrderValue, 0);
+      const grossMarginRate = Math.min(Math.max(values.grossMarginRate, 1), 100);
+      const revenueBudget = revenueTarget * budgetRate;
+      const customerObjectiveBudget = targetCustomers * targetCac;
+      const method = Math.floor(values.planningMethod ?? 0);
+      const recommendedBudget = method === 1 ? customerObjectiveBudget : method === 2 ? fixedBudget : revenueBudget;
+      const customerCapacity = targetCac > 0 ? recommendedBudget / targetCac : 0;
+      const revenueCapacity = customerCapacity * aov;
+      const grossProfitCapacity = revenueCapacity * (grossMarginRate / 100);
+      const breakEvenRoas = 100 / (grossMarginRate / 100);
+      const budgetAsRevenueRate = revenueTarget > 0 ? recommendedBudget / revenueTarget * 100 : 0;
+      const contributionAfterAd = grossProfitCapacity - recommendedBudget;
+      const weights = [
+        { label: "검색 광고", value: Math.max(values.searchWeight, 0) },
+        { label: "유료 소셜", value: Math.max(values.paidSocialWeight, 0) },
+        { label: "리타겟팅", value: Math.max(values.retargetingWeight, 0) },
+        { label: "콘텐츠/CRM", value: Math.max(values.contentCrmWeight, 0) }
+      ];
+      const totalWeight = weights.reduce((sum, item) => sum + item.value, 0) || 1;
+      const allocations = weights.map((item) => ({
+        ...item,
+        rate: item.value / totalWeight,
+        amount: recommendedBudget * item.value / totalWeight
+      }));
+      const methodLabel = method === 1 ? "목표 고객 × CAC" : method === 2 ? "고정 예산" : "매출 대비 비율";
+
+      return {
+        headline: formatWon(recommendedBudget),
+        subline: `${methodLabel} 기준 · 고객 수용량 ${formatNumber(customerCapacity, 1)}명 · 손익분기 ROAS ${formatPercent(breakEvenRoas, 1)}`,
+        rows: [
+          { label: "계획 방식", value: methodLabel, tone: "strong" },
+          { label: "추천 월 마케팅 예산", value: formatWon(recommendedBudget), tone: "strong" },
+          { label: "목표 CAC 기준 고객 수용량", value: `${formatNumber(customerCapacity, 1)}명`, tone: "strong" },
+          { label: "예상 신규 매출", value: formatWon(revenueCapacity), tone: "strong" },
+          { label: "예상 매출총이익", value: formatWon(grossProfitCapacity) },
+          { label: "광고비 차감 후 기여이익", value: formatWon(contributionAfterAd), tone: contributionAfterAd >= 0 ? "strong" : "muted" },
+          { label: "손익분기 ROAS", value: formatPercent(breakEvenRoas, 1), tone: "strong" },
+          { label: "매출 목표 대비 예산 비중", value: formatPercent(budgetAsRevenueRate, 2) },
+          { label: "검색 광고 배분", value: `${formatWon(allocations[0].amount)} (${formatPercent(allocations[0].rate * 100, 1)})` },
+          { label: "유료 소셜 배분", value: `${formatWon(allocations[1].amount)} (${formatPercent(allocations[1].rate * 100, 1)})` },
+          { label: "리타겟팅 배분", value: `${formatWon(allocations[2].amount)} (${formatPercent(allocations[2].rate * 100, 1)})` },
+          { label: "콘텐츠/CRM 배분", value: `${formatWon(allocations[3].amount)} (${formatPercent(allocations[3].rate * 100, 1)})` }
+        ],
+        chart: allocations.map((item) => ({ name: item.label, value: item.amount }))
       };
     }
   },
@@ -10079,6 +11214,296 @@ export const calculators: CalculatorConfig[] = [
     }
   },
   {
+    slug: "child-support-calculator",
+    title: "자녀 양육비 계산기",
+    description: "부모의 세전 월소득, 양육자 지정, 자녀 나이를 입력해 2021년 양육비 산정기준표 기준의 표준양육비와 비양육자 분담액을 계산합니다.",
+    category: "생활",
+    keywords: ["양육비 계산기", "자녀 양육비", "양육비 산정기준표", "이혼 양육비", "비양육자 양육비"],
+    badge: "2021 양육비 산정기준표",
+    audience: "이혼·별거 후 자녀 양육비 기준액과 부모별 분담액을 가늠하려는 보호자",
+    fields: [
+      { name: "parentIncome", label: "본인 월소득", type: "number", unit: "원", min: 0, max: 100000000, step: 100000, defaultValue: 2500000 },
+      { name: "spouseIncome", label: "상대방 월소득", type: "number", unit: "원", min: 0, max: 100000000, step: 100000, defaultValue: 3500000 },
+      {
+        name: "custodian",
+        label: "양육자",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "본인이 양육자", value: 0 },
+          { label: "상대방이 양육자", value: 1 }
+        ]
+      },
+      {
+        name: "childCount",
+        label: "자녀 수",
+        type: "select",
+        defaultValue: 2,
+        options: [
+          { label: "1명", value: 1 },
+          { label: "2명", value: 2 },
+          { label: "3명", value: 3 },
+          { label: "4명", value: 4 },
+          { label: "5명", value: 5 }
+        ]
+      },
+      { name: "childAge1", label: "자녀 1 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 7 },
+      { name: "childAge2", label: "자녀 2 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 12 },
+      { name: "childAge3", label: "자녀 3 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 4 },
+      { name: "childAge4", label: "자녀 4 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 10 },
+      { name: "childAge5", label: "자녀 5 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 15 },
+      {
+        name: "regionType",
+        label: "자녀 거주지역",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "기본 - 지역 보정 없음", value: 0 },
+          { label: "도시 지역 가산", value: 1 },
+          { label: "농어촌 등 감산", value: 2 }
+        ]
+      },
+      {
+        name: "childrenAdjustment",
+        label: "자녀 수 가감",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "반영 - 1명 가산, 3명 이상 감산", value: 1 },
+          { label: "미반영 - 기준표 금액 그대로", value: 0 }
+        ]
+      }
+    ],
+    guideTitle: "양육비 산정 기준",
+    guide: [
+      "참조 링크의 입력 흐름처럼 본인·상대방 월소득, 양육자, 자녀 수와 자녀 나이를 기준으로 계산합니다. 다만 기준표는 로밴드 페이지의 2017년 표가 아니라 서울가정법원이 2021년 12월 22일 공표하고 2022년 3월 1일부터 시행한 2021년 양육비 산정기준표를 사용합니다.",
+      "표준양육비는 부모 합산 월 세전소득과 자녀 만 나이 구간이 만나는 칸의 자녀 1인당 월 평균양육비입니다. 부모 합산소득은 근로소득, 사업소득, 임대소득, 이자수입, 정부보조금, 연금 등을 합산한 세전 월 소득으로 봅니다.",
+      "비양육자가 지급할 월 양육비는 조정 후 양육비 총액에 비양육자의 소득비율을 곱해 계산합니다. 양육비 산정기준표는 협의나 법원 판단의 참고자료이며 법적 구속력이 있는 확정액은 아닙니다."
+    ],
+    checkpoints: [
+      "만 19세 미만 자녀만 입력하세요. 만 19세 이상은 일반적으로 이 계산 대상에서 제외합니다.",
+      "기준표는 양육자녀 2인인 4인 가구 기준입니다. 자녀가 1명이면 가산, 3명 이상이면 감산 요소를 선택적으로 반영했습니다.",
+      "고액의 치료비·교육비, 부모의 재산상황, 개인회생, 실제 거주지 물가 등은 최종 협의·재판에서 달라질 수 있습니다."
+    ],
+    faqs: [
+      { question: "계산 결과가 그대로 법원에서 인정되나요?", answer: "아니요. 양육비 산정기준표는 참고 기준입니다. 실제 양육비는 부모의 합의나 법원의 판단에서 재산, 치료비, 교육비, 자녀 복리 등 개별 사정을 반영해 달라질 수 있습니다." },
+      { question: "소득이 없는 부모는 부담액이 0원인가요?", answer: "기준표 비율만 적용하면 0원에 가까워질 수 있지만, 해설서의 기본원칙은 부모가 현재 소득이 없더라도 최소한의 양육비를 분담한다는 것입니다." },
+      { question: "자녀가 여러 명이면 어떻게 계산하나요?", answer: "각 자녀 나이 구간별 표준양육비를 더한 뒤 자녀 수 보정과 지역 보정을 적용하고, 그 총액을 비양육자의 소득비율로 나눕니다." }
+    ],
+    calculate(values) {
+      const parentIncome = Math.max(values.parentIncome, 0);
+      const spouseIncome = Math.max(values.spouseIncome, 0);
+      const totalIncome = parentIncome + spouseIncome;
+      const incomeBandIndex = childSupportIncomeBandIndex(totalIncome);
+      const incomeBand = CHILD_SUPPORT_INCOME_BANDS[incomeBandIndex];
+      const childCount = Math.min(Math.max(Math.floor(values.childCount || 1), 1), 5);
+      const ages = [values.childAge1, values.childAge2, values.childAge3, values.childAge4, values.childAge5]
+        .slice(0, childCount)
+        .map((age) => Math.min(Math.max(Math.floor(age), 0), 18));
+      const children = ages.map((age, index) => {
+        const ageBand = childSupportAgeBand(age);
+        const standardAmount = ageBand.amounts[incomeBandIndex];
+        return {
+          label: `자녀 ${index + 1}`,
+          age,
+          ageBand: ageBand.label,
+          standardAmount,
+          minimum: ageBand.minimum
+        };
+      });
+      const standardTotal = children.reduce((sum, child) => sum + child.standardAmount, 0);
+      const childCountFactor = childSupportChildrenFactor(childCount, values.childrenAdjustment === 1);
+      const regionFactor = childSupportRegionFactor(values.regionType);
+      const adjustedTotal = standardTotal * childCountFactor * regionFactor;
+      const nonCustodialIncome = values.custodian === 0 ? spouseIncome : parentIncome;
+      const custodialLabel = values.custodian === 0 ? "본인" : "상대방";
+      const payerLabel = values.custodian === 0 ? "상대방" : "본인";
+      const payerRatio = totalIncome > 0 ? nonCustodialIncome / totalIncome : 0;
+      const payerAmount = adjustedTotal * payerRatio;
+      const payerRatioText = formatPercent(payerRatio * 100, 1);
+      const childRows = children.map((child) => ({
+        label: `${child.label} (${child.age}세)`,
+        value: `${formatWon(child.standardAmount)} · ${child.ageBand}`,
+        tone: "strong" as const
+      }));
+
+      return {
+        headline: formatWon(payerAmount),
+        subline: `${payerLabel} 월 예상 분담액 · 소득비율 ${payerRatioText} · 양육자 ${custodialLabel}`,
+        rows: [
+          { label: "부모 합산 월소득", value: `${formatWon(totalIncome)} (${incomeBand.label})`, tone: "strong" },
+          { label: "양육자", value: custodialLabel },
+          { label: "비양육자", value: payerLabel, tone: "strong" },
+          { label: "비양육자 소득비율", value: payerRatioText, tone: "strong" },
+          ...childRows,
+          { label: "표준양육비 합계", value: formatWon(standardTotal), tone: "strong" },
+          { label: "자녀 수 보정", value: `× ${formatNumber(childCountFactor, 3)}` },
+          { label: "거주지역 보정", value: `× ${formatNumber(regionFactor, 3)}` },
+          { label: "조정 후 양육비 총액", value: formatWon(adjustedTotal), tone: "strong" },
+          { label: `${payerLabel} 월 지급 추정액`, value: formatWon(payerAmount), tone: "strong" }
+        ],
+        chart: [
+          { name: "표준합계", value: standardTotal },
+          { name: "조정총액", value: adjustedTotal },
+          { name: "비양육자분담", value: payerAmount },
+          { name: "최저합계", value: children.reduce((sum, child) => sum + child.minimum, 0) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "divorce-child-support-calculator",
+    title: "이혼 시 양육비 계산기",
+    description: "이혼 후 자녀와 함께 지낼 양육자, 부모의 세전 월소득, 자녀 나이와 거주지역을 입력해 예상 이혼 양육비를 계산합니다.",
+    category: "생활",
+    keywords: ["이혼 양육비 계산기", "이혼 시 양육비", "양육비 계산", "양육비 산정기준표", "서울가정법원 양육비"],
+    badge: "이혼 양육비 기준",
+    audience: "이혼 협의·조정·소송 전 자녀 양육비 기준액을 미리 확인하려는 보호자",
+    fields: [
+      {
+        name: "selfGender",
+        label: "본인 성별",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "남자", value: 0 },
+          { label: "여자", value: 1 }
+        ]
+      },
+      { name: "parentIncome", label: "본인 월소득", type: "number", unit: "원", min: 0, max: 100000000, step: 100000, defaultValue: 2500000 },
+      { name: "spouseIncome", label: "배우자 월소득", type: "number", unit: "원", min: 0, max: 100000000, step: 100000, defaultValue: 3500000 },
+      {
+        name: "custodian",
+        label: "이혼 후 자녀와 함께 지내는 사람",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "본인", value: 0 },
+          { label: "배우자", value: 1 }
+        ]
+      },
+      {
+        name: "regionType",
+        label: "자녀 거주지역",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "도시", value: 1 },
+          { label: "농어촌", value: 2 },
+          { label: "지역 보정 없음", value: 0 }
+        ]
+      },
+      {
+        name: "childCount",
+        label: "자녀 수",
+        type: "select",
+        defaultValue: 2,
+        options: [
+          { label: "1명", value: 1 },
+          { label: "2명", value: 2 },
+          { label: "3명", value: 3 },
+          { label: "4명", value: 4 },
+          { label: "5명", value: 5 }
+        ]
+      },
+      { name: "childAge1", label: "자녀 1 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 7 },
+      { name: "childAge2", label: "자녀 2 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 12 },
+      { name: "childAge3", label: "자녀 3 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 4 },
+      { name: "childAge4", label: "자녀 4 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 10 },
+      { name: "childAge5", label: "자녀 5 만 나이", type: "number", unit: "세", min: 0, max: 18, step: 1, defaultValue: 15 },
+      {
+        name: "childrenAdjustment",
+        label: "자녀 수 가감",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "반영", value: 1 },
+          { label: "미반영", value: 0 }
+        ]
+      }
+    ],
+    guideTitle: "이혼 양육비 계산 기준",
+    guide: [
+      "참조한 대륜 이혼 양육비 계산기처럼 본인의 성별, 이혼 후 자녀와 함께 지낼 사람, 자녀 거주지역, 자녀 수와 나이를 차례로 입력하도록 구성했습니다.",
+      "계산 기준은 2021 서울가정법원 양육비 산정기준표입니다. 부모 합산 세전 월소득과 자녀 만 나이 구간이 만나는 표준양육비를 자녀별로 더합니다.",
+      "월 예상 양육비는 조정 후 양육비 총액에 비양육자의 소득비율을 곱해 계산합니다. 실제 협의·조정·재판에서는 재산상황, 특별한 교육비·치료비, 자녀 복리 등이 추가로 반영될 수 있습니다."
+    ],
+    checkpoints: [
+      "소득은 세후 실수령액이 아니라 세전 월소득 기준으로 입력하는 것이 기준표 취지에 가깝습니다.",
+      "도시·농어촌 거주지역 선택은 가산·감산 요소로 반영됩니다.",
+      "성별은 상담 흐름을 맞추기 위한 입력이며, 현재 금액 산정 자체에는 영향을 주지 않습니다."
+    ],
+    faqs: [
+      { question: "이혼 양육비는 누가 지급하나요?", answer: "일반적으로 자녀와 함께 살지 않는 비양육자가 양육자에게 지급하는 구조로 계산합니다. 이 계산기는 선택한 양육자를 기준으로 비양육자의 소득비율을 적용합니다." },
+      { question: "대륜 계산기와 같은 방식인가요?", answer: "입력 흐름은 참조했지만, 현재 페이지는 2021 서울가정법원 양육비 산정기준표의 표준양육비와 소득비율, 거주지역 보정을 적용해 산출합니다." },
+      { question: "결과 금액이 법원에서 그대로 확정되나요?", answer: "아니요. 산정기준표는 참고 기준입니다. 실제 금액은 부모의 합의나 법원 판단에서 개별 사정에 따라 달라질 수 있습니다." }
+    ],
+    calculate(values) {
+      const parentIncome = Math.max(values.parentIncome, 0);
+      const spouseIncome = Math.max(values.spouseIncome, 0);
+      const totalIncome = parentIncome + spouseIncome;
+      const incomeBandIndex = childSupportIncomeBandIndex(totalIncome);
+      const incomeBand = CHILD_SUPPORT_INCOME_BANDS[incomeBandIndex];
+      const childCount = Math.min(Math.max(Math.floor(values.childCount || 1), 1), 5);
+      const ages = [values.childAge1, values.childAge2, values.childAge3, values.childAge4, values.childAge5]
+        .slice(0, childCount)
+        .map((age) => Math.min(Math.max(Math.floor(age), 0), 18));
+      const children = ages.map((age, index) => {
+        const ageBand = childSupportAgeBand(age);
+        const standardAmount = ageBand.amounts[incomeBandIndex];
+        return {
+          label: `자녀 ${index + 1}`,
+          age,
+          ageBand: ageBand.label,
+          standardAmount,
+          minimum: ageBand.minimum
+        };
+      });
+      const standardTotal = children.reduce((sum, child) => sum + child.standardAmount, 0);
+      const childCountFactor = childSupportChildrenFactor(childCount, values.childrenAdjustment === 1);
+      const regionFactor = childSupportRegionFactor(values.regionType);
+      const adjustedTotal = standardTotal * childCountFactor * regionFactor;
+      const nonCustodialIncome = values.custodian === 0 ? spouseIncome : parentIncome;
+      const custodialLabel = values.custodian === 0 ? "본인" : "배우자";
+      const payerLabel = values.custodian === 0 ? "배우자" : "본인";
+      const payerRatio = totalIncome > 0 ? nonCustodialIncome / totalIncome : 0;
+      const payerAmount = adjustedTotal * payerRatio;
+      const payerRatioText = formatPercent(payerRatio * 100, 1);
+      const genderLabel = values.selfGender === 1 ? "여자" : "남자";
+      const regionLabel = values.regionType === 1 ? "도시" : values.regionType === 2 ? "농어촌" : "지역 보정 없음";
+      const childRows = children.map((child) => ({
+        label: `${child.label} (${child.age}세)`,
+        value: `${formatWon(child.standardAmount)} · ${child.ageBand}`,
+        tone: "strong" as const
+      }));
+
+      return {
+        headline: formatWon(payerAmount),
+        subline: `${payerLabel} 월 예상 양육비 · 소득비율 ${payerRatioText} · ${regionLabel}`,
+        rows: [
+          { label: "본인 성별", value: genderLabel },
+          { label: "부모 합산 월소득", value: `${formatWon(totalIncome)} (${incomeBand.label})`, tone: "strong" },
+          { label: "이혼 후 양육자", value: custodialLabel, tone: "strong" },
+          { label: "양육비 지급 예상자", value: payerLabel, tone: "strong" },
+          { label: "비양육자 소득비율", value: payerRatioText, tone: "strong" },
+          { label: "자녀 거주지역", value: regionLabel },
+          ...childRows,
+          { label: "표준양육비 합계", value: formatWon(standardTotal), tone: "strong" },
+          { label: "자녀 수 보정", value: `× ${formatNumber(childCountFactor, 3)}` },
+          { label: "거주지역 보정", value: `× ${formatNumber(regionFactor, 3)}` },
+          { label: "조정 후 양육비 총액", value: formatWon(adjustedTotal), tone: "strong" },
+          { label: `${payerLabel} 월 지급 추정액`, value: formatWon(payerAmount), tone: "strong" }
+        ],
+        chart: [
+          { name: "표준합계", value: standardTotal },
+          { name: "조정총액", value: adjustedTotal },
+          { name: "월예상양육비", value: payerAmount },
+          { name: "최저합계", value: children.reduce((sum, child) => sum + child.minimum, 0) }
+        ]
+      };
+    }
+  },
+  {
     slug: "isa-tax",
     title: "ISA 절세 계산기",
     description: "ISA 계좌 이익과 소득구간에 따라 비과세 한도와 초과분 9% 분리과세 효과를 계산합니다.",
@@ -10184,6 +11609,87 @@ export const calculators: CalculatorConfig[] = [
           { name: "원금", value: values.purchaseAmount },
           { name: "수수료", value: totalFee },
           { name: "총액", value: total }
+        ]
+      };
+    }
+  },
+  {
+    slug: "speed-distance-calculator",
+    title: "속도 거리 계산기",
+    description: "거리, 속도, 시간 중 두 값을 입력해 나머지 값을 계산하고 km/h, m/s, 페이스까지 함께 변환합니다.",
+    category: "생활",
+    keywords: ["속도 거리 계산기", "속도 계산기", "거리 시간 계산", "평균속도 계산", "이동시간 계산"],
+    badge: "속도·거리·시간",
+    audience: "운전, 여행, 러닝, 물리 문제에서 속도·거리·시간 관계를 빠르게 계산하려는 사용자",
+    fields: [
+      {
+        name: "mode",
+        label: "계산 모드",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "거리 계산 - 속도와 시간 입력", value: 0 },
+          { label: "속도 계산 - 거리와 시간 입력", value: 1 },
+          { label: "시간 계산 - 거리와 속도 입력", value: 2 }
+        ]
+      },
+      { name: "distance", label: "거리", type: "number", unit: "km", min: 0, max: 1000000, step: 0.1, defaultValue: 100 },
+      { name: "speed", label: "속도", type: "number", unit: "km/h", min: 0, max: 3000, step: 0.1, defaultValue: 80 },
+      { name: "hours", label: "시간", type: "number", unit: "시간", min: 0, max: 10000, step: 1, defaultValue: 1 },
+      { name: "minutes", label: "분", type: "number", unit: "분", min: 0, max: 59, step: 1, defaultValue: 30 }
+    ],
+    guideTitle: "속도·거리·시간 계산 기준",
+    guide: [
+      "참조한 속도 거리 계산기처럼 거리, 속도, 시간 중 두 값을 입력하면 나머지 하나를 계산합니다.",
+      "기본 공식은 거리 = 속도 × 시간, 속도 = 거리 ÷ 시간, 시간 = 거리 ÷ 속도입니다. 현재 계산기는 거리 km, 속도 km/h, 시간은 시간과 분 입력을 기준으로 합니다.",
+      "결과에는 km/h, m/s, km당 페이스, 예상 도착 시간 형태를 함께 보여줍니다. 교통 체증, 휴식, 신호 대기, 고도 변화는 반영하지 않은 평균값입니다."
+    ],
+    checkpoints: [
+      "시간은 시간과 분을 합산해 계산합니다. 예를 들어 1시간 30분은 1.5시간입니다.",
+      "평균속도는 전체 이동거리와 전체 소요시간 기준입니다.",
+      "러닝이나 자전거처럼 페이스가 중요한 경우 km당 시간을 함께 확인하세요."
+    ],
+    faqs: [
+      { question: "거리, 속도, 시간 중 어떤 값을 비워야 하나요?", answer: "현재 화면에서는 계산 모드를 먼저 선택합니다. 거리 계산은 속도와 시간, 속도 계산은 거리와 시간, 시간 계산은 거리와 속도를 사용합니다." },
+      { question: "m/s 변환도 되나요?", answer: "네. km/h 결과를 m/s로 변환해 함께 표시합니다. 1km/h는 약 0.2778m/s입니다." },
+      { question: "실제 도착 시간과 같나요?", answer: "아니요. 평균속도만 사용하는 단순 계산이라 신호, 정체, 휴식, 경로 조건에 따라 실제 시간은 달라질 수 있습니다." }
+    ],
+    calculate(values) {
+      const mode = Math.min(Math.max(Math.floor(values.mode), 0), 2);
+      const inputDistance = Math.max(values.distance, 0);
+      const inputSpeed = Math.max(values.speed, 0);
+      const inputHours = Math.max(values.hours, 0) + Math.max(values.minutes, 0) / 60;
+      const distance = mode === 0 ? inputSpeed * inputHours : inputDistance;
+      const speed = mode === 1 ? (inputHours > 0 ? inputDistance / inputHours : 0) : inputSpeed;
+      const timeHours = mode === 2 ? (inputSpeed > 0 ? inputDistance / inputSpeed : 0) : inputHours;
+      const timeMinutes = timeHours * 60;
+      const speedMps = speed * 1000 / 3600;
+      const paceMinutes = speed > 0 ? 60 / speed : 0;
+      const modeLabel = mode === 0 ? "거리 계산" : mode === 1 ? "속도 계산" : "시간 계산";
+      const headline = mode === 0
+        ? `${formatNumber(distance, 2)}km`
+        : mode === 1
+          ? `${formatNumber(speed, 2)}km/h`
+          : formatDayLength(timeMinutes);
+      const paceLabel = paceMinutes > 0 ? formatDayLength(paceMinutes) : "계산 불가";
+
+      return {
+        headline,
+        subline: `${modeLabel} · 거리 ${formatNumber(distance, 2)}km · 속도 ${formatNumber(speed, 2)}km/h · 시간 ${formatDayLength(timeMinutes)}`,
+        rows: [
+          { label: "계산 모드", value: modeLabel, tone: "strong" },
+          { label: "거리", value: `${formatNumber(distance, 2)}km`, tone: mode === 0 ? "strong" : undefined },
+          { label: "속도", value: `${formatNumber(speed, 2)}km/h`, tone: mode === 1 ? "strong" : undefined },
+          { label: "속도 변환", value: `${formatNumber(speedMps, 2)}m/s` },
+          { label: "시간", value: formatDayLength(timeMinutes), tone: mode === 2 ? "strong" : undefined },
+          { label: "km당 페이스", value: paceLabel },
+          { label: "분당 이동거리", value: `${formatNumber(speed / 60, 3)}km` },
+          { label: "초당 이동거리", value: `${formatNumber(speedMps, 2)}m` }
+        ],
+        chart: [
+          { name: "거리(km)", value: distance },
+          { name: "속도(km/h)", value: speed },
+          { name: "시간(분)", value: timeMinutes }
         ]
       };
     }

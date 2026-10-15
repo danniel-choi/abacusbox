@@ -1,5 +1,29 @@
 export const fallbackBlogItems = [
   {
+    id: 1001,
+    type: "blog",
+    board: "guide",
+    slug: "one-in-eight-billion-life-calculator",
+    title: "80억분의 1 인생 계산기",
+    excerpt: "생년월일 하나로 내가 얼마나 희귀한 조합인지, 타로 탄생 카드와 인생 키워드로 가볍게 확인하는 공유용 가이드입니다.",
+    body_md:
+      "세상에는 약 80억 명이 살고 있지만, 내 생년월일과 살아온 선택의 조합은 단 하나뿐입니다.\n\n가장 쉬운 시작점은 생년월일입니다. 같은 달에 태어났어도 날짜가 다르면 카드 조합이 달라지고, 같은 카드가 나와도 받아들이는 키워드는 사람마다 달라집니다.\n\n계산의정석 타로 탄생 카드 계산기는 생년월일을 메이저 아르카나 번호로 줄여 성격 카드와 영혼 카드 조합을 보여줍니다.\n\n바이럴로 공유할 때는 긴 해석보다 한 줄이 더 강합니다. 결과에서 마음에 남는 표현 하나를 골라 친구, 연인, 가족과 비교해 보세요.",
+    published_at: "2026-10-14",
+    featured: 1,
+    view_count: 0,
+    comment_count: 0,
+    like_count: 0,
+    author_name: "계산의정석",
+    tags: [
+      { slug: "80억분의1", name: "80억분의1" },
+      { slug: "인생계산기", name: "인생계산기" },
+      { slug: "타로카드", name: "타로카드" },
+      { slug: "생년월일", name: "생년월일" },
+      { slug: "공유", name: "공유" }
+    ],
+    calculators: ["tarot-birth-card-calculator"]
+  },
+  {
     id: 4,
     type: "blog",
     board: "guide",

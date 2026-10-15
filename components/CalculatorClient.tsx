@@ -2,11 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent, ReactNode } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import * as THREE from "three";
+import { useLanguage } from "@/components/LanguageProvider";
 import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type ResultRow } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
+import { interpolate, type Locale } from "@/lib/i18n";
 
 type FormValues = Record<string, number>;
 
@@ -49,6 +52,41 @@ type ActionPlan = {
     label: string;
     text: string;
   }[];
+};
+
+type TarotCardVisual = {
+  number: number;
+  ko: string;
+  en: string;
+  keyword: string;
+  symbol: string;
+  imageSrc: string;
+  accent: string;
+  glow: string;
+};
+
+const TAROT_CARD_VISUALS: Record<number, Omit<TarotCardVisual, "number">> = {
+  1: { ko: "마법사", en: "The Magician", keyword: "시작, 의지, 표현력", symbol: "✦", imageSrc: "/tarot-images/01-TheMagician.png", accent: "#7c3aed", glow: "#ede9fe" },
+  2: { ko: "여사제", en: "The High Priestess", keyword: "직관, 내면, 통찰", symbol: "☾", imageSrc: "/tarot-images/02-TheHighPriestess.png", accent: "#2563eb", glow: "#dbeafe" },
+  3: { ko: "여황제", en: "The Empress", keyword: "창조성, 풍요, 돌봄", symbol: "✿", imageSrc: "/tarot-images/03-TheEmpress.png", accent: "#db2777", glow: "#fce7f3" },
+  4: { ko: "황제", en: "The Emperor", keyword: "질서, 책임, 리더십", symbol: "♜", imageSrc: "/tarot-images/04-TheEmperor.png", accent: "#b45309", glow: "#fef3c7" },
+  5: { ko: "교황", en: "The Hierophant", keyword: "가르침, 전통, 신념", symbol: "✚", imageSrc: "/tarot-images/05-TheHierophant.png", accent: "#0f766e", glow: "#ccfbf1" },
+  6: { ko: "연인", en: "The Lovers", keyword: "선택, 관계, 조화", symbol: "♡", imageSrc: "/tarot-images/06-TheLovers.png", accent: "#e11d48", glow: "#ffe4e6" },
+  7: { ko: "전차", en: "The Chariot", keyword: "추진력, 승부, 방향성", symbol: "⇧", imageSrc: "/tarot-images/07-TheChariot.png", accent: "#1d4ed8", glow: "#dbeafe" },
+  8: { ko: "힘", en: "Strength", keyword: "용기, 인내, 자기 조절", symbol: "∞", imageSrc: "/tarot-images/08-Strength.png", accent: "#ea580c", glow: "#ffedd5" },
+  9: { ko: "은둔자", en: "The Hermit", keyword: "성찰, 탐구, 지혜", symbol: "✺", imageSrc: "/tarot-images/09-TheHermit.png", accent: "#475569", glow: "#e2e8f0" },
+  10: { ko: "운명의 수레바퀴", en: "Wheel of Fortune", keyword: "전환, 흐름, 기회", symbol: "◎", imageSrc: "/tarot-images/10-WheelOfFortune.png", accent: "#0891b2", glow: "#cffafe" },
+  11: { ko: "정의", en: "Justice", keyword: "균형, 판단, 공정함", symbol: "⚖", imageSrc: "/tarot-images/11-Justice.png", accent: "#4f46e5", glow: "#e0e7ff" },
+  12: { ko: "매달린 사람", en: "The Hanged Man", keyword: "관점 전환, 멈춤, 수용", symbol: "◇", imageSrc: "/tarot-images/12-TheHangedMan.png", accent: "#16a34a", glow: "#dcfce7" },
+  13: { ko: "죽음", en: "Death", keyword: "끝맺음, 변화, 재탄생", symbol: "✕", imageSrc: "/tarot-images/13-Death.png", accent: "#111827", glow: "#e5e7eb" },
+  14: { ko: "절제", en: "Temperance", keyword: "조율, 회복, 중용", symbol: "♒", imageSrc: "/tarot-images/14-Temperance.png", accent: "#0d9488", glow: "#ccfbf1" },
+  15: { ko: "악마", en: "The Devil", keyword: "욕망, 집착, 현실 감각", symbol: "◆", imageSrc: "/tarot-images/15-TheDevil.png", accent: "#be123c", glow: "#ffe4e6" },
+  16: { ko: "탑", en: "The Tower", keyword: "충격, 해체, 새 기준", symbol: "⌁", imageSrc: "/tarot-images/16-TheTower.png", accent: "#ca8a04", glow: "#fef9c3" },
+  17: { ko: "별", en: "The Star", keyword: "희망, 영감, 치유", symbol: "★", imageSrc: "/tarot-images/17-TheStar.png", accent: "#0284c7", glow: "#e0f2fe" },
+  18: { ko: "달", en: "The Moon", keyword: "감정, 무의식, 불확실성", symbol: "☽", imageSrc: "/tarot-images/18-TheMoon.png", accent: "#6d28d9", glow: "#ede9fe" },
+  19: { ko: "태양", en: "The Sun", keyword: "활력, 성공, 명료함", symbol: "☀", imageSrc: "/tarot-images/19-TheSun.png", accent: "#f59e0b", glow: "#fef3c7" },
+  20: { ko: "심판", en: "Judgement", keyword: "각성, 부름, 재평가", symbol: "✧", imageSrc: "/tarot-images/20-Judgement.png", accent: "#0e7490", glow: "#cffafe" },
+  21: { ko: "세계", en: "The World", keyword: "완성, 통합, 성취", symbol: "◯", imageSrc: "/tarot-images/21-TheWorld.png", accent: "#059669", glow: "#d1fae5" }
 };
 
 const DIABLO3_GEM_OPTIONS = [
@@ -134,13 +172,40 @@ function writeSavedResults(items: SavedCalculatorResult[]) {
   window.localStorage.setItem(SAVED_RESULTS_STORAGE_KEY, JSON.stringify(items.slice(0, 12)));
 }
 
+function getTarotCardsFromResult(result: CalculatorResult) {
+  return result.chart
+    .map((point) => {
+      const number = Number(String(point.name).match(/^\d+/)?.[0] ?? point.value);
+      const visual = TAROT_CARD_VISUALS[number];
+      return visual ? { number, ...visual } : null;
+    })
+    .filter((card): card is TarotCardVisual => Boolean(card));
+}
+
+function formatDateInputParts(year: number, month: number, day: number) {
+  const safeYear = Math.min(Math.max(Math.floor(year) || 1992, 1900), 2100);
+  const safeMonth = Math.min(Math.max(Math.floor(month) || 1, 1), 12);
+  const daysInMonth = new Date(safeYear, safeMonth, 0).getDate();
+  const safeDay = Math.min(Math.max(Math.floor(day) || 1, 1), daysInMonth);
+  return `${safeYear}-${String(safeMonth).padStart(2, "0")}-${String(safeDay).padStart(2, "0")}`;
+}
+
+function formatDateInputValue(value: string, locale: Locale) {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return "-";
+  if (locale === "en") return `${month}/${day}/${year}`;
+  if (locale === "ja") return `${year.toLocaleString("ja-JP")}年 ${month}月 ${day}日`;
+  return `${year.toLocaleString("ko-KR")}년 ${month}월 ${day}일`;
+}
+
 export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const calculator = getCalculatorBySlug(slug);
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const resultRef = useRef<HTMLDivElement>(null);
   const [resultNonce, setResultNonce] = useState(0);
-  const [savedResults, setSavedResults] = useState<SavedCalculatorResult[]>(() => readSavedResults());
+  const [savedResults, setSavedResults] = useState<SavedCalculatorResult[]>([]);
   const defaults = useMemo(() => {
     return Object.fromEntries(
       calculator.fields.map((field) => {
@@ -161,6 +226,11 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   useEffect(() => {
     reset(defaults);
   }, [defaults, reset]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSavedResults(readSavedResults()), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -195,6 +265,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const relatedCalculators = useMemo(() => getRelatedCalculators(activeCalculator.slug, 4), [activeCalculator.slug]);
   const nextActions = useMemo(() => getNextActions(activeCalculator.slug), [activeCalculator.slug]);
   const actionPlan = useMemo(() => getActionPlan(activeCalculator.slug), [activeCalculator.slug]);
+  const isTarotBirthCard = activeCalculator.slug === "tarot-birth-card-calculator";
+  const isManseRyeok = activeCalculator.slug === "manse-ryeok";
+  const isSunriseSunset = activeCalculator.slug === "sunrise-sunset-calculator";
+  const usesUnifiedBirthDateInput = isTarotBirthCard || isManseRyeok || isSunriseSunset;
   const diablo2AttackSkillOptions = useMemo(() => {
     if (activeCalculator.slug !== "diablo2-attack-speed") return [];
     return getDiablo2AttackSkillOptions(Number(values.combatant ?? 0));
@@ -209,13 +283,35 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         return Number(values.dateBasis ?? 0) === 1;
       }
 
+      if ((field.name === "hour" || field.name === "minute") && activeCalculator.fields.some((item) => item.name === "birthTimeKnown")) {
+        return Number(values.birthTimeKnown ?? 1) === 1;
+      }
+
       return true;
     });
-  }, [activeCalculator.fields, activeCalculator.slug, values.dateBasis, values.species]);
-  const inputSummary = visibleFields.map((field) => ({
-    label: field.label,
-    value: formatInputValue(field, Number(values[field.name] ?? field.defaultValue))
-  }));
+  }, [activeCalculator.fields, activeCalculator.slug, values.birthTimeKnown, values.dateBasis, values.species]);
+  const renderedFields = usesUnifiedBirthDateInput
+    ? visibleFields.filter((field) => !["birthYear", "birthMonth", "birthDay", "year", "month", "day"].includes(field.name))
+    : visibleFields;
+  const unifiedBirthDateValue = formatDateInputParts(
+    Number(values[isTarotBirthCard ? "birthYear" : "year"] ?? (isTarotBirthCard ? 1992 : isSunriseSunset ? 2026 : 1990)),
+    Number(values[isTarotBirthCard ? "birthMonth" : "month"] ?? (isTarotBirthCard ? 6 : isSunriseSunset ? 10 : 1)),
+    Number(values[isTarotBirthCard ? "birthDay" : "day"] ?? (isSunriseSunset ? 12 : 1))
+  );
+  const birthDateBasis = Number(values.dateBasis ?? 0) === 1 ? t("calculator.lunar") : t("calculator.solar");
+  const lunarLeapLabel = Number(values.lunarLeap ?? 0) === 1 ? t("calculator.leap") : t("calculator.commonMonth");
+  const inputSummary = usesUnifiedBirthDateInput
+    ? [
+        ...(isSunriseSunset ? [] : [{ label: isManseRyeok ? t("calculator.dateBasis") : t("calculator.birthDateBasis"), value: birthDateBasis }]),
+        ...(Number(values.dateBasis ?? 0) === 1 ? [{ label: t("calculator.lunarType"), value: lunarLeapLabel }] : []),
+        { label: isSunriseSunset ? t("calculator.calculationDate") : t("calculator.birthDate"), value: formatDateInputValue(unifiedBirthDateValue, locale) },
+        ...(isManseRyeok ? [{ label: t("calculator.birthTime"), value: Number(values.birthTimeKnown ?? 1) === 1 ? `${String(Math.floor(Number(values.hour ?? 12))).padStart(2, "0")}:${String(Math.floor(Number(values.minute ?? 0))).padStart(2, "0")}` : t("calculator.timeUnknown") }] : [])
+      ]
+    : visibleFields.map((field) => ({
+        label: field.label,
+        value: formatInputValue(field, Number(values[field.name] ?? field.defaultValue))
+      }));
+  const tarotCards = isTarotBirthCard ? getTarotCardsFromResult(result) : [];
 
   useEffect(() => {
     if (activeCalculator.slug !== "diablo2-attack-speed" || diablo2AttackSkillOptions.length === 0) return;
@@ -375,22 +471,45 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
       <form className="min-w-0 overflow-hidden rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="text-sm font-extrabold text-brand">입력값</p>
-            <h2 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">조건을 입력하세요</h2>
+            <p className="text-sm font-extrabold text-brand">{t("calculator.inputEyebrow")}</p>
+            <h2 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">{t("calculator.inputTitle")}</h2>
           </div>
           <div className="hidden items-center gap-2 sm:flex">
-            <span className="rounded-full bg-paper px-3 py-1 text-xs font-extrabold text-slate-500">자동 계산</span>
+            <span className="rounded-full bg-paper px-3 py-1 text-xs font-extrabold text-slate-500">{t("calculator.autoCalculate")}</span>
             <button
               type="button"
               onClick={resetToDefaults}
               className="rounded-full border border-line px-3 py-1 text-xs font-extrabold text-slate-500 transition hover:border-brand hover:text-brand"
             >
-              기본값 복원
+              {t("calculator.resetDefaults")}
             </button>
           </div>
         </div>
         <div className="grid gap-5">
-          {visibleFields.map((field) => (
+          {usesUnifiedBirthDateInput && isSunriseSunset && (
+            <label className="grid gap-2">
+              <span className="flex items-center justify-between text-sm font-extrabold text-ink">
+                {t("calculator.calculationDate")}
+                <span className="font-bold text-slate-400">{t("calculator.solar")}</span>
+              </span>
+              <input
+                className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={unifiedBirthDateValue}
+                onChange={(event) => {
+                  const [year, month, day] = event.target.value.split("-").map(Number);
+                  if (!year || !month || !day) return;
+                  setValue("year", year, { shouldDirty: true });
+                  setValue("month", month, { shouldDirty: true });
+                  setValue("day", day, { shouldDirty: true });
+                }}
+              />
+              <span className="text-xs font-semibold text-slate-500">{t("calculator.dateHelp")}</span>
+            </label>
+          )}
+          {renderedFields.map((field) => (
             <label key={field.name} className="grid gap-2">
               <span className="flex items-center justify-between text-sm font-extrabold text-ink">
                 {field.label}
@@ -459,7 +578,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                   />
                   {field.max !== undefined && field.min !== undefined && (
                     <input
-                      aria-label={`${field.label} 슬라이더`}
+                      aria-label={interpolate(t("calculator.slider"), { label: field.label })}
                       className="h-2 w-full min-w-0"
                       type="range"
                       min={field.min}
@@ -474,19 +593,44 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
               {field.help && <span className="text-xs font-semibold text-slate-500">{field.help}</span>}
             </label>
           ))}
+          {usesUnifiedBirthDateInput && !isSunriseSunset && (
+            <label className="grid gap-2">
+              <span className="flex items-center justify-between text-sm font-extrabold text-ink">
+                {t("calculator.birthDate")}
+                <span className="font-bold text-slate-400">{birthDateBasis}</span>
+              </span>
+              <input
+                className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
+                type="date"
+                min="1900-01-01"
+                max="2100-12-31"
+                value={unifiedBirthDateValue}
+                onChange={(event) => {
+                  const [year, month, day] = event.target.value.split("-").map(Number);
+                  if (!year || !month || !day) return;
+                  setValue(isTarotBirthCard ? "birthYear" : "year", year, { shouldDirty: true });
+                  setValue(isTarotBirthCard ? "birthMonth" : "month", month, { shouldDirty: true });
+                  setValue(isTarotBirthCard ? "birthDay" : "day", day, { shouldDirty: true });
+                }}
+              />
+              <span className="text-xs font-semibold text-slate-500">
+                {interpolate(t("calculator.birthDateHelp"), { basis: birthDateBasis })}
+              </span>
+            </label>
+          )}
         </div>
         <div className="mt-6 rounded-[18px] border border-line bg-paper p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-extrabold text-ink">입력 요약</p>
-              <p className="mt-1 text-xs font-semibold text-slate-500">마지막 입력값은 이 기기에서 자동 저장됩니다.</p>
+              <p className="text-sm font-extrabold text-ink">{t("calculator.inputSummary")}</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500">{t("calculator.autoSaved")}</p>
             </div>
             <button
               type="button"
               onClick={() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
               className="w-full rounded-full bg-white px-4 py-3 text-xs font-extrabold text-brand shadow-sm transition hover:bg-brand hover:text-white sm:w-auto"
             >
-              결과 보기
+              {t("calculator.viewResult")}
             </button>
           </div>
           <div className="mt-4 grid gap-2">
@@ -503,7 +647,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
               onClick={resetToDefaults}
               className="w-full rounded-full border border-line px-4 py-3 text-sm font-extrabold text-slate-600 transition hover:border-brand hover:text-brand sm:w-auto"
             >
-              기본값 복원
+              {t("calculator.resetDefaults")}
             </button>
           </div>
         </div>
@@ -511,7 +655,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
 
       <section ref={resultRef} className="min-w-0 overflow-hidden rounded-[20px] border border-line bg-white p-5 shadow-float sm:p-6">
         <div className="rounded-[18px] bg-ink p-5 text-white">
-          <p className="text-sm font-extrabold text-brand">계산 결과</p>
+          <p className="text-sm font-extrabold text-brand">{t("calculator.resultEyebrow")}</p>
           <h2 className="mt-2 text-3xl font-extrabold leading-tight sm:text-4xl">{result.headline}</h2>
           <p className="mt-3 text-sm font-semibold text-white/62">{result.subline}</p>
         </div>
@@ -524,6 +668,58 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 <p className="mt-2 text-2xl font-extrabold text-ink">{row.value}</p>
               </div>
             ))}
+          </div>
+        )}
+
+        {tarotCards.length > 0 && (
+          <div className="mt-5 rounded-[18px] border border-line bg-[#fbfaf7] p-5">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-sm font-extrabold text-ink">{t("calculator.tarotTitle")}</p>
+                <p className="mt-1 text-xs font-semibold text-slate-500">{t("calculator.tarotDescription")}</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">
+                {interpolate(t("calculator.tarotCount"), { count: tarotCards.length })}
+              </span>
+            </div>
+            <div className="mt-5 grid grid-cols-1 justify-items-center gap-4 sm:grid-cols-2">
+              {tarotCards.map((card, index) => (
+                <div
+                  key={`${card.number}-${card.ko}`}
+                  className="relative w-full min-w-0 overflow-hidden rounded-[18px] border bg-white p-3 shadow-sm"
+                  style={{ borderColor: card.glow }}
+                >
+                  <div className="flex min-h-[360px] flex-col rounded-[14px] border p-4 max-sm:min-h-[340px]" style={{ borderColor: card.accent, background: card.glow }}>
+                    <div className="flex items-center justify-between text-xs font-black" style={{ color: card.accent }}>
+                      <span>{String(card.number).padStart(2, "0")}</span>
+                      <span>{index === 0 ? t("calculator.tarotPersonality") : index === tarotCards.length - 1 ? t("calculator.tarotSoul") : t("calculator.tarotBridge")}</span>
+                    </div>
+                    <div className="my-5 grid flex-1 place-items-center rounded-[12px] bg-white/78 p-3 sm:p-4">
+                      {card.imageSrc ? (
+                        <Image
+                          src={card.imageSrc}
+                          alt={`${card.ko} 카드 이미지`}
+                          width={300}
+                          height={527}
+                          className="h-auto w-[min(22vw,180px)] rounded-[8px] border border-black/10 bg-[#f9f1dc] object-contain shadow-md max-lg:w-[min(28vw,170px)] max-sm:w-[min(58vw,180px)]"
+                          loading="lazy"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="grid h-32 w-32 place-items-center rounded-full border-4 text-6xl shadow-inner" style={{ borderColor: card.accent, color: card.accent }}>
+                          {card.symbol}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-black text-ink">{card.ko}</p>
+                      <p className="mt-1 text-xs font-extrabold uppercase text-slate-500">{card.en}</p>
+                      <p className="mt-3 rounded-full bg-white px-3 py-2 text-xs font-extrabold text-slate-700">{card.keyword}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -543,8 +739,8 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         <div className="mt-5 rounded-[18px] border border-line bg-paper p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-extrabold text-ink">비교 차트</p>
-              <p className="mt-1 text-xs font-semibold text-slate-500">핵심 수치를 한 번에 비교합니다.</p>
+              <p className="text-sm font-extrabold text-ink">{t("calculator.chartTitle")}</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500">{t("calculator.chartDescription")}</p>
             </div>
           </div>
           <div className="grid h-56 items-end gap-4" style={{ gridTemplateColumns: `repeat(${result.chart.length}, minmax(0, 1fr))` }}>
@@ -566,7 +762,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         </div>
 
         <div className="mt-5 rounded-[18px] border border-line bg-white p-5">
-          <p className="text-sm font-extrabold text-ink">해석 포인트</p>
+          <p className="text-sm font-extrabold text-ink">{t("calculator.checkpointsTitle")}</p>
           <div className="mt-4 grid gap-3">
             {activeCalculator.checkpoints.map((item) => (
               <div key={item} className="flex gap-3 rounded-2xl bg-paper px-4 py-4">
@@ -581,10 +777,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           <div className="mt-5 rounded-[18px] border border-brand/20 bg-[#f0fffa] p-5">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-sm font-extrabold text-brand">다음 액션</p>
-                <h3 className="mt-2 text-xl font-extrabold text-ink">계산 결과로 바로 이어서 할 일</h3>
+                <p className="text-sm font-extrabold text-brand">{t("calculator.nextActionEyebrow")}</p>
+                <h3 className="mt-2 text-xl font-extrabold text-ink">{t("calculator.nextActionTitle")}</h3>
               </div>
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-brand">맞춤 추천</span>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-brand">{t("calculator.customRecommendation")}</span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {nextActions.map((action) => (
@@ -618,7 +814,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 <h3 className="mt-2 text-xl font-extrabold text-ink">{actionPlan.title}</h3>
                 <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{actionPlan.intro}</p>
               </div>
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">상담 전 정리</span>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">{t("calculator.preConsultation")}</span>
             </div>
             <div className="mt-5 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
               <div className="grid gap-2">
@@ -655,7 +851,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
             onClick={saveCurrentResult}
             className="w-full rounded-full bg-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand sm:w-auto"
           >
-            결과 저장
+            {t("calculator.saveResult")}
           </button>
           {activeCalculator.actionLabel && (
             <button
@@ -675,7 +871,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
 
         {relatedCalculators.length > 0 && (
           <div className="mt-5 rounded-[18px] border border-line bg-paper p-5">
-            <p className="text-sm font-extrabold text-ink">다음에 이어서 볼 계산기</p>
+            <p className="text-sm font-extrabold text-ink">{t("calculator.relatedTitle")}</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {relatedCalculators.map((item) => {
                 const groupMeta = CALCULATOR_GROUP_META[getCalculatorGroup(item.slug)];
@@ -700,7 +896,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         )}
 
         <p className="mt-4 text-xs font-semibold leading-6 text-slate-500">
-          계산 결과는 입력값과 현재 반영 기준에 따른 추정치입니다. 실제 심사·지급·대출 승인 결과는 기관 판단에 따라 달라질 수 있습니다.
+          {t("calculator.disclaimer")}
         </p>
       </section>
     </div>

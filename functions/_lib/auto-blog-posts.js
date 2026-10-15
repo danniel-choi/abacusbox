@@ -152,9 +152,9 @@ export async function upsertAutoPublishedPost(db, draft, options) {
 
   const created = await db.prepare(`
     INSERT INTO posts (
-      type, board, slug, title, excerpt, body_md, status, author_id, published_at, featured
+      type, board, slug, title, excerpt, body_md, cover_image_url, status, author_id, published_at, featured
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     draft.type,
     draft.board,
@@ -162,6 +162,7 @@ export async function upsertAutoPublishedPost(db, draft, options) {
     draft.title,
     draft.excerpt,
     draft.body_md,
+    draft.coverImageUrl || `/api/blog-image/${draft.slug}.svg`,
     draft.status,
     authorId,
     publishedAt,

@@ -10,20 +10,44 @@ export async function onRequestGet(context) {
     const db = getD1Binding(context.env);
     if (!db) throw new Error("D1 binding is unavailable");
 
-    const result = await db.prepare(`
-      SELECT
-        id,
-        trigger_source,
-        executed_at,
-        published_count,
-        draft_created,
-        draft_slug,
-        error_message,
-        created_at
-      FROM scheduler_runs
-      ORDER BY id DESC
-      LIMIT 20
-    `).all();
+    let result;
+    try {
+      result = await db.prepare(`
+        SELECT
+          id,
+          trigger_source,
+          executed_at,
+          published_count,
+          draft_created,
+          draft_slug,
+          calculator_ideas_created,
+          calculator_ideas_planned,
+          calculator_idea_seed,
+          error_message,
+          created_at
+        FROM scheduler_runs
+        ORDER BY id DESC
+        LIMIT 20
+      `).all();
+    } catch {
+      result = await db.prepare(`
+        SELECT
+          id,
+          trigger_source,
+          executed_at,
+          published_count,
+          draft_created,
+          draft_slug,
+          0 AS calculator_ideas_created,
+          0 AS calculator_ideas_planned,
+          NULL AS calculator_idea_seed,
+          error_message,
+          created_at
+        FROM scheduler_runs
+        ORDER BY id DESC
+        LIMIT 20
+      `).all();
+    }
 
     return json({ items: result.results || [] });
   } catch (cause) {

@@ -21,6 +21,15 @@ type ReferenceSite = {
   internal?: boolean;
 };
 
+const KASI_COPYRIGHT_NOTICE = {
+  sourceHref: "https://astro.kasi.re.kr/",
+  policyHref: "https://www.kasi.re.kr/kor/pageView/293",
+  koglHref: "https://www.kogl.or.kr/info/licenseType1.do",
+  copyright: "Copyright (C) Korea Astronomy and Space Science Institute. All Rights Reserved.",
+  license: "공공누리 제1유형: 출처표시 조건에 따라 이용할 수 있습니다.",
+  inclusion: "이 고지는 일출일몰시각계산 페이지 및 해당 기능의 복사본 또는 상당 부분에 함께 포함되어야 합니다."
+};
+
 export function generateStaticParams() {
   return calculators.map((calculator) => ({ slug: calculator.slug }));
 }
@@ -370,6 +379,31 @@ export default async function CalculatorPage({ params }: Props) {
               </li>
             ))}
           </ul>
+          {calculator.slug === "sunrise-sunset-calculator" && (
+            <div className="mt-6 rounded-[18px] border border-brand/30 bg-white/8 p-5">
+              <p className="text-sm font-extrabold text-brand">KASI 저작권 및 라이선스 고지</p>
+              <div className="mt-4 grid gap-3 text-sm font-semibold leading-6 text-white/76">
+                <p>
+                  출처:
+                  {" "}
+                  <a href={KASI_COPYRIGHT_NOTICE.sourceHref} rel="noreferrer" target="_blank" className="text-brand underline underline-offset-4">
+                    한국천문연구원 천문우주포털
+                  </a>
+                </p>
+                <p>{KASI_COPYRIGHT_NOTICE.copyright}</p>
+                <p>{KASI_COPYRIGHT_NOTICE.license}</p>
+                <p>{KASI_COPYRIGHT_NOTICE.inclusion}</p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <a href={KASI_COPYRIGHT_NOTICE.policyHref} rel="noreferrer" target="_blank" className="rounded-full border border-brand/40 px-4 py-2 text-xs font-extrabold text-brand transition hover:bg-brand hover:text-white">
+                    KASI 저작권정책 전문
+                  </a>
+                  <a href={KASI_COPYRIGHT_NOTICE.koglHref} rel="noreferrer" target="_blank" className="rounded-full border border-brand/40 px-4 py-2 text-xs font-extrabold text-brand transition hover:bg-brand hover:text-white">
+                    공공누리 제1유형 전문
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="mt-6 rounded-[18px] border border-white/10 bg-white/5 p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>

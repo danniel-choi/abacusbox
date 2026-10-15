@@ -61,6 +61,7 @@ export async function onRequestGet(context) {
         p.board,
         p.slug,
         p.title,
+        p.cover_image_url,
         p.status,
         p.published_at,
         p.featured,

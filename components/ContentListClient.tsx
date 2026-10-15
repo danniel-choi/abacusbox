@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useLanguage } from "@/components/LanguageProvider";
 
 export type ContentListItem = {
   id: number;
@@ -11,6 +12,7 @@ export type ContentListItem = {
   slug: string;
   title: string;
   excerpt: string | null;
+  cover_image_url?: string | null;
   published_at: string | null;
   featured: number;
   view_count: number;
@@ -30,6 +32,7 @@ type Props = {
 };
 
 export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badge, meta = "blog", pageSize, detailMode = "query" }: Props) {
+  const { locale, t } = useLanguage();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -109,16 +112,16 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
 
   const emptyMessage = useMemo(() => {
     return meta === "community"
-      ? "아직 등록된 커뮤니티 글이 없습니다."
-      : "아직 등록된 블로그 글이 없습니다.";
-  }, [meta]);
+      ? t("content.communityEmpty")
+      : t("content.blogEmpty");
+  }, [meta, t]);
 
   return (
     <section className="mt-8">
       <div className="flex items-center justify-between gap-4">
         <div>
           {badge ? <p className="text-sm font-extrabold text-brand">{badge}</p> : null}
-          {loading && <p className="mt-2 text-sm font-semibold text-slate-500">콘텐츠를 불러오는 중입니다.</p>}
+          {loading && <p className="mt-2 text-sm font-semibold text-slate-500">{t("content.loading")}</p>}
           {!loading && error && <p className="mt-2 text-sm font-semibold text-amber-600">{error}</p>}
         </div>
       </div>
@@ -128,33 +131,33 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
           <FilterPill
             active={!board}
             onClick={() => updateQuery(router, pathname, searchParams, { board: "" })}
-            label="전체"
+            label={t("content.all")}
           />
           <FilterPill
             active={board === "qna"}
             onClick={() => updateQuery(router, pathname, searchParams, { board: "qna" })}
-            label="질문답변"
+            label={t("content.qna")}
           />
           <FilterPill
             active={board === "case"}
             onClick={() => updateQuery(router, pathname, searchParams, { board: "case" })}
-            label="사례공유"
+            label={t("content.case")}
           />
           <FilterPill
             active={board === "notice"}
             onClick={() => updateQuery(router, pathname, searchParams, { board: "notice" })}
-            label="공지"
+            label={t("content.notice")}
           />
           <div className="ml-0 flex flex-wrap gap-2 sm:ml-auto">
             <SortPill
               active={sort === "latest"}
               onClick={() => updateQuery(router, pathname, searchParams, { sort: "latest" })}
-              label="최신순"
+              label={t("content.latest")}
             />
             <SortPill
               active={sort === "popular"}
               onClick={() => updateQuery(router, pathname, searchParams, { sort: "popular" })}
-              label="인기순"
+              label={t("content.popular")}
             />
           </div>
         </div>
@@ -173,20 +176,31 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
                 href={detailMode === "path" ? `${detailBasePath}/${encodeURIComponent(item.slug)}` : `${detailBasePath}?slug=${encodeURIComponent(item.slug)}`}
                 className="readable-content w-full max-w-full min-w-0 overflow-hidden rounded-[24px] border border-line bg-white p-6 shadow-panel transition hover:-translate-y-1 hover:border-brand hover:shadow-float"
               >
-                <div className="flex flex-wrap items-center gap-2 text-sm font-extrabold">
-                  <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{labelForItem(item, meta)}</span>
-                  {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at)}</span>}
-                  {item.author_name && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{item.author_name}</span>}
-                </div>
-                <h2 className="mt-4 break-words text-xl font-extrabold text-ink [word-break:normal] sm:text-2xl">{item.title}</h2>
-                <p className="mt-3 break-words text-sm font-medium leading-7 text-slate-600 [word-break:normal]">{item.excerpt || ""}</p>
-                {meta === "community" && (
-                  <div className="mt-4 flex gap-4 text-sm font-bold text-slate-500">
-                    <span>댓글 {item.comment_count}</span>
-                    <span>좋아요 {item.like_count}</span>
-                    <span>조회 {item.view_count}</span>
+                <div className={meta === "blog" ? "grid gap-5 md:grid-cols-[220px_1fr]" : ""}>
+                  {meta === "blog" && (
+                    <div
+                      aria-hidden="true"
+                      className="aspect-[1200/630] overflow-hidden rounded-[18px] border border-line bg-paper bg-cover bg-center"
+                      style={{ backgroundImage: `url("${item.cover_image_url || `/api/blog-image/${encodeURIComponent(item.slug)}.svg`}")` }}
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 text-sm font-extrabold">
+                      <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{labelForItem(item, meta)}</span>
+                      {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at, locale)}</span>}
+                      {item.author_name && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{item.author_name}</span>}
+                    </div>
+                    <h2 className="mt-4 break-words text-xl font-extrabold text-ink [word-break:normal] sm:text-2xl">{item.title}</h2>
+                    <p className="mt-3 break-words text-sm font-medium leading-7 text-slate-600 [word-break:normal]">{item.excerpt || ""}</p>
+                    {meta === "community" && (
+                      <div className="mt-4 flex gap-4 text-sm font-bold text-slate-500">
+                        <span>{t("content.comments")} {item.comment_count}</span>
+                        <span>{t("content.likes")} {item.like_count}</span>
+                        <span>{t("content.views")} {item.view_count}</span>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </Link>
             ))}
           </div>
@@ -197,7 +211,7 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
                 disabled={page <= 1}
                 onClick={() => updateQuery(router, pathname, searchParams, { page: String(page - 1) })}
               >
-                이전
+                {t("content.previous")}
               </PaginationButton>
               {pageNumbers.map((pageNumber) => (
                 <PaginationButton
@@ -212,7 +226,7 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
                 disabled={page >= totalPages}
                 onClick={() => updateQuery(router, pathname, searchParams, { page: String(page + 1) })}
               >
-                다음
+                {t("content.next")}
               </PaginationButton>
             </div>
           ) : null}
@@ -309,8 +323,8 @@ function labelForItem(item: ContentListItem, meta: "blog" | "community") {
   }
 }
 
-function formatDate(value: string) {
+function formatDate(value: string, locale: string = "ko") {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ko-KR");
+  return date.toLocaleDateString(locale === "ja" ? "ja-JP" : locale === "en" ? "en-US" : "ko-KR");
 }

@@ -74,6 +74,9 @@ type SchedulerRun = {
   published_count: number;
   draft_created: number;
   draft_slug: string | null;
+  calculator_ideas_created?: number;
+  calculator_ideas_planned?: number;
+  calculator_idea_seed?: string | null;
   error_message: string | null;
   created_at: string;
 };
@@ -581,6 +584,25 @@ export function AdminModerationClient() {
       setNotice("계산기 구현 초안을 생성했습니다.");
     } catch {
       setNotice("계산기 구현 초안 생성에 실패했습니다.");
+    }
+  }
+
+  async function promoteCalculatorIdeaToBuildQueue(id: number) {
+    try {
+      const response = await fetch("/api/admin/calculator-ideas", {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: adminHeaders(token, true),
+        body: JSON.stringify({ id, action: "promoteToBuildQueue" })
+      });
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      const data = await response.json();
+      if (data.item) {
+        setCalculatorIdeas((items) => items.map((item) => item.id === id ? data.item : item));
+      }
+      setNotice("계산기 후보를 제작 대기열로 승격했습니다.");
+    } catch {
+      setNotice("제작 대기열 승격에 실패했습니다.");
     }
   }
 
@@ -1106,7 +1128,7 @@ export function AdminModerationClient() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-2xl font-extrabold text-ink">cron 실행 확인</h2>
-                <p className="mt-2 text-sm font-semibold text-slate-500">매시간 자동 글 생성과 예약 발행 실행 로그를 확인합니다.</p>
+                <p className="mt-2 text-sm font-semibold text-slate-500">매시간 자동 글 생성, 예약 발행, 계산기 후보 자동 발굴 실행 로그를 확인합니다.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={fetchSchedulerRuns} className="rounded-full border border-brand px-4 py-2 text-sm font-extrabold text-brand transition hover:bg-brand hover:text-white">
@@ -1129,8 +1151,15 @@ export function AdminModerationClient() {
                       <span className="rounded-full bg-white px-3 py-1 text-slate-600">{formatDateTime(item.executed_at)}</span>
                       <span className="rounded-full bg-white px-3 py-1 text-slate-600">발행 {item.published_count}</span>
                       <span className={`rounded-full px-3 py-1 ${item.draft_created ? "bg-brand/10 text-brand" : "bg-white text-slate-600"}`}>{item.draft_created ? "초안 생성" : "초안 건너뜀"}</span>
+                      <span className={`rounded-full px-3 py-1 ${Number(item.calculator_ideas_created || 0) > 0 ? "bg-brand/10 text-brand" : "bg-white text-slate-600"}`}>
+                        계산기 후보 {Number(item.calculator_ideas_created || 0)}
+                      </span>
+                      <span className={`rounded-full px-3 py-1 ${Number(item.calculator_ideas_planned || 0) > 0 ? "bg-brand/10 text-brand" : "bg-white text-slate-600"}`}>
+                        계획 보강 {Number(item.calculator_ideas_planned || 0)}
+                      </span>
                     </div>
                     <p className="mt-3 text-sm font-bold text-ink">{item.draft_slug || "생성된 초안 slug 없음"}</p>
+                    {item.calculator_idea_seed && <p className="mt-2 text-sm font-semibold text-slate-600">자동 후보 큐: {item.calculator_idea_seed}</p>}
                     {item.error_message ? <p className="mt-2 text-sm font-semibold text-[#b42318]">{item.error_message}</p> : <p className="mt-2 text-sm font-semibold text-slate-500">오류 없음</p>}
                   </div>
                 ))}
@@ -1292,6 +1321,7 @@ export function AdminModerationClient() {
                           <h3 className="text-lg font-extrabold text-ink">{idea.title}</h3>
                           <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">{idea.category}</span>
                           <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-extrabold text-brand">우선순위 {idea.priority}</span>
+                          {renderCalculatorIdeaAutomationBadges(idea)}
                         </div>
                         <p className="mt-2 text-xs font-bold text-slate-500">/{idea.slug}</p>
                       </div>
@@ -1312,6 +1342,9 @@ export function AdminModerationClient() {
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button type="button" onClick={() => generateCalculatorIdeaDraft(idea.id)} className="rounded-full bg-ink px-3 py-2 text-xs font-extrabold text-white transition hover:bg-brand">
                         구현 초안 생성
+                      </button>
+                      <button type="button" onClick={() => promoteCalculatorIdeaToBuildQueue(idea.id)} className="rounded-full border border-ink bg-white px-3 py-2 text-xs font-extrabold text-ink transition hover:bg-ink hover:text-white">
+                        제작 대기열로 승격
                       </button>
                       <button type="button" onClick={() => copyCalculatorIdeaCode(idea)} className="rounded-full border border-brand bg-white px-3 py-2 text-xs font-extrabold text-brand transition hover:bg-brand hover:text-white">
                         코드 복사
@@ -1622,6 +1655,14 @@ function parseCalculatorIdeaSpec(idea: CalculatorIdea) {
   if (!idea.generated_spec_json) return null;
   try {
     return JSON.parse(idea.generated_spec_json) as {
+      automation?: {
+        stage?: string;
+        complexity?: string;
+        riskLevel?: string;
+        nextAction?: string;
+        acceptanceCriteria?: string[];
+        generatedAt?: string;
+      };
       implementation?: {
         codeSnippet?: string;
         insertionChecklist?: string[];
@@ -1637,9 +1678,31 @@ function getCalculatorIdeaCode(idea: CalculatorIdea) {
   return parseCalculatorIdeaSpec(idea)?.implementation?.codeSnippet || "";
 }
 
+function getAutomationStageLabel(stage: string | undefined) {
+  if (stage === "candidate") return "후보 수집";
+  if (stage === "ready_for_build") return "계획 완료";
+  if (stage === "build_queue") return "제작 대기";
+  if (stage === "draft_ready") return "초안 준비";
+  return stage || "단계 미정";
+}
+
+function renderCalculatorIdeaAutomationBadges(idea: CalculatorIdea) {
+  const automation = parseCalculatorIdeaSpec(idea)?.automation;
+  if (!automation) return null;
+
+  return (
+    <>
+      <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">{getAutomationStageLabel(automation.stage)}</span>
+      {automation.complexity && <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">난이도 {automation.complexity}</span>}
+      {automation.riskLevel && <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-slate-600">{automation.riskLevel}</span>}
+    </>
+  );
+}
+
 function renderCalculatorIdeaDraft(idea: CalculatorIdea) {
   const spec = parseCalculatorIdeaSpec(idea);
   const implementation = spec?.implementation;
+  const automation = spec?.automation;
 
   if (!implementation?.codeSnippet) {
     return <pre className="mt-2 max-h-56 overflow-auto rounded-2xl bg-white p-3 text-xs leading-5 text-slate-700">{formatJsonPreview(idea.generated_spec_json || "")}</pre>;
@@ -1647,6 +1710,22 @@ function renderCalculatorIdeaDraft(idea: CalculatorIdea) {
 
   return (
     <div className="mt-2 grid gap-3">
+      {automation && (
+        <div className="rounded-2xl bg-white p-3">
+          <p className="text-xs font-extrabold text-ink">자동 업데이트 판단</p>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-600">
+            <span className="rounded-full bg-paper px-3 py-1">{getAutomationStageLabel(automation.stage)}</span>
+            {automation.complexity && <span className="rounded-full bg-paper px-3 py-1">난이도 {automation.complexity}</span>}
+            {automation.riskLevel && <span className="rounded-full bg-paper px-3 py-1">{automation.riskLevel}</span>}
+          </div>
+          {automation.nextAction && <p className="mt-3 text-xs font-semibold leading-5 text-slate-600">{automation.nextAction}</p>}
+          {automation.acceptanceCriteria && automation.acceptanceCriteria.length > 0 && (
+            <ul className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-600">
+              {automation.acceptanceCriteria.map((item) => <li key={item}>- {item}</li>)}
+            </ul>
+          )}
+        </div>
+      )}
       <pre className="max-h-72 overflow-auto rounded-2xl bg-white p-3 text-xs leading-5 text-slate-700">{implementation.codeSnippet}</pre>
       {implementation.insertionChecklist && implementation.insertionChecklist.length > 0 && (
         <div className="rounded-2xl bg-white p-3">

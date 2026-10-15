@@ -271,17 +271,63 @@ function buildImplementationDraft(title, slug, category) {
   };
 }
 
-function buildSpec(title, category, slug = slugifyIdea(title)) {
+function inferComplexity(category, title) {
+  if (category === "세금" || /(법령|환급|공제|신고|양도|상속|증여)/.test(title)) return "높음";
+  if (category === "금융" || /(수익률|대출|이자|배당|마진|CAC|LTV)/i.test(title)) return "중간";
+  return "낮음";
+}
+
+function inferRiskLevel(category, title) {
+  if (category === "세금" || /(세금|환급|법령|신고|공제)/.test(title)) return "공식 기준 필수";
+  if (category === "금융" || /(투자|대출|수익률|배당|손익)/.test(title)) return "참고용 고지 필요";
+  if (category === "사주") return "엔터테인먼트 고지 필요";
+  return "일반 검증";
+}
+
+function buildAutomationReview(title, category, options = {}) {
+  const complexity = inferComplexity(category, title);
+  const riskLevel = inferRiskLevel(category, title);
+  const stage = options.stage || "draft_ready";
+  const source = options.source || "admin";
+
+  return {
+    stage,
+    source,
+    seed: options.seed || null,
+    keyword: options.keyword || null,
+    complexity,
+    riskLevel,
+    nextAction: stage === "candidate"
+      ? "계산식 출처를 확인하고 구현 초안을 생성하세요."
+      : stage === "ready_for_build"
+        ? "코드 스니펫을 검토한 뒤 제작 대기열로 승격하세요."
+        : "구현 후 타입 검사, 빌드, 모바일 표시를 확인하세요.",
+    acceptanceCriteria: [
+      `${title}의 핵심 입력값과 결과값이 한 화면에서 이해되어야 합니다.`,
+      "0, 큰 값, 소수 입력의 결과가 깨지지 않아야 합니다.",
+      "관련 공식 기준 또는 참고용 고지 문구를 페이지에 포함해야 합니다.",
+      "검색 의도에 맞는 FAQ와 내부 링크를 함께 준비해야 합니다."
+    ],
+    generatedAt: new Date().toISOString()
+  };
+}
+
+export function buildCalculatorIdeaSpec(title, category, slug = slugifyIdea(title), options = {}) {
   const fields = buildFieldSet(title, category);
   return {
     title,
     slug,
     category,
+    automation: buildAutomationReview(title, category, options),
     fields,
     result: "입력값을 기준으로 예상 금액, 월 환산액, 체크포인트를 보여주는 계산기 초안",
     notes: ["공식 기준이 필요한 영역은 출처 확인 후 계산식을 확정하세요.", "후보 저장 후 실제 계산식 검증 단계가 필요합니다."],
     implementation: buildImplementationDraft(title, slug, category)
   };
+}
+
+function buildSpec(title, category, slug = slugifyIdea(title), options = {}) {
+  return buildCalculatorIdeaSpec(title, category, slug, options);
 }
 
 function buildIdeas({ seedKeyword, sourceUrl, sourceText }) {
@@ -299,7 +345,12 @@ function buildIdeas({ seedKeyword, sourceUrl, sourceText }) {
       reason: buildReason(title, seedKeyword, sourceUrl, duplicate),
       priority: scoreIdea(title, seedKeyword, sourceText),
       status: duplicate ? "rejected" : "candidate",
-      generatedSpec: buildSpec(title, category, slug)
+      generatedSpec: buildSpec(title, category, slug, {
+        seed: seedKeyword || null,
+        keyword: seedKeyword || title,
+        source: sourceUrl ? "source_url" : "manual",
+        stage: "candidate"
+      })
     };
   }).sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title, "ko"));
 }
@@ -466,11 +517,50 @@ export async function onRequestPatch(context) {
 
       if (!idea?.id) return error("calculator idea not found", 404);
 
-      const specJson = JSON.stringify(buildSpec(String(idea.title), String(idea.category), String(idea.slug)));
+      const specJson = JSON.stringify(buildSpec(String(idea.title), String(idea.category), String(idea.slug), {
+        seed: String(idea.seed_keyword || ""),
+        keyword: String(idea.seed_keyword || idea.title || ""),
+        source: "admin",
+        stage: "ready_for_build"
+      }));
       await db.prepare(`
         UPDATE calculator_ideas
         SET generated_spec_json = ?,
             status = CASE WHEN status = 'candidate' THEN 'planned' ELSE status END,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).bind(specJson, id).run();
+
+      const updated = await db.prepare(`
+        SELECT *
+        FROM calculator_ideas
+        WHERE id = ?
+        LIMIT 1
+      `).bind(id).first();
+
+      return json({ ok: true, item: updated });
+    }
+
+    if (action === "promoteToBuildQueue") {
+      const idea = await db.prepare(`
+        SELECT id, title, slug, category, seed_keyword
+        FROM calculator_ideas
+        WHERE id = ?
+        LIMIT 1
+      `).bind(id).first();
+
+      if (!idea?.id) return error("calculator idea not found", 404);
+
+      const specJson = JSON.stringify(buildSpec(String(idea.title), String(idea.category), String(idea.slug), {
+        seed: String(idea.seed_keyword || ""),
+        keyword: String(idea.seed_keyword || idea.title || ""),
+        source: "admin",
+        stage: "build_queue"
+      }));
+      await db.prepare(`
+        UPDATE calculator_ideas
+        SET generated_spec_json = ?,
+            status = 'building',
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `).bind(specJson, id).run();

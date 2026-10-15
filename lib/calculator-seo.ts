@@ -1373,6 +1373,31 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/health", label: "건강 계산기 모음", text: "러닝, 운동, 칼로리 계산기를 함께 제공합니다." }
     ]
   },
+  "speed-distance-calculator": {
+    title: "속도 거리 계산기 | 거리·속도·시간 자동 계산",
+    description: "속도 거리 계산기로 거리, 속도, 시간 중 두 값을 입력해 나머지 값을 계산하고 km/h, m/s, 페이스를 확인하세요.",
+    keywords: ["속도 거리 계산기", "속도 계산기", "거리 시간 계산", "평균속도 계산", "이동시간 계산"],
+    searchIntents: [
+      "거리와 평균속도로 예상 이동시간을 알고 싶을 때",
+      "이동거리와 소요시간으로 평균속도를 계산하고 싶을 때",
+      "속도와 시간으로 이동거리를 빠르게 계산하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "거리·속도·시간 중 하나를 계산합니다.",
+        body: "계산 모드를 선택하고 두 값을 입력하면 거리=속도×시간, 속도=거리÷시간, 시간=거리÷속도 공식으로 나머지 값을 계산합니다."
+      },
+      {
+        title: "속도 변환과 페이스를 함께 보여줍니다.",
+        body: "km/h 결과를 m/s로 변환하고 km당 페이스까지 표시해 운전, 여행, 러닝, 물리 문제에 함께 활용할 수 있습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/distance-calculator", label: "거리 계산기", text: "현재 위치 기준 목적지까지의 직선거리를 확인합니다." },
+      { href: "/calculators/running-pace", label: "러닝 페이스 계산기", text: "달리기 기록과 페이스를 더 자세히 계산합니다." },
+      { href: "/calculators/fuel-cost", label: "유류비 계산기", text: "주행거리 기준 기름값을 함께 계산합니다." }
+    ]
+  },
   "auto-installment": {
     title: "자동차 할부 계산기 | 월 할부금·총 이자 계산",
     description: "자동차 할부 계산기로 차량 가격, 선수금, 금리, 기간을 입력해 월 할부금, 총 이자, 초기 필요 현금을 계산하세요.",
@@ -1421,6 +1446,31 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/calculators/car-maintenance", label: "자동차 유지비 계산기", text: "보험료와 자동차세를 포함한 월 유지비를 계산합니다." },
       { href: "/calculators/auto-installment", label: "자동차 할부 계산기", text: "차량 구매 월 할부금을 함께 확인합니다." },
       { href: "/calculators/distance-calculator", label: "거리 계산기", text: "현재 위치 기준 목적지까지 거리를 확인합니다." }
+    ]
+  },
+  "estimated-mileage-calculator": {
+    title: "예상주행거리 계산기 | 평일·주말 기준 연간 km 계산",
+    description: "예상주행거리 계산기로 평일과 주말 하루 주행거리를 입력해 연간, 월평균, 주평균 자동차 주행거리를 계산하세요.",
+    keywords: ["예상주행거리 계산기", "연간 주행거리 계산", "자동차 주행거리 계산", "보험 마일리지", "차량 유지비 주행거리"],
+    searchIntents: [
+      "보험 마일리지 특약 가입 전 연간 주행거리를 가늠하고 싶을 때",
+      "자동차 유지비나 유류비 계산 전에 연간 km를 먼저 추정하고 싶을 때",
+      "평일 출퇴근과 주말 운행 패턴을 나눠 계산하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "평일과 주말 주행 패턴을 나눠 계산합니다.",
+        body: "평일 1일 주행거리와 주말·공휴일 1일 주행거리에 각각 연간 일수를 곱해 연간 예상주행거리를 계산합니다."
+      },
+      {
+        title: "월평균·주평균 거리까지 함께 보여줍니다.",
+        body: "연간 총거리뿐 아니라 월평균, 주평균, 하루평균 주행거리와 평일·주말 비중을 함께 확인할 수 있습니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/fuel-cost", label: "유류비 계산기", text: "예상주행거리로 연간 기름값을 계산합니다." },
+      { href: "/calculators/car-maintenance", label: "자동차 유지비 계산기", text: "보험료와 자동차세까지 포함한 유지비를 봅니다." },
+      { href: "/calculators/auto-installment", label: "자동차 할부 계산기", text: "차량 구매 월 납입액도 함께 확인합니다." }
     ]
   },
   "youth-future-savings": {
@@ -1521,6 +1571,56 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/calculators/parental-leave", label: "육아휴직 급여 계산기", text: "육아휴직 중 받을 수 있는 급여를 함께 계산합니다." },
       { href: "/calculators/korean-age", label: "만나이 계산기", text: "아동의 개월 수와 나이를 확인합니다." },
       { href: "/life", label: "생활 도구 계산기 모음", text: "가족과 지원금 계산기를 함께 제공합니다." }
+    ]
+  },
+  "child-support-calculator": {
+    title: "자녀 양육비 계산기 | 2021 양육비 산정기준표 기준",
+    description: "자녀 양육비 계산기로 부모 월소득, 양육자, 자녀 나이를 입력해 표준양육비와 비양육자 예상 분담액을 계산하세요.",
+    keywords: ["양육비 계산기", "자녀 양육비", "양육비 산정기준표", "이혼 양육비", "비양육자 양육비"],
+    searchIntents: [
+      "부모 소득비율 기준 양육비 분담액을 확인하고 싶을 때",
+      "자녀 나이별 2021년 양육비 산정기준표 금액을 보고 싶을 때",
+      "협의 전 표준양육비와 보정 후 금액을 비교하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "부모 합산 소득과 자녀 나이 구간을 함께 봅니다.",
+        body: "부모의 세전 월소득 합계와 자녀 만 나이 구간을 기준으로 표준양육비를 찾고, 자녀별 기준 금액을 합산합니다."
+      },
+      {
+        title: "비양육자의 소득비율로 예상 분담액을 계산합니다.",
+        body: "양육자를 지정하면 조정 후 양육비 총액에 비양육자의 소득비율을 곱해 월 지급 추정액을 보여줍니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/childbirth-grant", label: "출산 지원금 계산기", text: "가족 지원금과 양육 비용을 함께 확인합니다." },
+      { href: "/calculators/korean-age", label: "만나이 계산기", text: "자녀의 만 나이를 정확히 확인합니다." },
+      { href: "/life", label: "생활 도구 계산기 모음", text: "가족과 생활비 계산기를 함께 제공합니다." }
+    ]
+  },
+  "divorce-child-support-calculator": {
+    title: "이혼 시 양육비 계산기 | 서울가정법원 산정기준표 기준",
+    description: "이혼 시 양육비 계산기로 양육자, 부모 월소득, 자녀 나이와 거주지역을 입력해 월 예상 양육비를 계산하세요.",
+    keywords: ["이혼 양육비 계산기", "이혼 시 양육비", "양육비 산정기준표", "서울가정법원 양육비", "월 예상 양육비"],
+    searchIntents: [
+      "이혼 후 비양육자가 지급할 월 양육비를 알고 싶을 때",
+      "도시·농어촌 거주지역 보정을 반영하고 싶을 때",
+      "자녀 나이별 양육비 기준금액을 빠르게 확인하고 싶을 때"
+    ],
+    sections: [
+      {
+        title: "이혼 후 양육자와 거주지역을 먼저 선택합니다.",
+        body: "본인 성별, 이혼 후 자녀와 함께 지낼 사람, 자녀 거주지역을 입력해 상담형 흐름으로 월 예상 양육비를 계산합니다."
+      },
+      {
+        title: "2021 서울가정법원 양육비 산정기준표를 기준으로 계산합니다.",
+        body: "부모 합산 세전 월소득과 자녀 만 나이 구간별 표준양육비를 합산한 뒤 자녀 수, 거주지역, 비양육자 소득비율을 반영합니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/child-support-calculator", label: "자녀 양육비 계산기", text: "일반 양육비 기준액을 함께 확인합니다." },
+      { href: "/calculators/korean-age", label: "만나이 계산기", text: "자녀의 만 나이를 정확히 계산합니다." },
+      { href: "/life", label: "생활 도구 계산기 모음", text: "가족과 생활비 계산기를 함께 제공합니다." }
     ]
   }
 };
