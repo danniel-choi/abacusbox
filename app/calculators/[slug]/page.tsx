@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AdSenseAd } from "@/components/AdSenseAd";
 import { CalculatorClient } from "@/components/CalculatorClient";
+import { LocalizedCalculatorHero } from "@/components/LocalizedCalculatorHero";
 import { calculators, getCalculator } from "@/lib/calculators";
-import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
+import { getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 import { calculatorSeoContent } from "@/lib/calculator-seo";
 import { blogPosts } from "@/lib/content";
 import { DEFAULT_OG_IMAGE, legalStandards, officialSources, SITE_URL } from "@/lib/constants";
@@ -155,7 +156,6 @@ export default async function CalculatorPage({ params }: Props) {
   if (!calculator) notFound();
   const relatedCalculators = getRelatedCalculators(calculator.slug, 4);
   const relatedBlogPosts = getRelatedBlogPosts(calculator);
-  const groupMeta = CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)];
   const referenceSites = getReferenceSites(getCalculatorGroup(calculator.slug));
   const seoContent = calculatorSeoContent[calculator.slug];
 
@@ -218,56 +218,17 @@ export default async function CalculatorPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <section className="bg-ink text-white">
-        <div className="mx-auto max-w-6xl px-4 pb-12 pt-8">
-          <nav className="text-sm font-semibold text-white/56">
-            <Link href="/" className="hover:text-brand">홈</Link>
-            <span className="mx-2">/</span>
-            <Link href="/calculators" className="hover:text-brand">계산기</Link>
-            <span className="mx-2">/</span>
-            <span>{calculator.title}</span>
-          </nav>
-          <div className="py-8">
-            <p className="inline-flex rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-extrabold text-brand">
-              {calculator.category} 계산기 · {calculator.badge}
-            </p>
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm font-extrabold text-white/84">
-              <span>{getCalculatorIcon(calculator.slug)}</span>
-              <span>{groupMeta.label}</span>
-            </div>
-            <h1 className="mt-5 text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-tight md:text-5xl md:leading-tight lg:text-6xl">{calculator.title}</h1>
-            <p className="mt-5 max-w-3xl text-lg font-medium leading-8 text-white/68">{calculator.description}</p>
-            <div className="mt-6 flex flex-wrap gap-3 text-sm font-bold text-white/72">
-              <span className="rounded-full border border-white/10 bg-white/6 px-4 py-2">{calculator.audience}</span>
-              <span className="rounded-full border border-white/10 bg-white/6 px-4 py-2">기준연도 {legalStandards.year} 반영</span>
-              <span className="rounded-full border border-white/10 bg-white/6 px-4 py-2">공유 가능한 결과 화면</span>
-            </div>
-            <div className="mt-6 grid gap-3 md:max-w-4xl md:grid-cols-3">
-              <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-4">
-                <p className="text-sm font-extrabold text-brand">누가 많이 쓰나</p>
-                <p className="mt-2 text-sm font-medium leading-6 text-white/74">{calculator.audience}</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-4">
-                <p className="text-sm font-extrabold text-brand">먼저 볼 것</p>
-                <p className="mt-2 text-sm font-medium leading-6 text-white/74">{calculator.checkpoints[0]}</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-4">
-                <p className="text-sm font-extrabold text-brand">이 페이지에서 제공</p>
-                <p className="mt-2 text-sm font-medium leading-6 text-white/74">빠른 계산, 기준 설명, FAQ, 관련 계산기까지 한 번에 확인</p>
-              </div>
-            </div>
-            {seoContent && (
-              <div className="mt-6 flex flex-wrap gap-2 text-sm font-bold text-white/72">
-                {seoContent.searchIntents.map((intent) => (
-                  <span key={intent} className="rounded-full border border-brand/20 bg-brand/10 px-4 py-2 text-brand">
-                    {intent}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+      <LocalizedCalculatorHero
+        calculator={{
+          slug: calculator.slug,
+          title: calculator.title,
+          description: calculator.description,
+          category: calculator.category,
+          badge: calculator.badge,
+          audience: calculator.audience,
+          checkpoints: calculator.checkpoints
+        }}
+      />
 
       <div className="mx-auto -mt-10 max-w-6xl px-4">
         <Suspense fallback={<div className="rounded-[20px] border border-line bg-white p-6 shadow-panel">계산기를 불러오는 중입니다.</div>}>

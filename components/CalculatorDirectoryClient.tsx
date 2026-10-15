@@ -15,6 +15,7 @@ import {
   type CalculatorGroup
 } from "@/lib/calculator-directory";
 import { formatCalculatorCount, formatDirectoryResultTitle, type TranslationKey } from "@/lib/i18n";
+import { getLocalizedCalculatorPresentation } from "@/lib/calculator-i18n";
 
 type Props = {
   initialCategory?: "전체" | CalculatorCategory;
@@ -84,6 +85,10 @@ export function CalculatorDirectoryClient({
           calculator.audience,
           calculator.badge,
           calculator.category,
+          getLocalizedCalculatorPresentation(calculator, locale).title,
+          getLocalizedCalculatorPresentation(calculator, locale).description,
+          getLocalizedCalculatorPresentation(calculator, locale).audience,
+          getLocalizedCalculatorPresentation(calculator, locale).badge,
           ...calculator.keywords
         ]
           .join(" ")
@@ -93,14 +98,16 @@ export function CalculatorDirectoryClient({
     }
 
     if (sort === "name") {
-      list = list.slice().sort((a, b) => a.title.localeCompare(b.title, "ko"));
+      list = list.slice().sort((a, b) =>
+        getLocalizedCalculatorPresentation(a, locale).title.localeCompare(getLocalizedCalculatorPresentation(b, locale).title, locale)
+      );
     } else if (sort === "group") {
       list = list
         .slice()
         .sort((a, b) =>
-          `${getLocalizedGroupMeta(locale, getCalculatorGroup(a.slug)).label} ${a.title}`.localeCompare(
-            `${getLocalizedGroupMeta(locale, getCalculatorGroup(b.slug)).label} ${b.title}`,
-            "ko"
+          `${getLocalizedGroupMeta(locale, getCalculatorGroup(a.slug)).label} ${getLocalizedCalculatorPresentation(a, locale).title}`.localeCompare(
+            `${getLocalizedGroupMeta(locale, getCalculatorGroup(b.slug)).label} ${getLocalizedCalculatorPresentation(b, locale).title}`,
+            locale
           )
         );
     }
@@ -446,6 +453,7 @@ function FilterButton({
 function CalculatorCard({ calculator }: { calculator: CalculatorConfig }) {
   const { locale, t } = useLanguage();
   const groupMeta = getLocalizedGroupMeta(locale, getCalculatorGroup(calculator.slug));
+  const presentation = getLocalizedCalculatorPresentation(calculator, locale);
   return (
     <Link
       href={`/calculators/${calculator.slug}`}
@@ -453,18 +461,18 @@ function CalculatorCard({ calculator }: { calculator: CalculatorConfig }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-extrabold text-brand">{calculator.category}</span>
+          <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-extrabold text-brand">{presentation.category}</span>
             <span className="rounded-full bg-paper px-3 py-1 text-xs font-extrabold text-slate-500">{groupMeta.label}</span>
         </div>
         <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-xl ${groupMeta.softClass} ${groupMeta.accentClass}`}>
           {getCalculatorIcon(calculator.slug)}
         </span>
       </div>
-      <h3 className="mt-4 text-lg font-extrabold text-ink">{calculator.title}</h3>
-      <p className="mt-3 min-h-20 text-sm font-medium leading-6 text-slate-600">{calculator.description}</p>
+      <h3 className="mt-4 text-lg font-extrabold text-ink">{presentation.title}</h3>
+      <p className="mt-3 min-h-20 text-sm font-medium leading-6 text-slate-600">{presentation.description}</p>
       <div className="mt-4 flex items-center justify-between gap-3">
-        <p className="text-xs font-bold text-slate-400">{calculator.audience}</p>
-        <span className={`text-[11px] font-extrabold ${groupMeta.accentClass}`}>{calculator.badge}</span>
+        <p className="text-xs font-bold text-slate-400">{presentation.audience}</p>
+        <span className={`text-[11px] font-extrabold ${groupMeta.accentClass}`}>{presentation.badge}</span>
       </div>
       <span className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-brand">
         {t("directory.calculate")} <span>↗</span>
@@ -495,7 +503,7 @@ function DirectoryHighlight({
               <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-base ${CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)].softClass} ${CALCULATOR_GROUP_META[getCalculatorGroup(calculator.slug)].accentClass}`}>
                 {getCalculatorIcon(calculator.slug)}
               </span>
-              <span className="block truncate text-sm font-extrabold text-ink">{calculator.title}</span>
+              <span className="block truncate text-sm font-extrabold text-ink">{getLocalizedCalculatorPresentation(calculator, locale).title}</span>
               <span className="mt-1 block text-xs font-semibold text-slate-500">{getLocalizedGroupMeta(locale, getCalculatorGroup(calculator.slug)).label}</span>
             </span>
             <span className="ml-3 text-sm font-extrabold text-brand">↗</span>

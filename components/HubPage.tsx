@@ -4,12 +4,13 @@ import Link from "next/link";
 import { AdSenseAd } from "@/components/AdSenseAd";
 import { useLanguage } from "@/components/LanguageProvider";
 import { getCalculatorsByGroup } from "@/lib/calculator-directory";
+import { getLocalizedCalculatorPresentation } from "@/lib/calculator-i18n";
 import { calculators, type CalculatorConfig } from "@/lib/calculators";
 import { blogPosts, type BlogPost } from "@/lib/content";
 import type { HubContent } from "@/lib/hub-content";
 
 export function HubPage({ hub }: { hub: HubContent }) {
-  const { t } = useLanguage();
+  const { locale, t } = useLanguage();
   const groupCalculators = getCalculatorsByGroup(hub.group);
   const featured = hub.featuredSlugs
     .map((slug) => calculators.find((calculator) => calculator.slug === slug))
@@ -59,17 +60,18 @@ export function HubPage({ hub }: { hub: HubContent }) {
             </Link>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
-            {featured.map((calculator) => (
-              <Link
+            {featured.map((calculator) => {
+              const presentation = getLocalizedCalculatorPresentation(calculator, locale);
+              return <Link
                 key={calculator.slug}
                 href={`/calculators/${calculator.slug}`}
                 className="rounded-[22px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white"
               >
-                <p className="text-xs font-extrabold text-brand">{calculator.badge}</p>
-                <h3 className="mt-2 text-lg font-extrabold text-ink">{calculator.title}</h3>
-                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{calculator.description}</p>
+                <p className="text-xs font-extrabold text-brand">{presentation.badge}</p>
+                <h3 className="mt-2 text-lg font-extrabold text-ink">{presentation.title}</h3>
+                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{presentation.description}</p>
               </Link>
-            ))}
+            })}
           </div>
         </div>
 

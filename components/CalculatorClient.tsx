@@ -10,6 +10,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type ResultRow } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 import { interpolate, type Locale } from "@/lib/i18n";
+import { getLocalizedCalculatorPresentation } from "@/lib/calculator-i18n";
 
 type FormValues = Record<string, number>;
 
@@ -222,6 +223,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   });
   const values = useWatch({ control });
   const activeCalculator = calculator;
+  const localizedCalculator = getLocalizedCalculatorPresentation(activeCalculator, locale);
 
   useEffect(() => {
     reset(defaults);
@@ -366,7 +368,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     const snapshot: SavedCalculatorResult = {
       id: `${activeCalculator.slug}-${Date.now()}`,
       slug: activeCalculator.slug,
-      title: activeCalculator.title,
+      title: localizedCalculator.title,
       headline: result.headline,
       subline: result.subline,
       rows: result.rows.slice(0, 6),
@@ -385,13 +387,13 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   }
 
   if (activeCalculator.slug === "graphing-calculator") {
-    return <GraphingCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <GraphingCalculator title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "scientific-calculator") {
     return (
       <ExpressionCalculator
-        title={activeCalculator.title}
+        title={localizedCalculator.title}
         checkpoints={activeCalculator.checkpoints}
         historyStorageKey={SCIENTIFIC_CALCULATOR_HISTORY_STORAGE_KEY}
         memoryStorageKey={SCIENTIFIC_CALCULATOR_MEMORY_STORAGE_KEY}
@@ -400,53 +402,53 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   }
 
   if (activeCalculator.slug === "four-function-calculator") {
-    return <FourFunctionCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <FourFunctionCalculator title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "dday") {
-    return <DdayCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <DdayCalculator title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "date-add") {
-    return <DateAddCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <DateAddCalculator title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "stopwatch") {
-    return <StopwatchTool title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <StopwatchTool title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "internet-speed-test") {
-    return <InternetSpeedTest title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <InternetSpeedTest title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "math-notes") {
-    return <MathNotes title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <MathNotes title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "matrix-calculator") {
-    return <MatrixCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <MatrixCalculator title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "derivative-calculator") {
-    return <CalculusCalculator mode="derivative" title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <CalculusCalculator mode="derivative" title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "integral-calculator") {
-    return <CalculusCalculator mode="integral" title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <CalculusCalculator mode="integral" title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "geometry-tool") {
-    return <GeometryTool title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <GeometryTool title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "three-d-calculator") {
-    return <ThreeDCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <ThreeDCalculator title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "web-calculator") {
     return (
       <ExpressionCalculator
-        title={activeCalculator.title}
+        title={localizedCalculator.title}
         checkpoints={activeCalculator.checkpoints}
         historyStorageKey={WEB_CALCULATOR_HISTORY_STORAGE_KEY}
         memoryStorageKey={WEB_CALCULATOR_MEMORY_STORAGE_KEY}
@@ -455,15 +457,15 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   }
 
   if (activeCalculator.slug === "distance-calculator") {
-    return <DistanceCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <DistanceCalculator title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "text-counter") {
-    return <TextCounter title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <TextCounter title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   if (activeCalculator.slug === "poker-equity-calculator") {
-    return <PokerEquityCalculator title={activeCalculator.title} checkpoints={activeCalculator.checkpoints} />;
+    return <PokerEquityCalculator title={localizedCalculator.title} checkpoints={activeCalculator.checkpoints} />;
   }
 
   return (
@@ -862,7 +864,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
               {activeCalculator.actionLabel}
             </button>
           )}
-          <ShareActions slug={activeCalculator.slug} title={activeCalculator.title} result={result} fileName={`${activeCalculator.slug}-result.png`} />
+          <ShareActions slug={activeCalculator.slug} title={localizedCalculator.title} result={result} fileName={`${activeCalculator.slug}-result.png`} />
         </div>
 
         {activeCalculator.slug === "unpaid-wage" && <UnpaidWageComplaintHelper result={result} values={values as FormValues} />}

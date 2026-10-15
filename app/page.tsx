@@ -15,6 +15,7 @@ import {
   getRecentCalculators
 } from "@/lib/calculator-directory";
 import { getLatestBlogPosts } from "@/lib/content";
+import { getLocalizedCalculatorPresentation } from "@/lib/calculator-i18n";
 import { legalStandards } from "@/lib/constants";
 import { formatWon } from "@/lib/format";
 import { hubContents, hubOrder } from "@/lib/hub-content";
@@ -88,17 +89,18 @@ export default function HomePage() {
                 <Metric label={t("home.metricHealthInsurance")} value="7.19%" compact />
               </div>
               <div className="mt-5 grid gap-3 md:grid-cols-2">
-                {featured.map((calculator) => (
-                  <Link
+                {featured.map((calculator) => {
+                  const presentation = getLocalizedCalculatorPresentation(calculator, locale);
+                  return <Link
                     key={calculator.slug}
                     href={`/calculators/${calculator.slug}`}
                     className="flex h-full flex-col justify-between rounded-2xl border border-line bg-paper px-4 py-4 text-left transition hover:border-brand hover:bg-white"
                   >
-                    <p className="text-xs font-extrabold text-brand">{calculator.badge}</p>
-                    <h3 className="mt-2 text-base font-extrabold text-ink">{calculator.title}</h3>
-                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{calculator.audience}</p>
+                    <p className="text-xs font-extrabold text-brand">{presentation.badge}</p>
+                    <h3 className="mt-2 text-base font-extrabold text-ink">{presentation.title}</h3>
+                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{presentation.audience}</p>
                   </Link>
-                ))}
+                })}
               </div>
             </div>
           </div>
@@ -158,6 +160,7 @@ export default function HomePage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {shareableCalculators.map((calculator) => {
               const groupMeta = CALCULATOR_GROUP_META[getCalculatorGroupForHome(calculator.slug)];
+              const presentation = getLocalizedCalculatorPresentation(calculator, locale);
               return (
                 <Link
                   key={calculator.slug}
@@ -171,12 +174,12 @@ export default function HomePage() {
                       </span>
                       <span className="rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-slate-500 group-hover:text-brand">{t("home.resultCard")}</span>
                     </div>
-                    <h3 className="mt-4 text-lg font-extrabold text-ink">{calculator.title}</h3>
-                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{calculator.description}</p>
+                    <h3 className="mt-4 text-lg font-extrabold text-ink">{presentation.title}</h3>
+                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{presentation.description}</p>
                   </div>
                   <div className="mt-5 rounded-2xl bg-white px-4 py-3">
                     <p className="text-xs font-extrabold text-brand">{t("home.shareExample")}</p>
-                    <p className="mt-1 text-sm font-extrabold leading-6 text-ink">{getShareExample(calculator.slug)}</p>
+                    <p className="mt-1 text-sm font-extrabold leading-6 text-ink">{getShareExample(calculator.slug, locale)}</p>
                   </div>
                 </Link>
               );
@@ -220,8 +223,8 @@ export default function HomePage() {
 
       <section className="page-shell py-2 md:py-3">
         <div className="grid gap-6 lg:grid-cols-2">
-          <MiniCalculatorSection title={t("home.popular")} items={popular} />
-          <MiniCalculatorSection title={t("home.recent")} items={recent} />
+          <MiniCalculatorSection title={t("home.popular")} items={popular} locale={locale} />
+          <MiniCalculatorSection title={t("home.recent")} items={recent} locale={locale} />
         </div>
       </section>
 
@@ -337,7 +340,29 @@ function getCalculatorGroupForHome(slug: (typeof calculators)[number]["slug"]) {
   return getCalculatorGroup(slug);
 }
 
-function getShareExample(slug: (typeof calculators)[number]["slug"]) {
+function getShareExample(slug: (typeof calculators)[number]["slug"], locale: "ko" | "en" | "ja") {
+  if (locale === "en") {
+    const examples: Record<string, string> = {
+      "year-end-tax-settlement": "Estimated refund: ₩420,000",
+      "poker-equity-calculator": "Win probability: 68.4%",
+      "spending-habit-score": "Spending score: 82",
+      "salary-vanish-calculator": "Salary runs out on day 24",
+      "fire-retirement-age": "FIRE possible at age 45",
+      "retirement-savings": "Retirement savings gap: ₩180M"
+    };
+    return examples[slug] ?? "Check your result and share it";
+  }
+  if (locale === "ja") {
+    const examples: Record<string, string> = {
+      "year-end-tax-settlement": "還付見込み：₩420,000",
+      "poker-equity-calculator": "勝率：68.4%",
+      "spending-habit-score": "消費習慣スコア：82",
+      "salary-vanish-calculator": "給料がなくなる日：24日",
+      "fire-retirement-age": "45歳でFIRE可能",
+      "retirement-savings": "老後資金の不足額：₩180M"
+    };
+    return examples[slug] ?? "結果を確認して共有できます";
+  }
   if (slug === "year-end-tax-settlement") return "내 연말정산 예상 결과 환급 42만원";
   if (slug === "poker-equity-calculator") return "내 포커 승률 68.4%";
   if (slug === "spending-habit-score") return "내 소비 습관 점수 82점";
@@ -359,10 +384,12 @@ function ProcessCard({ step, title, text }: { step: string; title: string; text:
 
 function MiniCalculatorSection({
   title,
-  items
+  items,
+  locale
 }: {
   title: string;
   items: typeof calculators;
+  locale: "ko" | "en" | "ja";
 }) {
   return (
     <div className="rounded-[24px] border border-line bg-white p-6 shadow-panel">
@@ -373,19 +400,20 @@ function MiniCalculatorSection({
         </Link>
       </div>
       <div className="mt-4 grid gap-2">
-        {items.map((calculator) => (
-          <Link
+        {items.map((calculator) => {
+          const presentation = getLocalizedCalculatorPresentation(calculator, locale);
+          return <Link
             key={calculator.slug}
             href={`/calculators/${calculator.slug}`}
             className="flex items-center justify-between rounded-2xl bg-paper px-4 py-3 transition hover:bg-white"
           >
             <span className="min-w-0">
-              <span className="block truncate text-sm font-extrabold text-ink">{calculator.title}</span>
-              <span className="mt-1 block text-xs font-semibold text-slate-500">{calculator.audience}</span>
+              <span className="block truncate text-sm font-extrabold text-ink">{presentation.title}</span>
+              <span className="mt-1 block text-xs font-semibold text-slate-500">{presentation.audience}</span>
             </span>
             <span className="ml-3 text-sm font-extrabold text-brand">↗</span>
-          </Link>
-        ))}
+          </Link>;
+        })}
       </div>
     </div>
   );
