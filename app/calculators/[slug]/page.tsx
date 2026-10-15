@@ -6,7 +6,7 @@ import { AdSenseAd } from "@/components/AdSenseAd";
 import { CalculatorClient } from "@/components/CalculatorClient";
 import { LocalizedCalculatorHero } from "@/components/LocalizedCalculatorHero";
 import { calculators, getCalculator } from "@/lib/calculators";
-import { getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
+import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 import { calculatorSeoContent } from "@/lib/calculator-seo";
 import { blogPosts } from "@/lib/content";
 import { DEFAULT_OG_IMAGE, legalStandards, officialSources, SITE_URL } from "@/lib/constants";
