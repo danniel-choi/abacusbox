@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
+import { getLocalizedBlogPresentation } from "@/lib/blog-i18n";
 
 export type ContentListItem = {
   id: number;
@@ -171,6 +172,11 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
         <>
           <div className="mt-6 grid gap-4">
             {items.map((item) => (
+              (() => {
+                const presentation = meta === "blog"
+                  ? getLocalizedBlogPresentation({ slug: item.slug, title: item.title, excerpt: item.excerpt || "", category: "운영", tags: [] }, locale)
+                  : null;
+                return (
               <Link
                 key={item.slug}
                 href={detailMode === "path" ? `${detailBasePath}/${encodeURIComponent(item.slug)}` : `${detailBasePath}?slug=${encodeURIComponent(item.slug)}`}
@@ -186,12 +192,12 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
                   )}
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2 text-sm font-extrabold">
-                      <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{labelForItem(item, meta)}</span>
+                      <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{presentation?.category || labelForItem(item, meta, locale)}</span>
                       {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at, locale)}</span>}
                       {item.author_name && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{item.author_name}</span>}
                     </div>
-                    <h2 className="mt-4 break-words text-xl font-extrabold text-ink [word-break:normal] sm:text-2xl">{item.title}</h2>
-                    <p className="mt-3 break-words text-sm font-medium leading-7 text-slate-600 [word-break:normal]">{item.excerpt || ""}</p>
+                    <h2 className="mt-4 break-words text-xl font-extrabold text-ink [word-break:normal] sm:text-2xl">{presentation?.title || item.title}</h2>
+                    <p className="mt-3 break-words text-sm font-medium leading-7 text-slate-600 [word-break:normal]">{presentation?.excerpt || item.excerpt || ""}</p>
                     {meta === "community" && (
                       <div className="mt-4 flex gap-4 text-sm font-bold text-slate-500">
                         <span>{t("content.comments")} {item.comment_count}</span>
@@ -202,6 +208,8 @@ export function ContentListClient({ apiPath, detailBasePath, fallbackItems, badg
                   </div>
                 </div>
               </Link>
+                );
+              })()
             ))}
           </div>
 
@@ -306,20 +314,20 @@ function PaginationButton({
   );
 }
 
-function labelForItem(item: ContentListItem, meta: "blog" | "community") {
+function labelForItem(item: ContentListItem, meta: "blog" | "community", locale: "ko" | "en" | "ja") {
   if (meta === "blog") {
-    return item.board === "guide" ? "가이드" : item.type;
+    return item.board === "guide" ? (locale === "en" ? "Guide" : locale === "ja" ? "ガイド" : "가이드") : item.type;
   }
 
   switch (item.board) {
     case "qna":
-      return "질문답변";
+      return locale === "en" ? "Q&A" : locale === "ja" ? "Q&A" : "질문답변";
     case "case":
-      return "사례공유";
+      return locale === "en" ? "Case study" : locale === "ja" ? "事例共有" : "사례공유";
     case "notice":
-      return "공지";
+      return locale === "en" ? "Notice" : locale === "ja" ? "お知らせ" : "공지";
     default:
-      return "커뮤니티";
+      return locale === "en" ? "Community" : locale === "ja" ? "コミュニティ" : "커뮤니티";
   }
 }
 

@@ -5,6 +5,7 @@ import { AdSenseAd } from "@/components/AdSenseAd";
 import { blogPosts, getBlogPost, getLatestBlogPosts, type BlogVisual } from "@/lib/content";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { getCalculator } from "@/lib/calculators";
+import { LocalizedBlogHeader } from "@/components/LocalizedBlogHeader";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -91,19 +92,7 @@ export default async function BlogPostPage({ params }: Props) {
     <main className="mx-auto w-full max-w-4xl min-w-0 px-4 py-8 sm:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <article className="readable-content w-full max-w-full min-w-0 overflow-hidden rounded-[28px] border border-line bg-white p-5 shadow-panel sm:p-7">
-        <Link href="/blog" className="text-sm font-extrabold text-brand">
-          ← 블로그 목록
-        </Link>
-
-        <div className="mt-5 flex flex-wrap gap-2 text-sm font-extrabold">
-          <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{post.category}</span>
-          <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(post.publishedAt)}</span>
-          <span className="rounded-full bg-paper px-3 py-1 text-slate-500">읽는 시간 {post.readTime}</span>
-          <span className="rounded-full bg-paper px-3 py-1 text-slate-500">계산의정석</span>
-        </div>
-
-        <h1 className="mt-5 break-words text-3xl font-extrabold leading-tight text-ink [word-break:normal] sm:text-4xl">{post.title}</h1>
-        <p className="mt-4 break-words text-base font-medium leading-7 text-slate-600 [word-break:normal]">{post.excerpt}</p>
+        <LocalizedBlogHeader post={post} />
 
         {linkedCalculator && (
           <div className="mt-6 rounded-[22px] border border-brand/30 bg-[#f0fffa] p-5">
@@ -252,14 +241,4 @@ function BlogVisualBlock({ visual }: { visual: BlogVisual }) {
       </div>
     </section>
   );
-}
-
-function formatDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
 }

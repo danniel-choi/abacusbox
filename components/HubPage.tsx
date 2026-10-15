@@ -5,6 +5,7 @@ import { AdSenseAd } from "@/components/AdSenseAd";
 import { useLanguage } from "@/components/LanguageProvider";
 import { getCalculatorsByGroup } from "@/lib/calculator-directory";
 import { getLocalizedCalculatorPresentation } from "@/lib/calculator-i18n";
+import { getLocalizedBlogPresentation } from "@/lib/blog-i18n";
 import { calculators, type CalculatorConfig } from "@/lib/calculators";
 import { blogPosts, type BlogPost } from "@/lib/content";
 import type { HubContent } from "@/lib/hub-content";
@@ -104,15 +105,20 @@ export function HubPage({ hub }: { hub: HubContent }) {
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           {posts.map((post) => (
+            (() => {
+              const presentation = getLocalizedBlogPresentation(post, locale);
+              return (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
               className="rounded-[22px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white"
             >
-              <p className="text-xs font-extrabold text-brand">{post.category}</p>
-              <h3 className="mt-2 text-lg font-extrabold leading-7 text-ink">{post.title}</h3>
-              <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{post.excerpt}</p>
+              <p className="text-xs font-extrabold text-brand">{presentation.category}</p>
+              <h3 className="mt-2 text-lg font-extrabold leading-7 text-ink">{presentation.title}</h3>
+              <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{presentation.excerpt}</p>
             </Link>
+              );
+            })()
           ))}
         </div>
       </section>
