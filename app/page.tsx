@@ -223,8 +223,8 @@ export default function HomePage() {
 
       <section className="page-shell py-2 md:py-3">
         <div className="grid gap-6 lg:grid-cols-2">
-          <MiniCalculatorSection title={t("home.popular")} items={popular} locale={locale} />
-          <MiniCalculatorSection title={t("home.recent")} items={recent} locale={locale} />
+          <MiniCalculatorSection title={t("home.popular")} items={popular} locale={locale} viewAllLabel={t("home.viewAll")} />
+          <MiniCalculatorSection title={t("home.recent")} items={recent} locale={locale} viewAllLabel={t("home.viewAll")} />
         </div>
       </section>
 
@@ -385,18 +385,20 @@ function ProcessCard({ step, title, text }: { step: string; title: string; text:
 function MiniCalculatorSection({
   title,
   items,
-  locale
+  locale,
+  viewAllLabel
 }: {
   title: string;
   items: typeof calculators;
   locale: "ko" | "en" | "ja";
+  viewAllLabel: string;
 }) {
   return (
     <div className="rounded-[24px] border border-line bg-white p-6 shadow-panel">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-xl font-extrabold text-ink">{title}</h2>
         <Link href="/calculators" className="text-sm font-extrabold text-brand">
-          전체 보기 ↗
+          {viewAllLabel}
         </Link>
       </div>
       <div className="mt-4 grid gap-2">

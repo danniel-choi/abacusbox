@@ -9,9 +9,11 @@ import { getLocalizedBlogPresentation } from "@/lib/blog-i18n";
 import { calculators, type CalculatorConfig } from "@/lib/calculators";
 import { blogPosts, type BlogPost } from "@/lib/content";
 import type { HubContent } from "@/lib/hub-content";
+import { getLocalizedHubContent } from "@/lib/hub-i18n";
 
 export function HubPage({ hub }: { hub: HubContent }) {
   const { locale, t } = useLanguage();
+  const localizedHub = getLocalizedHubContent(hub, locale);
   const groupCalculators = getCalculatorsByGroup(hub.group);
   const featured = hub.featuredSlugs
     .map((slug) => calculators.find((calculator) => calculator.slug === slug))
@@ -23,9 +25,9 @@ export function HubPage({ hub }: { hub: HubContent }) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <section className="rounded-[28px] bg-ink px-6 py-10 text-white shadow-panel">
-        <p className="text-sm font-extrabold text-brand">{hub.eyebrow}</p>
-        <h1 className="mt-3 text-3xl font-extrabold leading-tight md:text-5xl">{hub.title}</h1>
-        <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-white/72 md:text-base">{hub.description}</p>
+        <p className="text-sm font-extrabold text-brand">{localizedHub.eyebrow}</p>
+        <h1 className="mt-3 text-3xl font-extrabold leading-tight md:text-5xl">{localizedHub.title}</h1>
+        <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-white/72 md:text-base">{localizedHub.description}</p>
         <div className="mt-7 flex flex-wrap gap-3">
           <Link href={`/calculators?group=${hub.group}`} className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72]">
             {t("hub.calculators")}
@@ -37,7 +39,7 @@ export function HubPage({ hub }: { hub: HubContent }) {
       </section>
 
       <section className="mt-8 grid gap-4 md:grid-cols-3">
-        {hub.sections.map((section) => (
+        {localizedHub.sections.map((section) => (
           <article key={section.title} className="rounded-[24px] border border-line bg-white p-6 shadow-panel">
             <h2 className="text-lg font-extrabold leading-7 text-ink">{section.title}</h2>
             <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{section.body}</p>
@@ -80,7 +82,7 @@ export function HubPage({ hub }: { hub: HubContent }) {
           <p className="text-sm font-extrabold text-brand">{t("hub.checklist")}</p>
           <h2 className="mt-2 text-2xl font-extrabold">{t("hub.checklistTitle")}</h2>
           <div className="mt-5 grid gap-3">
-            {hub.checklist.map((item) => (
+            {localizedHub.checklist.map((item) => (
               <div key={item} className="rounded-2xl border border-white/10 bg-white/6 px-4 py-4 text-sm font-semibold leading-6 text-white/82">
                 {item}
               </div>

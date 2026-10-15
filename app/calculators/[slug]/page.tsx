@@ -5,8 +5,9 @@ import { Suspense } from "react";
 import { AdSenseAd } from "@/components/AdSenseAd";
 import { CalculatorClient } from "@/components/CalculatorClient";
 import { LocalizedCalculatorHero } from "@/components/LocalizedCalculatorHero";
+import { LocalizedRelatedBlogSection, LocalizedRelatedCalculatorSection } from "@/components/LocalizedRelatedSections";
 import { calculators, getCalculator } from "@/lib/calculators";
-import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
+import { getCalculatorGroup, getRelatedCalculators } from "@/lib/calculator-directory";
 import { calculatorSeoContent } from "@/lib/calculator-seo";
 import { blogPosts } from "@/lib/content";
 import { DEFAULT_OG_IMAGE, legalStandards, officialSources, SITE_URL } from "@/lib/constants";
@@ -399,69 +400,17 @@ export default async function CalculatorPage({ params }: Props) {
         </section>
 
         {relatedCalculators.length > 0 && (
-          <section className="rounded-[20px] border border-line bg-white p-6 shadow-panel">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-extrabold text-brand">관련 계산기</p>
-                <h2 className="mt-2 text-2xl font-extrabold text-ink">같이 많이 보는 계산기</h2>
-              </div>
-              <Link href="/calculators" className="text-sm font-extrabold text-brand">
-                전체 보기 ↗
-              </Link>
-            </div>
-            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {relatedCalculators.map((item) => {
-                const relatedGroup = CALCULATOR_GROUP_META[getCalculatorGroup(item.slug)];
-                return (
-                  <Link
-                    key={item.slug}
-                    href={`/calculators/${item.slug}`}
-                    className="rounded-[20px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg ${relatedGroup.softClass} ${relatedGroup.accentClass}`}>
-                        {getCalculatorIcon(item.slug)}
-                      </span>
-                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-slate-500">{relatedGroup.label}</span>
-                    </div>
-                    <h3 className="mt-4 text-base font-extrabold text-ink">{item.title}</h3>
-                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{item.description}</p>
-                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-brand">바로 보기 <span>↗</span></span>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
+          <LocalizedRelatedCalculatorSection
+            items={relatedCalculators.map(({ slug, title, description, category, badge, audience }) => ({ slug, title, description, category, badge, audience }))}
+          />
         )}
 
         <AdSenseAd placement="bottom" />
 
         {relatedBlogPosts.length > 0 && (
-          <section className="rounded-[20px] border border-line bg-white p-6 shadow-panel">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-extrabold text-brand">관련 가이드</p>
-                <h2 className="mt-2 text-2xl font-extrabold text-ink">계산 전에 같이 보면 좋은 글</h2>
-              </div>
-              <Link href="/blog" className="text-sm font-extrabold text-brand">
-                블로그 전체 보기 ↗
-              </Link>
-            </div>
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              {relatedBlogPosts.map((post) => (
-                <Link
-                  key={post.slug}
-                  href={`/blog/${encodeURIComponent(post.slug)}`}
-                  className="rounded-[20px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white"
-                >
-                  <p className="text-xs font-extrabold text-brand">{post.category}</p>
-                  <h3 className="mt-3 text-base font-extrabold text-ink">{post.title}</h3>
-                  <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{post.excerpt}</p>
-                  <span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-brand">가이드 보기 <span>↗</span></span>
-                </Link>
-              ))}
-            </div>
-          </section>
+          <LocalizedRelatedBlogSection
+            items={relatedBlogPosts.map(({ slug, title, excerpt, category, tags }) => ({ slug, title, excerpt, category, tags }))}
+          />
         )}
       </article>
     </main>
