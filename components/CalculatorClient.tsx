@@ -10,7 +10,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type ResultRow } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 import { interpolate, type Locale } from "@/lib/i18n";
-import { getLocalizedCalculatorPresentation, getLocalizedFieldHelp, getLocalizedFieldLabel, getLocalizedOptionLabel, getLocalizedResultLabel } from "@/lib/calculator-i18n";
+import { getLocalizedCalculatorPresentation, getLocalizedFieldHelp, getLocalizedFieldLabel, getLocalizedOptionLabel, getLocalizedResultLabel, getLocalizedUtilityText } from "@/lib/calculator-i18n";
 
 type FormValues = Record<string, number>;
 
@@ -706,7 +706,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                       {card.imageSrc ? (
                         <Image
                           src={card.imageSrc}
-                          alt={`${card.ko} 카드 이미지`}
+                          alt={locale === "ko" ? `${card.ko} 카드 이미지` : locale === "en" ? `${card.en} card image` : `${card.en}のカード画像`}
                           width={300}
                           height={527}
                           className="h-auto w-[min(22vw,180px)] rounded-[8px] border border-black/10 bg-[#f9f1dc] object-contain shadow-md max-lg:w-[min(28vw,170px)] max-sm:w-[min(58vw,180px)]"
@@ -720,9 +720,9 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                       )}
                     </div>
                     <div className="text-center">
-                      <p className="text-2xl font-black text-ink">{card.ko}</p>
+                      <p className="text-2xl font-black text-ink">{locale === "ko" ? card.ko : card.en}</p>
                       <p className="mt-1 text-xs font-extrabold uppercase text-slate-500">{card.en}</p>
-                      <p className="mt-3 rounded-full bg-white px-3 py-2 text-xs font-extrabold text-slate-700">{card.keyword}</p>
+                      <p className="mt-3 rounded-full bg-white px-3 py-2 text-xs font-extrabold text-slate-700">{locale === "ko" ? card.keyword : locale === "en" ? "Tarot interpretation" : "タロットの解釈"}</p>
                     </div>
                   </div>
                 </div>
@@ -1668,18 +1668,20 @@ function CoordinateInput({
 }
 
 function ResultTile({ label, value }: { label: string; value: string }) {
+  const { locale } = useLanguage();
   return (
     <div className="rounded-[18px] border border-line bg-paper p-4">
-      <p className="text-sm font-bold text-slate-500">{label}</p>
+      <p className="text-sm font-bold text-slate-500">{getLocalizedResultLabel(label, locale)}</p>
       <p className="mt-2 text-2xl font-extrabold text-ink">{value}</p>
     </div>
   );
 }
 
 function ResultLine({ label, value }: { label: string; value: string }) {
+  const { locale } = useLanguage();
   return (
     <div className="grid grid-cols-1 gap-1 border-b border-line p-3 text-sm last:border-0 sm:grid-cols-[0.9fr_1.1fr] sm:gap-0">
-      <div className="bg-paper px-4 py-4 font-extrabold text-slate-600">{label}</div>
+      <div className="bg-paper px-4 py-4 font-extrabold text-slate-600">{getLocalizedResultLabel(label, locale)}</div>
       <div className="min-w-0 px-4 py-4 text-left text-xs font-extrabold text-ink sm:text-right sm:text-sm">
         <span className="break-words">{value}</span>
       </div>
@@ -4312,22 +4314,23 @@ function InternetSpeedTest({ title, checkpoints }: { title: string; checkpoints:
 }
 
 function LifeToolShell({ title, heading, checkpoints, children }: { title: string; heading: string; checkpoints: string[]; children: ReactNode }) {
+  const { locale } = useLanguage();
   return (
     <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
       <div className="grid gap-6">
         <div className="rounded-[20px] border border-line bg-white px-5 py-5 shadow-sm sm:px-6">
-          <p className="text-sm font-black text-brand">{title}</p>
-          <h2 className="mt-2 break-keep text-3xl font-black leading-tight text-ink sm:text-4xl">{heading}</h2>
+          <p className="text-sm font-black text-brand">{getLocalizedUtilityText(title, locale)}</p>
+          <h2 className="mt-2 break-keep text-3xl font-black leading-tight text-ink sm:text-4xl">{getLocalizedUtilityText(heading, locale)}</h2>
         </div>
         {children}
       </div>
       <aside className="rounded-[20px] border border-line bg-white p-5 shadow-panel sm:p-6">
-        <p className="text-sm font-extrabold text-ink">사용 체크포인트</p>
+        <p className="text-sm font-extrabold text-ink">{getLocalizedUtilityText("사용 체크포인트", locale)}</p>
         <div className="mt-4 grid gap-3">
           {checkpoints.map((item) => (
             <div key={item} className="flex gap-3 rounded-2xl bg-paper px-4 py-4">
               <span className="mt-1 h-2.5 w-2.5 rounded-full bg-brand" />
-              <p className="text-sm font-medium leading-6 text-slate-700">{item}</p>
+              <p className="text-sm font-medium leading-6 text-slate-700">{getLocalizedUtilityText(item, locale)}</p>
             </div>
           ))}
         </div>
@@ -4337,18 +4340,20 @@ function LifeToolShell({ title, heading, checkpoints, children }: { title: strin
 }
 
 function DateInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  const { locale } = useLanguage();
   return (
     <label className="grid gap-2">
-      <span className="text-sm font-extrabold text-ink">{label}</span>
+      <span className="text-sm font-extrabold text-ink">{getLocalizedUtilityText(label, locale)}</span>
       <input type="date" value={value} onChange={(event) => onChange(event.target.value)} className="h-12 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none focus:border-brand focus:bg-white" />
     </label>
   );
 }
 
 function LifeNumberInput({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+  const { locale } = useLanguage();
   return (
     <label className="grid gap-2">
-      <span className="text-sm font-extrabold text-ink">{label}</span>
+      <span className="text-sm font-extrabold text-ink">{getLocalizedUtilityText(label, locale)}</span>
       <input type="number" value={value} onChange={(event) => onChange(Number(event.target.value) || 0)} className="h-12 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none focus:border-brand focus:bg-white" />
     </label>
   );

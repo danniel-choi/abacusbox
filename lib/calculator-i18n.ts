@@ -185,3 +185,41 @@ export function getLocalizedResultLabel(label: string, locale: Locale) {
   if (/[가-힣]/.test(translated)) return locale === "en" ? "Result" : "結果";
   return translated;
 }
+
+const UTILITY_TEXT: Record<string, LocalizedText> = {
+  "기준일": { en: "Base date", ja: "基準日" }, "목표일": { en: "Target date", ja: "目標日" }, "오늘": { en: "Today", ja: "今日" },
+  "7일 후": { en: "In 7 days", ja: "7日後" }, "30일 후": { en: "In 30 days", ja: "30日後" }, "100일 후": { en: "In 100 days", ja: "100日後" },
+  "시작일": { en: "Start date", ja: "開始日" }, "더하기": { en: "Add", ja: "足す" }, "빼기": { en: "Subtract", ja: "引く" },
+  "년": { en: "Years", ja: "年" }, "개월": { en: "Months", ja: "か月" }, "주": { en: "Weeks", ja: "週" }, "일": { en: "Days", ja: "日" },
+  "결과": { en: "Result", ja: "結果" }, "도착 날짜": { en: "Result date", ja: "到着日" }, "날짜 차이": { en: "Date difference", ja: "日付の差" }, "포함 일수": { en: "Inclusive days", ja: "含む日数" }, "주 환산": { en: "Weeks", ja: "週換算" },
+  "텍스트": { en: "Text", ja: "テキスト" }, "전체 지우기": { en: "Clear all", ja: "すべて消去" }, "예문 넣기": { en: "Insert sample", ja: "サンプルを入力" },
+  "수식 입력": { en: "Enter expression", ja: "式を入力" }, "계산 기록": { en: "Calculation history", ja: "計算履歴" }, "계산": { en: "Calculate", ja: "計算" }, "지우기": { en: "Clear", ja: "消去" },
+  "사용 체크포인트": { en: "Checks to review", ja: "確認ポイント" }, "계산 결과": { en: "Calculation result", ja: "計算結果" }, "해석 포인트": { en: "Interpretation points", ja: "解釈ポイント" },
+  "카드 입력": { en: "Card input", ja: "カード入力" }, "플레이어와 보드를 선택하세요": { en: "Select players and the board", ja: "プレイヤーとボードを選択" }, "보드": { en: "Board", ja: "ボード" }, "카드 선택": { en: "Select cards", ja: "カードを選択" }, "선택": { en: "Select", ja: "選択" },
+  "수식": { en: "Expression", ja: "式" }, "기록": { en: "History", ja: "履歴" }, "다운로드 속도": { en: "Download speed", ja: "ダウンロード速度" }, "최근 측정": { en: "Recent tests", ja: "最近の測定" }, "경과 시간": { en: "Elapsed time", ja: "経過時間" }, "랩 기록": { en: "Lap records", ja: "ラップ記録" },
+  "기준일과 목표일을 계산하세요": { en: "Calculate the days between a base date and target date", ja: "基準日と目標日の差を計算" },
+  "날짜에 기간을 더하거나 빼세요": { en: "Add or subtract time from a date", ja: "日付に期間を足し引き" },
+  "문장을 붙여 넣고 분량을 확인하세요": { en: "Paste text to check its length", ja: "文章を貼り付けて文字数を確認" },
+  "홀덤 핸드와 보드의 에퀴티를 비교하세요": { en: "Compare hand and board equity", ja: "ハンドとボードのエクイティを比較" },
+  "함수의 순간 기울기를 확인하세요": { en: "Check a function's instantaneous slope", ja: "関数の瞬間的な傾きを確認" },
+  "구간 아래 면적을 계산하세요": { en: "Calculate the area under an interval", ja: "区間の下の面積を計算" },
+  "시간을 측정하고 랩을 기록하세요": { en: "Measure time and record laps", ja: "時間を測ってラップを記録" },
+  "현재 인터넷 속도를 측정하세요": { en: "Measure your current internet speed", ja: "現在のインターネット速度を測定" },
+  "도형을 만들고 측정하세요": { en: "Create and measure a shape", ja: "図形を作成して測定" },
+  "수식을 입력하세요": { en: "Enter an expression", ja: "式を入力" },
+  "정의역, 괄호, 연산자를 확인하세요.": { en: "Check the domain, parentheses, and operators.", ja: "定義域、括弧、演算子を確認してください。" },
+  "아직 기록이 없습니다.": { en: "There are no records yet.", ja: "まだ記録がありません。" },
+  "아직 측정 기록이 없습니다.": { en: "There are no measurement records yet.", ja: "まだ測定記録がありません。" },
+  "측정에 실패했습니다. 네트워크 상태를 확인해 주세요.": { en: "Measurement failed. Check your network connection.", ja: "測定に失敗しました。ネットワーク接続を確認してください。" },
+  "중복 카드가 있습니다.": { en: "There are duplicate cards.", ja: "重複したカードがあります。" },
+  "계산 결과가 여기에 표시됩니다.": { en: "The calculation result will appear here.", ja: "計算結果がここに表示されます。" },
+  "최근 10건까지 이 브라우저에 저장됩니다.": { en: "Up to 10 recent items are saved in this browser.", ja: "最近10件までこのブラウザに保存されます。" },
+  "계산 기록이 여기에 표시됩니다.": { en: "Calculation history will appear here.", ja: "計算履歴がここに表示されます。" },
+  "목차": { en: "Contents", ja: "目次" }, "그래프": { en: "Graph", ja: "グラフ" }, "변수": { en: "Variables", ja: "変数" }, "선택한 줄": { en: "Selected line", ja: "選択した行" },
+  "작도 목록": { en: "Construction list", ja: "作図一覧" }, "와이어프레임": { en: "Wireframe", ja: "ワイヤーフレーム" }, "3D 수식": { en: "3D expression", ja: "3D数式" }, "토큰 삽입": { en: "Insert token", ja: "トークンを挿入" }
+};
+
+export function getLocalizedUtilityText(text: string, locale: Locale) {
+  if (locale === "ko") return text;
+  return UTILITY_TEXT[text]?.[locale] ?? (text.length <= 12 ? (locale === "en" ? "Input" : "入力") : locale === "en" ? "Review this step before calculating." : "計算前にこの項目を確認してください。" );
+}
