@@ -265,8 +265,14 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const chartMax = Math.max(...result.chart.map((point) => point.value), 1);
   const highlightedRows = result.rows.filter((row) => row.tone === "strong");
   const relatedCalculators = useMemo(() => getRelatedCalculators(activeCalculator.slug, 4), [activeCalculator.slug]);
-  const nextActions = useMemo(() => getNextActions(activeCalculator.slug), [activeCalculator.slug]);
-  const actionPlan = useMemo(() => getActionPlan(activeCalculator.slug), [activeCalculator.slug]);
+  const nextActions = useMemo(
+    () => locale === "ko" ? getNextActions(activeCalculator.slug) : getLocalizedNextActions(locale, localizedCalculator.title),
+    [activeCalculator.slug, locale, localizedCalculator.title]
+  );
+  const actionPlan = useMemo(
+    () => locale === "ko" ? getActionPlan(activeCalculator.slug) : getLocalizedActionPlan(locale, localizedCalculator.title),
+    [activeCalculator.slug, locale, localizedCalculator.title]
+  );
   const isTarotBirthCard = activeCalculator.slug === "tarot-birth-card-calculator";
   const isManseRyeok = activeCalculator.slug === "manse-ryeok";
   const isSunriseSunset = activeCalculator.slug === "sunrise-sunset-calculator";
@@ -1019,9 +1025,9 @@ function SavedResultsPanel({
   if (items.length === 0) {
     return (
       <div className="mt-5 rounded-[18px] border border-dashed border-line bg-paper p-5">
-        <p className="text-sm font-extrabold text-ink">저장한 계산 결과</p>
+        <p className="text-sm font-extrabold text-ink">{locale === "en" ? "Saved results" : locale === "ja" ? "保存した結果" : "저장한 계산 결과"}</p>
         <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-          결과를 저장하면 여러 조건을 비교하거나 나중에 이어서 계산할 수 있습니다.
+          {locale === "en" ? "Save a result to compare conditions or continue later." : locale === "ja" ? "結果を保存すると条件を比較したり、後で続きから計算できます。" : "결과를 저장하면 여러 조건을 비교하거나 나중에 이어서 계산할 수 있습니다."}
         </p>
       </div>
     );
@@ -1031,8 +1037,8 @@ function SavedResultsPanel({
     <div className="mt-5 rounded-[18px] border border-line bg-paper p-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-extrabold text-ink">저장한 계산 결과</p>
-          <p className="mt-1 text-xs font-semibold text-slate-500">이 기기에 최대 12개까지 저장됩니다.</p>
+          <p className="text-sm font-extrabold text-ink">{locale === "en" ? "Saved results" : locale === "ja" ? "保存した結果" : "저장한 계산 결과"}</p>
+          <p className="mt-1 text-xs font-semibold text-slate-500">{locale === "en" ? "Up to 12 results are stored on this device." : locale === "ja" ? "この端末に最大12件まで保存されます。" : "이 기기에 최대 12개까지 저장됩니다."}</p>
         </div>
       </div>
       <div className="mt-4 grid gap-3">
@@ -1049,14 +1055,14 @@ function SavedResultsPanel({
                   href={`/calculators/${item.slug}${item.query}`}
                   className="rounded-full bg-ink px-3 py-2 text-xs font-extrabold text-white transition hover:bg-brand"
                 >
-                  이어보기
+                  {locale === "en" ? "Continue" : locale === "ja" ? "続ける" : "이어보기"}
                 </a>
                 <button
                   type="button"
                   onClick={() => onDelete(item.id)}
                   className="rounded-full border border-line px-3 py-2 text-xs font-extrabold text-slate-500 transition hover:border-brand hover:text-brand"
                 >
-                  삭제
+                  {locale === "en" ? "Delete" : locale === "ja" ? "削除" : "삭제"}
                 </button>
               </div>
             </div>
@@ -1075,17 +1081,17 @@ function SavedResultsPanel({
       {comparableItems.length >= 2 && (
         <div className="mt-5 overflow-hidden rounded-2xl border border-line bg-white">
           <div className="border-b border-line bg-ink px-4 py-3">
-            <p className="text-sm font-extrabold text-white">저장 결과 비교</p>
-            <p className="mt-1 text-xs font-semibold text-white/60">같은 계산기의 최근 저장값을 나란히 봅니다.</p>
+            <p className="text-sm font-extrabold text-white">{locale === "en" ? "Compare saved results" : locale === "ja" ? "保存結果を比較" : "저장 결과 비교"}</p>
+            <p className="mt-1 text-xs font-semibold text-white/60">{locale === "en" ? "Compare recent results from this calculator side by side." : locale === "ja" ? "この計算機の最近の結果を並べて比較します。" : "같은 계산기의 최근 저장값을 나란히 봅니다."}</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-xs">
               <thead>
                 <tr className="border-b border-line bg-paper">
-                  <th className="px-4 py-3 font-extrabold text-slate-600">항목</th>
+                  <th className="px-4 py-3 font-extrabold text-slate-600">{locale === "en" ? "Item" : locale === "ja" ? "項目" : "항목"}</th>
                   {comparableItems.map((item, index) => (
                     <th key={item.id} className="px-4 py-3 font-extrabold text-ink">
-                      저장 {index + 1}
+                      {locale === "en" ? `Saved ${index + 1}` : locale === "ja" ? `保存 ${index + 1}` : `저장 ${index + 1}`}
                       <span className="mt-1 block font-semibold text-slate-500">{formatSavedAt(item.savedAt)}</span>
                     </th>
                   ))}
@@ -1093,7 +1099,7 @@ function SavedResultsPanel({
               </thead>
               <tbody>
                 <tr className="border-b border-line">
-                  <td className="px-4 py-3 font-extrabold text-slate-600">대표 결과</td>
+                  <td className="px-4 py-3 font-extrabold text-slate-600">{locale === "en" ? "Headline" : locale === "ja" ? "代表結果" : "대표 결과"}</td>
                   {comparableItems.map((item) => (
                     <td key={`${item.id}-headline`} className="px-4 py-3 font-extrabold text-brand">
                       {item.headline}
@@ -6305,6 +6311,38 @@ function getNextActions(slug: CalculatorSlug): NextAction[] {
   };
 
   return actionsBySlug[slug] ?? defaultActions;
+}
+
+function getLocalizedNextActions(locale: "en" | "ja", title: string): NextAction[] {
+  if (locale === "en") {
+    return [
+      { title: "Explore related calculators", text: `Compare ${title} with related tools using a different scenario.`, href: "/calculators", label: "View calculators" },
+      { title: "Save and share the result", text: "Save this result or share it as an image card so you can compare it later.", href: "#result-actions", label: "Use save button", tone: "ink" }
+    ];
+  }
+  return [
+    { title: "関連計算機を見る", text: `${title}と関連ツールを別の条件で比較できます。`, href: "/calculators", label: "計算機を見る" },
+    { title: "結果を保存・共有", text: "結果を保存したり画像カードで共有すると、後から比較できます。", href: "#result-actions", label: "保存ボタンを使う", tone: "ink" }
+  ];
+}
+
+function getLocalizedActionPlan(locale: "en" | "ja", title: string): ActionPlan {
+  if (locale === "en") {
+    return {
+      eyebrow: "Next steps",
+      title: `Review the assumptions behind ${title}`,
+      intro: "Use the result as a starting point, then check the inputs, assumptions, and official guidance that apply to your situation.",
+      steps: ["Confirm the dates, amounts, and options you entered.", "Compare a conservative and an optimistic scenario.", "Verify important decisions with an official source or qualified professional."],
+      links: [{ href: "/resources", label: "Official references", text: "Review official reference sites and related guidance." }, { href: "/calculators", label: "More calculators", text: "Compare another scenario with a related calculator." }]
+    };
+  }
+  return {
+    eyebrow: "次の確認ポイント",
+    title: `${title}の入力条件を確認しましょう`,
+    intro: "結果は出発点として使い、入力値と適用条件、公式の案内を確認してから判断してください。",
+    steps: ["入力した日付、金額、選択肢を確認します。", "控えめなケースと楽観的なケースを比較します。", "重要な判断は公式資料や専門家に再確認します。"],
+    links: [{ href: "/resources", label: "公式参考資料", text: "公式の参考サイトと関連案内を確認します。" }, { href: "/calculators", label: "他の計算機", text: "関連計算機で別の条件を比較します。" }]
+  };
 }
 
 function getActionPlan(slug: CalculatorSlug): ActionPlan | null {
