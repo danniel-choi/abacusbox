@@ -6,6 +6,7 @@ import { AdSenseAd } from "@/components/AdSenseAd";
 import { CalculatorClient } from "@/components/CalculatorClient";
 import { LocalizedCalculatorHero } from "@/components/LocalizedCalculatorHero";
 import { LocalizedRelatedBlogSection, LocalizedRelatedCalculatorSection } from "@/components/LocalizedRelatedSections";
+import { LocalizedCalculatorCopy } from "@/components/LocalizedCalculatorCopy";
 import { calculators, getCalculator } from "@/lib/calculators";
 import { getCalculatorGroup, getRelatedCalculators } from "@/lib/calculator-directory";
 import { calculatorSeoContent } from "@/lib/calculator-seo";
@@ -232,7 +233,7 @@ export default async function CalculatorPage({ params }: Props) {
       />
 
       <div className="mx-auto -mt-10 max-w-6xl px-4">
-        <Suspense fallback={<div className="rounded-[20px] border border-line bg-white p-6 shadow-panel">계산기를 불러오는 중입니다.</div>}>
+        <Suspense fallback={<div className="rounded-[20px] border border-line bg-white p-6 shadow-panel"><LocalizedCalculatorCopy id="loading" /></div>}>
           <CalculatorClient slug={calculator.slug} />
         </Suspense>
       </div>
@@ -251,9 +252,9 @@ export default async function CalculatorPage({ params }: Props) {
 
         <section>
           <div className="rounded-[20px] border border-line bg-white p-6 shadow-panel">
-            <h2 className="text-2xl font-extrabold text-ink md:text-3xl">{calculator.guideTitle}</h2>
+            <h2 className="text-2xl font-extrabold text-ink md:text-3xl"><LocalizedCalculatorCopy id="guideTitle" /></h2>
             <p className="mt-4 text-sm font-semibold leading-6 text-slate-500">
-              {legalStandards.year}년 기준으로 {calculator.title}를 확인할 때 자주 놓치는 입력 기준과 해석 포인트를 함께 정리했습니다.
+              <LocalizedCalculatorCopy id="guideIntro" />
             </p>
             <div className="mt-5 grid gap-4 text-base font-medium leading-8 text-slate-700">
               {calculator.guide.map((paragraph) => (
@@ -265,8 +266,8 @@ export default async function CalculatorPage({ params }: Props) {
 
         {seoContent && (
           <section className="rounded-[20px] border border-line bg-white p-6 shadow-panel">
-            <p className="text-sm font-extrabold text-brand">검색 많이 하는 질문</p>
-            <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink md:text-3xl">{calculator.title}를 찾는 분들이 확인하는 핵심 기준</h2>
+            <p className="text-sm font-extrabold text-brand"><LocalizedCalculatorCopy id="faq" /></p>
+            <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink md:text-3xl"><LocalizedCalculatorCopy id="searchTitle" /></h2>
             <div className="mt-5 grid gap-4 md:grid-cols-3">
               {seoContent.sections.map((section) => (
                 <article key={section.title} className="rounded-[18px] bg-paper p-5">
@@ -295,7 +296,7 @@ export default async function CalculatorPage({ params }: Props) {
         <section>
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
             <div>
-              <h2 className="text-2xl font-extrabold text-ink md:text-3xl">자주 묻는 질문</h2>
+              <h2 className="text-2xl font-extrabold text-ink md:text-3xl"><LocalizedCalculatorCopy id="faq" /></h2>
               <div className="mt-4 grid gap-3">
                 {calculator.faqs.map((faq) => (
                   <details key={faq.question} className="rounded-[18px] border border-line bg-white p-5 shadow-sm">
@@ -307,15 +308,15 @@ export default async function CalculatorPage({ params }: Props) {
             </div>
 
             <aside className="rounded-[20px] border border-line bg-white p-6 shadow-panel">
-              <p className="text-sm font-extrabold text-brand">빠른 안내</p>
-              <h2 className="mt-2 text-2xl font-extrabold text-ink">이 계산기를 이렇게 쓰면 됩니다.</h2>
+              <p className="text-sm font-extrabold text-brand"><LocalizedCalculatorCopy id="quickGuide" /></p>
+              <h2 className="mt-2 text-2xl font-extrabold text-ink"><LocalizedCalculatorCopy id="quickGuideTitle" /></h2>
               <div className="mt-5 grid gap-4">
                 {[
-                  "현재 조건 입력",
-                  "핵심 결과와 비교 차트 확인",
-                  "FAQ와 기준 설명까지 검토"
+                  <LocalizedCalculatorCopy key="current-condition" id="currentCondition" />,
+                  <LocalizedCalculatorCopy key="check-result" id="checkResult" />,
+                  <LocalizedCalculatorCopy key="review-faq" id="reviewFaq" />
                 ].map((item, index) => (
-                  <div key={item} className="flex gap-3 rounded-2xl bg-paper px-4 py-4">
+                  <div key={index} className="flex gap-3 rounded-2xl bg-paper px-4 py-4">
                     <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-xs font-extrabold text-white">
                       {index + 1}
                     </span>
@@ -328,9 +329,9 @@ export default async function CalculatorPage({ params }: Props) {
         </section>
 
         <section className="rounded-[20px] bg-navy p-6 text-white">
-          <h2 className="text-2xl font-extrabold">기준 및 출처</h2>
+          <h2 className="text-2xl font-extrabold"><LocalizedCalculatorCopy id="sources" /></h2>
           <p className="mt-3 text-sm font-semibold leading-6 text-white/68">
-            계산 결과는 참고용이며, 아래 공식 기준과 안내 자료를 바탕으로 {legalStandards.year}년 기준 정보를 반영했습니다.
+            <LocalizedCalculatorCopy id="sourceDescription" />
           </p>
           <ul className="mt-4 grid gap-2 text-sm font-semibold text-white/68">
             {officialSources.map((source) => (
@@ -343,7 +344,7 @@ export default async function CalculatorPage({ params }: Props) {
           </ul>
           {calculator.slug === "sunrise-sunset-calculator" && (
             <div className="mt-6 rounded-[18px] border border-brand/30 bg-white/8 p-5">
-              <p className="text-sm font-extrabold text-brand">KASI 저작권 및 라이선스 고지</p>
+              <p className="text-sm font-extrabold text-brand"><LocalizedCalculatorCopy id="kasiNotice" /></p>
               <div className="mt-4 grid gap-3 text-sm font-semibold leading-6 text-white/76">
                 <p>
                   출처:
@@ -357,10 +358,10 @@ export default async function CalculatorPage({ params }: Props) {
                 <p>{KASI_COPYRIGHT_NOTICE.inclusion}</p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   <a href={KASI_COPYRIGHT_NOTICE.policyHref} rel="noreferrer" target="_blank" className="rounded-full border border-brand/40 px-4 py-2 text-xs font-extrabold text-brand transition hover:bg-brand hover:text-white">
-                    KASI 저작권정책 전문
+                    <LocalizedCalculatorCopy id="kasiPolicy" />
                   </a>
                   <a href={KASI_COPYRIGHT_NOTICE.koglHref} rel="noreferrer" target="_blank" className="rounded-full border border-brand/40 px-4 py-2 text-xs font-extrabold text-brand transition hover:bg-brand hover:text-white">
-                    공공누리 제1유형 전문
+                    <LocalizedCalculatorCopy id="publicNuri" />
                   </a>
                 </div>
               </div>
@@ -369,11 +370,11 @@ export default async function CalculatorPage({ params }: Props) {
           <div className="mt-6 rounded-[18px] border border-white/10 bg-white/5 p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-extrabold text-brand">공식 참고 사이트</p>
-                <h3 className="mt-2 text-xl font-extrabold text-white">이 계산기와 함께 확인할 만한 기관</h3>
+                <p className="text-sm font-extrabold text-brand"><LocalizedCalculatorCopy id="officialSites" /></p>
+                <h3 className="mt-2 text-xl font-extrabold text-white"><LocalizedCalculatorCopy id="officialSitesTitle" /></h3>
               </div>
               <Link href="/resources" className="rounded-full border border-brand/40 px-4 py-2 text-sm font-extrabold text-brand transition hover:bg-brand hover:text-white">
-                전체 참고 사이트 보기
+                <LocalizedCalculatorCopy id="viewResources" />
               </Link>
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
