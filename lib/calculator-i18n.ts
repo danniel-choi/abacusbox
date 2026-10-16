@@ -158,3 +158,30 @@ export function getLocalizedOptionLabel(label: string, locale: Locale) {
   if (locale === "ko") return label;
   return OPTION_LABELS[label]?.[locale] ?? (label.replace(/[가-힣]+/g, "").trim() || (locale === "en" ? "Option" : "選択肢"));
 }
+
+const RESULT_LABELS: Record<string, LocalizedText> = {
+  "합계": { en: "Total", ja: "合計" }, "총액": { en: "Total amount", ja: "総額" }, "예상 금액": { en: "Estimated amount", ja: "予想金額" },
+  "월 납입액": { en: "Monthly payment", ja: "月々の支払額" }, "월 상환액": { en: "Monthly repayment", ja: "月々の返済額" },
+  "총이자": { en: "Total interest", ja: "総利息" }, "원금": { en: "Principal", ja: "元金" }, "이자": { en: "Interest", ja: "利息" },
+  "세금": { en: "Tax", ja: "税金" }, "환급액": { en: "Refund", ja: "還付額" }, "추가 납부액": { en: "Additional tax", ja: "追加納付額" },
+  "수익": { en: "Profit", ja: "利益" }, "수익률": { en: "Return", ja: "収益率" }, "손실": { en: "Loss", ja: "損失" },
+  "승률": { en: "Win rate", ja: "勝率" }, "확률": { en: "Probability", ja: "確率" }, "기대값": { en: "Expected value", ja: "期待値" },
+  "기간": { en: "Period", ja: "期間" }, "남은 기간": { en: "Remaining period", ja: "残り期間" }, "필요 금액": { en: "Required amount", ja: "必要金額" },
+  "평균": { en: "Average", ja: "平均" }, "평균단가": { en: "Average price", ja: "平均単価" }, "현재값": { en: "Current value", ja: "現在値" },
+  "최종 금액": { en: "Final amount", ja: "最終金額" }, "차이": { en: "Difference", ja: "差額" }, "총 비용": { en: "Total cost", ja: "総費用" },
+  "점수": { en: "Score", ja: "スコア" }, "등급": { en: "Grade", ja: "等級" }, "나이": { en: "Age", ja: "年齢" }, "생년월일": { en: "Birth date", ja: "生年月日" }
+};
+
+export function getLocalizedResultLabel(label: string, locale: Locale) {
+  if (locale === "ko") return label;
+  if (RESULT_LABELS[label]?.[locale]) return RESULT_LABELS[label][locale];
+  let translated = label;
+  const replacements: Array<[string, LocalizedText]> = [
+    ["월", { en: "Monthly ", ja: "月" }], ["연", { en: "Annual ", ja: "年" }], ["예상", { en: "Estimated ", ja: "予想" }],
+    ["금액", { en: "amount", ja: "金額" }], ["비용", { en: "cost", ja: "費用" }], ["수량", { en: "quantity", ja: "数量" }],
+    ["결과", { en: "result", ja: "結果" }], ["기간", { en: "period", ja: "期間" }], ["시간", { en: "time", ja: "時間" }]
+  ];
+  for (const [source, replacement] of replacements) translated = translated.replaceAll(source, replacement[locale]);
+  if (/[가-힣]/.test(translated)) return locale === "en" ? "Result" : "結果";
+  return translated;
+}

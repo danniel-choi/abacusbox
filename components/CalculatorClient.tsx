@@ -10,7 +10,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type ResultRow } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 import { interpolate, type Locale } from "@/lib/i18n";
-import { getLocalizedCalculatorPresentation, getLocalizedFieldHelp, getLocalizedFieldLabel, getLocalizedOptionLabel } from "@/lib/calculator-i18n";
+import { getLocalizedCalculatorPresentation, getLocalizedFieldHelp, getLocalizedFieldLabel, getLocalizedOptionLabel, getLocalizedResultLabel } from "@/lib/calculator-i18n";
 
 type FormValues = Record<string, number>;
 
@@ -666,7 +666,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {highlightedRows.map((row) => (
               <div key={row.label} className="rounded-[18px] border border-line bg-paper p-4">
-                <p className="text-sm font-bold text-slate-500">{row.label}</p>
+                <p className="text-sm font-bold text-slate-500">{getLocalizedResultLabel(row.label, locale)}</p>
                 <p className="mt-2 text-2xl font-extrabold text-ink">{row.value}</p>
               </div>
             ))}
@@ -728,7 +728,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         <div className="mt-5 overflow-hidden rounded-[18px] border border-line">
           {result.rows.map((row) => (
             <div key={row.label} className="grid grid-cols-1 gap-1 border-b border-line p-3 text-sm last:border-0 sm:grid-cols-[0.9fr_1.1fr] sm:gap-0">
-              <div className="bg-paper px-4 py-4 font-extrabold text-slate-600">{row.label}</div>
+              <div className="bg-paper px-4 py-4 font-extrabold text-slate-600">{getLocalizedResultLabel(row.label, locale)}</div>
               <div
                 className={`min-w-0 px-4 py-4 text-left text-xs font-extrabold sm:text-right sm:text-sm ${row.tone === "strong" ? "text-brand" : "text-ink"}`}
               >
@@ -754,7 +754,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                     <div className="w-full rounded-t-xl bg-brand" style={{ height: `${height}%` }} />
                   </div>
                   <div className="text-center">
-                    <p className="truncate text-xs font-extrabold text-slate-600">{point.name}</p>
+                    <p className="truncate text-xs font-extrabold text-slate-600">{getLocalizedResultLabel(point.name, locale)}</p>
                     <p className="mt-1 truncate text-xs font-bold text-slate-400">{Math.round(point.value).toLocaleString("ko-KR")}</p>
                   </div>
                 </div>
@@ -1010,6 +1010,7 @@ function SavedResultsPanel({
   items: SavedCalculatorResult[];
   onDelete: (id: string) => void;
 }) {
+  const { locale } = useLanguage();
   const comparableItems = items.filter((item) => item.slug === currentSlug).slice(0, 3);
   const comparisonRows = Array.from(
     new Set(comparableItems.flatMap((item) => item.rows.slice(0, 5).map((row) => row.label)))
@@ -1062,7 +1063,7 @@ function SavedResultsPanel({
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {item.rows.slice(0, 4).map((row) => (
                 <div key={`${item.id}-${row.label}`} className="rounded-xl bg-paper px-3 py-2">
-                  <p className="text-[11px] font-bold text-slate-500">{row.label}</p>
+                  <p className="text-[11px] font-bold text-slate-500">{getLocalizedResultLabel(row.label, locale)}</p>
                   <p className="mt-1 truncate text-xs font-extrabold text-ink">{row.value}</p>
                 </div>
               ))}
@@ -1101,7 +1102,7 @@ function SavedResultsPanel({
                 </tr>
                 {comparisonRows.map((label) => (
                   <tr key={label} className="border-b border-line last:border-b-0">
-                    <td className="px-4 py-3 font-extrabold text-slate-600">{label}</td>
+                    <td className="px-4 py-3 font-extrabold text-slate-600">{getLocalizedResultLabel(label, locale)}</td>
                     {comparableItems.map((item) => {
                       const row = item.rows.find((candidate) => candidate.label === label);
                       return (
