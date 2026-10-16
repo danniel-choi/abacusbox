@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LocalizedResourcesHeader, LocalizedResourcesNotice, LocalizedSummaryTile } from "@/components/LocalizedDirectoryIntro";
 
 export const metadata: Metadata = {
   title: "법률·세무·금융 참고 사이트",
@@ -179,16 +180,11 @@ export default function ResourcesPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       <section className="rounded-[28px] border border-line bg-white p-6 shadow-panel sm:p-8">
-        <p className="text-sm font-extrabold text-brand">Reference Sites</p>
-        <h1 className="mt-2 text-3xl font-black leading-tight text-ink sm:text-4xl">법률·세무·금융 참고 사이트</h1>
-        <p className="mt-4 max-w-3xl text-base font-medium leading-8 text-slate-600">
-          계산 결과를 실제 신고, 계약, 대출, 투자 판단에 연결하기 전에는 공식 자료를 함께 확인해야 합니다.
-          아래 목록은 계산의정석에서 기준 검토와 사용자 안내에 우선 참고하기 좋은 공공·공식 사이트입니다.
-        </p>
+        <LocalizedResourcesHeader />
         <div className="mt-6 grid gap-3 md:grid-cols-3">
-          <SummaryTile label="법률" value="6개" text="법령, 판례, 등기, 소송, 법률구조" />
-          <SummaryTile label="세무" value="6개" text="국세, 지방세, 세법 해석, 4대보험" />
-          <SummaryTile label="금융" value="7개" text="소비자보호, 상품 비교, 공시, 시장 정보" />
+          <LocalizedSummaryTile kind="legal" value="6" />
+          <LocalizedSummaryTile kind="tax" value="6" />
+          <LocalizedSummaryTile kind="finance" value="7" />
         </div>
       </section>
 
@@ -235,23 +231,8 @@ export default function ResourcesPage() {
       </div>
 
       <section className="mt-8 rounded-[28px] bg-navy p-6 text-white shadow-panel sm:p-7">
-        <p className="text-sm font-extrabold text-brand">주의사항</p>
-        <h2 className="mt-2 text-2xl font-black">최종 판단은 공식 자료와 전문가 검토를 함께 보세요.</h2>
-        <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-white/72">
-          계산의정석의 계산기와 참고 링크는 빠른 비교와 기준 확인을 돕기 위한 자료입니다. 실제 신고, 소송, 계약, 금융상품 가입, 투자 판단은
-          최신 법령·공시·기관 안내와 세무사, 변호사, 금융전문가의 검토를 함께 확인하는 것이 안전합니다.
-        </p>
+        <LocalizedResourcesNotice />
       </section>
     </main>
-  );
-}
-
-function SummaryTile({ label, value, text }: { label: string; value: string; text: string }) {
-  return (
-    <div className="rounded-[20px] bg-paper p-5">
-      <p className="text-sm font-extrabold text-brand">{label}</p>
-      <p className="mt-2 text-3xl font-black text-ink">{value}</p>
-      <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{text}</p>
-    </div>
   );
 }
