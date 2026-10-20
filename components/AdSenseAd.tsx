@@ -17,12 +17,14 @@ type AdSenseAdProps = {
 };
 
 const AD_CLIENT = "ca-pub-5568924428249376";
+const DEFAULT_DISPLAY_SLOT = "8858811048";
+const DISPLAY_SLOT = process.env.NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT || DEFAULT_DISPLAY_SLOT;
 
 const SLOT_BY_PLACEMENT: Record<AdPlacement, string | undefined> = {
-  top: process.env.NEXT_PUBLIC_ADSENSE_TOP_SLOT || process.env.NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT,
-  calculator: process.env.NEXT_PUBLIC_ADSENSE_CALCULATOR_SLOT || process.env.NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT,
-  inArticle: process.env.NEXT_PUBLIC_ADSENSE_IN_ARTICLE_SLOT || process.env.NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT,
-  bottom: process.env.NEXT_PUBLIC_ADSENSE_BOTTOM_SLOT || process.env.NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT
+  top: process.env.NEXT_PUBLIC_ADSENSE_TOP_SLOT || DISPLAY_SLOT,
+  calculator: process.env.NEXT_PUBLIC_ADSENSE_CALCULATOR_SLOT || DISPLAY_SLOT,
+  inArticle: process.env.NEXT_PUBLIC_ADSENSE_IN_ARTICLE_SLOT || DISPLAY_SLOT,
+  bottom: process.env.NEXT_PUBLIC_ADSENSE_BOTTOM_SLOT || DISPLAY_SLOT
 };
 
 export function AdSenseAd({ placement, className = "" }: AdSenseAdProps) {
