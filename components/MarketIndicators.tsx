@@ -35,17 +35,12 @@ export function MarketIndicators() {
     const ratesFresh = Boolean(cached.rates && cached.ratesFetchedAt && now - cached.ratesFetchedAt < RATES_TTL);
     const goldFresh = Boolean(cached.gold && cached.goldFetchedAt && now - cached.goldFetchedAt < GOLD_TTL);
 
-    try {
-      const savedUnit = window.localStorage.getItem("calcrule_gold_unit");
-      if (savedUnit === "don") setGoldUnit("don");
-    } catch {
-      // Ignore unavailable local storage.
-    }
-
-    setData(cached);
-    setLoading(!cached.rates || !cached.gold);
-
     const load = async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      setData(cached);
+      setLoading(!cached.rates || !cached.gold);
+
       try {
         const [ratesResult, goldResult] = await Promise.all([
           ratesFresh ? Promise.resolve(null) : fetch("https://open.er-api.com/v6/latest/USD", { cache: "no-store" }).then(assertResponse).then((response) => response.json()),
