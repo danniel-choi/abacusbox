@@ -24,6 +24,7 @@ import { AdSenseAd } from "@/components/AdSenseAd";
 import { HomeBlogRoller } from "@/components/HomeBlogRoller";
 import { Logo } from "@/components/Logo";
 import { RecentCalculatorsSection } from "@/components/RecentCalculatorsSection";
+import { MarketIndicators } from "@/components/MarketIndicators";
 
 export default function HomePage() {
   const { locale, t } = useLanguage();
@@ -103,6 +104,17 @@ export default function HomePage() {
                 })}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="page-shell py-2 md:py-3">
+        <div className="overflow-hidden rounded-[28px] border border-brand/20 bg-gradient-to-br from-[#e9fbf5] via-white to-[#eef3ff] p-6 shadow-panel md:p-7">
+          <p className="text-sm font-extrabold text-brand">{t("home.indicatorEyebrow")}</p>
+          <h2 className="mt-2 text-2xl font-extrabold leading-tight text-ink md:text-3xl">{t("home.indicatorTitle")}</h2>
+          <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-slate-600 md:text-base">{t("home.indicatorDescription")}</p>
+          <div className="mt-6">
+            <MarketIndicators />
           </div>
         </div>
       </section>
