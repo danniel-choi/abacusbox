@@ -153,7 +153,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     title: "날짜, 단위, 내신, 촌수 계산기",
     description: "날짜 차이, D-Day, 기념일, 만 나이, 내신 등급, 촌수, 단위변환, 퍼센트처럼 자주 쓰는 빠른 도구를 모았습니다.",
     featuredSlugs: ["date-diff", "dday", "school-grade", "kinship-calculator", "anniversary-calculator", "unit-converter"],
-    blogSlugs: ["distance-calculator-how-to-use", "unit-converter-comparison-20261228-05-hourly", "math-notes-classroom-guide"],
+    blogSlugs: ["distance-calculator-how-to-use", "unit-converter-comparison-20260924-00-hourly", "math-notes-classroom-guide"],
     sections: [
       {
         title: "일상 도구는 빠르게 꺼내 쓰는 계산입니다.",

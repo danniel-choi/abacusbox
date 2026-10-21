@@ -763,81 +763,6 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
   }
 };
 
-const hourlyAutoBlogCalculatorGroups = [
-  ["minimum-wage", "unpaid-wage", "unemployment", "severance", "weekly-holiday", "hourly-wage", "annual-leave", "annual-leave-grant", "parental-leave", "net-salary"],
-  ["loan-interest", "loan-dsr", "housing-subscription", "loan-amortization", "card-installment", "exchange-rate", "savings", "lump-sum-deposit", "compound-interest", "youth-future-savings", "youth-leap-account"],
-  ["year-end-tax-settlement", "earned-income-tax", "comprehensive-income-tax", "retirement-income-tax", "inheritance-tax", "pension-tax", "isa-tax", "earned-income-tax-credit", "survivor-pension", "vat"],
-  ["stock-return", "kr-etf", "coin-profit-calculator", "crypto-investment-growth", "stock-average-price", "gold-price-calculator", "money-value-calculator"],
-  ["bmi", "calorie-calculator", "daily-intake", "ovulation-calculator", "pregnancy-week-calculator", "bmr-calculator", "ideal-weight", "one-rep-max", "sleep-calculator", "running-pace"],
-  ["military-discharge-date", "date-diff", "korean-age", "pet-age", "unit-converter", "percent", "discount-rate", "traffic-fine-penalty", "vehicle-inspection-period", "moving-cost", "mobile-plan", "gpa", "school-grade", "kinship-calculator"],
-  ["draw-probability", "diablo2-attack-speed", "lol-skill-haste", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator", "lineage-classic-lucky-character", "diablo3-gem-calculator", "fc-transfer-fee", "poker-equity-calculator", "win-rate-calculator", "edpi-calculator", "mouse-sensitivity-converter", "random-number"],
-  ["seller-profit", "break-even", "adsense-revenue", "youtube-ad-revenue", "subscription-revenue"],
-  ["math-notes", "graphing-calculator", "scientific-calculator", "derivative-calculator"]
-];
-
-function interleaveAutoBlogCalculators(groups: string[][]) {
-  const maxLength = Math.max(...groups.map((group) => group.length));
-  const ordered: string[] = [];
-
-  for (let index = 0; index < maxLength; index += 1) {
-    for (const group of groups) {
-      const slug = group[index];
-      if (slug) ordered.push(slug);
-    }
-  }
-
-  return ordered;
-}
-
-const hourlyAutoBlogCalculatorOrder = interleaveAutoBlogCalculators(hourlyAutoBlogCalculatorGroups);
-
-const legacyHourlyAutoBlogCalculatorOrder = [
-  "minimum-wage",
-  "unpaid-wage",
-  "unemployment",
-  "severance",
-  "weekly-holiday",
-  "hourly-wage",
-  "annual-leave",
-  "annual-leave-grant",
-  "parental-leave",
-  "net-salary",
-  "military-discharge-date",
-  "loan-interest",
-  "loan-dsr",
-  "loan-amortization",
-  "real-estate-acquisition-tax",
-  "jeonse-vs-monthly-rent",
-  "card-installment",
-  "exchange-rate",
-  "savings",
-  "lump-sum-deposit",
-  "compound-interest",
-  "pension-tax",
-  "isa-tax",
-  "youth-leap-account",
-  "comprehensive-income-tax",
-  "retirement-income-tax",
-  "vat",
-  "seller-profit",
-  "break-even",
-  "car-maintenance",
-  "moving-cost",
-  "mobile-plan",
-  "bmi",
-  "korean-age",
-  "date-diff",
-  "unit-converter",
-  "percent",
-  "discount-rate",
-  "gpa"
-];
-
-const legacyHourlyAutoBlogSlugs = [
-  "loan-interest-checklist-20260930-16-hourly",
-  "annual-leave-grant-mistakes-20260930-12-hourly"
-];
-
 const hourlyTemplateMeta = {
   guide: { suffix: "핵심 정리", focus: "기준 구조와 입력 흐름" },
   checklist: { suffix: "입력 전 체크리스트", focus: "계산 전에 확인할 항목" },
@@ -846,57 +771,35 @@ const hourlyTemplateMeta = {
   scenario: { suffix: "상황별 활용 방법", focus: "실제 상황별 계산 흐름" }
 } as const;
 
-const hourlyAutoBlogTemplateOrder = Object.keys(hourlyTemplateMeta) as (keyof typeof hourlyTemplateMeta)[];
-
-function toDateCode(date: Date) {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-
-  return `${year}${month}${day}`;
-}
-
-function buildHourlyAutoBlogDateCodes() {
-  const start = Date.UTC(2026, 8, 1);
-  const today = new Date();
-  const end = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-  const dateCodes: string[] = [];
-
-  for (let time = start; time <= end; time += 24 * 60 * 60 * 1000) {
-    dateCodes.push(toDateCode(new Date(time)));
-  }
-
-  return dateCodes;
-}
-
-const hourlyAutoBlogDateCodes = buildHourlyAutoBlogDateCodes();
-
-function buildHourlyAutoBlogSlugFromOrder(dateCode: string, hour: number, calculatorOrder: string[]) {
-  const dayNumber = Number(dateCode.slice(-2));
-  const calculatorSlug = calculatorOrder[(dayNumber + hour) % calculatorOrder.length];
-  const templateKey = hourlyAutoBlogTemplateOrder[(dayNumber + hour) % hourlyAutoBlogTemplateOrder.length];
-  const hourCode = String(hour).padStart(2, "0");
-
-  return `${calculatorSlug}-${templateKey}-${dateCode}-${hourCode}-hourly`;
-}
-
-function buildHourlyAutoBlogSlug(dateCode: string, hour: number) {
-  return buildHourlyAutoBlogSlugFromOrder(dateCode, hour, hourlyAutoBlogCalculatorOrder);
-}
-
-const hourlyAutoBlogSlugs = Array.from(
-  new Set(
-    [
-      ...hourlyAutoBlogDateCodes.flatMap((dateCode) =>
-        Array.from({ length: 24 }, (_, hour) => buildHourlyAutoBlogSlug(dateCode, hour))
-      ),
-      ...hourlyAutoBlogDateCodes.flatMap((dateCode) =>
-        Array.from({ length: 24 }, (_, hour) => buildHourlyAutoBlogSlugFromOrder(dateCode, hour, legacyHourlyAutoBlogCalculatorOrder))
-      ),
-      ...legacyHourlyAutoBlogSlugs
-    ]
-  )
-);
+// Keep a small, curated set of auto-generated guides. Generating dozens of near-duplicate
+// posts per day creates a large low-value crawl surface and dilutes the pages that should
+// earn search traffic and display ads.
+const hourlyAutoBlogSlugs = [
+  "loan-interest-checklist-20260901-00-hourly",
+  "year-end-tax-settlement-mistakes-20260901-01-hourly",
+  "stock-return-comparison-20260901-02-hourly",
+  "draw-probability-checklist-20260901-15-hourly",
+  "poker-equity-calculator-scenario-20260902-18-hourly",
+  "lunar-solar-converter-checklist-20260902-21-hourly",
+  "random-number-guide-20260904-05-hourly",
+  "zodiac-sign-guide-20260901-17-hourly",
+  "loan-interest-checklist-20260930-16-hourly",
+  "annual-leave-grant-mistakes-20260930-12-hourly",
+  "break-even-checklist-20260926-00-hourly",
+  "car-maintenance-mistakes-20260926-01-hourly",
+  "moving-cost-comparison-20260926-02-hourly",
+  "mobile-plan-scenario-20260926-03-hourly",
+  "minimum-wage-guide-20260920-00-hourly",
+  "unemployment-guide-20260920-01-hourly",
+  "severance-checklist-20260920-02-hourly",
+  "loan-dsr-guide-20260921-00-hourly",
+  "exchange-rate-comparison-20260921-01-hourly",
+  "vat-guide-20260922-00-hourly",
+  "seller-profit-scenario-20260922-01-hourly",
+  "bmi-guide-20260923-00-hourly",
+  "calorie-calculator-checklist-20260923-01-hourly",
+  "unit-converter-comparison-20260924-00-hourly"
+];
 
 function buildHourlyAutoBlogPost(slug: string): BlogPost {
   const match = slug.match(/^(.+)-(guide|checklist|mistakes|comparison|scenario)-(\d{8})-(\d{2})-hourly$/);
