@@ -120,6 +120,10 @@ export default function HomePage() {
       </section>
 
       <section className="page-shell py-2 md:py-3">
+        <AdSenseAd placement="top" />
+      </section>
+
+      <section className="page-shell py-2 md:py-3">
         <div className="rounded-[28px] border border-line bg-white p-5 shadow-panel md:p-6">
           <div className="section-heading mb-4">
             <div>
@@ -153,10 +157,6 @@ export default function HomePage() {
       </section>
 
       <RecentCalculatorsSection />
-
-      <section className="page-shell py-2 md:py-3">
-        <AdSenseAd placement="top" />
-      </section>
 
       <section className="page-shell section-shell">
         <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel md:p-7">
