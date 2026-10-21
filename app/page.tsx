@@ -191,6 +191,18 @@ export default function HomePage() {
           <HomeBlogRoller posts={latestBlogPosts} />
         </div>
       </section>
+
+      <section className="page-shell pb-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-white px-4 py-4 shadow-panel">
+          <p className="text-sm font-semibold text-slate-600">{t("home.trustDescription")}</p>
+          <nav aria-label="사이트 안내" className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-extrabold text-brand">
+            <Link href="/resources" className="transition hover:text-ink">{t("home.checkSources")}</Link>
+            <Link href="/editorial-policy" className="transition hover:text-ink">{t("home.policy")}</Link>
+            <Link href="/privacy" className="transition hover:text-ink">{t("home.privacy")}</Link>
+            <Link href="/contact" className="transition hover:text-ink">{t("home.contact")}</Link>
+          </nav>
+        </div>
+      </section>
     </main>
   );
 }
