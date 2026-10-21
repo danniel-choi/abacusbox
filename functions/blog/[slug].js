@@ -1,4 +1,4 @@
-const SITE_URL = "https://abacusbox.com";
+const SITE_URL = "https://www.abacusbox.com";
 
 const calculatorMeta = {
   "break-even": {

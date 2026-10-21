@@ -1334,7 +1334,7 @@ function downloadResultCard({
 
   context.fillStyle = "#17212b";
   context.font = "800 28px sans-serif";
-  context.fillText("abacusbox.com", 128, 1216);
+  context.fillText("www.abacusbox.com", 128, 1216);
   context.fillStyle = "#7a8794";
   context.font = "600 22px sans-serif";
   wrapCanvasText(context, url, 128, 1254, width - 256, 30, 2);

@@ -1,4 +1,4 @@
-const SITE_URL = "https://abacusbox.com";
+const SITE_URL = "https://www.abacusbox.com";
 
 const CATEGORY_THEMES = [
   { test: /(사주|만세력|타로|운세|띠|삼재|오행)/, label: "사주 가이드", bg: "#151221", accent: "#b9fbc0", sub: "#f8d7ff" },
