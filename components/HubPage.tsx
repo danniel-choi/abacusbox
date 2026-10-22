@@ -10,6 +10,7 @@ import { calculators, type CalculatorConfig } from "@/lib/calculators";
 import { blogPosts, type BlogPost } from "@/lib/content";
 import type { HubContent } from "@/lib/hub-content";
 import { getLocalizedHubContent } from "@/lib/hub-i18n";
+import { SITE_URL } from "@/lib/constants";
 
 export function HubPage({ hub }: { hub: HubContent }) {
   const { locale, t } = useLanguage();
@@ -21,9 +22,41 @@ export function HubPage({ hub }: { hub: HubContent }) {
   const posts = hub.blogSlugs
     .map((slug) => blogPosts.find((post) => post.slug === slug))
     .filter((post): post is BlogPost => Boolean(post));
+  const collectionLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: localizedHub.title,
+    description: localizedHub.description,
+    url: `${SITE_URL}${hub.path}`,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "계산의정석",
+      url: SITE_URL
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: featured.length,
+      itemListElement: featured.map((calculator, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: calculator.title,
+        url: `${SITE_URL}/calculators/${calculator.slug}`
+      }))
+    }
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "홈", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: localizedHub.title, item: `${SITE_URL}${hub.path}` }
+    ]
+  };
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="rounded-[28px] bg-ink px-6 py-10 text-white shadow-panel">
         <p className="text-sm font-extrabold text-brand">{localizedHub.eyebrow}</p>
         <h1 className="mt-3 text-3xl font-extrabold leading-tight md:text-5xl">{localizedHub.title}</h1>
