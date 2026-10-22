@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { AdSenseLoader } from "@/components/AdSenseLoader";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { Header } from "@/components/Header";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="min-h-screen antialiased">
         <LanguageProvider>
           <AdSenseLoader />
+          <GoogleAnalytics />
           <Header />
           {children}
           <SiteFooter />
