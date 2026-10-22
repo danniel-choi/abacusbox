@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     template: "%s | 계산의정석"
   },
   description: "계산의정석, 계산의 정석은 노무, 금융, 절세, 건강, 일상 도구, 생활, 사업 계산기와 수학 도구를 검색과 필터로 빠르게 찾고 실행할 수 있는 계산기 디렉토리입니다.",
+  alternates: {
+    canonical: SITE_URL
+  },
   keywords: ["계산의정석", "계산의 정석", "계산기", "세금 계산기", "연말정산 계산기", "실수령액 계산기", "대출 계산기"],
   openGraph: {
     title: "계산의정석(계산의 정석) - 노무·금융·건강·일상·생활 계산기 디렉토리",

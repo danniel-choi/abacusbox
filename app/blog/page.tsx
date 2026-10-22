@@ -5,7 +5,8 @@ import { getLatestBlogPosts } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "블로그",
-  description: "노무·금융 계산과 연결되는 제도 해설, 실무 가이드, 운영 업데이트를 제공합니다."
+  description: "노무·금융 계산과 연결되는 제도 해설, 실무 가이드, 운영 업데이트를 제공합니다.",
+  alternates: { canonical: "/blog" }
 };
 
 export default function BlogPage() {

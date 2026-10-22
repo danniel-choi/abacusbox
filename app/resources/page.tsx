@@ -3,7 +3,8 @@ import { LocalizedResourcesHeader, LocalizedResourcesNotice, LocalizedSummaryTil
 
 export const metadata: Metadata = {
   title: "법률·세무·금융 참고 사이트",
-  description: "법률, 세무, 금융 판단 전에 함께 확인하면 좋은 공식기관과 공공 정보 사이트를 분야별로 정리했습니다."
+  description: "법률, 세무, 금융 판단 전에 함께 확인하면 좋은 공식기관과 공공 정보 사이트를 분야별로 정리했습니다.",
+  alternates: { canonical: "/resources" }
 };
 
 type ResourceItem = {
