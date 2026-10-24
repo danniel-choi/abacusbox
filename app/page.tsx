@@ -27,7 +27,9 @@ const brandRelatedLinks = [
   { href: "/calculators/net-salary", label: "실수령액 계산기" },
   { href: "/calculators/severance", label: "퇴직금 계산기" },
   { href: "/calculators/loan-interest", label: "대출 이자 계산기" },
-  { href: "/calculators/year-end-tax-settlement", label: "연말정산 계산기" }
+  { href: "/calculators/year-end-tax-settlement", label: "연말정산 계산기" },
+  { href: "/calculators/lotto-probability", label: "복권 당첨 확률 계산기" },
+  { href: "/calculators/lightning-strike-probability", label: "번개 맞을 확률 계산기" }
 ];
 
 export default function HomePage() {

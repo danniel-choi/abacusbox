@@ -126,6 +126,8 @@ export type CalculatorSlug =
   | "fuel-cost"
   | "estimated-mileage-calculator"
   | "lotto-generator"
+  | "lotto-probability"
+  | "lightning-strike-probability"
   | "cbm-freight"
   | "subscription-revenue"
   | "real-estate-brokerage-fee"
@@ -915,6 +917,27 @@ function binomialAtLeastProbability(trials: number, target: number, probability:
   }
 
   return Math.min(Math.max(1 - belowTarget, 0), 1);
+}
+
+function combination(n: number, k: number) {
+  const wholeN = Math.floor(n);
+  const wholeK = Math.floor(k);
+  if (wholeK < 0 || wholeK > wholeN) return 0;
+  const reducedK = Math.min(wholeK, wholeN - wholeK);
+  let result = 1;
+  for (let index = 1; index <= reducedK; index += 1) {
+    result = result * (wholeN - reducedK + index) / index;
+  }
+  return result;
+}
+
+function formatLotteryProbability(probability: number) {
+  if (probability <= 0) return "0%";
+  if (probability >= 1) return "100%";
+  const percent = probability * 100;
+  if (percent >= 0.01) return formatPercent(percent, 2);
+  if (percent >= 0.0001) return formatPercent(percent, 4);
+  return `${percent.toExponential(2)}%`;
 }
 
 function createSeededRandom(seed: number) {
@@ -11846,6 +11869,163 @@ export const calculators: CalculatorConfig[] = [
           { name: "원금", value: principal.toNumber() },
           { name: "세후이자", value: grossInterest.minus(tax).toNumber() },
           { name: "세금", value: tax.toNumber() }
+        ]
+      };
+    }
+  },
+  {
+    slug: "lightning-strike-probability",
+    title: "번개 맞을 확률 계산기",
+    description: "기준 연간 피격 확률과 계산 기간, 야외 노출 보정을 입력해 길을 걷다 번개에 맞을 확률을 참고로 계산합니다.",
+    category: "생활",
+    keywords: ["번개 맞을 확률 계산기", "번개 피격 확률", "길가다 번개 맞을 확률", "번개 확률 계산", "벼락 맞을 확률"],
+    badge: "번개 피격 확률",
+    audience: "길을 걷거나 야외 활동 중 번개에 맞을 확률을 참고로 확인하려는 사용자",
+    fields: [
+      {
+        name: "annualOddsDenominator",
+        label: "기준 연간 확률 분모",
+        type: "number",
+        unit: "분의 1",
+        min: 1,
+        max: 1000000000,
+        step: 1000,
+        defaultValue: 1222000,
+        help: "지역·기간별 통계에 맞춰 수정할 수 있습니다. 기본값은 미국 NWS의 과거 추정치입니다."
+      },
+      {
+        name: "years",
+        label: "계산 기간",
+        type: "number",
+        unit: "년",
+        min: 1,
+        max: 100,
+        step: 1,
+        defaultValue: 1
+      },
+      {
+        name: "riskMultiplier",
+        label: "야외 노출 보정",
+        type: "number",
+        unit: "배",
+        min: 0.1,
+        max: 10,
+        step: 0.1,
+        defaultValue: 1,
+        help: "야외 체류·뇌우 노출이 평균보다 적거나 많다고 판단할 때 참고로 조정합니다."
+      }
+    ],
+    guideTitle: "번개 피격 확률 계산 기준",
+    guide: [
+      "번개 피격 확률은 국가·지역의 뇌우 빈도, 야외 체류 시간, 지형과 행동에 따라 크게 달라집니다. 따라서 이 계산기는 특정 지역의 확정 위험도가 아니라 입력한 기준값을 기간별 확률로 환산하는 참고 도구입니다.",
+      "기본 기준값은 미국 국립기상청(NWS)이 2009~2018년 미국 평균 자료로 제시한 연간 약 1/1,222,000 추정치입니다. 한국이나 다른 지역에 그대로 적용할 수 없으므로 지역 통계가 있으면 기준 분모를 바꿔 입력하세요.",
+      "계산은 1 - (1 - 연간확률 × 야외노출보정)^기간으로 계산합니다. 실제 뇌우가 발생한 상황에서는 일반적인 연간 평균보다 위험이 훨씬 커질 수 있습니다."
+    ],
+    checkpoints: [
+      "천둥이 들리면 계산 결과와 관계없이 즉시 안전한 건물이나 지붕이 있는 차량으로 이동하세요.",
+      "야외에서 나무 아래, 높은 곳, 개방된 공간에 머무르는 행동은 위험을 줄이는 방법이 아닙니다.",
+      "이 계산기는 기상 경보나 실시간 위치별 위험도를 제공하지 않습니다."
+    ],
+    faqs: [
+      { question: "길을 걷다가 번개에 맞을 확률은 정확히 계산할 수 있나요?", answer: "개인의 정확한 확률은 지역, 뇌우 빈도, 야외 체류 시간과 행동에 따라 달라 단일 숫자로 확정하기 어렵습니다. 기준값과 노출 보정을 바꿔 참고용으로 확인하세요." },
+      { question: "기본값은 어느 지역 기준인가요?", answer: "미국 국립기상청이 2009~2018년 미국 평균 사망·부상 추정치를 바탕으로 제시한 연간 약 1/1,222,000 값입니다. 한국의 공식 지역 통계와는 다를 수 있습니다." },
+      { question: "천둥이 들리면 어떻게 해야 하나요?", answer: "즉시 실내의 큰 건물이나 지붕이 있는 차량으로 이동하세요. 미국 국립기상청은 천둥이 들리면 실내로 들어가고, 마지막 천둥 후 30분을 기다리라고 안내합니다." }
+    ],
+    calculate(values) {
+      const denominator = Math.max(1, Math.floor(values.annualOddsDenominator || 1222000));
+      const years = Math.max(1, Math.min(100, Math.floor(values.years || 1)));
+      const multiplier = Math.max(0.1, Math.min(10, values.riskMultiplier || 1));
+      const annualProbability = Math.min(1, multiplier / denominator);
+      const periodProbability = 1 - Math.pow(1 - annualProbability, years);
+      const remainingProbability = 1 - periodProbability;
+      return {
+        headline: formatLotteryProbability(periodProbability),
+        subline: `${years}년 기준 · 야외 노출 보정 ${multiplier.toFixed(1)}배`,
+        rows: [
+          { label: "입력 기준 연간 확률", value: `1/${denominator.toLocaleString("ko-KR")}`, tone: "strong" },
+          { label: "계산 기간", value: `${years}년` },
+          { label: "야외 노출 보정", value: `${multiplier.toFixed(1)}배` },
+          { label: "기간 내 피격 확률", value: formatLotteryProbability(periodProbability), tone: "strong" },
+          { label: "기간 내 피격되지 않을 확률", value: formatLotteryProbability(remainingProbability) },
+          { label: "단순 환산", value: periodProbability > 0 ? `약 ${Math.round(1 / periodProbability).toLocaleString("ko-KR")}분의 1` : "계산 불가" }
+        ],
+        chart: [
+          { name: "피격 확률", value: periodProbability * 100 },
+          { name: "피격되지 않을 확률", value: remainingProbability * 100 }
+        ]
+      };
+    }
+  },
+  {
+    slug: "lotto-probability",
+    title: "복권 당첨 확률 계산기",
+    description: "로또 6/45 게임 수를 입력해 1등부터 5등까지 등수별 당첨 확률과 5등 이상 당첨 확률을 계산합니다.",
+    category: "생활",
+    keywords: ["복권 당첨 확률 계산기", "로또 당첨 확률", "로또 1등 확률", "로또 2등 확률", "로또 6/45 확률", "복권 확률 계산"],
+    badge: "로또 6/45 확률",
+    audience: "로또 게임 수에 따른 등수별 당첨 확률과 1등 확률을 확인하려는 사용자",
+    fields: [
+      {
+        name: "games",
+        label: "구매 게임 수",
+        type: "number",
+        unit: "게임",
+        min: 1,
+        max: 10000,
+        step: 1,
+        defaultValue: 1,
+        help: "로또 6/45 게임을 몇 게임 구매하는지 입력하세요."
+      }
+    ],
+    guideTitle: "로또 6/45 당첨 확률 계산 기준",
+    guide: [
+      "로또 6/45는 45개 숫자 중 6개를 고르는 조합을 기준으로 계산합니다. 전체 가능한 조합은 8,145,060가지입니다.",
+      "1게임 기준으로 1등은 6개 일치, 2등은 5개와 보너스 숫자 일치, 3등은 5개 일치, 4등은 4개 일치, 5등은 3개 일치 조건을 사용합니다.",
+      "여러 게임의 확률은 각 게임이 독립적으로 추첨된다고 가정해 ‘한 번 이상 당첨될 확률’로 계산합니다. 같은 조합을 중복 구매하거나 실제 구매 조합이 겹치면 해석이 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "1등 확률은 1게임 기준 약 814만분의 1입니다.",
+      "구매 게임 수가 늘어도 1등 확률이 게임 수만큼 단순히 보장되는 것은 아닙니다.",
+      "당첨 확률은 과거 당첨 번호나 번호 패턴으로 높아지지 않습니다."
+    ],
+    faqs: [
+      { question: "로또 1등 확률은 얼마인가요?", answer: "로또 6/45 1게임의 1등 확률은 8,145,060분의 1입니다. 구매 게임 수를 입력하면 한 번 이상 1등에 당첨될 확률로 환산합니다." },
+      { question: "10게임을 사면 1등 확률이 10배인가요?", answer: "서로 다른 조합을 구매한다는 단순 가정에서는 1게임보다 높아지지만, 정확한 값은 1-(1-1등확률)^게임수로 계산합니다." },
+      { question: "번호를 분석하면 당첨 확률이 올라가나요?", answer: "아니요. 모든 6개 조합은 추첨 전 동일한 확률을 가지므로 특정 번호 패턴이 당첨 확률을 높인다고 볼 수 없습니다." }
+    ],
+    calculate(values) {
+      const games = Math.max(1, Math.min(10000, Math.floor(values.games || 1)));
+      const totalCombinations = combination(45, 6);
+      const rankCombinations = {
+        first: combination(6, 6) * combination(39, 0),
+        second: combination(6, 5) * combination(1, 1),
+        third: combination(6, 5) * combination(39, 1),
+        fourth: combination(6, 4) * combination(39, 2),
+        fifth: combination(6, 3) * combination(39, 3)
+      };
+      const rankProbability = (count: number) => count / totalCombinations;
+      const atLeastOnce = (count: number) => 1 - Math.pow(1 - rankProbability(count), games);
+      const fifthOrBetter = Object.values(rankCombinations).reduce((sum, count) => sum + count, 0);
+      const firstChance = rankProbability(rankCombinations.first);
+      return {
+        headline: formatLotteryProbability(atLeastOnce(rankCombinations.first)),
+        subline: `${games.toLocaleString("ko-KR")}게임 기준 1등 당첨 확률 · 단순 독립 시행 가정`,
+        rows: [
+          { label: "구매 게임 수", value: `${games.toLocaleString("ko-KR")}게임`, tone: "strong" },
+          { label: "1등 당첨 확률", value: `${formatLotteryProbability(atLeastOnce(rankCombinations.first))} (약 ${Math.round(1 / atLeastOnce(rankCombinations.first)).toLocaleString("ko-KR")}분의 1)`, tone: "strong" },
+          { label: "2등 당첨 확률", value: formatLotteryProbability(atLeastOnce(rankCombinations.second)) },
+          { label: "3등 당첨 확률", value: formatLotteryProbability(atLeastOnce(rankCombinations.third)) },
+          { label: "4등 당첨 확률", value: formatLotteryProbability(atLeastOnce(rankCombinations.fourth)) },
+          { label: "5등 당첨 확률", value: formatLotteryProbability(atLeastOnce(rankCombinations.fifth)) },
+          { label: "5등 이상 당첨 확률", value: formatLotteryProbability(atLeastOnce(fifthOrBetter)), tone: "strong" },
+          { label: "1게임 기준 1등 확률", value: `${formatLotteryProbability(firstChance)} (1/${totalCombinations.toLocaleString("ko-KR")})` }
+        ],
+        chart: [
+          { name: "1등", value: atLeastOnce(rankCombinations.first) * 100 },
+          { name: "2등", value: atLeastOnce(rankCombinations.second) * 100 },
+          { name: "3등", value: atLeastOnce(rankCombinations.third) * 100 },
+          { name: "4등", value: atLeastOnce(rankCombinations.fourth) * 100 },
+          { name: "5등", value: atLeastOnce(rankCombinations.fifth) * 100 }
         ]
       };
     }
