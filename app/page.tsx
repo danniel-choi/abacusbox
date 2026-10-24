@@ -21,6 +21,15 @@ import { HomeBlogRoller } from "@/components/HomeBlogRoller";
 import { Logo } from "@/components/Logo";
 import { MarketIndicators } from "@/components/MarketIndicators";
 
+const brandRelatedLinks = [
+  { href: "/calculators", label: "계산의정석 계산기 모음" },
+  { href: "/calculators/minimum-wage", label: "최저임금 계산기" },
+  { href: "/calculators/net-salary", label: "실수령액 계산기" },
+  { href: "/calculators/severance", label: "퇴직금 계산기" },
+  { href: "/calculators/loan-interest", label: "대출 이자 계산기" },
+  { href: "/calculators/year-end-tax-settlement", label: "연말정산 계산기" }
+];
+
 export default function HomePage() {
   const { locale, t } = useLanguage();
   const featured = getFeaturedCalculators().slice(0, 4);
@@ -135,6 +144,23 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+          <div className="mt-6 rounded-2xl border border-brand/15 bg-brand/5 px-4 py-4">
+            <p className="text-sm font-extrabold text-ink">계산의정석 계산기 빠른 검색</p>
+            <p className="mt-1 text-sm font-medium leading-6 text-slate-600">
+              계산의 정석에서 찾는 무료 온라인 계산기와 생활 계산기 모음을 분야별로 바로 확인하세요.
+            </p>
+            <nav aria-label="계산의정석 주요 계산기" className="mt-3 flex flex-wrap gap-2">
+              {brandRelatedLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-full border border-line bg-white px-3 py-2 text-xs font-extrabold text-brand transition hover:border-brand hover:text-ink"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
         </div>
       </section>
