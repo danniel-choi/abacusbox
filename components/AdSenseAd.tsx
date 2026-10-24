@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 declare global {
   interface Window {
     adsbygoogle?: unknown[];
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
@@ -32,6 +33,7 @@ export function AdSenseAd({ placement, className = "" }: AdSenseAdProps) {
   const slot = SLOT_BY_PLACEMENT[placement];
   const key = useMemo(() => `${placement}-${slot || "display"}`, [placement, slot]);
   const adRef = useRef<HTMLModElement>(null);
+  const viewTrackedRef = useRef(false);
 
   useEffect(() => {
     const adElement = adRef.current;
@@ -47,13 +49,41 @@ export function AdSenseAd({ placement, className = "" }: AdSenseAdProps) {
     }
   }, [slot, key]);
 
+  useEffect(() => {
+    const adElement = adRef.current;
+    if (!adElement || viewTrackedRef.current || typeof IntersectionObserver === "undefined") return;
+
+    let timer: number | undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting || entry.intersectionRatio < 0.5 || viewTrackedRef.current) return;
+        timer = window.setTimeout(() => {
+          if (viewTrackedRef.current) return;
+          viewTrackedRef.current = true;
+          window.gtag?.("event", "ad_slot_view", {
+            ad_placement: placement,
+            ad_slot: slot || "display"
+          });
+        }, 1000);
+      },
+      { threshold: [0.5] }
+    );
+
+    observer.observe(adElement);
+    return () => {
+      observer.disconnect();
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [placement, slot, key]);
+
   return (
-    <div className={`ad-slot rounded-[20px] border border-line bg-white px-3 py-3 shadow-sm ${className}`}>
+    <div aria-label="광고" className={`ad-slot rounded-[20px] border border-line bg-white px-3 py-3 shadow-sm ${className}`}>
       <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-normal text-slate-400">{t(`ads.${placement}` as "ads.top" | "ads.calculator" | "ads.inArticle" | "ads.bottom")}</p>
       <ins
         ref={adRef}
         key={key}
         className="adsbygoogle block min-h-[90px] w-full"
+        data-ad-placement={placement}
         style={{ display: "block" }}
         data-ad-client={AD_CLIENT}
         data-ad-slot={slot || undefined}
