@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AdSenseAd } from "@/components/AdSenseAd";
 import { CalculatorDirectoryClient } from "@/components/CalculatorDirectoryClient";
 import { LocalizedDirectoryIntro } from "@/components/LocalizedDirectoryIntro";
+import { RelatedSearchTags } from "@/components/RelatedSearchTags";
 
 export const metadata: Metadata = {
   title: "전체 계산기",
@@ -13,6 +14,10 @@ export default function CalculatorsPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <LocalizedDirectoryIntro />
+
+      <div className="mt-6">
+        <RelatedSearchTags />
+      </div>
 
       <div className="mt-8">
         <AdSenseAd placement="top" />

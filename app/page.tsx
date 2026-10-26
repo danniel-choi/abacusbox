@@ -20,6 +20,7 @@ import { AdSenseAd } from "@/components/AdSenseAd";
 import { HomeBlogRoller } from "@/components/HomeBlogRoller";
 import { Logo } from "@/components/Logo";
 import { MarketIndicators } from "@/components/MarketIndicators";
+import { RelatedSearchTags } from "@/components/RelatedSearchTags";
 
 const brandRelatedLinks = [
   { href: "/calculators", label: "계산의정석 계산기 모음" },
@@ -163,6 +164,9 @@ export default function HomePage() {
                 </Link>
               ))}
             </nav>
+          </div>
+          <div className="mt-4">
+            <RelatedSearchTags />
           </div>
         </div>
       </section>
