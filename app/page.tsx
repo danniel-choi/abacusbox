@@ -21,6 +21,7 @@ import { HomeBlogRoller } from "@/components/HomeBlogRoller";
 import { Logo } from "@/components/Logo";
 import { MarketIndicators } from "@/components/MarketIndicators";
 import { RelatedSearchTags } from "@/components/RelatedSearchTags";
+import { HomeFormulaCalculator } from "@/components/HomeFormulaCalculator";
 
 const brandRelatedLinks = [
   { href: "/calculators", label: "계산의정석 계산기 모음" },
@@ -66,6 +67,7 @@ export default function HomePage() {
               <Link href="/resources" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
                 {t("home.viewResources")}
               </Link>
+              <HomeFormulaCalculator trigger="desktop" />
             </div>
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <HeroStat label={t("home.calculatorCount")} value={`${calculators.length}${t("directory.countCalculators")}`} />

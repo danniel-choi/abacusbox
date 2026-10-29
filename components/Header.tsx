@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 import { Logo } from "@/components/Logo";
+import { HomeFormulaCalculator } from "@/components/HomeFormulaCalculator";
 import { calculators } from "@/lib/calculators";
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon } from "@/lib/calculator-directory";
 import type { TranslationKey } from "@/lib/i18n";
@@ -62,6 +63,7 @@ export function Header() {
             ))}
           </nav>
 
+          <HomeFormulaCalculator trigger="mobile" />
           <button
             type="button"
             aria-label={t("menu.open")}

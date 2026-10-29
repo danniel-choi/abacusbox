@@ -8,9 +8,6 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
 
   function handleChange(nextLocale: typeof locale) {
     setLocale(nextLocale);
-    const url = new URL(window.location.href);
-    url.searchParams.set("lang", nextLocale);
-    window.history.replaceState({}, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
   }
 
   return (

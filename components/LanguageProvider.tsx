@@ -23,9 +23,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
 
   useEffect(() => {
-    const paramsLocale = new URLSearchParams(window.location.search).get("lang");
     const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-    const nextLocale = isLocale(paramsLocale) ? paramsLocale : isLocale(storedLocale) ? storedLocale : DEFAULT_LOCALE;
+    const nextLocale = isLocale(storedLocale) ? storedLocale : DEFAULT_LOCALE;
+
+    // Older versions used ?lang=... for a client-only preference. Remove that
+    // parameter so language variants do not become separate crawlable URLs.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("lang")) {
+      url.searchParams.delete("lang");
+      window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    }
+
     const timer = window.setTimeout(() => setLocaleState(nextLocale), 0);
     return () => window.clearTimeout(timer);
   }, []);
