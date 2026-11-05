@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/LanguageProvider";
 
 type Token = number | "+" | "-" | "*" | "/" | "%" | "(" | ")";
@@ -97,10 +98,12 @@ export function HomeFormulaCalculator({ trigger = "desktop" }: { trigger?: "desk
   const [expression, setExpression] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [history, setHistory] = useState<Array<{ expression: string; result: string }>>([]);
   const labels = useMemo(() => {
-    if (locale === "en") return { eyebrow: "QUICK TOOL", title: "Basic formula calculator", clear: "Clear", calculate: "Calculate" };
-    if (locale === "ja") return { eyebrow: "すぐ使える計算機", title: "基本式計算機", clear: "クリア", calculate: "計算" };
-    return { eyebrow: "바로 쓰는 계산기", title: "기본 수식 계산기", clear: "지우기", calculate: "계산" };
+    if (locale === "en") return { eyebrow: "QUICK TOOL", title: "Basic formula calculator", clear: "Clear", calculate: "Calculate", copy: "Copy", copied: "Copied", recent: "Recent calculations" };
+    if (locale === "ja") return { eyebrow: "すぐ使える計算機", title: "基本式計算機", clear: "クリア", calculate: "計算", copy: "コピー", copied: "コピー済み", recent: "最近の計算" };
+    return { eyebrow: "바로 쓰는 계산기", title: "기본 수식 계산기", clear: "지우기", calculate: "계산", copy: "복사", copied: "복사됨", recent: "최근 계산" };
   }, [locale]);
 
   useEffect(() => {
@@ -118,11 +121,18 @@ export function HomeFormulaCalculator({ trigger = "desktop" }: { trigger?: "desk
 
   function calculate() {
     try {
-      setResult(formatResult(evaluateExpression(expression), locale));
+      const formatted = formatResult(evaluateExpression(expression), locale);
+      setResult(formatted);
       setError(null);
+      setCopied(false);
+      setHistory((current) => [
+        { expression: expression.trim(), result: formatted },
+        ...current.filter((item) => item.expression !== expression.trim())
+      ].slice(0, 5));
     } catch (calculationError) {
       setResult(null);
       setError(calculationError instanceof Error ? calculationError.message : "수식을 확인하세요.");
+      setCopied(false);
     }
   }
 
@@ -130,12 +140,21 @@ export function HomeFormulaCalculator({ trigger = "desktop" }: { trigger?: "desk
     setExpression((current) => `${current}${value}`);
     setResult(null);
     setError(null);
+    setCopied(false);
   }
 
   function clear() {
     setExpression("");
     setResult(null);
     setError(null);
+    setCopied(false);
+  }
+
+  async function copyResult() {
+    if (!result || !navigator.clipboard) return;
+    await navigator.clipboard.writeText(result);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
   }
 
   const isMobile = trigger === "mobile";
@@ -158,9 +177,9 @@ export function HomeFormulaCalculator({ trigger = "desktop" }: { trigger?: "desk
         ) : labels.title}
       </button>
 
-      {open && (
+      {open && typeof document !== "undefined" ? createPortal(
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-ink/75 px-4 py-6 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-ink/75 p-0 backdrop-blur-sm md:px-4 md:py-6"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setOpen(false);
@@ -170,7 +189,7 @@ export function HomeFormulaCalculator({ trigger = "desktop" }: { trigger?: "desk
             role="dialog"
             aria-modal="true"
             aria-labelledby="home-formula-calculator-title"
-            className="max-h-[calc(100dvh-3rem)] w-full max-w-md overflow-y-auto rounded-[28px] border border-line bg-white p-5 text-ink shadow-float md:p-6"
+            className="flex min-h-dvh max-h-dvh w-full max-w-none flex-col justify-center overflow-y-auto border-0 bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-ink shadow-float md:min-h-0 md:max-h-[calc(100dvh-3rem)] md:max-w-md md:rounded-[28px] md:border md:p-6"
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
@@ -195,7 +214,6 @@ export function HomeFormulaCalculator({ trigger = "desktop" }: { trigger?: "desk
                   setError(null);
                 }}
                 inputMode="decimal"
-                autoFocus
                 placeholder="예: (12500 + 3500) ÷ 2"
                 className="h-12 w-full rounded-xl border border-line bg-paper px-4 text-right text-lg font-extrabold outline-none transition focus:border-brand"
                 aria-describedby={`home-formula-result-${trigger}`}
@@ -233,13 +251,47 @@ export function HomeFormulaCalculator({ trigger = "desktop" }: { trigger?: "desk
                   </button>
                 ))}
               </div>
-              <p id={`home-formula-result-${trigger}`} aria-live="polite" className={`mt-3 min-h-7 text-right text-xl font-black ${error ? "text-rose-600" : "text-ink"}`}>
-                {error || (result !== null ? `= ${result}` : "")}
-              </p>
+              <div className="mt-3 flex min-h-9 items-center justify-between gap-3">
+                <p id={`home-formula-result-${trigger}`} aria-live="polite" className={`min-w-0 flex-1 text-right text-xl font-black ${error ? "text-rose-600" : "text-ink"}`}>
+                  {error || (result !== null ? `= ${result}` : "")}
+                </p>
+                {result && !error && (
+                  <button type="button" onClick={copyResult} className="shrink-0 rounded-lg bg-paper px-2.5 py-1.5 text-xs font-extrabold text-slate-600 transition hover:bg-brand/10 hover:text-brand">
+                    {copied ? labels.copied : labels.copy}
+                  </button>
+                )}
+              </div>
+              {history.length > 0 && (
+                <section className="mt-4 border-t border-line pt-3" aria-label={labels.recent}>
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="text-xs font-extrabold text-slate-500">{labels.recent}</h3>
+                    <button type="button" onClick={() => setHistory([])} className="text-xs font-bold text-slate-400 transition hover:text-brand">{labels.clear}</button>
+                  </div>
+                  <div className="grid gap-1.5">
+                    {history.map((item) => (
+                      <button
+                        key={`${item.expression}-${item.result}`}
+                        type="button"
+                        onClick={() => {
+                          setExpression(item.expression);
+                          setResult(item.result);
+                          setError(null);
+                          setCopied(false);
+                        }}
+                        className="flex items-center justify-between gap-3 rounded-lg bg-paper px-3 py-2 text-left text-xs transition hover:bg-brand/10"
+                      >
+                        <span className="truncate font-semibold text-slate-600">{item.expression}</span>
+                        <span className="shrink-0 font-black text-ink">= {item.result}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
             </form>
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+      ) : null}
     </>
   );
 }

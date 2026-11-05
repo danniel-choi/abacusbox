@@ -63,22 +63,24 @@ export function Header() {
             ))}
           </nav>
 
-          <HomeFormulaCalculator trigger="mobile" />
-          <button
-            type="button"
-            aria-label={t("menu.open")}
-            aria-expanded={open}
-            aria-controls="mobile-menu-drawer"
-            onClick={() => setOpen(true)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand/40 bg-white text-ink transition hover:border-brand hover:bg-brand hover:text-white md:hidden"
-          >
-            <span className="sr-only">{t("menu.open")}</span>
-            <span aria-hidden="true" className="relative block h-5 w-6">
-              <span className="absolute left-0 top-0 block h-[2px] w-full rounded-full bg-current" />
-              <span className="absolute left-0 top-[8px] block h-[2px] w-full rounded-full bg-current" />
-              <span className="absolute left-0 top-[16px] block h-[2px] w-full rounded-full bg-current" />
-            </span>
-          </button>
+          <div className="flex shrink-0 items-center gap-2 md:hidden">
+            <HomeFormulaCalculator trigger="mobile" />
+            <button
+              type="button"
+              aria-label={t("menu.open")}
+              aria-expanded={open}
+              aria-controls="mobile-menu-drawer"
+              onClick={() => setOpen(true)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand/40 bg-white text-ink transition hover:border-brand hover:bg-brand hover:text-white"
+            >
+              <span className="sr-only">{t("menu.open")}</span>
+              <span aria-hidden="true" className="relative block h-5 w-6">
+                <span className="absolute left-0 top-0 block h-[2px] w-full rounded-full bg-current" />
+                <span className="absolute left-0 top-[8px] block h-[2px] w-full rounded-full bg-current" />
+                <span className="absolute left-0 top-[16px] block h-[2px] w-full rounded-full bg-current" />
+              </span>
+            </button>
+          </div>
         </div>
       </header>
 

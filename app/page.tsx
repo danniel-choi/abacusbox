@@ -34,6 +34,14 @@ const brandRelatedLinks = [
   { href: "/calculators/lightning-strike-probability", label: "번개 맞을 확률 계산기" }
 ];
 
+const laborFocusLinks = [
+  { href: "/calculators/minimum-wage", title: "최저임금 계산기", description: "월급과 근로시간을 입력해 환산 시급을 확인" },
+  { href: "/calculators/net-salary", title: "실수령액 계산기", description: "세전 급여와 공제 후 예상 수령액 비교" },
+  { href: "/calculators/severance", title: "퇴직금 계산기", description: "평균임금과 근속기간으로 예상 퇴직금 계산" },
+  { href: "/calculators/weekly-holiday", title: "주휴수당 계산기", description: "소정근로시간과 근무일을 기준으로 확인" },
+  { href: "/calculators/unemployment", title: "실업급여 계산기", description: "수급 조건을 확인한 뒤 예상 금액 계산" }
+];
+
 export default function HomePage() {
   const { locale, t } = useLanguage();
   const featured = getFeaturedCalculators().slice(0, 4);
@@ -112,6 +120,30 @@ export default function HomePage() {
           <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-slate-600 md:text-base">{t("home.indicatorDescription")}</p>
           <div className="mt-6">
             <MarketIndicators />
+          </div>
+        </div>
+      </section>
+
+      <section className="page-shell py-2 md:py-3" aria-labelledby="labor-focus-title">
+        <div className="rounded-[28px] border border-line bg-white p-6 shadow-panel md:p-7">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-3xl">
+              <p className="text-sm font-extrabold text-brand">급여·노무 계산기 모음</p>
+              <h2 id="labor-focus-title" className="mt-2 text-2xl font-extrabold leading-tight text-ink md:text-3xl">월급부터 퇴직까지, 필요한 계산을 한 흐름으로 확인하세요.</h2>
+              <p className="mt-3 text-sm font-medium leading-7 text-slate-600 md:text-base">
+                최저임금 충족 여부를 확인한 뒤 실수령액, 주휴수당, 퇴직금, 실업급여를 이어서 비교할 수 있습니다. 계산 결과는 참고용이며 실제 정산과 수급 판단은 공식기관 기준을 함께 확인하세요.
+              </p>
+            </div>
+            <Link href="/labor" className="shrink-0 rounded-full bg-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand">급여·노무 허브 보기</Link>
+          </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            {laborFocusLinks.map((item, index) => (
+              <Link key={item.href} href={item.href} className="rounded-2xl border border-line bg-paper p-4 transition hover:-translate-y-0.5 hover:border-brand hover:bg-white">
+                <span className="text-xs font-black text-brand">0{index + 1}</span>
+                <h3 className="mt-2 text-base font-extrabold text-ink">{item.title}</h3>
+                <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{item.description}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

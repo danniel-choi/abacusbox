@@ -80,6 +80,26 @@ export function HubPage({ hub }: { hub: HubContent }) {
         ))}
       </section>
 
+      {hub.key === "labor" && (
+        <section className="mt-8 rounded-[28px] border border-brand/20 bg-brand/5 p-6 shadow-panel md:p-7" aria-labelledby="labor-start-title">
+          <p className="text-sm font-extrabold text-brand">급여·노무 계산 순서</p>
+          <h2 id="labor-start-title" className="mt-2 text-2xl font-extrabold text-ink">어떤 계산기부터 사용해야 할까요?</h2>
+          <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-slate-600">
+            먼저 임금 기준과 근로시간을 확인하고, 세전·세후 급여를 구분한 뒤 퇴직·휴가·고용보험 항목을 각각 계산하면 결과를 해석하기 쉽습니다.
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <StepCard number="01" title="임금 기준 확인" text="최저임금과 월급, 소정근로시간을 먼저 비교합니다." href="/calculators/minimum-wage" label="최저임금 계산기" />
+            <StepCard number="02" title="급여명세서 비교" text="세전 급여와 4대 보험·소득세 공제 후 금액을 나눠 봅니다." href="/calculators/net-salary" label="실수령액 계산기" />
+            <StepCard number="03" title="퇴직·고용 조건 확인" text="근속기간과 수급 요건을 확인한 뒤 예상 금액을 계산합니다." href="/calculators/severance" label="퇴직금 계산기" />
+          </div>
+          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-extrabold text-brand">
+            <a href="https://www.moel.go.kr" target="_blank" rel="noreferrer">고용노동부 공식 안내 ↗</a>
+            <a href="https://www.law.go.kr" target="_blank" rel="noreferrer">국가법령정보센터 ↗</a>
+            <a href="https://www.ei.go.kr" target="_blank" rel="noreferrer">고용보험 공식 안내 ↗</a>
+          </div>
+        </section>
+      )}
+
       <div className="mt-8">
         <AdSenseAd placement="top" />
       </div>
@@ -158,5 +178,16 @@ export function HubPage({ hub }: { hub: HubContent }) {
         </div>
       </section>
     </main>
+  );
+}
+
+function StepCard({ number, title, text, href, label }: { number: string; title: string; text: string; href: string; label: string }) {
+  return (
+    <Link href={href} className="rounded-2xl border border-line bg-white p-4 transition hover:-translate-y-0.5 hover:border-brand">
+      <span className="text-xs font-black text-brand">{number}</span>
+      <h3 className="mt-2 text-base font-extrabold text-ink">{title}</h3>
+      <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{text}</p>
+      <span className="mt-3 block text-xs font-extrabold text-brand">{label} →</span>
+    </Link>
   );
 }
