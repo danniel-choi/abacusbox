@@ -11,6 +11,7 @@ import { getCalculatorBySlug, type CalculatorResult, type CalculatorSlug, type R
 import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelatedCalculators } from "@/lib/calculator-directory";
 import { interpolate, type Locale } from "@/lib/i18n";
 import { getLocalizedCalculatorPresentation, getLocalizedFieldHelp, getLocalizedFieldLabel, getLocalizedOptionLabel, getLocalizedResultLabel, getLocalizedUtilityText } from "@/lib/calculator-i18n";
+import { FAVORITE_CALCULATORS_STORAGE_KEY } from "@/components/FavoriteCalculatorsSection";
 
 type FormValues = Record<string, number>;
 
@@ -207,6 +208,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const resultRef = useRef<HTMLDivElement>(null);
   const [resultNonce, setResultNonce] = useState(0);
   const [savedResults, setSavedResults] = useState<SavedCalculatorResult[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
   const defaults = useMemo(() => {
     return Object.fromEntries(
       calculator.fields.map((field) => {
@@ -233,6 +235,20 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     const timer = window.setTimeout(() => setSavedResults(readSavedResults()), 0);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const timer = window.setTimeout(() => {
+      try {
+        const raw = window.localStorage.getItem(FAVORITE_CALCULATORS_STORAGE_KEY);
+        const favorites = raw ? JSON.parse(raw) as CalculatorSlug[] : [];
+        setIsFavorite(favorites.includes(slug));
+      } catch {
+        setIsFavorite(false);
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [slug]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -390,6 +406,22 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     const next = savedResults.filter((item) => item.id !== id);
     writeSavedResults(next);
     setSavedResults(next);
+  }
+
+  function toggleFavorite() {
+    const raw = window.localStorage.getItem(FAVORITE_CALCULATORS_STORAGE_KEY);
+    let favorites: CalculatorSlug[] = [];
+    try {
+      favorites = raw ? JSON.parse(raw) as CalculatorSlug[] : [];
+    } catch {
+      favorites = [];
+    }
+    const next = isFavorite
+      ? favorites.filter((item) => item !== slug)
+      : [slug, ...favorites.filter((item) => item !== slug)].slice(0, 12);
+    window.localStorage.setItem(FAVORITE_CALCULATORS_STORAGE_KEY, JSON.stringify(next));
+    setIsFavorite(!isFavorite);
+    window.dispatchEvent(new CustomEvent("calcrule:favorite-calculators"));
   }
 
   if (activeCalculator.slug === "graphing-calculator") {
@@ -854,6 +886,13 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
         )}
 
         <div id="result-actions" className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={toggleFavorite}
+            className={`w-full rounded-full border px-5 py-3 text-sm font-extrabold transition sm:w-auto ${isFavorite ? "border-amber-300 bg-amber-50 text-amber-700" : "border-line text-slate-600 hover:border-amber-300 hover:text-amber-700"}`}
+          >
+            {isFavorite ? "★ 저장됨" : "☆ 즐겨찾기"}
+          </button>
           <button
             type="button"
             onClick={saveCurrentResult}

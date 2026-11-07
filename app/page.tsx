@@ -22,6 +22,8 @@ import { Logo } from "@/components/Logo";
 import { MarketIndicators } from "@/components/MarketIndicators";
 import { RelatedSearchTags } from "@/components/RelatedSearchTags";
 import { HomeFormulaCalculator } from "@/components/HomeFormulaCalculator";
+import { FavoriteCalculatorsSection } from "@/components/FavoriteCalculatorsSection";
+import { RecentCalculatorsSection } from "@/components/RecentCalculatorsSection";
 
 const brandRelatedLinks = [
   { href: "/calculators", label: "계산의정석 계산기 모음" },
@@ -110,6 +112,18 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <FavoriteCalculatorsSection />
+      <RecentCalculatorsSection />
+
+      <section className="page-shell py-2 md:py-3">
+        <MiniCalculatorSection title={t("home.popular")} items={popular} locale={locale} viewAllLabel={t("home.viewAll")} />
+        <div className="mt-4 flex justify-center">
+          <Link href="/calculators" className="inline-flex rounded-full bg-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand">
+            {t("home.allCalculators")}
+          </Link>
         </div>
       </section>
 
@@ -232,15 +246,6 @@ export default function HomePage() {
 
       <section className="page-shell py-2 md:py-3">
         <AdSenseAd placement="bottom" />
-      </section>
-
-      <section className="page-shell py-2 md:py-3">
-        <MiniCalculatorSection title={t("home.popular")} items={popular} locale={locale} viewAllLabel={t("home.viewAll")} />
-        <div className="mt-4 flex justify-center">
-          <Link href="/calculators" className="inline-flex rounded-full bg-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand">
-            {t("home.allCalculators")}
-          </Link>
-        </div>
       </section>
 
       <section className="page-shell grid gap-6 pb-16">
