@@ -6241,10 +6241,10 @@ export const calculators: CalculatorConfig[] = [
   {
     slug: "unit-converter",
     title: "단위변환 계산기",
-    description: "길이, 무게, 면적 단위를 빠르게 변환합니다.",
-    category: "금융",
-    keywords: ["단위변환", "평수 변환", "kg lb", "m ft"],
-    badge: "길이·무게·면적",
+    description: "길이, 무게, 면적부터 온도·압력·에너지·전력·연비·데이터까지 한 번에 변환합니다.",
+    category: "생활",
+    keywords: ["단위변환", "공학 단위 변환", "평수 변환", "온도 변환", "압력 변환", "연비 변환"],
+    badge: "생활·공학 단위",
     audience: "생활 계산 사용자, 부동산·쇼핑·해외 단위 확인 사용자",
     fields: [
       {
@@ -6260,20 +6260,37 @@ export const calculators: CalculatorConfig[] = [
           { label: "cm → inch", value: 4 },
           { label: "inch → cm", value: 5 },
           { label: "km → mile", value: 6 },
-          { label: "mile → km", value: 7 }
+          { label: "mile → km", value: 7 },
+          { label: "℃ → ℉", value: 8 },
+          { label: "℉ → ℃", value: 9 },
+          { label: "kPa → bar", value: 10 },
+          { label: "bar → kPa", value: 11 },
+          { label: "J → kWh", value: 12 },
+          { label: "kWh → J", value: 13 },
+          { label: "W → kW", value: 14 },
+          { label: "kW → W", value: 15 },
+          { label: "m/s → km/h", value: 16 },
+          { label: "km/h → m/s", value: 17 },
+          { label: "도 → 라디안", value: 18 },
+          { label: "라디안 → 도", value: 19 },
+          { label: "km/L → L/100km", value: 20 },
+          { label: "L/100km → km/L", value: 21 },
+          { label: "MB → GB", value: 22 },
+          { label: "GB → MB", value: 23 }
         ]
       },
       { name: "inputValue", label: "입력값", type: "number", unit: "", min: 0, max: 1000000, step: 0.01, defaultValue: 84 }
     ],
     guideTitle: "단위변환 기준",
     guide: [
-      "이 계산기는 생활에서 자주 쓰는 면적, 무게, 길이 단위를 빠르게 바꾸는 용도입니다.",
-      "부동산에서는 1평을 약 3.305785㎡로 보고, 해외 상품 규격이나 운동 데이터에서는 kg/lb, cm/inch, km/mile 변환이 자주 사용됩니다.",
+      "이 계산기는 생활에서 자주 쓰는 면적, 무게, 길이뿐 아니라 온도, 압력, 에너지, 전력, 속도, 각도, 연비, 데이터 단위를 빠르게 바꾸는 용도입니다.",
+      "부동산에서는 1평을 약 3.305785㎡로 보고, 해외 상품 규격이나 공학 데이터에서는 kg/lb, cm/inch, kPa/bar, W/kW 변환이 자주 사용됩니다.",
       "실무 문서에서는 소수점 자릿수 기준이 따로 정해질 수 있으므로 제출용 숫자는 해당 기관이나 계약 문서 기준에 맞춰 반올림해야 합니다."
     ],
     checkpoints: [
       "평수 변환은 소수점 자릿수 기준에 따라 체감값이 조금 달라질 수 있습니다.",
-      "해외 쇼핑 규격은 inch, lb 단위가 많아 직접 확인용으로 유용합니다.",
+      "온도는 섭씨·화씨의 기준점이 달라 단순 곱셈이 아니라 보정값을 적용합니다.",
+      "연비는 km/L와 L/100km가 역수 관계라 값이 커질수록 효율이 항상 같은 방향으로 움직이지 않습니다.",
       "공식 제출용 수치는 별도 반올림 기준이 있을 수 있습니다."
     ],
     faqs: [
@@ -6283,6 +6300,9 @@ export const calculators: CalculatorConfig[] = [
     calculate(values) {
       const input = values.inputValue;
       const type = values.conversionType;
+      if ((type === 20 || type === 21) && input <= 0) {
+        throw new Error("연비 변환은 0보다 큰 값을 입력해 주세요.");
+      }
       const output =
         type === 0 ? input / 3.305785 :
         type === 1 ? input * 3.305785 :
@@ -6291,7 +6311,23 @@ export const calculators: CalculatorConfig[] = [
         type === 4 ? input / 2.54 :
         type === 5 ? input * 2.54 :
         type === 6 ? input * 0.6213711922 :
-        input * 1.609344;
+        type === 7 ? input * 1.609344 :
+        type === 8 ? input * 9 / 5 + 32 :
+        type === 9 ? (input - 32) * 5 / 9 :
+        type === 10 ? input / 100 :
+        type === 11 ? input * 100 :
+        type === 12 ? input / 3600000 :
+        type === 13 ? input * 3600000 :
+        type === 14 ? input / 1000 :
+        type === 15 ? input * 1000 :
+        type === 16 ? input * 3.6 :
+        type === 17 ? input / 3.6 :
+        type === 18 ? input * Math.PI / 180 :
+        type === 19 ? input * 180 / Math.PI :
+        type === 20 ? 100 / input :
+        type === 21 ? 100 / input :
+        type === 22 ? input / 1024 :
+        input * 1024;
 
       const labels = [
         ["㎡", "평"],
@@ -6301,7 +6337,23 @@ export const calculators: CalculatorConfig[] = [
         ["cm", "inch"],
         ["inch", "cm"],
         ["km", "mile"],
-        ["mile", "km"]
+        ["mile", "km"],
+        ["℃", "℉"],
+        ["℉", "℃"],
+        ["kPa", "bar"],
+        ["bar", "kPa"],
+        ["J", "kWh"],
+        ["kWh", "J"],
+        ["W", "kW"],
+        ["kW", "W"],
+        ["m/s", "km/h"],
+        ["km/h", "m/s"],
+        ["도", "rad"],
+        ["rad", "도"],
+        ["km/L", "L/100km"],
+        ["L/100km", "km/L"],
+        ["MB", "GB"],
+        ["GB", "MB"]
       ];
       const [from, to] = labels[type] || ["", ""];
 

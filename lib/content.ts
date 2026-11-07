@@ -334,8 +334,8 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     title: "단위변환 계산기",
     category: "생활 가이드",
     audience: "생활 계산 사용자, 부동산·쇼핑·해외 단위 확인 사용자",
-    description: "길이, 무게, 면적 단위를 빠르게 변환합니다.",
-    tags: ["단위변환", "생활계산", "면적"]
+    description: "길이, 무게, 면적부터 온도·압력·에너지·전력·연비·데이터까지 한 번에 변환합니다.",
+    tags: ["단위변환", "공학 단위", "온도변환", "압력변환", "생활계산"]
   },
   percent: {
     title: "퍼센트 계산기",
