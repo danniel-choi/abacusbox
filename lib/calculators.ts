@@ -6276,15 +6276,41 @@ export const calculators: CalculatorConfig[] = [
           { label: "km/L → L/100km", value: 20 },
           { label: "L/100km → km/L", value: 21 },
           { label: "MB → GB", value: 22 },
-          { label: "GB → MB", value: 23 }
+          { label: "GB → MB", value: 23 },
+          { label: "mL → L", value: 24 },
+          { label: "L → mL", value: 25 },
+          { label: "분 → 시간", value: 26 },
+          { label: "시간 → 분", value: 27 },
+          { label: "L/s → L/min", value: 28 },
+          { label: "L/min → L/s", value: 29 },
+          { label: "V → mV", value: 30 },
+          { label: "mV → V", value: 31 },
+          { label: "A → mA", value: 32 },
+          { label: "mA → A", value: 33 },
+          { label: "Ω → kΩ", value: 34 },
+          { label: "kΩ → Ω", value: 35 },
+          { label: "Gy → mGy", value: 36 },
+          { label: "mGy → Gy", value: 37 },
+          { label: "Sv → mSv", value: 38 },
+          { label: "mSv → Sv", value: 39 },
+          { label: "Bq → kBq", value: 40 },
+          { label: "kBq → Bq", value: 41 },
+          { label: "cd → mcd", value: 42 },
+          { label: "mcd → cd", value: 43 },
+          { label: "A·turn → kA·turn", value: 44 },
+          { label: "kA·turn → A·turn", value: 45 },
+          { label: "US cup → L", value: 46 },
+          { label: "L → US cup", value: 47 },
+          { label: "US gal → L", value: 48 },
+          { label: "L → US gal", value: 49 }
         ]
       },
       { name: "inputValue", label: "입력값", type: "number", unit: "", min: 0, max: 1000000, step: 0.01, defaultValue: 84 }
     ],
     guideTitle: "단위변환 기준",
     guide: [
-      "이 계산기는 생활에서 자주 쓰는 면적, 무게, 길이뿐 아니라 온도, 압력, 에너지, 전력, 속도, 각도, 연비, 데이터 단위를 빠르게 바꾸는 용도입니다.",
-      "부동산에서는 1평을 약 3.305785㎡로 보고, 해외 상품 규격이나 공학 데이터에서는 kg/lb, cm/inch, kPa/bar, W/kW 변환이 자주 사용됩니다.",
+      "이 계산기는 생활에서 자주 쓰는 면적, 무게, 길이뿐 아니라 온도, 압력, 에너지, 전력, 시간, 부피, 유량, 전기, 방사선, 광도, 자기력 단위를 빠르게 바꾸는 용도입니다.",
+      "부동산에서는 1평을 약 3.305785㎡로 보고, 공학 데이터에서는 kPa/bar, W/kW, V/mV, Gy/mGy, Sv/mSv 같은 단위 변환이 자주 사용됩니다.",
       "실무 문서에서는 소수점 자릿수 기준이 따로 정해질 수 있으므로 제출용 숫자는 해당 기관이나 계약 문서 기준에 맞춰 반올림해야 합니다."
     ],
     checkpoints: [
@@ -6327,7 +6353,33 @@ export const calculators: CalculatorConfig[] = [
         type === 20 ? 100 / input :
         type === 21 ? 100 / input :
         type === 22 ? input / 1024 :
-        input * 1024;
+        type === 23 ? input * 1024 :
+        type === 24 ? input / 1000 :
+        type === 25 ? input * 1000 :
+        type === 26 ? input / 60 :
+        type === 27 ? input * 60 :
+        type === 28 ? input * 60 :
+        type === 29 ? input / 60 :
+        type === 30 ? input * 1000 :
+        type === 31 ? input / 1000 :
+        type === 32 ? input * 1000 :
+        type === 33 ? input / 1000 :
+        type === 34 ? input / 1000 :
+        type === 35 ? input * 1000 :
+        type === 36 ? input * 1000 :
+        type === 37 ? input / 1000 :
+        type === 38 ? input * 1000 :
+        type === 39 ? input / 1000 :
+        type === 40 ? input / 1000 :
+        type === 41 ? input * 1000 :
+        type === 42 ? input * 1000 :
+        type === 43 ? input / 1000 :
+        type === 44 ? input / 1000 :
+        type === 45 ? input * 1000 :
+        type === 46 ? input * 0.2365882365 :
+        type === 47 ? input / 0.2365882365 :
+        type === 48 ? input * 3.785411784 :
+        input / 3.785411784;
 
       const labels = [
         ["㎡", "평"],
@@ -6353,7 +6405,33 @@ export const calculators: CalculatorConfig[] = [
         ["km/L", "L/100km"],
         ["L/100km", "km/L"],
         ["MB", "GB"],
-        ["GB", "MB"]
+        ["GB", "MB"],
+        ["mL", "L"],
+        ["L", "mL"],
+        ["분", "시간"],
+        ["시간", "분"],
+        ["L/s", "L/min"],
+        ["L/min", "L/s"],
+        ["V", "mV"],
+        ["mV", "V"],
+        ["A", "mA"],
+        ["mA", "A"],
+        ["Ω", "kΩ"],
+        ["kΩ", "Ω"],
+        ["Gy", "mGy"],
+        ["mGy", "Gy"],
+        ["Sv", "mSv"],
+        ["mSv", "Sv"],
+        ["Bq", "kBq"],
+        ["kBq", "Bq"],
+        ["cd", "mcd"],
+        ["mcd", "cd"],
+        ["A·turn", "kA·turn"],
+        ["kA·turn", "A·turn"],
+        ["US cup", "L"],
+        ["L", "US cup"],
+        ["US gal", "L"],
+        ["L", "US gal"]
       ];
       const [from, to] = labels[type] || ["", ""];
 
