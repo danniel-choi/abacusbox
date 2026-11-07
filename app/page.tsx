@@ -34,6 +34,7 @@ const brandRelatedLinks = [
   { href: "/calculators/year-end-tax-settlement", label: "연말정산 계산기" },
   { href: "/calculators/lotto-probability", label: "복권 당첨 확률 계산기" },
   { href: "/calculators/lightning-strike-probability", label: "번개 맞을 확률 계산기" }
+  ,{ href: "/side-income", label: "웹 부업·재테크 가이드" }
 ];
 
 const laborFocusLinks = [
