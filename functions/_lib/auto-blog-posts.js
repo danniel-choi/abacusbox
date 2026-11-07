@@ -137,7 +137,10 @@ async function findSimilarAutoBlogPosts(db, draft) {
 
 export async function upsertAutoPublishedPost(db, draft, options) {
   const authorId = options?.authorId ?? null;
-  const publishedAt = String(options?.publishedAt || new Date().toISOString());
+  const hasPublishedAt = options && Object.prototype.hasOwnProperty.call(options, "publishedAt");
+  const publishedAt = hasPublishedAt && options.publishedAt !== null
+    ? String(options.publishedAt)
+    : null;
   const duplicates = await findSimilarAutoBlogPosts(db, draft);
 
   if (duplicates.length > 0) {

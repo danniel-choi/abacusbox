@@ -104,13 +104,15 @@ async function publishScheduledDrafts(db) {
   return items.length;
 }
 
-async function createHourlyDraft(db, now = new Date()) {
-  const draft = buildHourlyAutoBlogDraft(now);
+async function createReviewDraft(db, now = new Date()) {
+  const draft = {
+    ...buildHourlyAutoBlogDraft(now),
+    status: "draft"
+  };
   const authorId = await ensureOperationsAuthor(db);
-  const publishedAt = now.toISOString();
   return upsertAutoPublishedPost(db, draft, {
     authorId,
-    publishedAt
+    publishedAt: null
   });
 }
 
@@ -290,7 +292,7 @@ export async function executeSchedulerRun(db, options = {}) {
 
   try {
     const publishedCount = await publishScheduledDrafts(db);
-    const draftResult = await createHourlyDraft(db, now);
+    const draftResult = await createReviewDraft(db, now);
     const calculatorIdeaResult = await createAutomaticCalculatorIdeas(db, now);
     const calculatorIdeasPlanned = await planAutomaticCalculatorIdeas(db, now);
     const result = {
