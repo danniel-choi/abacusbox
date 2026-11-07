@@ -166,15 +166,22 @@ export function HomeFormulaCalculator({ trigger = "desktop" }: { trigger?: "desk
         aria-label={labels.title}
         onClick={() => setOpen(true)}
         className={isMobile
-          ? "inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-brand/40 bg-white text-ink transition hover:border-brand hover:bg-brand hover:text-white md:hidden"
-          : "hidden min-h-12 items-center rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand md:inline-flex"}
+          ? "relative inline-flex h-11 w-11 items-center justify-center rounded-2xl border-2 border-brand bg-brand text-white shadow-[0_8px_20px_rgba(7,196,145,0.38)] transition hover:-translate-y-0.5 hover:bg-[#029b72] md:hidden"
+          : "group hidden min-h-12 items-center gap-2 rounded-full border-2 border-brand bg-brand px-5 py-3 text-sm font-extrabold text-white shadow-[0_10px_24px_rgba(7,196,145,0.28)] transition hover:-translate-y-0.5 hover:bg-[#029b72] md:inline-flex"}
       >
         {isMobile ? (
           <>
             <span className="sr-only">{labels.title}</span>
-            <span aria-hidden="true" className="text-lg font-black">＋÷</span>
+            <span aria-hidden="true" className="text-lg font-black leading-none">＋÷</span>
+            <span aria-hidden="true" className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-ink bg-white" />
           </>
-        ) : labels.title}
+        ) : (
+          <>
+            <span aria-hidden="true" className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-base font-black leading-none">＋</span>
+            <span>{labels.title}</span>
+            <span aria-hidden="true" className="text-base transition-transform group-hover:translate-x-0.5">→</span>
+          </>
+        )}
       </button>
 
       {open && typeof document !== "undefined" ? createPortal(
