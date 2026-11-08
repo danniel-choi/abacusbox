@@ -290,9 +290,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     [activeCalculator.slug, locale, localizedCalculator.title]
   );
   const isTarotBirthCard = activeCalculator.slug === "tarot-birth-card-calculator";
+  const isSamjae = activeCalculator.slug === "samjae-calculator";
   const isManseRyeok = activeCalculator.slug === "manse-ryeok";
   const isSunriseSunset = activeCalculator.slug === "sunrise-sunset-calculator";
-  const usesUnifiedBirthDateInput = isTarotBirthCard || isManseRyeok || isSunriseSunset;
+  const usesUnifiedBirthDateInput = isTarotBirthCard || isSamjae || isManseRyeok || isSunriseSunset;
   const diablo2AttackSkillOptions = useMemo(() => {
     if (activeCalculator.slug !== "diablo2-attack-speed") return [];
     return getDiablo2AttackSkillOptions(Number(values.combatant ?? 0));
@@ -318,9 +319,9 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     ? visibleFields.filter((field) => !["birthYear", "birthMonth", "birthDay", "year", "month", "day"].includes(field.name))
     : visibleFields;
   const unifiedBirthDateValue = formatDateInputParts(
-    Number(values[isTarotBirthCard ? "birthYear" : "year"] ?? (isTarotBirthCard ? 1992 : isSunriseSunset ? 2026 : 1990)),
-    Number(values[isTarotBirthCard ? "birthMonth" : "month"] ?? (isTarotBirthCard ? 6 : isSunriseSunset ? 10 : 1)),
-    Number(values[isTarotBirthCard ? "birthDay" : "day"] ?? (isSunriseSunset ? 12 : 1))
+    Number(values[isTarotBirthCard || isSamjae ? "birthYear" : "year"] ?? (isTarotBirthCard ? 1992 : isSamjae ? 1992 : isSunriseSunset ? 2026 : 1990)),
+    Number(values[isTarotBirthCard || isSamjae ? "birthMonth" : "month"] ?? (isTarotBirthCard || isSamjae ? 6 : isSunriseSunset ? 10 : 1)),
+    Number(values[isTarotBirthCard || isSamjae ? "birthDay" : "day"] ?? (isTarotBirthCard || isSamjae ? 11 : isSunriseSunset ? 12 : 1))
   );
   const birthDateBasis = Number(values.dateBasis ?? 0) === 1 ? t("calculator.lunar") : t("calculator.solar");
   const lunarLeapLabel = Number(values.lunarLeap ?? 0) === 1 ? t("calculator.leap") : t("calculator.commonMonth");
@@ -526,10 +527,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           </div>
         </div>
         <div className="grid gap-5">
-          {usesUnifiedBirthDateInput && isSunriseSunset && (
+          {usesUnifiedBirthDateInput && (isSunriseSunset || isSamjae || isTarotBirthCard) && (
             <label className="grid gap-2">
               <span className="flex items-center justify-between text-sm font-extrabold text-ink">
-                {t("calculator.calculationDate")}
+                {isSunriseSunset ? t("calculator.calculationDate") : "출생일"}
                 <span className="font-bold text-slate-400">{t("calculator.solar")}</span>
               </span>
               <input
@@ -541,9 +542,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 onChange={(event) => {
                   const [year, month, day] = event.target.value.split("-").map(Number);
                   if (!year || !month || !day) return;
-                  setValue("year", year, { shouldDirty: true });
-                  setValue("month", month, { shouldDirty: true });
-                  setValue("day", day, { shouldDirty: true });
+                  const prefix = isTarotBirthCard || isSamjae ? "birth" : "";
+                  setValue(prefix ? `${prefix}Year` : "year", year, { shouldDirty: true });
+                  setValue(prefix ? `${prefix}Month` : "month", month, { shouldDirty: true });
+                  setValue(prefix ? `${prefix}Day` : "day", day, { shouldDirty: true });
                 }}
               />
               <span className="text-xs font-semibold text-slate-500">{t("calculator.dateHelp")}</span>
