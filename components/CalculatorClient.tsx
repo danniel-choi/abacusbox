@@ -609,12 +609,21 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 <div className="grid gap-2">
                   <input
                     className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"
-                    type="number"
+                    type={field.unit === "원" ? "text" : "number"}
+                    inputMode={field.unit === "원" ? "numeric" : "decimal"}
                     min={field.min}
                     max={field.max}
                     step={field.step}
-                    value={Number(values[field.name] ?? field.defaultValue)}
-                    onChange={(event) => setValue(field.name, Number(event.target.value), { shouldDirty: true })}
+                    value={field.unit === "원"
+                      ? formatEditableMoney(Number(values[field.name] ?? field.defaultValue))
+                      : Number(values[field.name] ?? field.defaultValue)}
+                    onChange={(event) => {
+                      const rawValue = field.unit === "원"
+                        ? event.target.value.replace(/[^\d.-]/g, "")
+                        : event.target.value;
+                      const parsedValue = rawValue === "" || rawValue === "-" ? 0 : Number(rawValue);
+                      setValue(field.name, Number.isFinite(parsedValue) ? parsedValue : 0, { shouldDirty: true });
+                    }}
                   />
                   {field.max !== undefined && field.min !== undefined && (
                     <input
@@ -6092,6 +6101,11 @@ function formatInputValue(
     : value.toLocaleString(numberLocale, { maximumFractionDigits: 2 });
 
   return field.unit ? `${formatted}${field.unit}` : formatted;
+}
+
+function formatEditableMoney(value: number) {
+  if (!Number.isFinite(value)) return "0";
+  return Math.round(value).toLocaleString("ko-KR");
 }
 
 function getNextActions(slug: CalculatorSlug): NextAction[] {
