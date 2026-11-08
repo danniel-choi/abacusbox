@@ -319,9 +319,9 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     ? visibleFields.filter((field) => !["birthYear", "birthMonth", "birthDay", "year", "month", "day"].includes(field.name))
     : visibleFields;
   const unifiedBirthDateValue = formatDateInputParts(
-    Number(values[isTarotBirthCard || isSamjae ? "birthYear" : "year"] ?? (isTarotBirthCard ? 1992 : isSamjae ? 1992 : isSunriseSunset ? 2026 : 1990)),
-    Number(values[isTarotBirthCard || isSamjae ? "birthMonth" : "month"] ?? (isTarotBirthCard || isSamjae ? 6 : isSunriseSunset ? 10 : 1)),
-    Number(values[isTarotBirthCard || isSamjae ? "birthDay" : "day"] ?? (isTarotBirthCard || isSamjae ? 11 : isSunriseSunset ? 12 : 1))
+    Number(values[isTarotBirthCard ? "birthYear" : "year"] ?? (isTarotBirthCard ? 1992 : isSunriseSunset ? 2026 : 1990)),
+    Number(values[isTarotBirthCard ? "birthMonth" : "month"] ?? (isTarotBirthCard ? 6 : isSunriseSunset ? 10 : 1)),
+    Number(values[isTarotBirthCard ? "birthDay" : "day"] ?? (isTarotBirthCard ? 11 : isSunriseSunset ? 12 : 1))
   );
   const birthDateBasis = Number(values.dateBasis ?? 0) === 1 ? t("calculator.lunar") : t("calculator.solar");
   const lunarLeapLabel = Number(values.lunarLeap ?? 0) === 1 ? t("calculator.leap") : t("calculator.commonMonth");
@@ -542,7 +542,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
                 onChange={(event) => {
                   const [year, month, day] = event.target.value.split("-").map(Number);
                   if (!year || !month || !day) return;
-                  const prefix = isTarotBirthCard || isSamjae ? "birth" : "";
+                  const prefix = isTarotBirthCard ? "birth" : "";
                   setValue(prefix ? `${prefix}Year` : "year", year, { shouldDirty: true });
                   setValue(prefix ? `${prefix}Month` : "month", month, { shouldDirty: true });
                   setValue(prefix ? `${prefix}Day` : "day", day, { shouldDirty: true });

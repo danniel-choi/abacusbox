@@ -1527,6 +1527,7 @@ function calculateTarotBirthCard(values: Record<string, number>): CalculatorResu
 function usesSajuBirthDateBasis(mode: string) {
   return [
     "manse",
+    "samjae",
     "jisal",
     "geopsal",
     "jaesal",
