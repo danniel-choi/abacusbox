@@ -815,6 +815,31 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/labor", label: "급여·노무 계산기 모음", text: "최저임금, 퇴직금, 주휴수당 계산기도 함께 볼 수 있습니다." }
     ]
   },
+  "samsung-skhynix-bonus": {
+    title: "삼전닉스 성과급 계산기 | 삼성전자·SK하이닉스 성과급 비교",
+    description: "월 기본급과 직접 입력한 성과급률·상한·공제 가정으로 삼성전자와 SK하이닉스 성과급 예상액을 비교해 보세요.",
+    keywords: ["삼전닉스 성과급 계산기", "삼성전자 성과급", "SK하이닉스 성과급", "성과급 세후 계산", "성과급률 계산기"],
+    searchIntents: [
+      "삼성전자와 SK하이닉스 성과급을 같은 기준으로 비교하고 싶을 때",
+      "월 기본급과 성과급률을 기준으로 예상 지급액을 계산할 때",
+      "성과급 세전 금액과 공제 가정 후 금액의 차이를 확인할 때"
+    ],
+    sections: [
+      {
+        title: "삼전닉스 성과급은 입력한 지급률을 기준으로 비교합니다.",
+        body: "회사·사업부·직군·연도별 성과급 기준은 달라질 수 있어 특정 회사의 최신 지급률을 고정하지 않았습니다. 사내 공지에서 확인한 지급률과 산정 기준을 입력해 비교하세요."
+      },
+      {
+        title: "세후 금액은 공제 가정을 적용한 참고값입니다.",
+        body: "실제 입금액은 지급 시점의 원천징수, 4대보험, 다른 급여와의 합산, 연말정산 등에 따라 달라질 수 있습니다. 계산 결과는 급여명세서 확인 전 시뮬레이션으로 활용하세요."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/net-salary", label: "연봉 실수령액 계산기", text: "성과급 외 월급의 4대보험·소득세 공제 구조를 확인합니다." },
+      { href: "/labor", label: "급여·노무 계산기 모음", text: "실수령액, 퇴직금, 주휴수당 등 관련 계산기를 함께 확인합니다." },
+      { href: "/calculators/salary-vanish-calculator", label: "월급 증발 계산기", text: "월급에서 고정지출과 공제 후 남는 금액을 비교합니다." }
+    ]
+  },
   "earned-income-tax": {
     title: `근로소득세 계산기 | ${legalStandards.year}년 연봉·월급 소득세 계산`,
     description:

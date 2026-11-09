@@ -13,6 +13,7 @@ export type CalculatorSlug =
   | "annual-leave-grant"
   | "parental-leave"
   | "net-salary"
+  | "samsung-skhynix-bonus"
   | "loan-interest"
   | "loan-dsr"
   | "apr-calculator"
@@ -4072,6 +4073,69 @@ export const calculators: CalculatorConfig[] = [
           { name: "장기요양", value: care },
           { name: "고용보험", value: employment },
           { name: "소득·지방세", value: taxTotal }
+        ]
+      };
+    }
+  },
+  {
+    slug: "samsung-skhynix-bonus",
+    title: "삼전닉스 성과급 계산기",
+    description: "월 기본급과 삼성전자·SK하이닉스 성과급률을 입력해 세전·공제 가정 후 예상 성과급을 비교합니다.",
+    category: "노무",
+    keywords: ["삼전닉스 성과급 계산기", "삼성전자 성과급", "SK하이닉스 성과급", "성과급 세후 계산", "성과급률 계산기"],
+    badge: "삼성전자·SK하이닉스 비교",
+    audience: "삼성전자·SK하이닉스 성과급을 비교하려는 직장인",
+    fields: [
+      { name: "monthlyBasePay", label: "월 기본급", type: "number", unit: "원", min: 0, max: 100000000, step: 10000, defaultValue: 4000000, help: "성과급 산정에 사용할 월 기본급을 입력하세요." },
+      { name: "samsungRate", label: "삼성전자 성과급률", type: "number", unit: "%", min: 0, max: 1000, step: 0.1, defaultValue: 50, help: "회사·사업부·직군·연도별 공지 또는 내부 기준의 지급률을 입력하세요." },
+      { name: "skhynixRate", label: "SK하이닉스 성과급률", type: "number", unit: "%", min: 0, max: 1000, step: 0.1, defaultValue: 100, help: "회사·사업부·직군·연도별 공지 또는 내부 기준의 지급률을 입력하세요." },
+      { name: "capRate", label: "성과급 상한", type: "number", unit: "%", min: 0, max: 1000, step: 0.1, defaultValue: 100, help: "월 기본급 대비 적용할 상한입니다. 상한이 없다면 충분히 큰 값을 입력하세요." },
+      { name: "deductionRate", label: "공제 가정", type: "number", unit: "%", min: 0, max: 60, step: 0.1, defaultValue: 20, help: "세후 비교를 위한 단순 공제 가정이며 실제 원천징수와 다를 수 있습니다." }
+    ],
+    guideTitle: "삼성전자·SK하이닉스 성과급 계산 기준",
+    guide: [
+      "이 계산기는 회사별로 사용자가 입력한 지급률을 월 기본급에 적용하는 비교용 시뮬레이션입니다. 현재 실제 지급률을 자동으로 가져오거나 특정 회사의 공식 산식을 확정하지 않습니다.",
+      "성과급 산정 기준은 회사·사업부·직군·연도와 제도에 따라 달라질 수 있습니다. PS, PI, OPI 등 명칭이나 지급 기준을 혼동하지 말고 사내 공지와 급여 담당자 안내를 먼저 확인하세요.",
+      "세후 금액은 입력한 공제 가정만 반영합니다. 실제 원천징수, 4대보험, 연말정산, 지급 시점에 따른 세율은 급여명세서와 다를 수 있습니다."
+    ],
+    checkpoints: [
+      "월 기본급과 성과급 산정 기준이 같은지 사내 공지에서 확인",
+      "지급률이 월 기본급 기준인지 연봉 또는 다른 기준인지 확인",
+      "성과급 상한과 최소·최대 지급 조건 확인",
+      "세후 금액은 실제 급여명세서와 반드시 대조"
+    ],
+    faqs: [
+      { question: "삼성전자와 SK하이닉스의 실제 성과급률이 자동 반영되나요?", answer: "아니요. 사업부·직군·연도별 차이가 크고 공지 시점도 다르므로 실제 지급률을 고정하지 않았습니다. 확인한 지급률을 직접 입력해 비교하세요." },
+      { question: "성과급률 100%는 어떤 의미인가요?", answer: "이 계산기의 가정에서는 입력한 월 기본급과 같은 금액을 뜻합니다. 실제 회사의 성과급 제도에서 100%가 의미하는 기준은 다를 수 있습니다." },
+      { question: "세후 성과급이 실제 입금액과 다른 이유는 무엇인가요?", answer: "성과급 지급 시점의 원천징수, 4대보험 적용, 다른 급여와의 합산, 연말정산 등이 반영될 수 있기 때문입니다. 세후 값은 입력한 공제율을 적용한 참고값입니다." }
+    ],
+    calculate(values) {
+      const base = Math.max(values.monthlyBasePay, 0);
+      const capRate = Math.max(values.capRate, 0);
+      const cap = base * capRate / 100;
+      const deductionRate = Math.min(Math.max(values.deductionRate, 0), 60);
+      const samsungGross = Math.min(base * Math.max(values.samsungRate, 0) / 100, cap);
+      const skhynixGross = Math.min(base * Math.max(values.skhynixRate, 0) / 100, cap);
+      const samsungNet = samsungGross * (1 - deductionRate / 100);
+      const skhynixNet = skhynixGross * (1 - deductionRate / 100);
+      return {
+        headline: `삼성전자 ${formatWon(samsungGross)}`,
+        subline: `SK하이닉스 ${formatWon(skhynixGross)} · 입력한 지급률 시뮬레이션`,
+        rows: [
+          { label: "월 기본급", value: formatWon(base) },
+          { label: "상한 적용 기준액", value: formatWon(cap) },
+          { label: "삼성전자 예상 성과급(세전)", value: formatWon(samsungGross), tone: "strong" },
+          { label: "삼성전자 예상 성과급(공제 가정 후)", value: formatWon(samsungNet) },
+          { label: "SK하이닉스 예상 성과급(세전)", value: formatWon(skhynixGross), tone: "strong" },
+          { label: "SK하이닉스 예상 성과급(공제 가정 후)", value: formatWon(skhynixNet) },
+          { label: "세전 차이(SK하이닉스 - 삼성전자)", value: formatWon(skhynixGross - samsungGross) },
+          { label: "공제 가정 후 차이", value: formatWon(skhynixNet - samsungNet) }
+        ],
+        chart: [
+          { name: "삼성전자 세전", value: samsungGross },
+          { name: "삼성전자 공제 후", value: samsungNet },
+          { name: "SK하이닉스 세전", value: skhynixGross },
+          { name: "SK하이닉스 공제 후", value: skhynixNet }
         ]
       };
     }

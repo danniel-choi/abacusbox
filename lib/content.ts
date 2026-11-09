@@ -446,6 +446,13 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "연봉 또는 월급에서 비과세, 4대보험, 소득세, 지방소득세를 반영해 월 실수령액과 연간 실수령액을 계산합니다.",
     tags: ["연봉", "실수령액", "4대보험", "급여명세서"]
   },
+  "samsung-skhynix-bonus": {
+    title: "삼전닉스 성과급 계산기",
+    category: "노무 가이드",
+    audience: "삼성전자·SK하이닉스 성과급 비교 사용자",
+    description: "월 기본급과 직접 입력한 성과급률·상한·공제 가정으로 삼성전자와 SK하이닉스 성과급을 비교합니다.",
+    tags: ["삼성전자 성과급", "SK하이닉스 성과급", "성과급 계산", "성과급 세후"]
+  },
   "military-discharge-date": {
     title: "전역일 계산기",
     category: "생활 가이드",

@@ -48,7 +48,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     eyebrow: "급여·노무 허브",
     title: "급여, 퇴직, 휴가 계산기",
     description: "최저임금, 임금체불, 실수령액, 퇴직금, 주휴수당, 연차수당, 실업급여처럼 근로자가 자주 확인하는 계산을 기준별로 묶었습니다.",
-    featuredSlugs: ["minimum-wage", "unpaid-wage", "net-salary", "severance", "weekly-holiday", "annual-leave"],
+    featuredSlugs: ["minimum-wage", "unpaid-wage", "net-salary", "samsung-skhynix-bonus", "severance", "weekly-holiday", "annual-leave"],
     blogSlugs: ["weekly-holiday-pay-part-time-guide", "unemployment-guide-2026", "severance-common-mistakes-2026", "net-salary-payslip-checklist"],
     sections: [
       {
