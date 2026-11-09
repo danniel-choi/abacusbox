@@ -791,6 +791,7 @@ const hourlyAutoBlogSlugs = [
   "random-number-guide-20260904-05-hourly",
   "zodiac-sign-guide-20260901-17-hourly",
   "loan-interest-checklist-20260930-16-hourly",
+  "loan-interest-scenario-20261108-01-hourly",
   "annual-leave-grant-mistakes-20260930-12-hourly",
   "break-even-checklist-20260926-00-hourly",
   "car-maintenance-mistakes-20260926-01-hourly",
