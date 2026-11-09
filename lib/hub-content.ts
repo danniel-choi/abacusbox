@@ -49,7 +49,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     title: "급여, 퇴직, 휴가 계산기",
     description: "최저임금, 임금체불, 실수령액, 퇴직금, 주휴수당, 연차수당, 실업급여처럼 근로자가 자주 확인하는 계산을 기준별로 묶었습니다.",
     featuredSlugs: ["minimum-wage", "unpaid-wage", "net-salary", "samsung-skhynix-bonus", "severance", "weekly-holiday", "annual-leave"],
-    blogSlugs: ["samsung-skhynix-performance-bonus-guide", "weekly-holiday-pay-part-time-guide", "unemployment-guide-2026", "severance-common-mistakes-2026", "net-salary-payslip-checklist"],
+    blogSlugs: ["net-salary-actual-take-home-guide-20261109", "weekly-holiday-pay-eligibility-guide-20261109", "minimum-wage-monthly-pay-guide-20261109", "severance-average-wage-guide-20261109", "samsung-skhynix-performance-bonus-guide", "weekly-holiday-pay-part-time-guide", "unemployment-guide-2026", "severance-common-mistakes-2026", "net-salary-payslip-checklist"],
     sections: [
       {
         title: "노무 계산은 기간과 기준임금이 핵심입니다.",
@@ -74,7 +74,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     title: "대출 상환과 부동산 비용 계산기",
     description: "대출이자, DSR, 원리금 상환, 청약 가점, 대환대출, 중도상환수수료, 취득세와 보유비용을 비교할 수 있습니다.",
     featuredSlugs: ["loan-interest", "loan-dsr", "housing-subscription", "loan-amortization", "refinance-calculator", "real-estate-acquisition-tax"],
-    blogSlugs: ["loan-interest-scenario-20261108-01-hourly", "dsr-ltv-practical-difference", "loan-prepayment-before-refinance", "property-tax-holding-cost-guide"],
+    blogSlugs: ["loan-interest-monthly-payment-guide-20261109", "loan-interest-scenario-20261108-01-hourly", "dsr-ltv-practical-difference", "loan-prepayment-before-refinance", "property-tax-holding-cost-guide"],
     sections: [
       {
         title: "대출은 월 납입액과 총비용을 같이 봐야 합니다.",
@@ -252,7 +252,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     title: "띠, 삼재, 만세력, 오행, 타로 탄생 카드 계산기",
     description: "띠, 삼재, 육십갑자, 만세력, 사주 오행, 일간, 시주, 타로 탄생 카드, 별자리 궁합, 신살·귀인 계산기를 한곳에 모았습니다.",
     featuredSlugs: ["tarot-birth-card-calculator", "manse-ryeok", "saju-five-elements", "samjae-calculator", "korean-zodiac", "zodiac-compatibility"],
-    blogSlugs: ["one-in-eight-billion-life-calculator", "calcrule-content-hub-launch", "zodiac-sign-guide-20260901-17-hourly", "lunar-solar-converter-checklist-20260902-21-hourly"],
+    blogSlugs: ["samjae-calculator-solar-lunar-guide-20261109", "one-in-eight-billion-life-calculator", "calcrule-content-hub-launch", "zodiac-sign-guide-20260901-17-hourly", "lunar-solar-converter-checklist-20260902-21-hourly"],
     sections: [
       {
         title: "사주 계산은 기준 날짜와 시간이 먼저입니다.",
