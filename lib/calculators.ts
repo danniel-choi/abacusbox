@@ -14,6 +14,7 @@ export type CalculatorSlug =
   | "parental-leave"
   | "net-salary"
   | "samsung-skhynix-bonus"
+  | "debt-relief-calculator"
   | "loan-interest"
   | "loan-dsr"
   | "apr-calculator"
@@ -4136,6 +4137,81 @@ export const calculators: CalculatorConfig[] = [
           { name: "삼성전자 공제 후", value: samsungNet },
           { name: "SK하이닉스 세전", value: skhynixGross },
           { name: "SK하이닉스 공제 후", value: skhynixNet }
+        ]
+      };
+    }
+  },
+  {
+    slug: "debt-relief-calculator",
+    title: "빚 탕감 계산기",
+    description: "총채무, 세후 월소득, 필수지출, 재산과 상환기간을 입력해 예상 월 상환액과 감면 가능 금액을 비교합니다.",
+    category: "금융",
+    keywords: ["빚 탕감 계산기", "채무 감면 계산기", "개인회생 변제금", "월 변제금 계산", "채무조정 계산"],
+    badge: "채무 상환 시뮬레이션",
+    audience: "채무 상환 부담과 감면 가능 범위를 가늠하려는 사용자",
+    fields: [
+      { name: "unsecuredDebt", label: "총 무담보 채무", type: "number", unit: "원", min: 0, max: 10000000000, step: 100000, defaultValue: 30000000, help: "담보로 잡힌 부동산·차량 대출을 제외한 채무를 입력하세요." },
+      { name: "monthlyIncome", label: "세후 월소득", type: "number", unit: "원", min: 0, max: 100000000, step: 10000, defaultValue: 3000000, help: "세금과 4대보험 등을 뺀 월평균 소득입니다." },
+      { name: "necessaryExpenses", label: "월 필수지출", type: "number", unit: "원", min: 0, max: 100000000, step: 10000, defaultValue: 2200000, help: "주거비·식비·교통비 등 실제 필수생활비를 입력하세요." },
+      { name: "dependents", label: "부양가족 수", type: "number", unit: "명", min: 1, max: 12, step: 1, defaultValue: 1, help: "본인을 포함한 가족 수입니다. 법원 인정 생계비를 자동 확정하지는 않습니다." },
+      { name: "assets", label: "차량·부동산 등 재산가치", type: "number", unit: "원", min: 0, max: 100000000000, step: 100000, defaultValue: 0, help: "담보대출 잔액을 제외한 대략적인 재산가치입니다. 자격 판단에는 별도 기준이 적용됩니다." },
+      {
+        name: "repaymentMonths",
+        label: "상환기간 가정",
+        type: "select",
+        defaultValue: 60,
+        options: [
+          { label: "36개월", value: 36 },
+          { label: "60개월", value: 60 }
+        ],
+        help: "단순 비교를 위한 상환기간 가정입니다. 실제 절차의 기간을 의미하지 않습니다."
+      }
+    ],
+    guideTitle: "빚 탕감 계산 기준과 주의사항",
+    guide: [
+      "이 계산기는 세후 월소득에서 사용자가 입력한 필수지출을 뺀 금액을 월 상환 여력으로 보고, 그 금액에 상환기간을 곱해 단순 상환 시나리오를 계산합니다.",
+      "예상 감면액은 총 무담보 채무에서 단순 상환액을 뺀 값입니다. 차량·부동산 등 재산가치는 별도 결과로 보여주며, 재산이 있다고 해서 자동으로 감면액에서 차감하거나 개인회생·파산 가능성을 판정하지 않습니다.",
+      "실제 개인회생·파산·신용회복 절차는 채무 종류, 소득, 재산, 가족관계, 최근 채무 발생 경위, 법원·신용회복위원회 기준에 따라 달라집니다. 계산 결과는 상담 전 준비용 참고값입니다."
+    ],
+    checkpoints: [
+      "담보채무와 무담보채무를 구분해서 입력",
+      "세후 월소득과 실제 필수지출의 평균을 같은 기간으로 맞춤",
+      "차량·부동산의 시세가 아닌 순재산 기준이 필요한지 별도 확인",
+      "계산 결과만으로 신청 가능성이나 감면 확정액을 판단하지 않음"
+    ],
+    faqs: [
+      { question: "계산 결과가 실제 탕감액인가요?", answer: "아니요. 입력한 채무·소득·지출·기간으로 만든 단순 시뮬레이션입니다. 실제 감면액은 신청 제도와 공식 심사 기준에 따라 달라집니다." },
+      { question: "차량과 부동산을 입력하면 감면 가능 여부를 알 수 있나요?", answer: "아니요. 재산가치는 참고 정보로만 표시합니다. 담보대출, 순재산, 소유권, 처분가치 등 여러 요소를 함께 판단해야 하므로 이 계산기가 자격을 판정하지 않습니다." },
+      { question: "월 상환 여력이 음수이면 어떻게 되나요?", answer: "필수지출이 월소득보다 크면 단순 모델의 월 상환 여력을 0원으로 처리합니다. 실제 상황에서는 지출 조정, 채무조정 상담 등 별도의 검토가 필요합니다." }
+    ],
+    calculate(values) {
+      const debt = Math.max(values.unsecuredDebt, 0);
+      const income = Math.max(values.monthlyIncome, 0);
+      const expenses = Math.max(values.necessaryExpenses, 0);
+      const months = Math.max(Math.floor(values.repaymentMonths), 1);
+      const assets = Math.max(values.assets, 0);
+      const monthlyRepayment = Math.max(income - expenses, 0);
+      const estimatedRepayment = Math.min(debt, monthlyRepayment * months);
+      const estimatedRelief = Math.max(debt - estimatedRepayment, 0);
+      const reliefRate = debt > 0 ? estimatedRelief / debt * 100 : 0;
+      const debtToIncome = income > 0 ? debt / income : 0;
+      return {
+        headline: formatWon(estimatedRelief),
+        subline: `예상 감면액 · 월 상환 여력 ${formatWon(monthlyRepayment)} 기준`,
+        rows: [
+          { label: "총 무담보 채무", value: formatWon(debt) },
+          { label: "월 상환 여력", value: formatWon(monthlyRepayment), tone: "strong" },
+          { label: "상환기간 가정", value: `${months}개월` },
+          { label: "단순 예상 상환액", value: formatWon(estimatedRepayment) },
+          { label: "단순 예상 감면액", value: formatWon(estimatedRelief), tone: "strong" },
+          { label: "단순 감면 비율", value: formatPercent(reliefRate, 1) },
+          { label: "입력 재산가치", value: formatWon(assets) },
+          { label: "채무 ÷ 세후 월소득", value: `${debtToIncome.toFixed(1)}배` }
+        ],
+        chart: [
+          { name: "예상 상환액", value: estimatedRepayment },
+          { name: "예상 감면액", value: estimatedRelief },
+          { name: "입력 재산가치", value: assets }
         ]
       };
     }

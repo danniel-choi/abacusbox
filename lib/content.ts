@@ -453,6 +453,13 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "월 기본급과 직접 입력한 성과급률·상한·공제 가정으로 삼성전자와 SK하이닉스 성과급을 비교합니다.",
     tags: ["삼성전자 성과급", "SK하이닉스 성과급", "성과급 계산", "성과급 세후"]
   },
+  "debt-relief-calculator": {
+    title: "빚 탕감 계산기",
+    category: "금융 가이드",
+    audience: "채무 상환 부담과 감면 가능 범위를 가늠하려는 사용자",
+    description: "총채무, 세후 월소득, 필수지출, 재산과 상환기간으로 단순 예상 상환액과 감면액을 비교합니다.",
+    tags: ["빚 탕감", "채무조정", "개인회생", "월 변제금"]
+  },
   "military-discharge-date": {
     title: "전역일 계산기",
     category: "생활 가이드",

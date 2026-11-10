@@ -840,6 +840,31 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/calculators/salary-vanish-calculator", label: "월급 증발 계산기", text: "월급에서 고정지출과 공제 후 남는 금액을 비교합니다." }
     ]
   },
+  "debt-relief-calculator": {
+    title: "빚 탕감 계산기 | 채무 상환액·예상 감면액 비교",
+    description: "총 무담보 채무, 세후 월소득, 필수지출, 재산가치와 상환기간을 입력해 단순 예상 월 상환액과 감면액을 비교하세요.",
+    keywords: ["빚 탕감 계산기", "채무 감면 계산기", "개인회생 변제금", "월 변제금 계산", "채무조정 계산"],
+    searchIntents: [
+      "현재 소득과 필수지출을 기준으로 채무 상환 여력을 확인할 때",
+      "총채무와 상환기간을 기준으로 단순 예상 감면액을 비교할 때",
+      "개인회생이나 채무조정 상담 전에 재산·소득 자료를 정리할 때"
+    ],
+    sections: [
+      {
+        title: "빚 탕감 계산기는 상환 시나리오를 비교하는 도구입니다.",
+        body: "이 계산기는 세후 월소득에서 필수지출을 뺀 금액을 월 상환 여력으로 보고, 상환기간을 적용한 단순 모델을 제공합니다. 실제 법원이나 기관의 감면액을 확정하지 않습니다."
+      },
+      {
+        title: "실제 채무조정 결과는 재산과 채무 종류에 따라 달라집니다.",
+        body: "담보채무와 무담보채무, 차량·부동산의 순재산, 채무 발생 경위, 가족관계, 소득 증빙 등은 실제 심사에서 별도로 검토될 수 있습니다. 계산 결과만으로 신청 가능성을 판단하지 마세요."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/loan-interest", label: "대출 이자 계산기", text: "대출 원금과 금리에 따른 월 상환액·총이자를 확인합니다." },
+      { href: "/calculators/net-salary", label: "연봉 실수령액 계산기", text: "세후 소득을 계산할 때 급여 공제 구조를 확인합니다." },
+      { href: "/loan", label: "대출·부동산 계산기 모음", text: "DSR과 상환 스케줄 등 관련 금융 계산기를 함께 확인합니다." }
+    ]
+  },
   "earned-income-tax": {
     title: `근로소득세 계산기 | ${legalStandards.year}년 연봉·월급 소득세 계산`,
     description:
