@@ -98,7 +98,7 @@ export const hubContents: Record<HubKey, HubContent> = {
     eyebrow: "투자·주식 허브",
     title: "주식·ETF·암호화폐 투자 계산기",
     description: "국내 ETF 장기투자, 주식 매매 손익, 추가 매수 후 평균단가, PER/PBR 가치평가, 암호화폐 적립식 투자 성장 시나리오를 한곳에서 비교할 수 있습니다.",
-    featuredSlugs: ["kr-etf", "stock-return", "crypto-investment-growth", "stock-average-price", "stock-valuation", "compound-interest"],
+    featuredSlugs: ["wealth-planning-calculator", "kr-etf", "stock-return", "crypto-investment-growth", "stock-average-price", "stock-valuation", "compound-interest"],
     blogSlugs: ["stock-calculator-before-trading", "irp-tax-credit-strategy-2026", "dsr-ltv-practical-difference"],
     sections: [
       {

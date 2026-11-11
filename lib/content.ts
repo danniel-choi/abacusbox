@@ -546,6 +546,13 @@ const hourlyAutoBlogMeta: Record<string, AutoBlogMeta> = {
     description: "초기 투자금, 월 추가 투자금, 수익률, 투자 기간을 기준으로 복리 수익을 계산합니다.",
     tags: ["복리", "투자", "장기수익률"]
   },
+  "wealth-planning-calculator": {
+    title: "재테크 계산기",
+    category: "금융 가이드",
+    audience: "저축·투자 계획을 세우는 직장인과 예비 투자자",
+    description: "초기자금, 월 적립액, 예상 수익률과 기간으로 목표 자산과 누적 수익을 시뮬레이션합니다.",
+    tags: ["재테크", "목돈 만들기", "적립식 투자", "자산 증식"]
+  },
   "pension-tax": {
     title: "IRP·연금저축 절세액 계산기",
     category: "세금 가이드",

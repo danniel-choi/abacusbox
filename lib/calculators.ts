@@ -24,6 +24,7 @@ export type CalculatorSlug =
   | "year-end-tax-settlement"
   | "inheritance-tax"
   | "compound-interest"
+  | "wealth-planning-calculator"
   | "inflation-calculator"
   | "money-value-calculator"
   | "roi-calculator"
@@ -5045,6 +5046,71 @@ export const calculators: CalculatorConfig[] = [
           { name: "초기원금", value: values.initialInvestment },
           { name: "추가원금", value: values.monthlyContribution * values.years * 12 },
           { name: "누적수익", value: gains }
+        ]
+      };
+    }
+  },
+  {
+    slug: "wealth-planning-calculator",
+    title: "재테크 계산기",
+    description: "초기자금, 월 적립액, 예상 수익률과 기간을 입력해 목표 자산과 누적 수익을 시뮬레이션합니다.",
+    category: "금융",
+    keywords: ["재테크 계산기", "재테크 수익 계산기", "월 적립식 투자 계산기", "목돈 만들기 계산기", "자산 증식 계산기"],
+    badge: "재테크 시뮬레이션",
+    audience: "저축·투자 계획을 세우는 직장인과 예비 투자자",
+    fields: [
+      { name: "initialCapital", label: "초기자금", type: "number", unit: "원", min: 0, max: 10000000000, step: 100000, defaultValue: 10000000 },
+      { name: "monthlySaving", label: "월 적립액", type: "number", unit: "원", min: 0, max: 100000000, step: 10000, defaultValue: 500000 },
+      { name: "annualReturn", label: "예상 연 수익률", type: "number", unit: "%", min: -50, max: 100, step: 0.1, defaultValue: 5 },
+      { name: "periodYears", label: "운용 기간", type: "number", unit: "년", min: 1, max: 60, step: 1, defaultValue: 10 },
+      { name: "annualFee", label: "연간 수수료 가정", type: "number", unit: "%", min: 0, max: 10, step: 0.01, defaultValue: 0.2 }
+    ],
+    guideTitle: "재테크 계산 기준",
+    guide: [
+      "초기자금과 월 적립액을 매월 운용하고, 예상 연 수익률에서 연간 수수료 가정을 뺀 순수익률을 월 단위로 환산해 계산하는 단순 시뮬레이션입니다.",
+      "예상 수익률은 사용자가 입력한 가정일 뿐 실제 수익을 보장하지 않습니다. 예금은 금리·세금, 투자상품은 가격 변동·분배금·수수료·세금에 따라 결과가 달라질 수 있습니다.",
+      "목돈을 만드는 계획에서는 수익률보다 월 적립액과 지속 기간이 결과에 큰 영향을 줄 수 있습니다. 보수·기준·낙관 시나리오를 나누어 비교해 보세요."
+    ],
+    checkpoints: [
+      "세전 수익률인지 세후 수익률인지 구분",
+      "수수료·세금·중도해지 조건을 상품 설명서에서 확인",
+      "월 적립액을 실제 현금흐름에서 지속할 수 있는지 점검",
+      "계산 결과를 확정 수익이 아닌 시나리오로 해석"
+    ],
+    faqs: [
+      { question: "재테크 계산기 결과가 실제 수익인가요?", answer: "아니요. 입력한 수익률과 수수료 가정을 적용한 예상값입니다. 실제 수익률은 매월 달라질 수 있습니다." },
+      { question: "예금과 주식 투자 모두 계산할 수 있나요?", answer: "기본적인 적립 구조 비교는 가능하지만, 상품별 세금·원금보장·변동성은 반영되지 않습니다. 상품별 계산기와 함께 비교하세요." },
+      { question: "월 적립액과 수익률 중 무엇이 더 중요한가요?", answer: "기간과 수익률에 따라 달라집니다. 월 적립액을 조금씩 바꾸는 시나리오와 수익률을 보수적으로 낮추는 시나리오를 함께 비교하는 것이 좋습니다." }
+    ],
+    calculate(values) {
+      const initialCapital = Math.max(values.initialCapital, 0);
+      const monthlySaving = Math.max(values.monthlySaving, 0);
+      const months = Math.max(Math.floor(values.periodYears * 12), 1);
+      const monthlyRate = (values.annualReturn - Math.max(values.annualFee, 0)) / 100 / 12;
+      const growth = Math.pow(1 + monthlyRate, months);
+      const futureInitial = initialCapital * growth;
+      const futureMonthly = Math.abs(monthlyRate) < 0.0000000001
+        ? monthlySaving * months
+        : monthlySaving * ((growth - 1) / monthlyRate) * (1 + monthlyRate);
+      const futureValue = Math.max(futureInitial + futureMonthly, 0);
+      const totalPrincipal = initialCapital + monthlySaving * months;
+      const gain = futureValue - totalPrincipal;
+      const gainRate = totalPrincipal > 0 ? gain / totalPrincipal * 100 : 0;
+      return {
+        headline: formatWon(futureValue),
+        subline: `총 납입원금 ${formatWon(totalPrincipal)} · 예상 수익 ${formatWon(gain)}`,
+        rows: [
+          { label: "초기자금", value: formatWon(initialCapital) },
+          { label: "월 적립액", value: formatWon(monthlySaving) },
+          { label: "총 납입원금", value: formatWon(totalPrincipal) },
+          { label: "예상 최종자산", value: formatWon(futureValue), tone: "strong" },
+          { label: "예상 수익", value: formatWon(gain), tone: "strong" },
+          { label: "원금 대비 예상 수익률", value: formatPercent(gainRate, 1) }
+        ],
+        chart: [
+          { name: "초기자금", value: initialCapital },
+          { name: "월 적립 원금", value: monthlySaving * months },
+          { name: "예상 수익", value: Math.max(gain, 0) }
         ]
       };
     }

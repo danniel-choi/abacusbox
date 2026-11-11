@@ -11,6 +11,31 @@ export type CalculatorSeoContent = {
 };
 
 export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoContent>> = {
+  "wealth-planning-calculator": {
+    title: "재테크 계산기 | 월 적립식 투자·목돈 만들기 시뮬레이션",
+    description: "초기자금, 월 적립액, 예상 연 수익률, 기간과 수수료를 입력해 예상 최종자산과 누적 수익을 비교해 보세요.",
+    keywords: ["재테크 계산기", "재테크 수익 계산기", "월 적립식 투자 계산기", "목돈 만들기 계산기", "자산 증식 계산기"],
+    searchIntents: [
+      "월급에서 매달 얼마를 적립하면 목표 자산에 가까워지는지 확인할 때",
+      "초기자금과 월 적립액을 장기간 운용했을 때의 예상 결과를 비교할 때",
+      "수익률과 수수료 가정을 바꿔 보수적인 재테크 시나리오를 만들 때"
+    ],
+    sections: [
+      {
+        title: "재테크 계산기는 저축과 투자의 가정을 숫자로 비교합니다.",
+        body: "초기자금과 월 적립액을 입력하고 예상 수익률·기간·수수료를 바꾸면 총 납입원금과 예상 최종자산의 차이를 확인할 수 있습니다."
+      },
+      {
+        title: "계산 결과는 확정 수익이 아닌 계획용 시뮬레이션입니다.",
+        body: "예금 금리, 투자 수익률, 세금, 상품 수수료, 가격 변동은 상품마다 다릅니다. 실제 가입이나 투자 전에는 상품 설명서와 원금 손실 가능성을 확인하세요."
+      }
+    ],
+    internalLinks: [
+      { href: "/calculators/compound-interest", label: "복리 계산기", text: "월 적립식 복리 효과를 더 단순한 구조로 비교합니다." },
+      { href: "/calculators/savings", label: "예금·적금 실수령액 계산기", text: "예금·적금 금리와 세후 만기 수령액을 확인합니다." },
+      { href: "/stock", label: "투자 계산기 모음", text: "주식·ETF·복리 관련 계산기를 함께 확인합니다." }
+    ]
+  },
   "minimum-wage": {
     title: "최저임금 계산기 | 월급·주휴시간 기준 환산 시급 확인",
     description:
