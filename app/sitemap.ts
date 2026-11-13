@@ -24,7 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${SITE_URL}${hubContents[key].path}`,
       lastModified: new Date()
     })),
-    ...["calculators", "resources", "about", "editorial-policy", "privacy", "terms", "contact", "blog"].map((path) => ({
+    ...["calculators", "toolbox", "resources", "about", "editorial-policy", "privacy", "terms", "contact", "blog"].map((path) => ({
       url: `${SITE_URL}/${path}`,
       lastModified: new Date()
     }))

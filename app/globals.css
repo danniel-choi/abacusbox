@@ -82,6 +82,24 @@ input[type="range"] {
   accent-color: #02b585;
 }
 
+.tool-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  min-height: 2.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.9rem;
+  background: #f8fafc;
+  padding: 0.65rem 0.8rem;
+  color: #111827;
+  font-weight: 700;
+  outline: none;
+}
+
+.tool-input:focus {
+  border-color: #02b585;
+}
+
 @media (max-width: 640px) {
   button,
   input,
