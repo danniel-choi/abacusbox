@@ -6,6 +6,7 @@ import { blogPosts, getBlogPost, getLatestBlogPosts, type BlogVisual } from "@/l
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { getCalculator } from "@/lib/calculators";
 import { LocalizedBlogHeader } from "@/components/LocalizedBlogHeader";
+import { BlogEngagementTools } from "@/components/BlogEngagementTools";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -113,6 +114,22 @@ export default async function BlogPostPage({ params }: Props) {
         )}
 
         {post.visual && <BlogVisualBlock visual={post.visual} />}
+
+        <section className="mt-7 grid gap-3 sm:grid-cols-3" aria-label="글 핵심 요약">
+          {post.content.slice(0, 3).map((paragraph, index) => (
+            <div key={`${post.slug}-summary-${index}`} className="rounded-[20px] border border-line bg-paper p-4">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-sm font-extrabold text-white">{index + 1}</span>
+              <p className="mt-3 line-clamp-4 text-sm font-bold leading-6 text-ink">{paragraph}</p>
+            </div>
+          ))}
+        </section>
+
+        <BlogEngagementTools
+          title={post.title}
+          excerpt={post.excerpt}
+          url={`${SITE_URL}/blog/${post.slug}`}
+          calculatorHref={linkedCalculator ? `/calculators/${linkedCalculator.slug}` : undefined}
+        />
 
         <div className="mt-8 grid min-w-0 gap-5 break-words text-base font-medium leading-8 text-slate-700 [word-break:normal]">
           {post.content.map((paragraph, index) => (
