@@ -45,6 +45,13 @@ const laborFocusLinks = [
   { href: "/calculators/unemployment", title: "실업급여 계산기", description: "수급 조건을 확인한 뒤 예상 금액 계산" }
 ];
 
+const quickActionLinks = [
+  { href: "/calculators/net-salary", label: "연봉 실수령액", description: "월급과 공제액 바로 확인" },
+  { href: "/calculators/loan-interest", label: "대출 이자", description: "월 납입금·총이자 계산" },
+  { href: "/calculators/lotto-probability", label: "복권 당첨 확률", description: "당첨 확률을 숫자로 확인" },
+  { href: "/toolbox/drawing-board", label: "브라우저 그림판", description: "설치 없이 바로 그리기" }
+];
+
 export default function HomePage() {
   const { locale, t } = useLanguage();
   const featured = getFeaturedCalculators().slice(0, 4);
@@ -85,6 +92,18 @@ export default function HomePage() {
               <HeroStat label={t("home.groupCount")} value={`${Object.keys(CALCULATOR_GROUP_META).length}${t("directory.countCalculators")}`} />
               <HeroStat label={t("home.standardYear")} value={`${legalStandards.year}`} />
             </div>
+            <div className="mt-5 rounded-[24px] border border-white/10 bg-white/6 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-extrabold text-white">지금 바로 시작하기</p>
+                <Link href="/calculators" className="text-xs font-extrabold text-brand hover:text-white">전체 계산기 →</Link>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {quickActionLinks.map((item) => <Link key={item.href} href={item.href} className="group rounded-2xl bg-white/8 px-3 py-3 transition hover:bg-white hover:text-ink">
+                  <span className="block text-sm font-extrabold text-white transition group-hover:text-ink">{item.label}</span>
+                  <span className="mt-1 block text-[11px] font-semibold text-white/55 transition group-hover:text-slate-500">{item.description}</span>
+                </Link>)}
+              </div>
+            </div>
           </div>
           <div className="grid gap-4 self-stretch">
             <div className="rounded-[28px] border border-white/10 bg-white p-5 text-ink shadow-float md:p-6">
@@ -108,6 +127,7 @@ export default function HomePage() {
                     <p className="text-xs font-extrabold text-brand">{presentation.badge}</p>
                     <h3 className="mt-2 text-base font-extrabold text-ink">{presentation.title}</h3>
                     <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{presentation.audience}</p>
+                    <span className="mt-4 text-xs font-extrabold text-brand">바로 계산 →</span>
                   </Link>
                 })}
               </div>
