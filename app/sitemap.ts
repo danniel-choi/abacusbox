@@ -9,28 +9,23 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: SITE_URL,
-      lastModified: new Date()
+      url: SITE_URL
     },
     ...calculators.map((calculator) => ({
-      url: `${SITE_URL}/calculators/${calculator.slug}`,
-      lastModified: new Date()
+      url: `${SITE_URL}/calculators/${calculator.slug}`
     })),
     ...blogPosts.map((post) => ({
       url: `${SITE_URL}/blog/${post.slug}`,
       lastModified: new Date(post.publishedAt)
     })),
     ...hubOrder.map((key) => ({
-      url: `${SITE_URL}${hubContents[key].path}`,
-      lastModified: new Date()
+      url: `${SITE_URL}${hubContents[key].path}`
     })),
     ...["calculators", "toolbox", "resources", "about", "editorial-policy", "privacy", "terms", "contact", "blog"].map((path) => ({
-      url: `${SITE_URL}/${path}`,
-      lastModified: new Date()
+      url: `${SITE_URL}/${path}`
     })),
     ...["image-tools", "json-formatter", "text-counter", "drawing-board", "youtube-thumbnail", "image-metadata"].map((tool) => ({
-      url: `${SITE_URL}/toolbox/${tool}`,
-      lastModified: new Date()
+      url: `${SITE_URL}/toolbox/${tool}`
     }))
   ];
 }
