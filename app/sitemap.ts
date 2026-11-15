@@ -27,6 +27,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...["calculators", "toolbox", "resources", "about", "editorial-policy", "privacy", "terms", "contact", "blog"].map((path) => ({
       url: `${SITE_URL}/${path}`,
       lastModified: new Date()
+    })),
+    ...["image-tools", "json-formatter", "text-counter", "drawing-board", "youtube-thumbnail", "image-metadata"].map((tool) => ({
+      url: `${SITE_URL}/toolbox/${tool}`,
+      lastModified: new Date()
     }))
   ];
 }

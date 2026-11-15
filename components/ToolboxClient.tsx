@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent, ReactNode } from "react";
 
 type ImageTool = "compress" | "resize" | "crop";
+export type ToolboxTool = "image" | "json" | "text" | "drawing" | "youtube" | "metadata";
 
-export function ToolboxClient() {
-  const [active, setActive] = useState<"image" | "json" | "text" | "drawing" | "youtube" | "metadata">("image");
+export function ToolboxClient({ initialActive = "image" }: { initialActive?: ToolboxTool }) {
+  const [active, setActive] = useState<ToolboxTool>(initialActive);
 
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
