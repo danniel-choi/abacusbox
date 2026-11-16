@@ -15,17 +15,16 @@ function extractStaticUrls(xml) {
   return Array.from(String(xml || "").matchAll(/<url>([\s\S]*?)<\/url>/g), (match) => {
     const block = match[1];
     const loc = block.match(/<loc>([\s\S]*?)<\/loc>/)?.[1]?.trim();
-    const lastmod = block.match(/<lastmod>([\s\S]*?)<\/lastmod>/)?.[1]?.trim();
-    return loc ? { loc, lastmod: lastmod || null } : null;
+    return loc ? { loc } : null;
   }).filter(Boolean);
 }
 
 async function loadStaticEntries(context) {
-  if (!context.env.ASSETS) return [{ loc: SITE_URL, lastmod: null }];
+  if (!context.env.ASSETS) return [{ loc: SITE_URL }];
 
   const assetUrl = new URL("/static-sitemap.xml", context.request.url);
   const response = await context.env.ASSETS.fetch(new Request(assetUrl));
-  if (!response.ok) return [{ loc: SITE_URL, lastmod: null }];
+  if (!response.ok) return [{ loc: SITE_URL }];
 
   return extractStaticUrls(await response.text());
 }
@@ -44,8 +43,7 @@ async function loadDatabaseEntries(env) {
   `).all();
 
   return (result.results || []).map((post) => ({
-    loc: `${SITE_URL}/blog/${encodeURIComponent(post.slug)}`,
-    lastmod: post.updated_at || post.published_at || null
+    loc: `${SITE_URL}/blog/${encodeURIComponent(post.slug)}`
   }));
 }
 
@@ -55,12 +53,11 @@ function renderSitemap(entries) {
     if (!unique.has(entry.loc)) unique.set(entry.loc, entry);
   }
 
-  const urls = Array.from(unique.values()).map(({ loc, lastmod }) => [
+  const urls = Array.from(unique.values()).map(({ loc }) => [
     "  <url>",
     `    <loc>${escapeXml(loc)}</loc>`,
-    lastmod ? `    <lastmod>${escapeXml(lastmod)}</lastmod>` : null,
     "  </url>"
-  ].filter(Boolean).join("\n"));
+  ].join("\n"));
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
