@@ -311,10 +311,6 @@ const TEMPLATE_META = {
   scenario: { label: "상황별 가이드", titleSuffix: "상황별 활용 방법", focus: "실제 사용 상황에 맞춘 흐름" }
 };
 
-function randomCode() {
-  return Math.random().toString(36).slice(2, 6);
-}
-
 function normalizeAutoDraftTitle(rawTitle) {
   return String(rawTitle || "")
     .replace(/^\[자동 초안[^\]]*\]\s*/u, "")
@@ -724,7 +720,9 @@ export function buildAutoBlogDraft(calculatorSlug, templateKey = "guide", option
     ? options.tags.map((item) => String(item).trim()).filter(Boolean)
     : [];
   const title = customTitle || titleFor(meta, templateKey);
-  const slug = customSlug || `${calculatorSlug}-${templateKey}-${buildDateCodeFromNow()}-${randomCode()}`;
+  // Keep new URLs descriptive and stable. The old hourly suffix was an internal
+  // scheduling detail that should not be exposed as part of the public URL.
+  const slug = customSlug || `${calculatorSlug}-${templateKey}-${buildDateCodeFromNow()}`;
 
   return {
     type: "blog",
@@ -755,7 +753,7 @@ export function buildDailyAutoBlogDraft(now = new Date()) {
   const templateKey = AUTO_BLOG_TEMPLATE_ORDER[(dayNumber - 1) % AUTO_BLOG_TEMPLATE_ORDER.length];
 
   return buildAutoBlogDraft(calculatorSlug, templateKey, {
-    slug: `${calculatorSlug}-${templateKey}-${dateCode}-daily`
+    slug: `${calculatorSlug}-${templateKey}-${dateCode}`
   });
 }
 
@@ -768,6 +766,6 @@ export function buildHourlyAutoBlogDraft(now = new Date()) {
   const templateKey = AUTO_BLOG_TEMPLATE_ORDER[(dayNumber + hourNumber) % AUTO_BLOG_TEMPLATE_ORDER.length];
 
   return buildAutoBlogDraft(calculatorSlug, templateKey, {
-    slug: `${calculatorSlug}-${templateKey}-${dateCode}-${hourCode}-hourly`
+    slug: `${calculatorSlug}-${templateKey}-${dateCode}`
   });
 }

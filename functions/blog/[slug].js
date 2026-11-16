@@ -629,13 +629,15 @@ function renderD1BlogHtml(post) {
 }
 
 function buildAutoBlogPost(slug) {
-  const match = slug.match(/^(.+)-(guide|checklist|mistakes|comparison|scenario)-(\d{8})-(\d{2})-hourly$/);
+  // Accept both the new descriptive slug and legacy hourly URLs so existing
+  // published links continue to resolve.
+  const match = slug.match(/^(.+)-(guide|checklist|mistakes|comparison|scenario)-(\d{8})(?:-(\d{2})-hourly)?$/);
   if (!match) return null;
 
   const calculatorSlug = match[1];
   const templateKey = match[2];
   const dateCode = match[3];
-  const hour = Number(match[4]);
+  const hour = match[4] === undefined ? 0 : Number(match[4]);
   const meta = calculatorMeta[calculatorSlug];
   const template = templateMeta[templateKey];
   const date = parseDateCode(dateCode);
