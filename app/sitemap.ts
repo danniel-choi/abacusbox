@@ -15,8 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${SITE_URL}/calculators/${calculator.slug}`
     })),
     ...blogPosts.map((post) => ({
-      url: `${SITE_URL}/blog/${post.slug}`,
-      lastModified: new Date(post.publishedAt)
+      url: `${SITE_URL}/blog/${post.slug}`
     })),
     ...hubOrder.map((key) => ({
       url: `${SITE_URL}${hubContents[key].path}`
