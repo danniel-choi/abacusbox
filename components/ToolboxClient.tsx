@@ -51,6 +51,11 @@ function ImageToolPanel() {
   const [tool, setTool] = useState<ImageTool>("compress");
   const [maxWidth, setMaxWidth] = useState(1600);
   const [quality, setQuality] = useState(82);
+  const [resizeUnit, setResizeUnit] = useState<"px" | "cm">("px");
+  const [targetWidth, setTargetWidth] = useState(1200);
+  const [targetHeight, setTargetHeight] = useState(800);
+  const [resizeDpi, setResizeDpi] = useState(96);
+  const [preserveAspect, setPreserveAspect] = useState(false);
   const [format, setFormat] = useState<"image/jpeg" | "image/png" | "image/webp">("image/jpeg");
   const [ratio, setRatio] = useState("free");
   const [preview, setPreview] = useState<string | null>(null);
@@ -83,16 +88,35 @@ function ImageToolPanel() {
     let height = source.naturalHeight;
     let sx = 0;
     let sy = 0;
+    let outputWidth: number;
+    let outputHeight: number;
     if (tool === "crop" && cropRatio) {
       if (width / height > cropRatio) { const croppedWidth = height * cropRatio; sx = (width - croppedWidth) / 2; width = croppedWidth; }
       else { const croppedHeight = width / cropRatio; sy = (height - croppedHeight) / 2; height = croppedHeight; }
     }
-    const scale = Math.min(1, maxWidth / width);
+    if (tool === "resize") {
+      const conversion = resizeUnit === "cm" ? resizeDpi / 2.54 : 1;
+      outputWidth = Math.round(targetWidth * conversion);
+      outputHeight = preserveAspect
+        ? Math.round(outputWidth * (height / width))
+        : Math.round(targetHeight * conversion);
+      if (outputWidth < 1 || outputHeight < 1 || outputWidth > 10000 || outputHeight > 10000) {
+        URL.revokeObjectURL(source.src);
+        setMessage("가로·세로는 1~10,000 범위로 입력하세요.");
+        return;
+      }
+    } else {
+      const scale = Math.min(1, maxWidth / width);
+      outputWidth = Math.max(1, Math.round(width * scale));
+      outputHeight = Math.max(1, Math.round(height * scale));
+    }
     const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(width * scale));
-    canvas.height = Math.max(1, Math.round(height * scale));
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
     const context = canvas.getContext("2d");
     if (!context) { setMessage("브라우저에서 이미지 처리를 지원하지 않습니다."); return; }
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
     context.drawImage(source, sx, sy, width, height, 0, 0, canvas.width, canvas.height);
     URL.revokeObjectURL(source.src);
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, format, quality / 100));
@@ -119,7 +143,18 @@ function ImageToolPanel() {
         </label>
         <FieldLabel label="작업"><select value={tool} onChange={(event) => setTool(event.target.value as ImageTool)} className="tool-input"><option value="compress">압축</option><option value="resize">크기 조절</option><option value="crop">가운데 자르기</option></select></FieldLabel>
         <FieldLabel label="출력 형식"><select value={format} onChange={(event) => setFormat(event.target.value as typeof format)} className="tool-input"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select></FieldLabel>
-        <FieldLabel label={`최대 가로 ${maxWidth}px`}><input type="range" min="320" max="4000" step="40" value={maxWidth} onChange={(event) => setMaxWidth(Number(event.target.value))} className="mt-3 w-full accent-brand" /></FieldLabel>
+        {tool === "resize" ? <>
+          <div className="sm:col-span-2 rounded-2xl border border-brand/20 bg-brand/5 p-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FieldLabel label="단위"><select value={resizeUnit} onChange={(event) => setResizeUnit(event.target.value as typeof resizeUnit)} className="tool-input"><option value="px">픽셀 (px)</option><option value="cm">센티미터 (cm)</option></select></FieldLabel>
+              <FieldLabel label="가로"><input type="number" min="1" max="10000" value={targetWidth} onChange={(event) => setTargetWidth(Number(event.target.value))} className="tool-input" /></FieldLabel>
+              <FieldLabel label="세로"><input type="number" min="1" max="10000" value={targetHeight} onChange={(event) => setTargetHeight(Number(event.target.value))} disabled={preserveAspect} className="tool-input disabled:cursor-not-allowed disabled:bg-slate-100" /></FieldLabel>
+              {resizeUnit === "cm" && <FieldLabel label="해상도 (DPI)"><input type="number" min="72" max="600" value={resizeDpi} onChange={(event) => setResizeDpi(Number(event.target.value))} className="tool-input" /></FieldLabel>}
+            </div>
+            <label className="mt-3 flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" checked={preserveAspect} onChange={(event) => setPreserveAspect(event.target.checked)} /> 비율 유지 (가로 기준으로 세로 자동 계산)</label>
+            <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{resizeUnit === "cm" ? `${resizeDpi} DPI 기준으로 cm를 픽셀로 환산합니다. 인쇄소나 제출처가 지정한 DPI가 있다면 그 값을 입력하세요.` : "입력한 가로·세로 픽셀 크기로 정확히 변환합니다."}</p>
+          </div>
+        </> : <FieldLabel label={`최대 가로 ${maxWidth}px`}><input type="range" min="320" max="4000" step="40" value={maxWidth} onChange={(event) => setMaxWidth(Number(event.target.value))} className="mt-3 w-full accent-brand" /></FieldLabel>}
         <FieldLabel label={`품질 ${quality}%`}><input type="range" min="20" max="100" step="1" value={quality} onChange={(event) => setQuality(Number(event.target.value))} className="mt-3 w-full accent-brand" /></FieldLabel>
         {tool === "crop" && <FieldLabel label="자르기 비율"><select value={ratio} onChange={(event) => setRatio(event.target.value)} className="tool-input"><option value="free">원본 비율</option><option value="1">1:1</option><option value="1.7777778">16:9</option><option value="1.3333333">4:3</option></select></FieldLabel>}
       </div>
