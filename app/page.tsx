@@ -64,8 +64,8 @@ export default function HomePage() {
   }));
 
   return (
-    <main className="pb-4">
-      <section className="bg-ink text-white">
+    <main className="home-page pb-4">
+      <section className="home-hero bg-ink text-white">
         <div className="page-shell grid gap-10 pb-14 pt-10 md:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)] md:items-center md:pb-20 md:pt-14">
           <div className="max-w-3xl">
             <p className="mb-4 inline-flex rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-bold text-brand">
@@ -98,7 +98,7 @@ export default function HomePage() {
                 <Link href="/calculators" className="text-xs font-extrabold text-brand hover:text-white">전체 계산기 →</Link>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
-                {quickActionLinks.map((item) => <Link key={item.href} href={item.href} className="group rounded-2xl bg-white/8 px-3 py-3 transition hover:bg-white hover:text-ink">
+                {quickActionLinks.map((item) => <Link key={item.href} href={item.href} className="home-card group rounded-2xl bg-white/8 px-3 py-3 transition hover:bg-white hover:text-ink">
                   <span className="block text-sm font-extrabold text-white transition group-hover:text-ink">{item.label}</span>
                   <span className="mt-1 block text-[11px] font-semibold text-white/55 transition group-hover:text-slate-500">{item.description}</span>
                 </Link>)}
@@ -106,7 +106,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid gap-4 self-stretch">
-            <div className="rounded-[28px] border border-white/10 bg-white p-5 text-ink shadow-float md:p-6">
+            <div className="home-feature-panel rounded-[28px] border border-white/10 bg-white p-5 text-ink shadow-float md:p-6">
               <div className="mb-5 flex items-center justify-between">
                 <Logo />
                 <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-extrabold text-brand">{t("home.live")}</span>
@@ -122,7 +122,7 @@ export default function HomePage() {
                   return <Link
                     key={calculator.slug}
                     href={`/calculators/${calculator.slug}`}
-                    className="flex h-full flex-col justify-between rounded-2xl border border-line bg-paper px-4 py-4 text-left transition hover:border-brand hover:bg-white"
+                    className="home-feature-card flex h-full flex-col justify-between rounded-2xl border border-line bg-paper px-4 py-4 text-left transition hover:border-brand hover:bg-white"
                   >
                     <p className="text-xs font-extrabold text-brand">{presentation.badge}</p>
                     <h3 className="mt-2 text-base font-extrabold text-ink">{presentation.title}</h3>
@@ -173,7 +173,7 @@ export default function HomePage() {
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {laborFocusLinks.map((item, index) => (
-              <Link key={item.href} href={item.href} className="rounded-2xl border border-line bg-paper p-4 transition hover:-translate-y-0.5 hover:border-brand hover:bg-white">
+              <Link key={item.href} href={item.href} className="home-card rounded-2xl border border-line bg-paper p-4 transition hover:-translate-y-0.5 hover:border-brand hover:bg-white">
                 <span className="text-xs font-black text-brand">0{index + 1}</span>
                 <h3 className="mt-2 text-base font-extrabold text-ink">{item.title}</h3>
                 <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{item.description}</p>
@@ -254,7 +254,7 @@ export default function HomePage() {
               <Link
                 key={hub.key}
                 href={hub.path}
-                className="rounded-[24px] border border-line bg-white p-6 shadow-panel transition hover:-translate-y-1 hover:border-brand hover:shadow-float"
+                className="home-card rounded-[24px] border border-line bg-white p-6 shadow-panel transition hover:-translate-y-1 hover:border-brand hover:shadow-float"
               >
                 <p className="text-sm font-extrabold text-brand">{hub.eyebrow}</p>
                 <h3 className="mt-3 text-xl font-extrabold text-ink">{hub.title}</h3>

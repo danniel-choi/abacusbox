@@ -6,6 +6,7 @@
   color-scheme: light;
   background: #f5f7fb;
   --font-sans: "Pretendard Variable", "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+  --font-display: "Pretendard Variable", "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
 
 * {
@@ -27,6 +28,7 @@ body {
   word-break: keep-all;
   overflow-wrap: break-word;
   overflow-x: hidden;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 h1,
@@ -135,4 +137,59 @@ input[type="range"] {
   min-width: 0;
   overflow-wrap: anywhere !important;
   word-break: break-all !important;
+}
+
+.home-page {
+  --home-section-gap: clamp(1.75rem, 4vw, 3rem);
+  background:
+    radial-gradient(circle at 8% 8%, rgba(2, 181, 133, 0.07), transparent 24rem),
+    #f5f7fb;
+}
+
+.home-page h1,
+.home-page h2,
+.home-page h3 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+.home-page p {
+  text-wrap: pretty;
+}
+
+.home-hero {
+  background:
+    radial-gradient(circle at 82% 22%, rgba(38, 104, 255, 0.26), transparent 24rem),
+    radial-gradient(circle at 18% 88%, rgba(2, 181, 133, 0.18), transparent 22rem),
+    linear-gradient(135deg, #040713 0%, #081333 58%, #062c3a 100%);
+}
+
+.home-feature-panel {
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.26);
+}
+
+.home-feature-card,
+.home-page .home-card {
+  box-shadow: 0 8px 22px rgba(4, 7, 19, 0.04);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.home-feature-card:hover,
+.home-page .home-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(4, 7, 19, 0.1);
+}
+
+@media (max-width: 767px) {
+  .home-page {
+    font-size: 0.98rem;
+  }
+
+  .home-page h1 {
+    letter-spacing: -0.045em;
+  }
+
+  .home-page h2 {
+    letter-spacing: -0.04em;
+  }
 }
