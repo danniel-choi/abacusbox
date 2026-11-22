@@ -28,3 +28,7 @@ npm run ai:integration-status
 ## 이벤트 데이터 계약
 
 사이트 내부 이벤트는 `npm run ai:data-contract`로 점검합니다. 계산기 식별자와 동작 방식만 전송하며 계산 입력값, 계산 결과, 급여, 생년월일, 이메일, 전화번호는 GA4 매개변수로 보내지 않습니다.
+
+## 인증값 형식 검사
+
+값을 설정한 뒤 `npm run ai:credentials-check`를 실행하면 원문을 출력하지 않고 JSON 구조, 속성 URL, GA4 숫자 Property ID, AdSense 계정 ID 형식만 검사합니다.
