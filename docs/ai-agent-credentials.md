@@ -2,6 +2,8 @@
 
 현재 저장소에는 Google API 인증정보가 연결되어 있지 않습니다. 실제 검색·방문·광고 데이터를 수집하려면 다음 값을 Cloudflare Secret 또는 로컬 환경변수로 준비해야 합니다.
 
+GA4 웹 측정 ID는 비밀값이 아니므로 `NEXT_PUBLIC_GA_MEASUREMENT_ID` 공개 환경변수로 Preview와 운영 속성을 분리할 수 있습니다. 미설정 시 현재 사이트의 측정 ID를 기본값으로 사용합니다.
+
 | 환경변수 | 용도 | 비고 |
 | --- | --- | --- |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Google API 인증 | JSON 원문을 코드·Git에 저장하지 않음 |

@@ -10,7 +10,6 @@ const protectedPatterns = [
   /^functions\/api\/admin\//,
   /^functions\/api\/(contact|comments|reactions|blog|community)\//,
   /^components\/AdSenseAd\.tsx$/,
-  /(^|\/)(\.env|\.dev\.vars)(\.|$)/,
   /(^|\/)(migrations|wrangler\.toml|wrangler\.jsonc)(\/|$)/,
   /(^|\/)(package-lock\.json|pnpm-lock\.yaml|yarn\.lock)$/
 ];
@@ -32,8 +31,8 @@ const changedFiles = [...new Set([committed, staged, working, untracked]
   .flatMap((value) => value.split("\n"))
   .map((file) => file.trim())
   .filter(Boolean))].sort();
-const protectedFiles = changedFiles.filter((file) => protectedPatterns.some((pattern) => pattern.test(file)));
-const secretLikeFiles = changedFiles.filter((file) => /(^|\/)(\.env|\.dev\.vars)/.test(file));
+const protectedFiles = changedFiles.filter((file) => protectedPatterns.some((pattern) => pattern.test(file)) || (!file.endsWith(".example") && /(^|\/)(\.env|\.dev\.vars)/.test(file)));
+const secretLikeFiles = changedFiles.filter((file) => !file.endsWith(".example") && /(^|\/)(\.env|\.dev\.vars)/.test(file));
 const status = protectedFiles.length === 0 && secretLikeFiles.length === 0 ? "READY" : "REVIEW_REQUIRED";
 
 const report = `# AI Preview 사전 검증
