@@ -1,4 +1,7 @@
 import process from "node:process";
+import { loadLocalEnv } from "./load-env.mjs";
+
+loadLocalEnv();
 
 const requirements = [
   ["GOOGLE_SERVICE_ACCOUNT_JSON", "Google API 서비스 계정 JSON 또는 Secret 값"],

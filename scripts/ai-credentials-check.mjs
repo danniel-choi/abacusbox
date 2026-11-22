@@ -1,5 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { loadLocalEnv } from "./load-env.mjs";
+
+loadLocalEnv();
 
 const root = process.cwd();
 const reportPath = path.join(root, "docs", "ai-credentials-check.md");

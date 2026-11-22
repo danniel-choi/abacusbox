@@ -29,6 +29,8 @@ npm run ai:integration-status
 
 입력 템플릿은 저장소 루트의 `.env.example`에 있습니다. 이를 `.env.local`로 복사한 뒤 `GA4_PROPERTY_ID`와 계정별 값을 입력할 수 있지만, `.env.local`은 절대 Git에 커밋하지 않습니다.
 
+검사 스크립트는 `.env`, `.env.local`, `.dev.vars`를 자동으로 읽습니다. 서비스 계정 JSON을 로컬 `.env`에 넣을 때는 한 줄 JSON 또는 `\\n`으로 이스케이프한 값으로 저장해야 합니다.
+
 ## 이벤트 데이터 계약
 
 사이트 내부 이벤트는 `npm run ai:data-contract`로 점검합니다. 계산기 식별자와 동작 방식만 전송하며 계산 입력값, 계산 결과, 급여, 생년월일, 이메일, 전화번호는 GA4 매개변수로 보내지 않습니다.
