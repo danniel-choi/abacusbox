@@ -249,11 +249,18 @@ function TextToolPanel() {
 function DrawingToolPanel() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [color, setColor] = useState("#111827");
+  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [size, setSize] = useState(6);
-  const [tool, setTool] = useState<"pen" | "eraser" | "line" | "rectangle" | "ellipse" | "text">("pen");
+  const [opacity, setOpacity] = useState(100);
+  const [tool, setTool] = useState<"pen" | "eraser" | "line" | "arrow" | "rectangle" | "ellipse" | "text">("pen");
   const [fillShape, setFillShape] = useState(false);
   const [textValue, setTextValue] = useState("텍스트");
   const [textSize, setTextSize] = useState(32);
+  const [canvasWidth, setCanvasWidth] = useState(1200);
+  const [canvasHeight, setCanvasHeight] = useState(650);
+  const [showGrid, setShowGrid] = useState(false);
+  const [exportFormat, setExportFormat] = useState<"png" | "jpeg" | "webp">("png");
+  const [exportQuality, setExportQuality] = useState(92);
   const [historyState, setHistoryState] = useState({ index: 0, length: 1 });
   const drawing = useRef(false);
   const startPoint = useRef({ x: 0, y: 0 });
@@ -263,14 +270,14 @@ function DrawingToolPanel() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    context.fillStyle = "#ffffff";
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+    context.fillStyle = backgroundColor;
     context.fillRect(0, 0, canvas.width, canvas.height);
     history.current = [context.getImageData(0, 0, canvas.width, canvas.height)];
     historyIndex.current = 0;
-  }, []);
+    setHistoryState({ index: 0, length: 1 });
+  }, [backgroundColor, canvasWidth, canvasHeight]);
 
   const syncHistory = () => setHistoryState({ index: historyIndex.current, length: history.current.length });
   const saveHistory = () => {
@@ -299,29 +306,45 @@ function DrawingToolPanel() {
     const rect = canvas.getBoundingClientRect();
     return { x: (event.clientX - rect.left) * canvas.width / rect.width, y: (event.clientY - rect.top) * canvas.height / rect.height };
   };
+  const setupStroke = (context: CanvasRenderingContext2D) => {
+    context.strokeStyle = tool === "eraser" ? backgroundColor : color;
+    context.fillStyle = color;
+    context.globalAlpha = opacity / 100;
+    context.lineWidth = size;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+  };
+  const drawArrow = (context: CanvasRenderingContext2D, start: { x: number; y: number }, end: { x: number; y: number }) => {
+    const angle = Math.atan2(end.y - start.y, end.x - start.x);
+    const head = Math.max(10, size * 3);
+    context.moveTo(start.x, start.y);
+    context.lineTo(end.x, end.y);
+    context.lineTo(end.x - head * Math.cos(angle - Math.PI / 6), end.y - head * Math.sin(angle - Math.PI / 6));
+    context.moveTo(end.x, end.y);
+    context.lineTo(end.x - head * Math.cos(angle + Math.PI / 6), end.y - head * Math.sin(angle + Math.PI / 6));
+  };
   const start = (event: PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
     if (!canvas || !context) return;
     const { x, y } = point(event);
     if (tool === "text") {
+      context.globalAlpha = opacity / 100;
       context.fillStyle = color;
       context.font = `${textSize}px sans-serif`;
       context.textBaseline = "top";
       context.fillText(textValue || "텍스트", x, y);
+      context.globalAlpha = 1;
       saveHistory();
       return;
     }
     drawing.current = true;
     startPoint.current = { x, y };
     baseImage.current = context.getImageData(0, 0, canvas.width, canvas.height);
+    setupStroke(context);
     context.beginPath();
     context.moveTo(x, y);
-    context.strokeStyle = tool === "eraser" ? "#ffffff" : color;
-    context.lineWidth = size;
-    context.lineCap = "round";
-    context.lineJoin = "round";
-    canvas?.setPointerCapture(event.pointerId);
+    canvas.setPointerCapture(event.pointerId);
   };
   const move = (event: PointerEvent<HTMLCanvasElement>) => {
     if (!drawing.current) return;
@@ -330,39 +353,42 @@ function DrawingToolPanel() {
     if (!context) return;
     const { x, y } = point(event);
     if (tool === "pen" || tool === "eraser") {
+      setupStroke(context);
       context.lineTo(x, y);
       context.stroke();
       return;
     }
     if (!baseImage.current) return;
     context.putImageData(baseImage.current, 0, 0);
+    setupStroke(context);
     context.beginPath();
-    context.strokeStyle = color;
-    context.lineWidth = size;
-    context.lineCap = "round";
-    context.lineJoin = "round";
-    const start = startPoint.current;
+    const startPointValue = startPoint.current;
     if (tool === "line") {
-      context.moveTo(start.x, start.y);
+      context.moveTo(startPointValue.x, startPointValue.y);
       context.lineTo(x, y);
       context.stroke();
+    } else if (tool === "arrow") {
+      drawArrow(context, startPointValue, { x, y });
+      context.stroke();
     } else if (tool === "rectangle") {
-      const width = x - start.x;
-      const height = y - start.y;
-      if (fillShape) { context.fillStyle = color; context.fillRect(start.x, start.y, width, height); }
-      context.strokeRect(start.x, start.y, width, height);
+      const width = x - startPointValue.x;
+      const height = y - startPointValue.y;
+      if (fillShape) context.fillRect(startPointValue.x, startPointValue.y, width, height);
+      context.strokeRect(startPointValue.x, startPointValue.y, width, height);
     } else if (tool === "ellipse") {
-      const centerX = (start.x + x) / 2;
-      const centerY = (start.y + y) / 2;
-      context.ellipse(centerX, centerY, Math.abs(x - start.x) / 2, Math.abs(y - start.y) / 2, 0, 0, Math.PI * 2);
-      if (fillShape) { context.fillStyle = color; context.fill(); }
+      const centerX = (startPointValue.x + x) / 2;
+      const centerY = (startPointValue.y + y) / 2;
+      context.ellipse(centerX, centerY, Math.abs(x - startPointValue.x) / 2, Math.abs(y - startPointValue.y) / 2, 0, 0, Math.PI * 2);
+      if (fillShape) context.fill();
       context.stroke();
     }
+    context.globalAlpha = 1;
   };
   const finish = (event?: PointerEvent<HTMLCanvasElement>) => {
     if (!drawing.current) return;
     drawing.current = false;
     if (event && canvasRef.current?.hasPointerCapture(event.pointerId)) canvasRef.current.releasePointerCapture(event.pointerId);
+    if (canvasRef.current) { const context = canvasRef.current.getContext("2d"); if (context) context.globalAlpha = 1; }
     saveHistory();
     baseImage.current = null;
   };
@@ -370,19 +396,37 @@ function DrawingToolPanel() {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
     if (!canvas || !context) return;
-    context.fillStyle = "#ffffff";
+    context.globalAlpha = 1;
+    context.fillStyle = backgroundColor;
     context.fillRect(0, 0, canvas.width, canvas.height);
     saveHistory();
   };
   const download = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const mime = `image/${exportFormat}`;
+    const extension = exportFormat === "jpeg" ? "jpg" : exportFormat;
     const anchor = document.createElement("a");
-    anchor.href = canvas.toDataURL("image/png");
-    anchor.download = "calcrule-drawing.png";
+    anchor.href = canvas.toDataURL(mime, exportQuality / 100);
+    anchor.download = `calcrule-drawing.${extension}`;
     anchor.click();
   };
-  return <div><p className="text-sm font-extrabold text-brand">이미지 도구</p><h1 className="mt-2 text-2xl font-extrabold text-ink">브라우저 그림판</h1><p className="mt-3 text-sm font-medium leading-6 text-slate-600">펜, 도형, 텍스트로 메모나 주석을 만든 뒤 PNG로 저장하세요. 입력 내용은 브라우저에만 남습니다.</p><div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-paper p-3"><label className="flex items-center gap-2 text-sm font-extrabold text-ink">도구<select value={tool} onChange={(event) => setTool(event.target.value as typeof tool)} className="tool-input w-auto py-2"><option value="pen">펜</option><option value="eraser">지우개</option><option value="line">직선</option><option value="rectangle">사각형</option><option value="ellipse">타원</option><option value="text">텍스트</option></select></label><label className="flex items-center gap-2 text-sm font-extrabold text-ink">색상 <input type="color" value={color} onChange={(event) => setColor(event.target.value)} disabled={tool === "eraser"} className="h-9 w-12 rounded border border-line disabled:opacity-50" /></label><label className="flex items-center gap-2 text-sm font-extrabold text-ink">굵기 <input type="range" min="1" max="40" value={size} onChange={(event) => setSize(Number(event.target.value))} /></label>{(tool === "rectangle" || tool === "ellipse") && <label className="flex items-center gap-2 text-sm font-extrabold text-ink"><input type="checkbox" checked={fillShape} onChange={(event) => setFillShape(event.target.checked)} /> 채우기</label>}{tool === "text" && <><input value={textValue} onChange={(event) => setTextValue(event.target.value)} placeholder="캔버스에 넣을 텍스트" className="tool-input min-w-44 py-2" /><label className="flex items-center gap-2 text-sm font-extrabold text-ink">글자 크기 <input type="range" min="12" max="96" value={textSize} onChange={(event) => setTextSize(Number(event.target.value))} /></label></>}</div><canvas ref={canvasRef} width={1200} height={650} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} onPointerLeave={(event) => { if (tool === "pen" || tool === "eraser") finish(event); }} className="mt-4 h-auto w-full touch-none rounded-2xl border border-line bg-white" /><div className="mt-4 flex flex-wrap items-center gap-3"><button type="button" onClick={() => restoreHistory(historyIndex.current - 1)} disabled={historyState.index <= 0} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink disabled:cursor-not-allowed disabled:opacity-40">실행취소</button><button type="button" onClick={() => restoreHistory(historyIndex.current + 1)} disabled={historyState.index >= historyState.length - 1} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink disabled:cursor-not-allowed disabled:opacity-40">다시실행</button><button type="button" onClick={clear} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink">초기화</button><button type="button" onClick={download} className="rounded-full bg-brand px-4 py-2 text-sm font-extrabold text-white">PNG 저장</button></div></div>;
+
+  return <div>
+    <p className="text-sm font-extrabold text-brand">이미지 도구</p>
+    <h1 className="mt-2 text-2xl font-extrabold text-ink">브라우저 그림판</h1>
+    <p className="mt-3 text-sm font-medium leading-6 text-slate-600">주석, 스케치, 화면 설명을 브라우저에서 만들고 PNG·JPG·WebP로 저장하세요. 입력 내용은 브라우저에만 남습니다.</p>
+    <div className="mt-6 grid gap-3 rounded-2xl bg-paper p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <FieldLabel label="캔버스 너비"><input type="number" min="320" max="2400" value={canvasWidth} onChange={(event) => setCanvasWidth(Math.min(2400, Math.max(320, Number(event.target.value) || 320)))} className="tool-input" /></FieldLabel>
+      <FieldLabel label="캔버스 높이"><input type="number" min="200" max="1600" value={canvasHeight} onChange={(event) => setCanvasHeight(Math.min(1600, Math.max(200, Number(event.target.value) || 200)))} className="tool-input" /></FieldLabel>
+      <label className="flex items-center gap-2 text-sm font-extrabold text-ink">배경색 <input type="color" value={backgroundColor} onChange={(event) => setBackgroundColor(event.target.value)} className="h-10 w-14 rounded border border-line" /></label>
+      <label className="flex items-center gap-2 text-sm font-extrabold text-ink"><input type="checkbox" checked={showGrid} onChange={(event) => setShowGrid(event.target.checked)} /> 격자 보기</label>
+    </div>
+    <div className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl bg-paper p-3"><label className="flex items-center gap-2 text-sm font-extrabold text-ink">도구<select value={tool} onChange={(event) => setTool(event.target.value as typeof tool)} className="tool-input w-auto py-2"><option value="pen">펜</option><option value="eraser">지우개</option><option value="line">직선</option><option value="arrow">화살표</option><option value="rectangle">사각형</option><option value="ellipse">타원</option><option value="text">텍스트</option></select></label><label className="flex items-center gap-2 text-sm font-extrabold text-ink">색상 <input type="color" value={color} onChange={(event) => setColor(event.target.value)} disabled={tool === "eraser"} className="h-9 w-12 rounded border border-line disabled:opacity-50" /></label><label className="flex items-center gap-2 text-sm font-extrabold text-ink">굵기 <input type="range" min="1" max="40" value={size} onChange={(event) => setSize(Number(event.target.value))} /></label><label className="flex items-center gap-2 text-sm font-extrabold text-ink">투명도 {opacity}% <input type="range" min="10" max="100" value={opacity} onChange={(event) => setOpacity(Number(event.target.value))} /></label>{(tool === "rectangle" || tool === "ellipse") && <label className="flex items-center gap-2 text-sm font-extrabold text-ink"><input type="checkbox" checked={fillShape} onChange={(event) => setFillShape(event.target.checked)} /> 채우기</label>}{tool === "text" && <><input value={textValue} onChange={(event) => setTextValue(event.target.value)} placeholder="캔버스에 넣을 텍스트" className="tool-input min-w-44 py-2" /><label className="flex items-center gap-2 text-sm font-extrabold text-ink">글자 크기 <input type="range" min="12" max="96" value={textSize} onChange={(event) => setTextSize(Number(event.target.value))} /></label></>}</div>
+    <div className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl border border-line p-3"><label className="flex items-center gap-2 text-sm font-extrabold text-ink">저장 형식<select value={exportFormat} onChange={(event) => setExportFormat(event.target.value as typeof exportFormat)} className="tool-input w-auto py-2"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select></label><label className="flex items-center gap-2 text-sm font-extrabold text-ink">저장 품질 {exportQuality}% <input type="range" min="50" max="100" value={exportQuality} onChange={(event) => setExportQuality(Number(event.target.value))} /></label><span className="text-xs font-semibold text-slate-500">캔버스 크기 변경과 배경색은 초기화 후 적용됩니다.</span></div>
+    <div className="relative mt-4 overflow-hidden rounded-2xl"><canvas ref={canvasRef} width={canvasWidth} height={canvasHeight} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} onPointerLeave={(event) => { if (tool === "pen" || tool === "eraser") finish(event); }} className="block h-auto w-full touch-none rounded-2xl border border-line bg-white" />{showGrid && <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-2xl opacity-30" style={{ backgroundImage: "linear-gradient(to right, #94a3b8 1px, transparent 1px), linear-gradient(to bottom, #94a3b8 1px, transparent 1px)", backgroundSize: "24px 24px" }} />}</div>
+    <div className="mt-4 flex flex-wrap items-center gap-3"><button type="button" onClick={() => restoreHistory(historyIndex.current - 1)} disabled={historyState.index <= 0} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink disabled:cursor-not-allowed disabled:opacity-40">실행취소</button><button type="button" onClick={() => restoreHistory(historyIndex.current + 1)} disabled={historyState.index >= historyState.length - 1} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink disabled:cursor-not-allowed disabled:opacity-40">다시실행</button><button type="button" onClick={clear} className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink">초기화</button><button type="button" onClick={download} className="rounded-full bg-brand px-4 py-2 text-sm font-extrabold text-white">{exportFormat.toUpperCase()} 저장</button><span className="text-xs font-semibold text-slate-500">히스토리 {historyState.index + 1}/{historyState.length}</span></div>
+  </div>;
 }
 
 function YoutubeThumbnailPanel() {
