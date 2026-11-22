@@ -50,8 +50,7 @@ const quickActionLinks = [
   { href: "/calculators/net-salary", label: "연봉 실수령액", description: "월급과 공제액 바로 확인" },
   { href: "/calculators/loan-interest", label: "대출 이자", description: "월 납입금·총이자 계산" },
   { href: "/calculators/lotto-probability", label: "복권 당첨 확률", description: "당첨 확률을 숫자로 확인" },
-  { href: "/toolbox/drawing-board", label: "브라우저 그림판", description: "설치 없이 바로 그리기" },
-  { href: "/calculators/si-outsourcing-price", label: "SI 외주 단가", description: "외주 개발 예산 범위 계산" }
+  { href: "/toolbox/drawing-board", label: "브라우저 그림판", description: "설치 없이 바로 그리기" }
 ];
 
 export default function HomePage() {
@@ -86,6 +85,9 @@ export default function HomePage() {
               </Link>
               <Link href="/resources" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
                 {t("home.viewResources")}
+              </Link>
+              <Link href="/calculators/si-outsourcing-price" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
+                SI 외주 단가 계산기
               </Link>
               <HomeFormulaCalculator trigger="desktop" />
             </div>
