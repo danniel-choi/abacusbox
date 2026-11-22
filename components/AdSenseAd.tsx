@@ -17,7 +17,7 @@ type AdSenseAdProps = {
   className?: string;
 };
 
-const AD_CLIENT = "ca-pub-5568924428249376";
+const AD_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-5568924428249376";
 const DEFAULT_DISPLAY_SLOT = "8858811048";
 const DISPLAY_SLOT = process.env.NEXT_PUBLIC_ADSENSE_DISPLAY_SLOT || DEFAULT_DISPLAY_SLOT;
 

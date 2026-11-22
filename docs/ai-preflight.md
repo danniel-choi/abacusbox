@@ -1,19 +1,23 @@
 # AI Preview 사전 검증
 
-- 생성 시각: 2026-11-22T08:41:46.086Z
-- 기준 ref: HEAD
+- 생성 시각: 2026-11-22T08:46:48.122Z
+- 기준 ref: HEAD~1
 - 상태: READY
 
 ## 변경 파일
 
 - .github/dependabot.yml
 - .github/workflows/ai-quality.yml
+- components/AdSenseAd.tsx
+- components/AdSenseLoader.tsx
 - docs/ai-auto-upgrade.md
 - docs/ai-data-contract.md
 - docs/ai-preflight.md
 - docs/ai-seo-check.md
 - docs/ai-site-audit.md
 - package.json
+- scripts/ai-change-plan.mjs
+- scripts/ai-preflight.mjs
 
 ## 보호 경로 변경
 

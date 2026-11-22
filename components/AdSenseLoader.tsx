@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 
 const ADSENSE_SCRIPT_ID = "adsense-loader";
-const ADSENSE_SRC = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5568924428249376";
+const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-5568924428249376";
+const ADSENSE_SRC = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
 
 export function AdSenseLoader() {
   useEffect(() => {

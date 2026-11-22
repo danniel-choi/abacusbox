@@ -53,7 +53,7 @@ const plan = `# AI 에이전트 승인 기반 변경 계획
 - \`functions/_lib/scheduler.js\`, 자동 게시·예약·콘텐츠 생성 로직
 - \`functions/api/admin/**\`, 인증·관리자 권한·세션
 - \`functions/api/**\`의 데이터 삭제, 게시, 댓글·문의 저장 로직
-- \`components/AdSenseAd.tsx\`, 광고 단위·배치·클릭을 유도할 수 있는 UI
+- 광고 UI의 클릭 유도·정책 위반 변경
 - 마이그레이션, D1 데이터, 환경변수·Secret, 도메인·DNS·Cloudflare 설정
 - 사용자 개인정보 수집 또는 추적 목적의 새 데이터 필드
 

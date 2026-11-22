@@ -9,7 +9,6 @@ const protectedPatterns = [
   /^functions\/_lib\/scheduler\.js$/,
   /^functions\/api\/admin\//,
   /^functions\/api\/(contact|comments|reactions|blog|community)\//,
-  /^components\/AdSenseAd\.tsx$/,
   /(^|\/)(migrations|wrangler\.toml|wrangler\.jsonc)(\/|$)/,
   /(^|\/)(package-lock\.json|pnpm-lock\.yaml|yarn\.lock)$/
 ];
