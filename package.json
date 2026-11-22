@@ -10,6 +10,7 @@
     "typecheck": "npx next typegen && tsc --noEmit",
     "ai:audit": "node scripts/ai-site-audit.mjs",
     "ai:integration-status": "node scripts/ai-integration-status.mjs",
+    "ai:plan": "node scripts/ai-change-plan.mjs",
     "cf:preview": "npx wrangler pages dev out",
     "d1:migrate:local": "npx wrangler d1 migrations apply calcrule-prod --local",
     "d1:migrate:remote": "npx wrangler d1 migrations apply calcrule-prod --remote"
