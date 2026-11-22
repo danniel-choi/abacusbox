@@ -31,6 +31,18 @@ npm run ai:integration-status
 
 검사 스크립트는 `.env`, `.env.local`, `.dev.vars`를 자동으로 읽습니다. 서비스 계정 JSON을 로컬 `.env`에 넣을 때는 한 줄 JSON 또는 `\\n`으로 이스케이프한 값으로 저장해야 합니다.
 
+인증과 권한을 확인하는 읽기 전용 테스트는 `AI_ALLOW_EXTERNAL_READ=1 npm run ai:google-readonly-check`로 실행합니다. 테스트는 Search Console 속성 접근, GA4 최근 7일 리포트 응답, AdSense 계정 API 응답만 확인하며 원본 검색어·수익·사용자 데이터는 출력하지 않습니다.
+
+## 403 권한 오류가 발생할 때
+
+읽기 전용 테스트에서 세 API가 모두 `HTTP 403`이면 서비스 계정 인증 형식은 통과했지만 Google 서비스 권한이 부족한 상태입니다.
+
+1. Google Cloud 프로젝트에서 Search Console API, Google Analytics Data API, AdSense Management API를 활성화합니다.
+2. Search Console 속성의 사용자 권한에 서비스 계정 이메일을 추가합니다.
+3. GA4 **관리 → 속성 액세스 관리**에서 서비스 계정 이메일을 조회자 이상으로 추가합니다.
+4. AdSense 계정의 API 사용 및 사용자 접근 권한을 확인합니다.
+5. 권한 반영 후 `AI_ALLOW_EXTERNAL_READ=1 npm run ai:google-readonly-check`를 다시 실행합니다.
+
 ## 이벤트 데이터 계약
 
 사이트 내부 이벤트는 `npm run ai:data-contract`로 점검합니다. 계산기 식별자와 동작 방식만 전송하며 계산 입력값, 계산 결과, 급여, 생년월일, 이메일, 전화번호는 GA4 매개변수로 보내지 않습니다.

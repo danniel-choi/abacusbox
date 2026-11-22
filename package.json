@@ -15,6 +15,7 @@
     "ai:preflight": "node scripts/ai-preflight.mjs",
     "ai:data-contract": "node scripts/ai-data-contract.mjs",
     "ai:credentials-check": "node scripts/ai-credentials-check.mjs",
+    "ai:google-readonly-check": "node scripts/ai-google-readonly-check.mjs",
     "cf:preview": "npx wrangler pages dev out",
     "d1:migrate:local": "npx wrangler d1 migrations apply calcrule-prod --local",
     "d1:migrate:remote": "npx wrangler d1 migrations apply calcrule-prod --remote"

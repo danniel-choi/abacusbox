@@ -1,17 +1,19 @@
 # AI Preview 사전 검증
 
-- 생성 시각: 2026-11-22T07:22:11.497Z
+- 생성 시각: 2026-11-22T07:38:00.775Z
 - 기준 ref: HEAD~1
 - 상태: READY
 
 ## 변경 파일
 
-- .env.example
 - docs/ai-agent-credentials.md
 - docs/ai-credentials-check.md
 - docs/ai-data-contract.md
+- docs/ai-google-readonly-check.md
 - docs/ai-preflight.md
+- package.json
 - scripts/ai-credentials-check.mjs
+- scripts/ai-google-readonly-check.mjs
 - scripts/ai-integration-status.mjs
 - scripts/load-env.mjs
 
