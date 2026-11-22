@@ -1,6 +1,6 @@
 # AI 에이전트 승인 기반 변경 계획
 
-- 생성 시각: 2026-11-22T04:57:02.312Z
+- 생성 시각: 2026-11-22T05:16:29.837Z
 - 기준 감사: [ai-site-audit.md](./ai-site-audit.md)
 - 현재 감사 결과: 9 PASS / 0 FAIL / 0 MANUAL
 - 외부 데이터: Search Console·GA4·AdSense 인증값이 없으므로 검색·수익 수치를 사용하지 않음
@@ -10,7 +10,7 @@
 
 - GA4 기본 태그가 `components/GoogleAnalytics.tsx`에 존재함
 - 광고 노출 이벤트 `ad_slot_view`가 존재함
-- 계산 시작·완료·공유 이벤트: 현재 소스에서 확인되지 않음
+- 계산 시작·완료·공유 이벤트: 확인됨
 
 ## 자동 변경 허용 범위
 

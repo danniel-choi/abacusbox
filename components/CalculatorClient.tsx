@@ -12,6 +12,7 @@ import { CALCULATOR_GROUP_META, getCalculatorGroup, getCalculatorIcon, getRelate
 import { interpolate, type Locale } from "@/lib/i18n";
 import { getLocalizedCalculatorPresentation, getLocalizedFieldHelp, getLocalizedFieldLabel, getLocalizedOptionLabel, getLocalizedResultLabel, getLocalizedUtilityText } from "@/lib/calculator-i18n";
 import { FAVORITE_CALCULATORS_STORAGE_KEY } from "@/components/FavoriteCalculatorsSection";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 type FormValues = Record<string, number>;
 
@@ -209,6 +210,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const [resultNonce, setResultNonce] = useState(0);
   const [savedResults, setSavedResults] = useState<SavedCalculatorResult[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
+  const startedCalculatorRef = useRef<CalculatorSlug | null>(null);
   const defaults = useMemo(() => {
     return Object.fromEntries(
       calculator.fields.map((field) => {
@@ -226,6 +228,12 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const values = useWatch({ control });
   const activeCalculator = calculator;
   const localizedCalculator = getLocalizedCalculatorPresentation(activeCalculator, locale);
+
+  useEffect(() => {
+    if (startedCalculatorRef.current === slug) return;
+    startedCalculatorRef.current = slug;
+    trackAnalyticsEvent("calculator_start", { calculator_slug: slug });
+  }, [slug]);
 
   useEffect(() => {
     reset(defaults);
@@ -388,6 +396,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   }
 
   function saveCurrentResult() {
+    trackAnalyticsEvent("calculator_complete", { calculator_slug: activeCalculator.slug, completion_method: "save" });
     const snapshot: SavedCalculatorResult = {
       id: `${activeCalculator.slug}-${Date.now()}`,
       slug: activeCalculator.slug,
@@ -1205,19 +1214,23 @@ function ShareActions({
   }
 
   async function copyLink() {
+    trackAnalyticsEvent("share_click", { calculator_slug: slug, share_method: "link" });
     await navigator.clipboard.writeText(window.location.href);
     showNotice("링크를 복사했습니다.");
   }
 
   async function copyResultText() {
+    trackAnalyticsEvent("share_click", { calculator_slug: slug, share_method: "result_text" });
     await navigator.clipboard.writeText(buildShareText(slug, title, result, window.location.href));
     showNotice("결과 요약을 복사했습니다.");
   }
 
   async function shareResult() {
+    const supportsNativeShare = "share" in navigator && typeof navigator.share === "function";
+    trackAnalyticsEvent("share_click", { calculator_slug: slug, share_method: supportsNativeShare ? "native" : "clipboard" });
     const text = buildShareText(slug, title, result, window.location.href);
     const shareLine = buildShareLine(slug, title, result);
-    if (navigator.share) {
+    if (supportsNativeShare) {
       try {
         await navigator.share({
           title: shareLine,
@@ -1236,6 +1249,7 @@ function ShareActions({
   }
 
   function downloadImage() {
+    trackAnalyticsEvent("share_click", { calculator_slug: slug, share_method: "image" });
     downloadResultCard({
       slug,
       title,
