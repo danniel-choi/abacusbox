@@ -33,6 +33,8 @@ npm run ai:integration-status
 
 인증과 권한을 확인하는 읽기 전용 테스트는 `AI_ALLOW_EXTERNAL_READ=1 npm run ai:google-readonly-check`로 실행합니다. 테스트는 Search Console 속성 접근, GA4 최근 7일 리포트 응답, AdSense 계정 API 응답만 확인하며 원본 검색어·수익·사용자 데이터는 출력하지 않습니다.
 
+집계 스냅샷은 `AI_ALLOW_EXTERNAL_READ=1 npm run ai:google-data-snapshot`으로 생성합니다. 최근 28일의 페이지·랜딩 페이지 집계만 `.ai-reports/`에 저장하며 검색어와 개인 식별 데이터는 저장하지 않습니다.
+
 ## 403 권한 오류가 발생할 때
 
 읽기 전용 테스트에서 세 API가 모두 `HTTP 403`이면 서비스 계정 인증 형식은 통과했지만 Google 서비스 권한이 부족한 상태입니다.
