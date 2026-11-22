@@ -95,6 +95,7 @@ function getReferenceSites(group: ReturnType<typeof getCalculatorGroup>) {
   if (group === "business") {
     return [
       ...common,
+      { href: "https://freesi.net/guide/software-outsourcing-price-table", label: "프리시 소프트웨어 외주 단가표", text: "2026년 소규모 소프트웨어 외주 프로젝트의 유형별 실제 수주가와 견적 변수를 확인합니다." },
       { href: "https://www.hometax.go.kr", label: "홈택스", text: "사업자 세금 신고, 계산서, 부가가치세, 증명 발급을 처리합니다." },
       { href: "https://www.nts.go.kr", label: "국세청", text: "부가가치세, 종합소득세, 사업자 세무 안내를 확인합니다." },
       { href: "https://www.ftc.go.kr", label: "공정거래위원회", text: "전자상거래, 표시광고, 소비자거래 관련 제도와 사업자 유의사항을 확인합니다." }

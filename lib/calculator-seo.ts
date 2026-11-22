@@ -11,6 +11,35 @@ export type CalculatorSeoContent = {
 };
 
 export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoContent>> = {
+  "si-outsourcing-price": {
+    title: "SI 외주 개발 단가 계산기 | 소프트웨어 외주 비용 범위",
+    description: "개발 유형, 프로젝트 규모, 외부 연동, 추가 화면과 납기 조건을 입력해 SI 외주 개발비 예상 범위를 계산하세요.",
+    keywords: ["SI 외주 개발 단가 계산기", "소프트웨어 외주 비용", "개발 견적 계산기", "웹앱 외주 단가", "외주 개발 예산"],
+    searchIntents: [
+      "웹사이트·업무 자동화·API 서버 외주 개발 예산을 잡을 때",
+      "개발 유형과 규모별 외주 견적 범위를 비교할 때",
+      "외부 연동과 빠른 납기가 견적에 미치는 영향을 확인할 때"
+    ],
+    sections: [
+      {
+        title: "개발 유형과 규모별 소프트웨어 외주 단가를 참고합니다.",
+        body: "웹 데이터 수집, 업무 자동화, GUI 프로그램, API 연동, 백엔드, 대시보드, 웹앱, 챗봇·AI 기능의 프로젝트 규모별 참고 범위를 계산합니다. 결과는 실제 계약 전 예산을 잡기 위한 참고값입니다."
+      },
+      {
+        title: "화면 수보다 연동·예외 처리·운영 범위가 중요합니다.",
+        body: "로그인·결제·공공데이터·AI API 같은 외부 연동, 권한과 보안, 데이터 이관, 장애 대응, 배포와 유지보수 포함 여부에 따라 실제 견적은 크게 달라질 수 있습니다."
+      },
+      {
+        title: "참고 단가의 출처와 적용 범위를 확인하세요.",
+        body: "기본 단가 범위는 프리시(Freesi)의 2026년 소프트웨어 외주 개발 단가표를 참고했습니다. 해당 자료는 소규모 외주 시장의 프로젝트 단가이며 대기업 SI 인월 계약 단가와는 산정 방식이 다릅니다."
+      }
+    ],
+    internalLinks: [
+      { href: "/business", label: "사업·판매 계산기 모음", text: "사업 비용과 판매 수익 관련 계산기를 함께 확인합니다." },
+      { href: "/calculators/break-even", label: "손익분기점 계산기", text: "개발비 회수에 필요한 매출과 판매량을 계산합니다." },
+      { href: "/calculators/subscription-revenue", label: "구독 매출 계산기", text: "웹서비스 출시 후 구독자와 운영 매출 시나리오를 비교합니다." }
+    ]
+  },
   "csat-score-calculator": {
     title: "수능 성적 계산기 | 국어·수학·탐구 표준점수 합계·평균",
     description: "수능 성적 계산기에 국어·수학·탐구 표준점수와 영어·한국사 등급을 입력해 합계와 평균을 확인하세요.",

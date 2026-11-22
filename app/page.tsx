@@ -33,7 +33,8 @@ const brandRelatedLinks = [
   { href: "/calculators/loan-interest", label: "대출 이자 계산기" },
   { href: "/calculators/year-end-tax-settlement", label: "연말정산 계산기" },
   { href: "/calculators/lotto-probability", label: "복권 당첨 확률 계산기" },
-  { href: "/calculators/lightning-strike-probability", label: "번개 맞을 확률 계산기" }
+  { href: "/calculators/lightning-strike-probability", label: "번개 맞을 확률 계산기" },
+  { href: "/calculators/si-outsourcing-price", label: "SI 외주 개발 단가 계산기" }
   ,{ href: "/side-income", label: "웹 부업·재테크 가이드" }
 ];
 
@@ -49,7 +50,8 @@ const quickActionLinks = [
   { href: "/calculators/net-salary", label: "연봉 실수령액", description: "월급과 공제액 바로 확인" },
   { href: "/calculators/loan-interest", label: "대출 이자", description: "월 납입금·총이자 계산" },
   { href: "/calculators/lotto-probability", label: "복권 당첨 확률", description: "당첨 확률을 숫자로 확인" },
-  { href: "/toolbox/drawing-board", label: "브라우저 그림판", description: "설치 없이 바로 그리기" }
+  { href: "/toolbox/drawing-board", label: "브라우저 그림판", description: "설치 없이 바로 그리기" },
+  { href: "/calculators/si-outsourcing-price", label: "SI 외주 단가", description: "외주 개발 예산 범위 계산" }
 ];
 
 export default function HomePage() {

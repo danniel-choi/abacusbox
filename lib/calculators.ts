@@ -48,6 +48,7 @@ export type CalculatorSlug =
   | "moving-cost"
   | "mobile-plan"
   | "seller-profit"
+  | "si-outsourcing-price"
   | "ad-performance-calculator"
   | "marketing-budget-calculator"
   | "adsense-revenue"
@@ -13838,6 +13839,126 @@ export const calculators: CalculatorConfig[] = [
           { name: "시세가치", value: spotValue },
           { name: "구매예상", value: estimatedBuyPrice },
           { name: "매도예상", value: estimatedSellPrice }
+        ]
+      };
+    }
+  },
+  {
+    slug: "si-outsourcing-price",
+    title: "SI 외주 개발 단가 계산기",
+    description: "소프트웨어 외주 유형과 규모, 연동·추가 화면·납기 조건을 반영해 예상 개발비 범위를 계산합니다.",
+    category: "금융",
+    keywords: ["SI 외주 단가 계산기", "외주 개발 비용 계산기", "소프트웨어 외주 단가", "개발 견적 계산기", "SI 개발 비용"],
+    badge: "2026 참고 단가",
+    audience: "소프트웨어 외주를 발주하거나 개발 견적을 비교하려는 사용자",
+    fields: [
+      {
+        name: "projectType",
+        label: "개발 유형",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "웹 데이터 수집", value: 0 },
+          { label: "업무 자동화(RPA)", value: 1 },
+          { label: "GUI·데스크톱 프로그램", value: 2 },
+          { label: "API 연동", value: 3 },
+          { label: "API 서버·백엔드", value: 4 },
+          { label: "분석·대시보드", value: 5 },
+          { label: "웹사이트·웹앱", value: 6 },
+          { label: "챗봇·AI 기능", value: 7 }
+        ]
+      },
+      {
+        name: "projectScale",
+        label: "프로젝트 규모",
+        type: "select",
+        defaultValue: 1,
+        options: [
+          { label: "소규모", value: 0 },
+          { label: "중간 규모", value: 1 },
+          { label: "대규모", value: 2 }
+        ]
+      },
+      { name: "extraScreens", label: "추가 화면 수", type: "number", unit: "장", min: 0, max: 50, step: 1, defaultValue: 0, help: "기본 범위를 넘어 추가되는 화면 수입니다." },
+      { name: "integrations", label: "외부 연동 수", type: "number", unit: "개", min: 0, max: 20, step: 1, defaultValue: 0, help: "결제·로그인·공공데이터·AI API 등 별도 연동 개수입니다." },
+      {
+        name: "schedule",
+        label: "납기 조건",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "일반 일정", value: 0 },
+          { label: "빠른 납기(약 20% 가산)", value: 1 },
+          { label: "긴급 납기(약 40% 가산)", value: 2 }
+        ]
+      },
+      {
+        name: "vatRate",
+        label: "부가세 표시",
+        type: "select",
+        defaultValue: 10,
+        options: [
+          { label: "부가세 별도", value: 0 },
+          { label: "부가세 10% 포함", value: 10 }
+        ]
+      }
+    ],
+    guideTitle: "SI 외주 개발 단가 계산 기준",
+    guide: [
+      "이 계산기는 프리시(Freesi)의 2026년 소프트웨어 외주 개발 단가표에 공개된 유형별 범위를 참고해 발주 전 예산 범위를 잡는 용도로 계산합니다.",
+      "기본 단가에 추가 화면당 60만 원, 외부 연동당 100만 원을 가정해 더합니다. 이 가산값은 일반적인 예산 시뮬레이션을 위한 가정이며 실제 업체 견적을 대신하지 않습니다.",
+      "대기업 SI의 인력 월 단위 계약 단가와 소규모 외주 프로젝트 단가는 시장과 산정 방식이 다릅니다. 보안, 권한, 데이터 이관, 배포, 운영·유지보수 범위는 별도 협의가 필요합니다."
+    ],
+    checkpoints: [
+      "화면 수만으로 견적이 정해지지 않고 데이터 복잡도와 예외 처리 범위가 큰 영향을 줍니다.",
+      "결제·로그인·공공데이터·AI API 같은 외부 연동은 대상별 인증·오류 처리 범위를 확인하세요.",
+      "배포·클라우드 비용, 소스코드 이관, 유지보수와 검수 기준이 견적서에 포함됐는지 확인하세요.",
+      "계산 결과는 참고용 범위이며 실제 계약 전 요구사항과 산출물을 문서로 확정해야 합니다."
+    ],
+    faqs: [
+      { question: "이 계산기는 대기업 SI 인월 단가도 계산하나요?", answer: "아니요. 참고 페이지의 소규모 소프트웨어 외주 프로젝트 단가 범위를 기반으로 한 예산 계산기입니다. 대기업 SI 인력 월 단위 계약은 역할·등급·투입률·기간을 별도로 산정해야 합니다." },
+      { question: "계산 결과에 서버·운영비가 포함되나요?", answer: "아니요. 개발비 범위만 계산하며 클라우드, 도메인, 외부 API 사용료와 유지보수 비용은 포함하지 않습니다." },
+      { question: "실제 견적과 차이가 나는 이유는 무엇인가요?", answer: "요구사항의 복잡도, 예외 처리, 권한·보안, 연동 개수, 납기, 검수·배포 범위에 따라 실제 견적은 달라질 수 있습니다. 계산 결과는 업체에 문의하기 전 기준점으로 활용하세요." }
+    ],
+    calculate(values) {
+      const ranges = [
+        [[30, 55], [50, 200], [200, 500]],
+        [[30, 50], [80, 150], [200, 500]],
+        [[100, 300], [300, 1000], [1000, 1500]],
+        [[50, 200], [100, 500], [200, 700]],
+        [[150, 400], [400, 1500], [1500, 3000]],
+        [[100, 300], [300, 1000], [1000, 2000]],
+        [[100, 200], [200, 500], [500, 1500]],
+        [[100, 300], [300, 700], [700, 1500]]
+      ] as const;
+      const typeIndex = Math.max(0, Math.min(7, Math.round(values.projectType)));
+      const scaleIndex = Math.max(0, Math.min(2, Math.round(values.projectScale)));
+      const base = ranges[typeIndex][scaleIndex];
+      const scheduleFactor = values.schedule === 2 ? 1.4 : values.schedule === 1 ? 1.2 : 1;
+      const additions = Math.max(0, values.extraScreens) * 60 + Math.max(0, values.integrations) * 100;
+      const beforeTaxMin = (base[0] + additions) * scheduleFactor;
+      const beforeTaxMax = (base[1] + additions) * scheduleFactor;
+      const taxFactor = values.vatRate === 10 ? 1.1 : 1;
+      const totalMin = beforeTaxMin * taxFactor;
+      const totalMax = beforeTaxMax * taxFactor;
+      const typeLabels = ["웹 데이터 수집", "업무 자동화", "GUI·데스크톱", "API 연동", "API 서버·백엔드", "분석·대시보드", "웹사이트·웹앱", "챗봇·AI"];
+      const scaleLabels = ["소규모", "중간 규모", "대규모"];
+      const duration = scaleIndex === 0 ? "약 1~3주" : scaleIndex === 1 ? "약 4~8주" : "약 2개월 이상";
+      return {
+        headline: `${formatWon(totalMin * 10000)}~${formatWon(totalMax * 10000)}`,
+        subline: `${typeLabels[typeIndex]} · ${scaleLabels[scaleIndex]} · ${duration}`,
+        rows: [
+          { label: "기본 단가 범위", value: `${formatWon(base[0] * 10000)}~${formatWon(base[1] * 10000)}` },
+          { label: "추가 화면·연동 가산", value: formatWon(additions * scheduleFactor * 10000) },
+          { label: "납기 가산 적용 후(공급가액)", value: `${formatWon(beforeTaxMin * 10000)}~${formatWon(beforeTaxMax * 10000)}`, tone: "strong" },
+          { label: "예상 계약 범위", value: `${formatWon(totalMin * 10000)}~${formatWon(totalMax * 10000)}`, tone: "strong" },
+          { label: "예상 개발 기간", value: duration },
+          { label: "운영비·유지보수", value: "별도 협의" }
+        ],
+        chart: [
+          { name: "하한", value: totalMin * 10000 },
+          { name: "중간값", value: ((totalMin + totalMax) / 2) * 10000 },
+          { name: "상한", value: totalMax * 10000 }
         ]
       };
     }
