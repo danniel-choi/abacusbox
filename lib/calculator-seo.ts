@@ -95,7 +95,7 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
     internalLinks: [
       { href: "/calculators/power-calculator", label: "거듭제곱 계산기", text: "수학에서 사용하는 지수와 거듭제곱 계산을 확인합니다." },
       { href: "/calculators/unit-converter", label: "단위 변환기", text: "전력·에너지 단위를 포함한 단위 변환 도구를 확인합니다." },
-      { href: "/math", label: "수학·과학 계산기 모음", text: "수학, 물리, 천문 관련 계산기를 분야별로 살펴봅니다." }
+      { href: "/science", label: "과학 계산기 모음", text: "전기, 물리, 천문 관련 계산기를 분야별로 살펴봅니다." }
     ]
   },
   "wealth-planning-calculator": {

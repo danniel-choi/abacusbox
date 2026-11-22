@@ -1,6 +1,6 @@
 import type { CalculatorGroup } from "@/lib/calculator-directory";
 
-export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "daily" | "life" | "game" | "saju" | "business" | "math";
+export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "daily" | "life" | "game" | "saju" | "business" | "math" | "science";
 
 export type HubContent = {
   key: HubKey;
@@ -322,7 +322,32 @@ export const hubContents: Record<HubKey, HubContent> = {
       }
     ],
     checklist: ["문제 조건을 먼저 글로 정리", "식과 그래프를 같은 화면에서 비교", "표로 값의 변화를 확인", "풀이 과정을 저장하거나 다시 불러오기"]
+  },
+  science: {
+    key: "science",
+    group: "science",
+    path: "/science",
+    eyebrow: "과학 도구 허브",
+    title: "전기·물리·천문 과학 계산기",
+    description: "전류·전압 사용량, 탈출속도, 궤도주기, 달의 위상, 천체 밝기와 일출·일몰처럼 과학 개념을 직접 계산하는 도구를 모았습니다.",
+    featuredSlugs: ["current-voltage-calculator", "escape-velocity-calculator", "orbital-period-calculator", "moon-phase-calculator", "sunrise-sunset-calculator", "light-year-parsec-converter"],
+    blogSlugs: [],
+    sections: [
+      {
+        title: "과학 계산은 단위와 가정을 먼저 확인해야 합니다.",
+        body: "전압·전류·전력, 거리·시간·속도, 천체의 밝기와 궤도 계산은 입력 단위와 기준값이 결과에 직접 영향을 줍니다. 입력 전에 단위와 적용한 공식을 확인하세요."
+      },
+      {
+        title: "물리와 천문 개념을 결과와 함께 확인하세요.",
+        body: "탈출속도, 궤도주기, 광년·파섹, 달의 위상과 천체 밝기 계산기는 공식을 숫자로 확인하는 학습 도구입니다. 실제 관측이나 정밀 설계에는 별도의 조건과 전문 자료가 필요합니다."
+      },
+      {
+        title: "전기 사용량은 단순 예상값으로 활용하세요.",
+        body: "전압과 전류로 계산한 소비전력·kWh는 비교용 예상값입니다. 역률, 전원 효율, 대기전력, 누진제와 기본요금이 실제 측정값과 청구액에 추가로 영향을 줄 수 있습니다."
+      }
+    ],
+    checklist: ["입력값의 단위 확인", "공식과 계산 가정 확인", "관측·설계에는 실제 조건 추가", "전기요금은 공식 고지서와 비교"]
   }
 };
 
-export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "daily", "life", "game", "saju", "business", "math"];
+export const hubOrder: HubKey[] = ["tax", "labor", "loan", "stock", "health", "daily", "life", "game", "saju", "business", "math", "science"];
