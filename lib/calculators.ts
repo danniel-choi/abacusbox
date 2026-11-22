@@ -57,6 +57,7 @@ export type CalculatorSlug =
   | "break-even"
   | "jeonse-vs-monthly-rent"
   | "gpa"
+  | "csat-score-calculator"
   | "school-grade"
   | "kinship-calculator"
   | "exchange-rate"
@@ -8225,6 +8226,65 @@ export const calculators: CalculatorConfig[] = [
           { name: "평균평점", value: gpa },
           { name: "만점", value: scale },
           { name: "백분율", value: percentage }
+        ]
+      };
+    }
+  },
+  {
+    slug: "csat-score-calculator",
+    title: "수능 성적 계산기",
+    description: "국어·수학·탐구 표준점수와 영어·한국사 등급을 입력해 표준점수 합계와 평균을 확인합니다.",
+    category: "생활",
+    keywords: ["수능 성적 계산기", "수능 점수 계산", "수능 표준점수 합산", "수능 등급 계산", "대학 입시 계산기"],
+    badge: "수능 성적",
+    audience: "수능 성적을 과목별로 정리하고 표준점수 합계와 평균을 확인하려는 수험생",
+    fields: [
+      { name: "koreanStandard", label: "국어 표준점수", type: "number", unit: "점", min: 0, max: 200, step: 1, defaultValue: 130 },
+      { name: "mathStandard", label: "수학 표준점수", type: "number", unit: "점", min: 0, max: 200, step: 1, defaultValue: 130 },
+      { name: "inquiry1Standard", label: "탐구 1 표준점수", type: "number", unit: "점", min: 0, max: 100, step: 1, defaultValue: 65 },
+      { name: "inquiry2Standard", label: "탐구 2 표준점수", type: "number", unit: "점", min: 0, max: 100, step: 1, defaultValue: 65 },
+      { name: "englishGrade", label: "영어 등급", type: "select", options: Array.from({ length: 9 }, (_, index) => ({ label: `${index + 1}등급`, value: index + 1 })), defaultValue: 1 },
+      { name: "historyGrade", label: "한국사 등급", type: "select", options: Array.from({ length: 9 }, (_, index) => ({ label: `${index + 1}등급`, value: index + 1 })), defaultValue: 1 }
+    ],
+    guideTitle: "수능 성적 계산 기준",
+    guide: [
+      "국어·수학·탐구는 입력한 표준점수를 합산하고 평균을 계산합니다. 영어와 한국사는 절대평가 등급을 별도로 표시합니다.",
+      "대학별 환산점수는 반영 영역, 가중치, 탐구 변환표준점수, 영어·한국사 등급 환산 방식에 따라 달라질 수 있습니다.",
+      "이 계산기는 성적표를 정리하고 기본 합계를 확인하는 참고용 도구이며 특정 대학의 합격 가능성이나 공식 환산점수를 대신하지 않습니다."
+    ],
+    checkpoints: [
+      "성적표에서 표준점수와 등급을 정확히 옮겨 입력합니다.",
+      "탐구 영역을 1과 2에 각각 입력하며 대학별 탐구 반영 방식은 모집요강을 확인해야 합니다.",
+      "대학별 점수 계산에는 백분위, 변환표준점수, 가산점, 지정 과목이 추가로 사용될 수 있습니다."
+    ],
+    faqs: [
+      { question: "이 계산기로 대학별 환산점수도 알 수 있나요?", answer: "아니요. 대학과 전형마다 반영 비율과 환산표가 달라 이 계산기는 표준점수 합계·평균과 등급 정리만 제공합니다." },
+      { question: "영어와 한국사는 합계에 포함되나요?", answer: "영어와 한국사는 등급으로 별도 표시합니다. 대학별 등급 환산점수는 모집요강 기준이 필요합니다." },
+      { question: "탐구 과목은 어떻게 입력하나요?", answer: "탐구 1과 탐구 2의 표준점수를 각각 입력합니다. 대학별로 두 과목 평균이나 상위 1과목만 반영할 수 있습니다." }
+    ],
+    calculate(values) {
+      const korean = Math.max(values.koreanStandard, 0);
+      const math = Math.max(values.mathStandard, 0);
+      const inquiry1 = Math.max(values.inquiry1Standard, 0);
+      const inquiry2 = Math.max(values.inquiry2Standard, 0);
+      const standardSum = korean + math + inquiry1 + inquiry2;
+      const standardAverage = standardSum / 4;
+      const inquiryAverage = (inquiry1 + inquiry2) / 2;
+      return {
+        headline: `${formatNumber(standardSum, 0)}점`,
+        subline: `국어·수학·탐구 표준점수 평균 ${formatNumber(standardAverage, 2)}점`,
+        rows: [
+          { label: "국어·수학·탐구 표준점수 합계", value: `${formatNumber(standardSum, 0)}점`, tone: "strong" },
+          { label: "국어·수학·탐구 평균", value: `${formatNumber(standardAverage, 2)}점`, tone: "strong" },
+          { label: "탐구 평균", value: `${formatNumber(inquiryAverage, 2)}점` },
+          { label: "영어 등급", value: `${formatNumber(values.englishGrade, 0)}등급` },
+          { label: "한국사 등급", value: `${formatNumber(values.historyGrade, 0)}등급` }
+        ],
+        chart: [
+          { name: "국어", value: korean },
+          { name: "수학", value: math },
+          { name: "탐구1", value: inquiry1 },
+          { name: "탐구2", value: inquiry2 }
         ]
       };
     }
