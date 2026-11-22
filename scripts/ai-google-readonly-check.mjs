@@ -61,7 +61,16 @@ async function run() {
   try {
     const body = await googleRequest("https://www.googleapis.com/webmasters/v3/sites", token);
     const sites = Array.isArray(body.siteEntry) ? body.siteEntry : [];
-    const matched = sites.some((site) => site.siteUrl === searchConsoleSiteUrl || site.siteUrl === searchConsoleSiteUrl.replace(/\/$/, ""));
+    const targetUrl = new URL(searchConsoleSiteUrl);
+    const host = targetUrl.hostname.replace(/^www\./, "");
+    const candidates = new Set([
+      searchConsoleSiteUrl,
+      searchConsoleSiteUrl.replace(/\/$/, ""),
+      `https://${host}`,
+      `https://${host}/`,
+      `sc-domain:${host}`
+    ]);
+    const matched = sites.some((site) => candidates.has(site.siteUrl));
     results.push(["Search Console", matched ? "PASS" : "REVIEW", `접근 가능, 대상 속성 ${matched ? "확인" : "미확인"}`]);
   } catch (error) {
     results.push(["Search Console", "FAIL", error.message]);
