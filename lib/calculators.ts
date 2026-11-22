@@ -145,6 +145,8 @@ export type CalculatorSlug =
   | "quadratic-formula"
   | "factoring-calculator"
   | "logarithm-calculator"
+  | "power-calculator"
+  | "current-voltage-calculator"
   | "inequality-calculator"
   | "geometry-tool"
   | "three-d-calculator"
@@ -198,7 +200,7 @@ export type CalculatorSlug =
   | "sunrise-sunset-calculator"
   | "tarot-birth-card-calculator";
 
-export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학" | "게임" | "사주";
+export type CalculatorCategory = "노무" | "금융" | "세금" | "생활" | "수학" | "과학" | "게임" | "사주";
 
 export type InputField = {
   name: string;
@@ -3263,6 +3265,127 @@ export const calculators: CalculatorConfig[] = [
           { name: "log_a(x)", value: Math.abs(result) },
           { name: "ln(x)", value: Math.abs(natural) },
           { name: "log10(x)", value: Math.abs(common) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "power-calculator",
+    title: "거듭제곱 계산기",
+    description: "밑수와 지수를 입력해 거듭제곱, 음의 지수, 제곱근과 계산 과정을 확인합니다.",
+    category: "수학",
+    keywords: ["거듭제곱 계산기", "제곱 계산기", "지수 계산기", "밑수 지수", "power calculator"],
+    badge: "밑수 × 지수",
+    audience: "거듭제곱과 지수 계산을 빠르게 확인하려는 학습자와 일반 사용자",
+    fields: [
+      { name: "base", label: "밑수", type: "number", min: -1000000, max: 1000000, step: 0.01, defaultValue: 2 },
+      { name: "exponent", label: "지수", type: "number", min: -100, max: 100, step: 0.01, defaultValue: 10 }
+    ],
+    guideTitle: "거듭제곱 계산 기준",
+    guide: [
+      "거듭제곱은 같은 수를 지수만큼 반복해서 곱하는 연산으로 xʸ처럼 표시합니다. x는 밑수, y는 지수입니다.",
+      "음의 지수는 밑수의 역수를 양의 지수만큼 계산합니다. 예를 들어 2⁻³은 1/2³이므로 0.125입니다.",
+      "실수 범위에서 음의 밑수와 소수 지수의 조합은 결과가 정의되지 않을 수 있어 계산 불가로 표시합니다."
+    ],
+    checkpoints: [
+      "밑수와 지수는 숫자로 입력하며 소수와 음수를 사용할 수 있습니다.",
+      "0의 음의 지수는 0으로 나누는 형태이므로 계산할 수 없습니다.",
+      "매우 큰 지수는 자바스크립트의 안전한 숫자 범위를 넘을 수 있어 결과가 무한대이면 계산 불가로 표시합니다."
+    ],
+    faqs: [
+      { question: "음의 지수도 계산할 수 있나요?", answer: "네. 2와 -3을 입력하면 2⁻³ = 0.125처럼 역수 형태로 계산합니다." },
+      { question: "분수 지수도 계산되나요?", answer: "네. 양의 밑수라면 4와 0.5를 입력해 제곱근처럼 계산할 수 있습니다." },
+      { question: "음의 밑수에 소수 지수를 넣을 수 있나요?", answer: "실수 범위에서 결과가 정의되지 않는 조합은 계산 불가로 표시합니다."
+      }
+    ],
+    calculate(values) {
+      const base = values.base;
+      const exponent = values.exponent;
+      const result = Math.pow(base, exponent);
+      if (!Number.isFinite(result)) {
+        return {
+          headline: "계산 불가",
+          subline: "입력한 조합이 실수 범위에서 정의되지 않거나 결과가 너무 큽니다.",
+          rows: [
+            { label: "밑수", value: formatNumber(base, 8) },
+            { label: "지수", value: formatNumber(exponent, 8) },
+            { label: "확인할 조건", value: "0의 음의 지수, 음의 밑수의 소수 지수, 지나치게 큰 결과" }
+          ],
+          chart: []
+        };
+      }
+      const expression = `${formatNumber(base, 8)}^(${formatNumber(exponent, 8)})`;
+      return {
+        headline: formatNumber(result, 10),
+        subline: `${expression} = ${formatNumber(result, 10)}`,
+        rows: [
+          { label: "거듭제곱 결과", value: formatNumber(result, 10), tone: "strong" },
+          { label: "밑수", value: formatNumber(base, 8) },
+          { label: "지수", value: formatNumber(exponent, 8) },
+          { label: "계산식", value: expression },
+          { label: "해석", value: exponent < 0 ? "밑수의 역수를 지수만큼 계산" : exponent === 0 ? "0이 아닌 밑수의 0제곱은 1" : "밑수를 지수만큼 반복 곱셈" }
+        ],
+        chart: [
+          { name: "밑수", value: Math.abs(base) },
+          { name: "지수", value: Math.abs(exponent) },
+          { name: "결과", value: Math.min(Math.abs(result), 1000000) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "current-voltage-calculator",
+    title: "전류·전압 사용량 계산기",
+    description: "전압과 전류, 사용시간, 전기요금을 입력해 소비전력과 전력 사용량, 예상 전기요금을 계산합니다.",
+    category: "과학",
+    keywords: ["전류 전압 계산기", "전력 계산기", "소비전력 계산", "전기 사용량 계산", "와트 계산기", "킬로와트시 계산"],
+    badge: "전기·전력",
+    audience: "전압과 전류 측정값으로 기기 소비전력과 사용량을 확인하려는 사용자",
+    fields: [
+      { name: "voltage", label: "전압", type: "number", unit: "V", min: 0, max: 100000, step: 0.1, defaultValue: 220 },
+      { name: "current", label: "전류", type: "number", unit: "A", min: 0, max: 100000, step: 0.01, defaultValue: 1 },
+      { name: "hours", label: "사용시간", type: "number", unit: "시간", min: 0, max: 876000, step: 0.1, defaultValue: 8 },
+      { name: "rate", label: "전력량 요금", type: "number", unit: "원/kWh", min: 0, max: 10000, step: 1, defaultValue: 150 }
+    ],
+    guideTitle: "전류·전압 사용량 계산 기준",
+    guide: [
+      "직류 또는 단순한 저항성 부하를 기준으로 소비전력은 전압(V) × 전류(A)로 계산합니다.",
+      "전력 사용량은 소비전력(W)을 1,000으로 나눈 뒤 사용시간을 곱해 kWh로 환산합니다.",
+      "실제 교류 기기의 전력은 역률, 대기전력, 효율, 부하 변동에 따라 달라질 수 있어 측정기와 청구서 값이 다를 수 있습니다."
+    ],
+    checkpoints: [
+      "전압과 전류는 같은 기기와 측정 조건에서 확인한 값을 입력합니다.",
+      "요금은 입력한 kWh당 단가를 적용한 단순 예상값입니다.",
+      "모터·어댑터·인버터 기기는 역률과 효율을 반영하지 않아 실제 사용량과 차이가 날 수 있습니다."
+    ],
+    faqs: [
+      { question: "소비전력은 어떻게 계산하나요?", answer: "기본적으로 전압(V)과 전류(A)를 곱해 와트(W)를 계산합니다." },
+      { question: "전기 사용량 단위 kWh는 무엇인가요?", answer: "1kW 기기를 1시간 사용했을 때의 에너지 양입니다. 소비전력(W)을 1,000으로 나누고 사용시간을 곱합니다." },
+      { question: "실제 전기요금과 왜 다른가요?", answer: "누진제, 기본요금, 역률, 기기 효율과 실제 부하 변동은 이 간단한 계산에 포함되지 않기 때문입니다." }
+    ],
+    calculate(values) {
+      const voltage = Math.max(values.voltage, 0);
+      const current = Math.max(values.current, 0);
+      const hours = Math.max(values.hours, 0);
+      const rate = Math.max(values.rate, 0);
+      const watts = voltage * current;
+      const kilowattHours = watts / 1000 * hours;
+      const estimatedCost = kilowattHours * rate;
+      return {
+        headline: `${formatNumber(watts, 2)}W`,
+        subline: `${formatNumber(kilowattHours, 3)}kWh · 예상 ${formatNumber(estimatedCost, 0)}원`,
+        rows: [
+          { label: "소비전력", value: `${formatNumber(watts, 2)}W`, tone: "strong" },
+          { label: "전력 사용량", value: `${formatNumber(kilowattHours, 3)}kWh`, tone: "strong" },
+          { label: "예상 전기요금", value: `${formatNumber(estimatedCost, 0)}원` },
+          { label: "입력 전압", value: `${formatNumber(voltage, 2)}V` },
+          { label: "입력 전류", value: `${formatNumber(current, 3)}A` }
+        ],
+        chart: [
+          { name: "전압(V)", value: voltage },
+          { name: "전류(A)", value: current },
+          { name: "전력(W)", value: Math.min(watts, 1000000) },
+          { name: "사용량(kWh)", value: Math.min(kilowattHours, 1000000) }
         ]
       };
     }

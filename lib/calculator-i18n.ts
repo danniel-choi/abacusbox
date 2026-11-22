@@ -74,6 +74,7 @@ const CATEGORY_LABELS: Record<CalculatorCategory, LocalizedText> = {
   세금: { en: "Tax", ja: "税金" },
   생활: { en: "Life", ja: "生活" },
   수학: { en: "Math", ja: "数学" },
+  과학: { en: "Science", ja: "科学" },
   게임: { en: "Games", ja: "ゲーム" },
   사주: { en: "Saju & fortune", ja: "四柱推命・占い" }
 };

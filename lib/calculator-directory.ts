@@ -1,7 +1,7 @@
 import { calculators, type CalculatorConfig, type CalculatorSlug } from "@/lib/calculators";
 import type { Locale } from "@/lib/i18n";
 
-export type CalculatorGroup = "labor" | "loan" | "tax" | "investment" | "health" | "daily" | "life" | "game" | "saju" | "business" | "math";
+export type CalculatorGroup = "labor" | "loan" | "tax" | "investment" | "health" | "daily" | "life" | "game" | "saju" | "business" | "math" | "science";
 
 export const CALCULATOR_GROUP_META: Record<
   CalculatorGroup,
@@ -83,6 +83,13 @@ export const CALCULATOR_GROUP_META: Record<
     icon: "∑",
     accentClass: "text-[#0369a1]",
     softClass: "bg-[#e0f2fe]"
+  },
+  science: {
+    label: "과학 도구",
+    description: "전기·전력, 물리, 천문과 과학 개념을 직접 계산하는 도구",
+    icon: "⚛",
+    accentClass: "text-[#0369a1]",
+    softClass: "bg-[#e0f2fe]"
   }
 };
 
@@ -99,7 +106,8 @@ const LOCALIZED_GROUP_META: Record<Locale, Partial<Record<CalculatorGroup, { lab
     game: { label: "Games", description: "Gacha odds, win rates, eDPI, and game tools" },
     saju: { label: "Saju & fortune", description: "Zodiac, samjae, ganji, manse-ryeok, elements, and tarot" },
     business: { label: "Business & sales", description: "Sales profit, cost ratios, break-even, and operating costs" },
-    math: { label: "Math tools", description: "Graphing, scientific, matrix, geometry, 3D, and web tools" }
+    math: { label: "Math tools", description: "Graphing, scientific, matrix, geometry, 3D, and web tools" },
+    science: { label: "Science tools", description: "Electricity, physics, astronomy, and practical science calculators" }
   },
   ja: {
     labor: { label: "給与・労務", description: "給与、退職、休暇、育児休業、勤務関連の計算機" },
@@ -112,7 +120,8 @@ const LOCALIZED_GROUP_META: Record<Locale, Partial<Record<CalculatorGroup, { lab
     game: { label: "ゲーム", description: "ガチャ確率、勝率、eDPI、ゲーム関連ツール" },
     saju: { label: "四柱推命・占い", description: "干支、三災、干支、万歳暦、五行、タロットの計算機" },
     business: { label: "事業・販売", description: "販売利益、原価率、損益分岐点、運営費の計算機" },
-    math: { label: "数学ツール", description: "グラフ、関数電卓、行列、幾何、3D、Webツール" }
+    math: { label: "数学ツール", description: "グラフ、関数電卓、行列、幾何、3D、Webツール" },
+    science: { label: "科学ツール", description: "電気、物理、天文、実用科学の計算ツール" }
   }
 };
 
@@ -263,6 +272,8 @@ export const CALCULATOR_ICON_BY_SLUG: Record<CalculatorSlug, string> = {
   "quadratic-formula": "x²",
   "factoring-calculator": "因",
   "logarithm-calculator": "log",
+  "power-calculator": "xʸ",
+  "current-voltage-calculator": "⚡",
   "inequality-calculator": "≤",
   "standard-deviation": "σ",
   "geometry-tool": "△",
@@ -509,11 +520,14 @@ const GROUP_BY_SLUG: Record<CalculatorSlug, CalculatorGroup> = {
   "quadratic-formula": "math",
   "factoring-calculator": "math",
   "logarithm-calculator": "math",
+  "power-calculator": "math",
   "inequality-calculator": "math",
   "standard-deviation": "math",
   "geometry-tool": "math",
   "three-d-calculator": "math",
   "web-calculator": "math"
+  ,
+  "current-voltage-calculator": "science"
 };
 
 export function getCalculatorGroup(slug: CalculatorSlug): CalculatorGroup {
