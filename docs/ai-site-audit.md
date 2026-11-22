@@ -1,9 +1,9 @@
 # AI 사이트 감사 보고서
 
-- 생성 시각: 2026-11-22T08:46:24.317Z
+- 생성 시각: 2026-11-22T19:13:41.039Z
 - 감사 방식: 로컬 소스·빌드 산출물 기반 읽기 전용 점검
 - 외부 데이터: Search Console·Analytics·AdSense API 권한 미연결로 미검증
-- 결과: 9 PASS / 0 FAIL / 0 MANUAL
+- 결과: 10 PASS / 0 FAIL / 0 MANUAL
 
 ## 점검 결과
 
@@ -14,6 +14,7 @@
 | PASS | 정적 sitemap 날짜 | lastmod 자동 생성 없음 |
 | PASS | 동적 sitemap 날짜 | 동적 lastmod 출력 없음 |
 | PASS | robots sitemap 연결 | robots.ts의 sitemap 경로 확인 |
+| PASS | canonical 호스트 고정 | 운영 canonical을 www 호스트로 고정 |
 | PASS | 기본 robots 정책 | layout.tsx index/follow 확인 |
 | PASS | 홈페이지 H1 | app/page.tsx의 H1 존재 여부 |
 | PASS | 홈페이지 내부 링크 | 계산기·웹툴 링크 확인 |

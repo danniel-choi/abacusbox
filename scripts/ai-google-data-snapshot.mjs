@@ -51,6 +51,14 @@ async function request(url, token, options = {}) {
   return response.json();
 }
 
+async function inspectUrl(siteUrl, inspectionUrl, token) {
+  return request("https://searchconsole.googleapis.com/v1/urlInspection/index:inspect", token, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ inspectionUrl, siteUrl, languageCode: "ko-KR" })
+  });
+}
+
 function summarize(rows, keys) {
   return {
     rows: rows.length,
@@ -63,7 +71,7 @@ async function run() {
   const token = await getAccessToken();
   const startDate = new Date(Date.now() - 28 * 86400000).toISOString().slice(0, 10);
   const endDate = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  const report = { generatedAt: new Date().toISOString(), dateRange: { startDate, endDate }, privacy: "검색어와 개인 식별 데이터는 수집하지 않음", searchConsole: null, ga4: null, adsense: null };
+  const report = { generatedAt: new Date().toISOString(), dateRange: { startDate, endDate }, privacy: "검색어와 개인 식별 데이터는 수집하지 않음", searchConsole: null, urlInspection: null, ga4: null, adsense: null };
 
   try {
     const target = new URL(siteUrl);
@@ -78,6 +86,49 @@ async function run() {
     });
     const rows = (body.rows || []).map((row) => ({ page: row.keys?.[0] || "", clicks: row.clicks || 0, impressions: row.impressions || 0, ctr: row.ctr || 0, position: row.position || 0 })).sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions);
     report.searchConsole = { status: "PASS", ...summarize(rows, ["clicks", "impressions"]) };
+
+    try {
+      const sitemapBody = await request(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(matchedSite.siteUrl)}/sitemaps`, token);
+      report.searchConsole.sitemaps = (sitemapBody.sitemap || []).map((sitemap) => ({
+        path: sitemap.path,
+        isPending: Boolean(sitemap.isPending),
+        lastSubmitted: sitemap.lastSubmitted || null,
+        lastDownloaded: sitemap.lastDownloaded || null,
+        errors: Number(sitemap.errors || 0),
+        warnings: Number(sitemap.warnings || 0)
+      }));
+    } catch (error) {
+      report.searchConsole.sitemaps = { status: "FAIL", reason: error.message };
+    }
+
+    const inspectionTargets = [
+      `${siteUrl.replace(/\/$/, "")}/`,
+      `${siteUrl.replace(/\/$/, "")}/calculators/loan-interest`,
+      `${siteUrl.replace(/\/$/, "")}/calculators/loan-amortization`,
+      `${siteUrl.replace(/\/$/, "")}/calculators/bmi`,
+      `${siteUrl.replace(/\/$/, "")}/blog/loan-prepayment-before-refinance`
+    ];
+    const inspectionResults = [];
+    for (const inspectionUrl of inspectionTargets) {
+      try {
+        const inspection = await inspectUrl(matchedSite.siteUrl, inspectionUrl, token);
+        const result = inspection.inspectionResult || {};
+        const indexStatus = result.indexStatusResult || {};
+        inspectionResults.push({
+          url: inspectionUrl,
+          verdict: indexStatus.verdict || null,
+          coverageState: indexStatus.coverageState || null,
+          robotsTxtState: indexStatus.robotsTxtState || null,
+          indexingState: indexStatus.indexingState || null,
+          pageFetchState: indexStatus.pageFetchState || null,
+          googleCanonical: indexStatus.googleCanonical || null,
+          userCanonical: indexStatus.userCanonical || null
+        });
+      } catch (error) {
+        inspectionResults.push({ url: inspectionUrl, status: "FAIL", reason: error.message });
+      }
+    }
+    report.urlInspection = { status: "PASS", items: inspectionResults };
   } catch (error) { report.searchConsole = { status: "FAIL", reason: error.message }; }
 
   try {

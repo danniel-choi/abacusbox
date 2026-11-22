@@ -38,6 +38,7 @@ const sitemapFunction = await read("functions/sitemap.xml.js");
 const robotsSource = await read("app/robots.ts");
 const layoutSource = await read("app/layout.tsx");
 const homeSource = await read("app/page.tsx");
+const constantsSource = await read("lib/constants.ts");
 const generatedSitemap = await read("out/sitemap.xml");
 
 const checks = [
@@ -46,6 +47,7 @@ const checks = [
   status(sitemapSource && !sitemapSource.includes("lastModified"), "정적 sitemap 날짜", sitemapSource.includes("lastModified") ? "lastModified가 남아 있음" : "lastmod 자동 생성 없음"),
   status(sitemapFunction && !sitemapFunction.includes("lastmod"), "동적 sitemap 날짜", sitemapFunction.includes("lastmod") ? "동적 함수에 lastmod 참조가 남아 있음" : "동적 lastmod 출력 없음"),
   status(robotsSource.includes("/sitemap.xml"), "robots sitemap 연결", "robots.ts의 sitemap 경로 확인"),
+  status(constantsSource.includes('SITE_URL = "https://www.abacusbox.com"'), "canonical 호스트 고정", "운영 canonical을 www 호스트로 고정"),
   status(layoutSource.includes('index: true') && layoutSource.includes('follow: true'), "기본 robots 정책", "layout.tsx index/follow 확인"),
   status(/<h1[\s>]/.test(homeSource), "홈페이지 H1", "app/page.tsx의 H1 존재 여부"),
   status(homeSource.includes("/calculators") && homeSource.includes("/toolbox"), "홈페이지 내부 링크", "계산기·웹툴 링크 확인"),

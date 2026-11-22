@@ -1,4 +1,6 @@
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abacusbox.com";
+// Keep production canonical URLs stable even if a deployment environment
+// contains an outdated NEXT_PUBLIC_SITE_URL value.
+export const SITE_URL = "https://www.abacusbox.com";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 export const legalStandards = {
