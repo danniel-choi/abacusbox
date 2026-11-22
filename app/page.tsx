@@ -9,7 +9,6 @@ import {
   getCalculatorsByGroup,
   getFeaturedCalculators,
   getLocalizedGroupMeta,
-  getPopularCalculators,
 } from "@/lib/calculator-directory";
 import { getLatestBlogPosts } from "@/lib/content";
 import { getLocalizedCalculatorPresentation } from "@/lib/calculator-i18n";
@@ -49,7 +48,6 @@ const laborFocusLinks = [
 export default function HomePage() {
   const { locale, t } = useLanguage();
   const featured = getFeaturedCalculators().slice(0, 4);
-  const popular = getPopularCalculators().slice(0, 6);
   const latestBlogPosts = getLatestBlogPosts(3);
   const groups = Object.entries(CALCULATOR_GROUP_META).map(([key]) => ({
     key,
@@ -129,15 +127,6 @@ export default function HomePage() {
 
       <FavoriteCalculatorsSection />
       <RecentCalculatorsSection />
-
-      <section className="page-shell py-2 md:py-3">
-        <MiniCalculatorSection title={t("home.popular")} items={popular} locale={locale} viewAllLabel={t("home.viewAll")} />
-        <div className="mt-4 flex justify-center">
-          <Link href="/calculators" className="inline-flex rounded-full bg-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand">
-            {t("home.allCalculators")}
-          </Link>
-        </div>
-      </section>
 
       <section className="page-shell py-2 md:py-3">
         <div className="overflow-hidden rounded-[28px] border border-brand/20 bg-gradient-to-br from-[#e9fbf5] via-white to-[#eef3ff] p-6 shadow-panel md:p-7">
@@ -304,45 +293,6 @@ function HeroStat({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-4">
       <p className="text-sm font-bold text-white/60">{label}</p>
       <p className="mt-2 text-2xl font-extrabold text-white">{value}</p>
-    </div>
-  );
-}
-
-function MiniCalculatorSection({
-  title,
-  items,
-  locale,
-  viewAllLabel
-}: {
-  title: string;
-  items: typeof calculators;
-  locale: "ko" | "en" | "ja";
-  viewAllLabel: string;
-}) {
-  return (
-    <div className="rounded-[24px] border border-line bg-white p-6 shadow-panel">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-extrabold text-ink">{title}</h2>
-        <Link href="/calculators" className="text-sm font-extrabold text-brand">
-          {viewAllLabel}
-        </Link>
-      </div>
-      <div className="mt-4 grid gap-2">
-        {items.map((calculator) => {
-          const presentation = getLocalizedCalculatorPresentation(calculator, locale);
-          return <Link
-            key={calculator.slug}
-            href={`/calculators/${calculator.slug}`}
-            className="flex items-center justify-between rounded-2xl bg-paper px-4 py-3 transition hover:bg-white"
-          >
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-extrabold text-ink">{presentation.title}</span>
-              <span className="mt-1 block text-xs font-semibold text-slate-500">{presentation.audience}</span>
-            </span>
-            <span className="ml-3 text-sm font-extrabold text-brand">↗</span>
-          </Link>;
-        })}
-      </div>
     </div>
   );
 }
