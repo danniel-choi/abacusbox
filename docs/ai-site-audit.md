@@ -1,8 +1,8 @@
 # AI 사이트 감사 보고서
 
-- 생성 시각: 2026-11-22T04:42:54.348Z
+- 생성 시각: 2026-11-22T05:26:50.704Z
 - 감사 방식: 로컬 소스·빌드 산출물 기반 읽기 전용 점검
-- 외부 데이터: https://www.abacusbox.com 응답 점검 포함
+- 외부 데이터: Search Console·Analytics·AdSense API 권한 미연결로 미검증
 - 결과: 9 PASS / 0 FAIL / 0 MANUAL
 
 ## 점검 결과
@@ -23,9 +23,9 @@
 
 | 상태 | 항목 | 결과 |
 | --- | --- | --- |
-| MANUAL | 홈페이지 응답 | 접속 확인 실패로 수동 확인 필요: fetch failed |
-| MANUAL | robots.txt 응답 | 접속 확인 실패로 수동 확인 필요: fetch failed |
-| MANUAL | sitemap.xml 응답 | 접속 확인 실패로 수동 확인 필요: fetch failed |
+| MANUAL | 홈페이지 응답 | 외부 URL 미지정으로 미검증 |
+| MANUAL | robots.txt 응답 | 외부 URL 미지정으로 미검증 |
+| MANUAL | sitemap.xml 응답 | 외부 URL 미지정으로 미검증 |
 
 ## AI 에이전트 다음 작업 후보
 
