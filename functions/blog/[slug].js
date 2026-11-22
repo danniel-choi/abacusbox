@@ -392,7 +392,7 @@ const staticBlogPosts = {
 
 export async function onRequest(context) {
   const { request, env } = context;
-  const assetResponse = env.ASSETS ? await env.ASSETS.fetch(request) : new Response(null, { status: 404 });
+  const assetResponse = await fetchBlogAsset(env, request);
   if (assetResponse.status !== 404) {
     return assetResponse;
   }
@@ -426,6 +426,27 @@ export async function onRequest(context) {
       "cache-control": "public, max-age=300, s-maxage=3600"
     }
   });
+}
+
+/**
+ * Next static export writes known blog posts as /blog/{slug}.html. Pages often
+ * resolves extensionless URLs automatically, but the Functions asset binding
+ * does not guarantee that behavior in every deployment/runtime. Try the exact
+ * request first, then the generated HTML asset so sitemap URLs never point to
+ * a page that the blog function cannot serve.
+ */
+async function fetchBlogAsset(env, request) {
+  if (!env.ASSETS) return new Response(null, { status: 404 });
+
+  const response = await env.ASSETS.fetch(request);
+  if (response.status !== 404) return response;
+
+  const url = new URL(request.url);
+  const pathname = url.pathname.replace(/\/$/, "");
+  if (!pathname || pathname.endsWith(".html")) return response;
+
+  const htmlUrl = new URL(`${pathname}.html${url.search}`, url);
+  return env.ASSETS.fetch(new Request(htmlUrl, request));
 }
 
 async function getD1BlogPost(env, slug) {

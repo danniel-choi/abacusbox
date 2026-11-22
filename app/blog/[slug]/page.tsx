@@ -12,6 +12,10 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+// Export every known static blog post as HTML. Unknown slugs are handled by
+// the Pages Function/D1 path instead of producing an RSC-only asset.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
 }
