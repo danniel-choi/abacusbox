@@ -13,6 +13,7 @@
     "ai:plan": "node scripts/ai-change-plan.mjs",
     "ai:seo-check": "node scripts/ai-seo-check.mjs",
     "ai:preflight": "node scripts/ai-preflight.mjs",
+    "ai:data-contract": "node scripts/ai-data-contract.mjs",
     "cf:preview": "npx wrangler pages dev out",
     "d1:migrate:local": "npx wrangler d1 migrations apply calcrule-prod --local",
     "d1:migrate:remote": "npx wrangler d1 migrations apply calcrule-prod --remote"

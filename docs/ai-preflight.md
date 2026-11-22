@@ -1,15 +1,19 @@
 # AI Preview 사전 검증
 
-- 생성 시각: 2026-11-22T05:26:20.252Z
+- 생성 시각: 2026-11-22T05:28:41.558Z
 - 기준 ref: HEAD~1
 - 상태: READY
 
 ## 변경 파일
 
+- docs/ai-agent-credentials.md
+- docs/ai-data-contract.md
+- docs/ai-preflight.md
 - docs/ai-seo-check.md
+- docs/ai-site-audit.md
 - package.json
+- scripts/ai-data-contract.mjs
 - scripts/ai-preflight.mjs
-- scripts/ai-seo-check.mjs
 
 ## 보호 경로 변경
 
