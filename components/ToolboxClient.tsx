@@ -6,6 +6,15 @@ import type { PointerEvent, ReactNode } from "react";
 type ImageTool = "compress" | "resize" | "crop";
 export type ToolboxTool = "image" | "json" | "text" | "drawing" | "youtube" | "metadata";
 
+async function copyToClipboard(value: string, onSuccess: () => void, onFailure: () => void) {
+  try {
+    await navigator.clipboard.writeText(value);
+    onSuccess();
+  } catch {
+    onFailure();
+  }
+}
+
 export function ToolboxClient({ initialActive = "image" }: { initialActive?: ToolboxTool }) {
   const [active, setActive] = useState<ToolboxTool>(initialActive);
 
@@ -175,13 +184,15 @@ function JsonToolPanel() {
     try { setValue(JSON.stringify(JSON.parse(value), null, compact ? 0 : 2)); setMessage("JSON 형식이 정상입니다."); }
     catch { setMessage("JSON 문법을 확인하세요."); }
   };
-  return <div><p className="text-sm font-extrabold text-brand">텍스트 도구</p><h1 className="mt-2 text-2xl font-extrabold text-ink">JSON 정리 도구</h1><textarea value={value} onChange={(event) => setValue(event.target.value)} placeholder='{"name":"계산의정석"}' className="mt-6 min-h-72 w-full rounded-2xl border border-line bg-paper p-4 font-mono text-sm outline-none focus:border-brand"/><div className="mt-4 flex flex-wrap gap-3"><button type="button" onClick={() => formatJson(false)} className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white">예쁘게 정리</button><button type="button" onClick={() => formatJson(true)} className="rounded-full border border-line px-5 py-3 text-sm font-extrabold text-ink">압축</button><span className="self-center text-sm font-semibold text-slate-500">{message}</span></div></div>;
+  return <div><p className="text-sm font-extrabold text-brand">개발 도구</p><h1 className="mt-2 text-2xl font-extrabold text-ink">JSON 정리 도구</h1><p className="mt-3 text-sm font-medium leading-6 text-slate-600">JSON 문법을 확인하고 보기 좋게 정리하거나 한 줄로 압축하세요.</p><textarea value={value} onChange={(event) => setValue(event.target.value)} placeholder='{"name":"계산의정석"}' spellCheck={false} className="mt-6 min-h-72 w-full rounded-2xl border border-line bg-paper p-4 font-mono text-sm outline-none focus:border-brand"/><div className="mt-4 flex flex-wrap gap-3"><button type="button" onClick={() => formatJson(false)} className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white">예쁘게 정리</button><button type="button" onClick={() => formatJson(true)} className="rounded-full border border-line px-5 py-3 text-sm font-extrabold text-ink">압축</button><button type="button" onClick={() => setValue('{\n  "name": "계산의정석",\n  "tool": "json"\n}')} className="rounded-full border border-line px-4 py-3 text-sm font-extrabold text-ink">예시</button><button type="button" onClick={() => copyToClipboard(value, () => setMessage("클립보드에 복사했습니다."), () => setMessage("클립보드 권한을 사용할 수 없습니다."))} disabled={!value} className="rounded-full border border-line px-4 py-3 text-sm font-extrabold text-ink disabled:opacity-40">복사</button><button type="button" onClick={() => { setValue(""); setMessage(""); }} className="rounded-full border border-line px-4 py-3 text-sm font-extrabold text-ink">초기화</button><span className="self-center text-sm font-semibold text-slate-500">{message}</span></div></div>;
 }
 
 function TextToolPanel() {
   const [value, setValue] = useState("");
   const withoutSpaces = value.replace(/\s/g, "");
-  return <div><p className="text-sm font-extrabold text-brand">텍스트 도구</p><h1 className="mt-2 text-2xl font-extrabold text-ink">텍스트 카운터</h1><textarea value={value} onChange={(event) => setValue(event.target.value)} placeholder="텍스트를 입력하세요." className="mt-6 min-h-72 w-full rounded-2xl border border-line bg-paper p-4 text-sm outline-none focus:border-brand"/><div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4"><Stat label="글자 수" value={value.length} /><Stat label="공백 제외" value={withoutSpaces.length} /><Stat label="단어 수" value={value.trim() ? value.trim().split(/\s+/).length : 0} /><Stat label="줄 수" value={value ? value.split(/\r?\n/).length : 0} /></div></div>;
+  const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0;
+  const byteCount = new TextEncoder().encode(value).length;
+  return <div><p className="text-sm font-extrabold text-brand">텍스트 도구</p><h1 className="mt-2 text-2xl font-extrabold text-ink">텍스트 카운터</h1><p className="mt-3 text-sm font-medium leading-6 text-slate-600">공백 포함·제외 글자 수와 단어·줄·UTF-8 바이트 수를 확인하세요.</p><textarea value={value} onChange={(event) => setValue(event.target.value)} placeholder="텍스트를 입력하세요." className="mt-6 min-h-72 w-full rounded-2xl border border-line bg-paper p-4 text-sm outline-none focus:border-brand"/><div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5"><Stat label="글자 수" value={value.length} /><Stat label="공백 제외" value={withoutSpaces.length} /><Stat label="단어 수" value={wordCount} /><Stat label="줄 수" value={value ? value.split(/\r?\n/).length : 0} /><Stat label="UTF-8 바이트" value={byteCount} /></div><div className="mt-4 flex flex-wrap gap-3"><button type="button" onClick={() => copyToClipboard(value, () => undefined, () => undefined)} disabled={!value} className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white disabled:opacity-40">텍스트 복사</button><button type="button" onClick={() => setValue("")} className="rounded-full border border-line px-5 py-3 text-sm font-extrabold text-ink">초기화</button></div></div>;
 }
 
 function DrawingToolPanel() {
@@ -337,20 +348,30 @@ function YoutubeThumbnailPanel() {
 }
 
 function ThumbnailCard({ src, label }: { src: string; label: string }) {
-  return <div className="overflow-hidden rounded-2xl border border-line bg-paper"><img src={src} alt={`${label} 유튜브 썸네일`} className="aspect-video w-full object-cover" /><div className="flex items-center justify-between gap-2 p-3"><span className="text-xs font-extrabold text-slate-500">{label}</span><a href={src} target="_blank" rel="noreferrer" className="rounded-full bg-ink px-3 py-1.5 text-xs font-extrabold text-white">열기</a></div></div>;
+  return <div className="overflow-hidden rounded-2xl border border-line bg-paper"><img src={src} alt={`${label} 유튜브 썸네일`} className="aspect-video w-full object-cover" /><div className="flex flex-wrap items-center justify-between gap-2 p-3"><span className="text-xs font-extrabold text-slate-500">{label}</span><div className="flex gap-2"><button type="button" onClick={() => copyToClipboard(src, () => undefined, () => undefined)} className="rounded-full border border-line px-3 py-1.5 text-xs font-extrabold text-ink">URL 복사</button><a href={src} target="_blank" rel="noreferrer" className="rounded-full bg-ink px-3 py-1.5 text-xs font-extrabold text-white">열기</a></div></div></div>;
 }
 
 function ImageMetadataPanel() {
   const [file, setFile] = useState<File | null>(null);
-  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+  const [size, setSize] = useState<{ width: number; height: number; orientation: string } | null>(null);
   const inspect = (next: File | undefined) => {
     if (!next || !next.type.startsWith("image/")) return;
     const image = new Image();
-    image.onload = () => setSize({ width: image.naturalWidth, height: image.naturalHeight });
-    image.src = URL.createObjectURL(next);
+    const objectUrl = URL.createObjectURL(next);
+    image.onload = () => {
+      const width = image.naturalWidth;
+      const height = image.naturalHeight;
+      setSize({ width, height, orientation: width === height ? "정사각형" : width > height ? "가로형" : "세로형" });
+      URL.revokeObjectURL(objectUrl);
+    };
+    image.onerror = () => {
+      setSize(null);
+      URL.revokeObjectURL(objectUrl);
+    };
+    image.src = objectUrl;
     setFile(next);
   };
-  return <div><p className="text-sm font-extrabold text-brand">이미지 도구</p><h1 className="mt-2 text-2xl font-extrabold text-ink">이미지 정보 확인</h1><p className="mt-3 text-sm font-medium leading-6 text-slate-600">이미지의 파일 형식, 용량, 픽셀 크기와 비율을 확인합니다.</p><label className="mt-6 flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand/40 bg-brand/5 p-5 text-center"><input type="file" accept="image/*" className="sr-only" onChange={(event) => inspect(event.target.files?.[0])} /><span className="text-sm font-extrabold text-ink">이미지 선택</span><span className="mt-1 text-xs font-semibold text-slate-500">파일은 서버로 전송되지 않습니다.</span></label>{file && size && <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><div className="rounded-2xl bg-paper p-4"><span className="block text-xs font-extrabold text-slate-500">형식</span><strong className="mt-2 block text-lg text-ink">{file.type.replace("image/", "").toUpperCase()}</strong></div><Stat label="용량(KB)" value={Math.round(file.size / 1024)} /><div className="rounded-2xl bg-paper p-4"><span className="block text-xs font-extrabold text-slate-500">픽셀</span><strong className="mt-2 block text-lg text-ink">{size.width}×{size.height}</strong></div><div className="rounded-2xl bg-paper p-4"><span className="block text-xs font-extrabold text-slate-500">비율</span><strong className="mt-2 block text-lg text-ink">{(size.width / size.height).toFixed(2)}:1</strong></div></div>}</div>;
+  return <div><p className="text-sm font-extrabold text-brand">이미지 도구</p><h1 className="mt-2 text-2xl font-extrabold text-ink">이미지 정보 확인</h1><p className="mt-3 text-sm font-medium leading-6 text-slate-600">이미지의 파일명, 형식, 용량, 픽셀 크기와 방향을 브라우저에서 확인합니다.</p><label className="mt-6 flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand/40 bg-brand/5 p-5 text-center"><input type="file" accept="image/*" className="sr-only" onChange={(event) => inspect(event.target.files?.[0])} /><span className="text-sm font-extrabold text-ink">이미지 선택</span><span className="mt-1 text-xs font-semibold text-slate-500">파일은 서버로 전송되지 않습니다.</span></label>{file && size && <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><div className="rounded-2xl bg-paper p-4"><span className="block text-xs font-extrabold text-slate-500">파일명</span><strong className="mt-2 block truncate text-sm text-ink" title={file.name}>{file.name}</strong></div><div className="rounded-2xl bg-paper p-4"><span className="block text-xs font-extrabold text-slate-500">형식·용량</span><strong className="mt-2 block text-sm text-ink">{file.type.replace("image/", "").toUpperCase()} · {Math.round(file.size / 1024).toLocaleString("ko-KR")}KB</strong></div><div className="rounded-2xl bg-paper p-4"><span className="block text-xs font-extrabold text-slate-500">픽셀</span><strong className="mt-2 block text-lg text-ink">{size.width}×{size.height}</strong></div><div className="rounded-2xl bg-paper p-4"><span className="block text-xs font-extrabold text-slate-500">방향·비율</span><strong className="mt-2 block text-sm text-ink">{size.orientation} · {(size.width / size.height).toFixed(2)}:1</strong></div></div>}</div>;
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
