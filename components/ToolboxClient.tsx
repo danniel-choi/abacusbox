@@ -69,18 +69,21 @@ function ImageToolPanel() {
   const [preserveAspect, setPreserveAspect] = useState(false);
   const [format, setFormat] = useState<"image/jpeg" | "image/png" | "image/webp">("image/jpeg");
   const [ratio, setRatio] = useState("free");
+  const [rotation, setRotation] = useState<0 | 90 | 180 | 270>(0);
+  const [flipHorizontal, setFlipHorizontal] = useState(false);
+  const [flipVertical, setFlipVertical] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const [outputName, setOutputName] = useState("");
+  const [outputBaseName, setOutputBaseName] = useState("");
   const [outputSize, setOutputSize] = useState(0);
   const [outputDimensions, setOutputDimensions] = useState({ width: 0, height: 0 });
+  const [sourceDimensions, setSourceDimensions] = useState({ width: 0, height: 0 });
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => () => {
-    if (preview) URL.revokeObjectURL(preview);
-    if (outputUrl) URL.revokeObjectURL(outputUrl);
-  }, [outputUrl, preview]);
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  useEffect(() => () => { if (outputUrl) URL.revokeObjectURL(outputUrl); }, [outputUrl]);
 
   const handleFile = (nextFile: File | undefined) => {
     if (!nextFile || !nextFile.type.startsWith("image/")) {
@@ -89,11 +92,18 @@ function ImageToolPanel() {
     }
     if (preview) URL.revokeObjectURL(preview);
     if (outputUrl) URL.revokeObjectURL(outputUrl);
+    const nextPreview = URL.createObjectURL(nextFile);
+    const image = new Image();
+    image.onload = () => { setSourceDimensions({ width: image.naturalWidth, height: image.naturalHeight }); URL.revokeObjectURL(nextPreview); };
+    image.onerror = () => URL.revokeObjectURL(nextPreview);
+    image.src = nextPreview;
     setFile(nextFile);
     setPreview(URL.createObjectURL(nextFile));
     setOutputUrl(null);
     setOutputName("");
+    setOutputBaseName(nextFile.name.replace(/\.[^.]+$/, "") + "-calcrule");
     setOutputSize(0);
+    setOutputDimensions({ width: 0, height: 0 });
     setMessage(`${nextFile.name} · ${(nextFile.size / 1024).toFixed(0)}KB`);
   };
 
@@ -132,26 +142,31 @@ function ImageToolPanel() {
       outputWidth = Math.max(1, Math.round(width * scale));
       outputHeight = Math.max(1, Math.round(height * scale));
     }
+    const isQuarterTurn = rotation === 90 || rotation === 270;
     const canvas = document.createElement("canvas");
-    canvas.width = outputWidth;
-    canvas.height = outputHeight;
+    canvas.width = isQuarterTurn ? outputHeight : outputWidth;
+    canvas.height = isQuarterTurn ? outputWidth : outputHeight;
     const context = canvas.getContext("2d");
     if (!context) { setMessage("브라우저에서 이미지 처리를 지원하지 않습니다."); return; }
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = "high";
-    context.drawImage(source, sx, sy, width, height, 0, 0, canvas.width, canvas.height);
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.rotate(rotation * Math.PI / 180);
+    context.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1);
+    context.drawImage(source, sx, sy, width, height, -outputWidth / 2, -outputHeight / 2, outputWidth, outputHeight);
     URL.revokeObjectURL(source.src);
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, format, quality / 100));
     if (!blob) { setMessage("이미지 변환에 실패했습니다."); return; }
     const extension = format === "image/png" ? "png" : format === "image/webp" ? "webp" : "jpg";
     if (outputUrl) URL.revokeObjectURL(outputUrl);
     const url = URL.createObjectURL(blob);
-    const name = `${file.name.replace(/\.[^.]+$/, "")}-calcrule.${extension}`;
+    const name = `${outputBaseName.trim() || file.name.replace(/\.[^.]+$/, "") + "-calcrule"}.${extension}`;
     setOutputUrl(url);
     setOutputName(name);
     setOutputSize(blob.size);
     setOutputDimensions({ width: canvas.width, height: canvas.height });
-    setMessage(`완료 · ${(blob.size / 1024).toFixed(0)}KB · ${canvas.width}×${canvas.height}px`);
+    const savingRate = file.size ? Math.round((1 - blob.size / file.size) * 100) : 0;
+    setMessage(`완료 · ${(blob.size / 1024).toFixed(0)}KB · ${canvas.width}×${canvas.height}px · ${savingRate >= 0 ? `${savingRate}% 절감` : `${Math.abs(savingRate)}% 증가`}`);
   };
 
   const downloadResult = () => {
@@ -174,6 +189,7 @@ function ImageToolPanel() {
         </label>
         <FieldLabel label="작업"><select value={tool} onChange={(event) => setTool(event.target.value as ImageTool)} className="tool-input"><option value="compress">압축</option><option value="resize">크기 조절</option><option value="crop">가운데 자르기</option></select></FieldLabel>
         <FieldLabel label="출력 형식"><select value={format} onChange={(event) => setFormat(event.target.value as typeof format)} className="tool-input"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select></FieldLabel>
+        <FieldLabel label="저장 파일명"><input value={outputBaseName} onChange={(event) => setOutputBaseName(event.target.value)} placeholder="파일명 입력" className="tool-input" /></FieldLabel>
         {tool === "resize" ? <>
           <div className="sm:col-span-2 rounded-2xl border border-brand/20 bg-brand/5 p-4">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -188,10 +204,11 @@ function ImageToolPanel() {
         </> : <FieldLabel label={`최대 가로 ${maxWidth}px`}><input type="range" min="320" max="4000" step="40" value={maxWidth} onChange={(event) => setMaxWidth(Number(event.target.value))} className="mt-3 w-full accent-brand" /></FieldLabel>}
         <FieldLabel label={`품질 ${quality}%`}><input type="range" min="20" max="100" step="1" value={quality} onChange={(event) => setQuality(Number(event.target.value))} className="mt-3 w-full accent-brand" /></FieldLabel>
         {tool === "crop" && <FieldLabel label="자르기 비율"><select value={ratio} onChange={(event) => setRatio(event.target.value)} className="tool-input"><option value="free">원본 비율</option><option value="1">1:1</option><option value="1.7777778">16:9</option><option value="1.3333333">4:3</option></select></FieldLabel>}
+        <div className="sm:col-span-2 rounded-2xl border border-line bg-paper p-4"><p className="text-sm font-extrabold text-ink">방향 보정</p><div className="mt-3 flex flex-wrap gap-3"><FieldLabel label="회전"><select value={rotation} onChange={(event) => setRotation(Number(event.target.value) as typeof rotation)} className="tool-input"><option value={0}>없음</option><option value={90}>90° 오른쪽</option><option value={180}>180°</option><option value={270}>270° 오른쪽</option></select></FieldLabel><label className="flex items-center gap-2 text-sm font-extrabold text-ink"><input type="checkbox" checked={flipHorizontal} onChange={(event) => setFlipHorizontal(event.target.checked)} /> 좌우 반전</label><label className="flex items-center gap-2 text-sm font-extrabold text-ink"><input type="checkbox" checked={flipVertical} onChange={(event) => setFlipVertical(event.target.checked)} /> 상하 반전</label></div></div>
       </div>
       {preview && <img src={preview} alt="선택한 이미지 미리보기" className="mt-5 max-h-64 w-full rounded-2xl border border-line object-contain" />}
       <div className="mt-5 flex flex-wrap items-center gap-3"><button type="button" onClick={processImage} className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white hover:bg-[#029b72]">변환하기</button>{outputUrl && <button type="button" onClick={downloadResult} className="rounded-full border border-brand px-5 py-3 text-sm font-extrabold text-brand">결과 다운로드</button>}<span className="text-sm font-semibold text-slate-500">{message}</span></div>
-      {outputUrl && <div className="mt-6 rounded-2xl border border-brand/20 bg-brand/5 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-extrabold text-ink">변환 결과 미리보기</p><p className="text-xs font-semibold text-slate-500">{outputDimensions.width}×{outputDimensions.height}px · {(outputSize / 1024).toFixed(0)}KB</p></div><img src={outputUrl} alt="변환된 이미지 미리보기" className="mt-3 max-h-64 w-full rounded-xl border border-line bg-white object-contain" /></div>}
+      {outputUrl && <div className="mt-6 rounded-2xl border border-brand/20 bg-brand/5 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-extrabold text-ink">변환 결과 미리보기</p><p className="text-xs font-semibold text-slate-500">{outputName} · {outputDimensions.width}×{outputDimensions.height}px · {(outputSize / 1024).toFixed(0)}KB</p></div><div className="mt-4 grid gap-4 md:grid-cols-2"><div><p className="mb-2 text-xs font-extrabold text-slate-500">원본 · {sourceDimensions.width}×{sourceDimensions.height}px · {(file ? file.size / 1024 : 0).toFixed(0)}KB</p><img src={preview ?? ""} alt="원본 이미지 미리보기" className="max-h-64 w-full rounded-xl border border-line bg-white object-contain" /></div><div><p className="mb-2 text-xs font-extrabold text-brand">결과 · {outputDimensions.width}×{outputDimensions.height}px · {(outputSize / 1024).toFixed(0)}KB</p><img src={outputUrl} alt="변환된 이미지 미리보기" className="max-h-64 w-full rounded-xl border border-brand/30 bg-white object-contain" /></div></div></div>}
     </div>
   );
 }
