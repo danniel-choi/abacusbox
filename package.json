@@ -17,6 +17,7 @@
     "ai:credentials-check": "node scripts/ai-credentials-check.mjs",
     "ai:google-readonly-check": "node scripts/ai-google-readonly-check.mjs",
     "ai:google-data-snapshot": "node scripts/ai-google-data-snapshot.mjs",
+    "ai:quality": "npm run ai:audit && npm run ai:data-contract && npm run typecheck && npm run lint && npm run build && npm run ai:seo-check && npm run ai:preflight",
     "cf:preview": "npx wrangler pages dev out",
     "d1:migrate:local": "npx wrangler d1 migrations apply calcrule-prod --local",
     "d1:migrate:remote": "npx wrangler d1 migrations apply calcrule-prod --remote"

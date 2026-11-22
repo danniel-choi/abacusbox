@@ -1,18 +1,19 @@
 # AI Preview 사전 검증
 
-- 생성 시각: 2026-11-22T08:26:19.692Z
-- 기준 ref: HEAD~1
+- 생성 시각: 2026-11-22T08:41:46.086Z
+- 기준 ref: HEAD
 - 상태: READY
 
 ## 변경 파일
 
-- .env.example
-- .gitignore
-- docs/ai-agent-credentials.md
+- .github/dependabot.yml
+- .github/workflows/ai-quality.yml
+- docs/ai-auto-upgrade.md
+- docs/ai-data-contract.md
 - docs/ai-preflight.md
+- docs/ai-seo-check.md
+- docs/ai-site-audit.md
 - package.json
-- scripts/ai-google-data-snapshot.mjs
-- scripts/ai-google-readonly-check.mjs
 
 ## 보호 경로 변경
 
