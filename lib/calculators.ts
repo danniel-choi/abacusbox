@@ -85,6 +85,9 @@ export type CalculatorSlug =
   | "win-rate-calculator"
   | "edpi-calculator"
   | "mouse-sensitivity-converter"
+  | "rank-climb-calculator"
+  | "game-effective-health-calculator"
+  | "rank-rarity-calculator"
   | "text-counter"
   | "tip-calculator"
   | "poker-equity-calculator"
@@ -10485,6 +10488,194 @@ export const calculators: CalculatorConfig[] = [
           { name: "새감도", value: newSensitivity },
           { name: "현재eDPI", value: currentEdpi },
           { name: "새eDPI", value: newEdpi }
+        ]
+      };
+    }
+  },
+  {
+    slug: "rank-climb-calculator",
+    title: "랭크 상승 게임 수 계산기",
+    description: "현재 LP, 목표 LP, 승리·패배 LP와 예상 승률을 입력해 목표 랭크까지 필요한 경기 수와 기간을 추정합니다.",
+    category: "게임",
+    keywords: ["랭크 상승 계산기", "게임 수 계산기", "LP 계산기", "티어 승급 계산", "랭크업 게임 수"],
+    badge: "랭크·LP",
+    audience: "리그 오브 레전드 등 LP 기반 랭크 게임의 목표 경기 수를 계획하려는 플레이어",
+    fields: [
+      { name: "currentLp", label: "현재 LP", type: "number", unit: "LP", min: 0, max: 5000, step: 1, defaultValue: 40 },
+      { name: "targetLp", label: "목표 LP", type: "number", unit: "LP", min: 1, max: 5000, step: 1, defaultValue: 100 },
+      { name: "winLp", label: "승리 시 LP", type: "number", unit: "LP", min: 1, max: 100, step: 1, defaultValue: 25 },
+      { name: "lossLp", label: "패배 시 LP", type: "number", unit: "LP", min: 0, max: 100, step: 1, defaultValue: 20 },
+      { name: "winRate", label: "예상 승률", type: "number", unit: "%", min: 0, max: 100, step: 0.1, defaultValue: 55 },
+      { name: "gamesPerDay", label: "하루 경기 수", type: "number", unit: "경기", min: 1, max: 100, step: 1, defaultValue: 5 }
+    ],
+    guideTitle: "랭크 상승 게임 수 계산 기준",
+    guide: [
+      "한 경기의 기대 LP는 승률 × 승리 LP − 패배율 × 패배 LP로 단순 추정합니다.",
+      "목표 LP와 현재 LP의 차이를 기대 LP로 나누어 필요한 경기 수를 올림합니다.",
+      "실제 LP 변동, 승급전, 보정, 듀오·게임별 MMR 규칙은 반영하지 않습니다."
+    ],
+    checkpoints: [
+      "최근 전적을 기준으로 현실적인 승률을 입력하세요.",
+      "기대 LP가 0 이하이면 현재 가정으로는 목표에 도달할 수 없습니다.",
+      "목표 LP는 같은 랭크 구간 안에서 비교하는 단순 계획값입니다."
+    ],
+    faqs: [
+      { question: "실제 승급 날짜를 정확히 예측하나요?", answer: "아니요. 승률과 LP 변동을 이용한 계획용 추정치이며 승급전과 매칭 변동은 포함하지 않습니다." },
+      { question: "승률이 50%여도 올라갈 수 있나요?", answer: "승리 LP와 패배 LP가 다르면 50% 승률에서도 기대 LP가 양수가 될 수 있습니다." }
+    ],
+    calculate(values) {
+      const currentLp = Math.max(0, values.currentLp);
+      const targetLp = Math.max(1, values.targetLp);
+      const winLp = Math.max(1, values.winLp);
+      const lossLp = Math.max(0, values.lossLp);
+      const winRate = Math.min(Math.max(values.winRate, 0), 100) / 100;
+      const gamesPerDay = Math.max(1, values.gamesPerDay);
+      const gap = Math.max(0, targetLp - currentLp);
+      const expectedLpPerGame = winRate * winLp - (1 - winRate) * lossLp;
+      const games = gap === 0 ? 0 : expectedLpPerGame > 0 ? Math.ceil(gap / expectedLpPerGame) : 0;
+      const days = games > 0 ? Math.ceil(games / gamesPerDay) : 0;
+      const impossible = gap > 0 && expectedLpPerGame <= 0;
+      return {
+        headline: gap === 0 ? "목표 달성" : impossible ? "추정 불가" : `${games.toLocaleString("ko-KR")}경기`,
+        subline: impossible ? "현재 승률·LP 가정에서는 기대 LP가 0 이하입니다." : `기대 LP ${formatNumber(expectedLpPerGame, 2)} · 하루 ${gamesPerDay}경기 기준 ${days}일`,
+        rows: [
+          { label: "LP 차이", value: `${formatNumber(gap, 0)} LP` },
+          { label: "경기당 기대 LP", value: `${formatNumber(expectedLpPerGame, 2)} LP`, tone: "strong" },
+          { label: "필요 경기 수", value: impossible ? "승률·LP 조건 조정 필요" : `${games.toLocaleString("ko-KR")}경기`, tone: "strong" },
+          { label: "예상 소요일", value: impossible ? "계산 불가" : `${days.toLocaleString("ko-KR")}일` },
+          { label: "입력 승률", value: formatPercent(winRate * 100, 1) }
+        ],
+        chart: [
+          { name: "현재 LP", value: currentLp },
+          { name: "목표 LP", value: targetLp },
+          { name: "기대 LP", value: Math.max(expectedLpPerGame, 0) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "game-effective-health-calculator",
+    title: "게임 유효체력 계산기",
+    description: "체력, 방어력·마법저항, 관통 수치를 입력해 물리·마법 피해 기준 유효체력과 피해 감소율을 계산합니다.",
+    category: "게임",
+    keywords: ["유효체력 계산기", "방어력 계산기", "마법저항 계산기", "롤 방어력", "EHP 계산기"],
+    badge: "방어·EHP",
+    audience: "방어력과 마법저항이 실제 생존력에 미치는 영향을 비교하려는 플레이어",
+    fields: [
+      { name: "health", label: "기본 체력", type: "number", unit: "HP", min: 1, max: 100000, step: 1, defaultValue: 2500 },
+      { name: "armor", label: "방어력", type: "number", unit: "방어력", min: -200, max: 10000, step: 1, defaultValue: 100 },
+      { name: "magicResist", label: "마법저항", type: "number", unit: "MR", min: -200, max: 10000, step: 1, defaultValue: 80 },
+      { name: "armorPen", label: "방어력 관통", type: "number", unit: "관통", min: 0, max: 10000, step: 1, defaultValue: 0 },
+      { name: "magicPen", label: "마법 관통", type: "number", unit: "관통", min: 0, max: 10000, step: 1, defaultValue: 0 }
+    ],
+    guideTitle: "게임 유효체력 계산 기준",
+    guide: [
+      "양의 저항력은 피해 배율 100 ÷ (100 + 저항력)으로 단순 계산합니다.",
+      "유효체력은 같은 피해 유형을 체력 0이 될 때까지 버틸 수 있는 이론상 피해량입니다.",
+      "게임마다 관통 순서, 퍼센트 관통, 고정 관통과 특수 피해 규칙이 달라 실제 전투 결과와 다를 수 있습니다."
+    ],
+    checkpoints: [
+      "방어력 관통과 마법 관통은 각각 해당 피해 유형에만 적용합니다.",
+      "보호막, 피해 감소 효과, 고정 피해는 계산에 포함하지 않습니다.",
+      "같은 게임과 패치의 공식 규칙을 확인한 뒤 빌드 비교용으로 사용하세요."
+    ],
+    faqs: [
+      { question: "유효체력이 높으면 무조건 더 단단한가요?", answer: "같은 피해 유형과 같은 관통 조건에서 비교할 때의 이론값입니다. 보호막과 실제 스킬 효과는 별도로 봐야 합니다." },
+      { question: "방어력과 마법저항을 함께 계산하나요?", answer: "물리 피해 기준과 마법 피해 기준을 나누어 각각의 유효체력을 계산합니다." }
+    ],
+    calculate(values) {
+      const health = Math.max(1, values.health);
+      const armor = values.armor - Math.max(0, values.armorPen);
+      const magicResist = values.magicResist - Math.max(0, values.magicPen);
+      const multiplier = (resistance: number) => resistance >= 0 ? 100 / (100 + resistance) : 2 - 100 / (100 - resistance);
+      const physicalMultiplier = multiplier(armor);
+      const magicMultiplier = multiplier(magicResist);
+      const physicalEhp = health / physicalMultiplier;
+      const magicEhp = health / magicMultiplier;
+      return {
+        headline: `${formatNumber(physicalEhp, 0)} 물리 EHP`,
+        subline: `마법 EHP ${formatNumber(magicEhp, 0)} · 관통 적용 후 기준`,
+        rows: [
+          { label: "물리 피해 감소율", value: formatPercent((1 - physicalMultiplier) * 100, 2) },
+          { label: "물리 유효체력", value: formatNumber(physicalEhp, 0), tone: "strong" },
+          { label: "마법 피해 감소율", value: formatPercent((1 - magicMultiplier) * 100, 2) },
+          { label: "마법 유효체력", value: formatNumber(magicEhp, 0), tone: "strong" },
+          { label: "적용 방어력", value: formatNumber(armor, 2) },
+          { label: "적용 마법저항", value: formatNumber(magicResist, 2) }
+        ],
+        chart: [
+          { name: "기본 체력", value: health },
+          { name: "물리 EHP", value: Math.min(physicalEhp, 1000000) },
+          { name: "마법 EHP", value: Math.min(magicEhp, 1000000) }
+        ]
+      };
+    }
+  },
+  {
+    slug: "rank-rarity-calculator",
+    title: "게임 랭크 희귀도 계산기",
+    description: "전체 플레이어 수와 해당 랭크 인원 수를 입력해 랭크 비율과 대략적인 희귀도를 확인합니다.",
+    category: "게임",
+    keywords: ["랭크 희귀도 계산기", "티어 분포 계산", "랭크 비율", "게임 티어 희귀도", "상위 퍼센트 계산"],
+    badge: "티어·분포",
+    audience: "특정 랭크가 전체 플레이어 중 어느 정도 비율인지 확인하려는 플레이어",
+    fields: [
+      { name: "rankPlayers", label: "해당 랭크 인원", type: "number", unit: "명", min: 0, max: 1000000000, step: 1, defaultValue: 15000 },
+      { name: "totalPlayers", label: "전체 플레이어", type: "number", unit: "명", min: 1, max: 1000000000, step: 1, defaultValue: 1000000 },
+      { name: "higherRankPlayers", label: "더 높은 랭크 인원", type: "number", unit: "명", min: 0, max: 1000000000, step: 1, defaultValue: 5000 },
+      {
+        name: "rankLevel",
+        label: "랭크 단계",
+        type: "select",
+        defaultValue: 4,
+        options: [
+          { label: "브론즈", value: 1 },
+          { label: "실버", value: 2 },
+          { label: "골드", value: 3 },
+          { label: "플래티넘", value: 4 },
+          { label: "다이아몬드", value: 5 },
+          { label: "마스터 이상", value: 6 }
+        ]
+      }
+    ],
+    guideTitle: "게임 랭크 희귀도 계산 기준",
+    guide: [
+      "해당 랭크 비율은 해당 랭크 인원을 전체 플레이어 수로 나누어 계산합니다.",
+      "상위 퍼센트는 해당 랭크 인원과 더 높은 랭크 인원을 합산해 계산한 단순 지표입니다.",
+      "시즌·지역·게임 모드·표본 집계 시점에 따라 실제 분포가 달라질 수 있습니다."
+    ],
+    checkpoints: [
+      "전체 플레이어와 랭크 인원은 같은 시즌·지역·모드 기준으로 입력하세요.",
+      "공식 분포가 없는 경우 임의의 수치를 사실처럼 해석하지 마세요.",
+      "랭크 희귀도는 실력의 절대값이 아니라 입력한 표본 안의 비율입니다."
+    ],
+    faqs: [
+      { question: "실시간 랭크 분포를 자동으로 가져오나요?", answer: "아니요. 이 계산기는 사용자가 확인한 동일 기준의 집계 수치를 입력하는 방식입니다." },
+      { question: "상위 퍼센트는 어떻게 계산하나요?", answer: "현재 랭크 인원과 더 높은 랭크 인원을 더해 전체 플레이어 수로 나눈 값입니다." }
+    ],
+    calculate(values) {
+      const rankPlayers = Math.max(0, values.rankPlayers);
+      const totalPlayers = Math.max(1, values.totalPlayers);
+      const higherRankPlayers = Math.max(0, values.higherRankPlayers);
+      const share = Math.min(100, rankPlayers / totalPlayers * 100);
+      const topPercent = Math.min(100, (rankPlayers + higherRankPlayers) / totalPlayers * 100);
+      const oneIn = share > 0 ? Math.max(1, Math.round(100 / share)) : 0;
+      const rankLabels = ["", "브론즈", "실버", "골드", "플래티넘", "다이아몬드", "마스터 이상"];
+      const rankLabel = rankLabels[Math.round(values.rankLevel)] || "선택 랭크";
+      return {
+        headline: `${formatPercent(share, 3)}`,
+        subline: `${rankLabel} 기준 · 약 ${oneIn > 0 ? `${oneIn}명 중 1명` : "계산 불가"}`,
+        rows: [
+          { label: "해당 랭크 비율", value: formatPercent(share, 3), tone: "strong" },
+          { label: "더 높은 랭크 포함 상위", value: formatPercent(topPercent, 3), tone: "strong" },
+          { label: "해당 랭크 희귀도", value: oneIn > 0 ? `약 ${oneIn}명 중 1명` : "계산 불가" },
+          { label: "해당 랭크 인원", value: `${rankPlayers.toLocaleString("ko-KR")}명` },
+          { label: "전체 플레이어", value: `${totalPlayers.toLocaleString("ko-KR")}명` }
+        ],
+        chart: [
+          { name: "해당 랭크", value: share },
+          { name: "상위 랭크 포함", value: topPercent },
+          { name: "그 외", value: Math.max(0, 100 - topPercent) }
         ]
       };
     }

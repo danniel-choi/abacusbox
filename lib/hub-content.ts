@@ -200,9 +200,9 @@ export const hubContents: Record<HubKey, HubContent> = {
     group: "game",
     path: "/game",
     eyebrow: "게임 계산 허브",
-    title: "가챠, 디아블로2 공속, 롤 스킬 가속, 클래시 계산기",
-    description: "뽑기 확률, 디아블로2 공속 프레임과 IAS 브레이크포인트, 리그 오브 레전드 스킬 가속과 쿨타임 환산, 클래시 오브 클랜즈 업그레이드 자원·시간, 로블록스 로벅스 원화 환산처럼 게임 플레이 판단에 필요한 도구를 모았습니다.",
-    featuredSlugs: ["diablo2-attack-speed", "lol-skill-haste", "clash-of-clans-calculator", "robux-calculator", "lineage-classic-hunting-efficiency", "blox-fruits-calculator"],
+    title: "랭크 상승, 전투 방어, 감도와 확률 게임 계산기",
+    description: "랭크 상승에 필요한 경기 수, 방어력·마법저항 유효체력, 뽑기 확률, 디아블로2 공속, 롤 스킬 가속, FPS 감도처럼 게임 플레이 판단에 필요한 도구를 모았습니다.",
+    featuredSlugs: ["rank-climb-calculator", "game-effective-health-calculator", "rank-rarity-calculator", "diablo2-attack-speed", "lol-skill-haste", "edpi-calculator"],
     blogSlugs: ["draw-probability-checklist-20260901-15-hourly", "poker-equity-calculator-scenario-20260902-18-hourly", "random-number-guide-20260904-05-hourly"],
     sections: [
       {

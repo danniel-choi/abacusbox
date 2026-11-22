@@ -69,6 +69,48 @@ export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoC
       { href: "/math", label: "수학 계산기 모음", text: "방정식, 함수, 통계와 수학 도구를 분야별로 확인합니다." }
     ]
   },
+  "rank-climb-calculator": {
+    title: "랭크 상승 게임 수 계산기 | 목표 LP까지 필요한 경기 수",
+    description: "현재 LP와 목표 LP, 승패 LP, 예상 승률을 입력해 목표 랭크까지 필요한 경기 수와 예상 기간을 계산하세요.",
+    keywords: ["랭크 상승 계산기", "LP 계산기", "랭크업 게임 수", "티어 승급 계산", "게임 경기 수 계산기"],
+    searchIntents: ["목표 LP까지 필요한 게임 수를 계산할 때", "승률과 승패 LP를 바꿔 랭크 상승 기간을 비교할 때"],
+    sections: [
+      { title: "승률과 LP 변동으로 랭크 상승 계획을 세웁니다.", body: "현재 LP, 목표 LP, 승리·패배 LP와 예상 승률을 입력하면 경기당 기대 LP와 필요한 경기 수를 단순 추정합니다." },
+      { title: "실제 랭크는 게임별 규칙에 따라 달라질 수 있습니다.", body: "승급전, MMR 보정, 연승 보너스, 닷지와 게임 모드별 규칙은 반영하지 않으므로 계획용 참고값으로 사용하세요." }
+    ],
+    internalLinks: [
+      { href: "/calculators/win-rate-calculator", label: "게임 승률 계산기", text: "현재 승·무·패 전적과 목표 승률을 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "랭크, 전투, 감도와 확률 관련 게임 도구를 확인합니다." }
+    ]
+  },
+  "game-effective-health-calculator": {
+    title: "게임 유효체력 계산기 | 방어력·마법저항 EHP",
+    description: "체력과 방어력·마법저항, 관통 수치를 입력해 물리·마법 피해 기준 유효체력과 감소율을 비교하세요.",
+    keywords: ["유효체력 계산기", "방어력 계산기", "마법저항 계산기", "EHP 계산기", "롤 방어력 계산"],
+    searchIntents: ["방어력과 마법저항이 실제 체력에 미치는 영향을 비교할 때", "관통 적용 후 유효체력을 계산할 때"],
+    sections: [
+      { title: "방어력과 마법저항을 유효체력으로 비교합니다.", body: "피해 감소율과 관통 적용 후 유효체력을 물리 피해와 마법 피해로 나누어 확인합니다." },
+      { title: "게임별 패치 규칙은 별도로 확인하세요.", body: "관통 순서, 고정 피해, 보호막과 스킬 효과는 게임마다 다르므로 빌드 비교용 단순 모델로 사용하세요." }
+    ],
+    internalLinks: [
+      { href: "/calculators/lol-skill-haste", label: "롤 스킬 가속 계산기", text: "스킬 가속에 따른 쿨타임 변화를 계산합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "게임 전투와 랭크 관련 계산기를 함께 확인합니다." }
+    ]
+  },
+  "rank-rarity-calculator": {
+    title: "게임 랭크 희귀도 계산기 | 티어 분포 상위 퍼센트",
+    description: "전체 플레이어와 랭크 인원 수를 입력해 해당 티어의 비율과 상위 퍼센트를 계산하세요.",
+    keywords: ["랭크 희귀도 계산기", "티어 분포 계산", "상위 퍼센트 계산", "게임 랭크 비율", "티어 희귀도"],
+    searchIntents: ["내 랭크가 전체 플레이어 중 어느 정도인지 계산할 때", "시즌별 티어 분포로 랭크 희귀도를 비교할 때"],
+    sections: [
+      { title: "랭크 인원 비율로 티어 희귀도를 확인합니다.", body: "전체 플레이어와 해당 랭크 인원을 입력하면 해당 티어의 비율과 대략적인 1명 중 몇 명인지 계산합니다." },
+      { title: "표본 기준을 맞춰야 비교가 가능합니다.", body: "시즌, 지역, 게임 모드와 집계 시점이 다르면 분포가 달라질 수 있으므로 같은 기준의 통계를 입력하세요." }
+    ],
+    internalLinks: [
+      { href: "/calculators/rank-climb-calculator", label: "랭크 상승 게임 수 계산기", text: "목표 LP까지 필요한 경기 수를 추정합니다." },
+      { href: "/game", label: "게임 계산기 모음", text: "랭크와 전투 관련 게임 도구를 확인합니다." }
+    ]
+  },
   "current-voltage-calculator": {
     title: "전류·전압 사용량 계산기 | 소비전력·kWh·전기요금 계산",
     description: "전압과 전류, 사용시간을 입력해 소비전력 W와 전력 사용량 kWh, 예상 전기요금을 계산하세요.",
