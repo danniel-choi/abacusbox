@@ -23,6 +23,8 @@
     "d1:migrate:remote": "npx wrangler d1 migrations apply calcrule-prod --remote"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@types/three": "^0.186.0",
     "decimal.js": "^10.4.3",
     "next": "^16.3.1",

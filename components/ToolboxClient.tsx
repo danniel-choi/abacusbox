@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent, ReactNode } from "react";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile, toBlobURL } from "@ffmpeg/util";
 
 type ImageTool = "compress" | "resize" | "crop";
-export type ToolboxTool = "image" | "json" | "text" | "drawing" | "youtube" | "metadata" | "developer";
+export type ToolboxTool = "image" | "json" | "text" | "drawing" | "youtube" | "metadata" | "developer" | "audio";
 
 async function copyToClipboard(value: string, onSuccess: () => void, onFailure: () => void) {
   try {
@@ -28,6 +30,7 @@ export function ToolboxClient({ initialActive = "image" }: { initialActive?: Too
         {active === "youtube" && <YoutubeThumbnailPanel />}
         {active === "metadata" && <ImageMetadataPanel />}
         {active === "developer" && <DeveloperToolsPanel />}
+        {active === "audio" && <AudioConverterPanel />}
       </section>
       <aside className="h-fit rounded-[28px] border border-line bg-white p-5 shadow-panel">
         <p className="text-sm font-extrabold text-brand">브라우저에서 바로 처리</p>
@@ -41,6 +44,7 @@ export function ToolboxClient({ initialActive = "image" }: { initialActive?: Too
           <ToolTab active={active === "youtube"} onClick={() => setActive("youtube")} title="유튜브 썸네일" description="영상 URL에서 이미지 추출" />
           <ToolTab active={active === "metadata"} onClick={() => setActive("metadata")} title="이미지 정보" description="크기·비율·용량 확인" />
           <ToolTab active={active === "developer"} onClick={() => setActive("developer")} title="개발자 도구" description="JWT·타임스탬프·인코딩" />
+          <ToolTab active={active === "audio"} onClick={() => setActive("audio")} title="오디오 변환" description="내 영상 파일을 MP3로 변환" />
         </div>
         <div className="mt-5 rounded-2xl bg-paper p-4 text-xs font-semibold leading-5 text-slate-500">OCR, 배경 제거, 웹사이트 캡처는 브라우저 권한과 별도 모델이 필요해 후속 도구로 확장합니다.</div>
       </aside>
@@ -582,6 +586,98 @@ function DeveloperToolsPanel() {
 
 function CodeOutput({ label, value }: { label: string; value: string }) {
   return <div><div className="mb-2 flex items-center justify-between"><span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">{label}</span><button type="button" onClick={() => copyToClipboard(value, () => undefined, () => undefined)} className="text-xs font-extrabold text-brand">복사</button></div><textarea readOnly value={value} className="min-h-48 w-full rounded-xl border border-line bg-paper p-3 font-mono text-xs outline-none" /></div>;
+}
+
+function AudioConverterPanel() {
+  const ffmpegRef = useRef<FFmpeg | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [quality, setQuality] = useState<"128k" | "192k" | "320k">("192k");
+  const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [resultName, setResultName] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState("");
+  const [converting, setConverting] = useState(false);
+
+  useEffect(() => () => { if (resultUrl) URL.revokeObjectURL(resultUrl); }, [resultUrl]);
+
+  const selectFile = (nextFile: File | undefined) => {
+    if (!nextFile || !(nextFile.type.startsWith("video/") || nextFile.type.startsWith("audio/"))) {
+      setStatus("MP4·WebM·MOV 등 영상 또는 오디오 파일을 선택하세요.");
+      return;
+    }
+    if (resultUrl) URL.revokeObjectURL(resultUrl);
+    setFile(nextFile);
+    setResultUrl(null);
+    setResultName("");
+    setProgress(0);
+    setStatus(`${nextFile.name} · ${(nextFile.size / 1024 / 1024).toFixed(1)}MB`);
+  };
+
+  const convert = async () => {
+    if (!file) {
+      setStatus("먼저 변환할 파일을 선택하세요.");
+      return;
+    }
+    setConverting(true);
+    setProgress(0);
+    setStatus("변환 엔진을 준비하는 중입니다. 처음 실행할 때 시간이 걸릴 수 있습니다.");
+    try {
+      const ffmpeg = ffmpegRef.current ?? new FFmpeg();
+      ffmpegRef.current = ffmpeg;
+      if (!ffmpeg.loaded) {
+        ffmpeg.on("progress", ({ progress: nextProgress }) => setProgress(Math.min(99, Math.round(nextProgress * 100))));
+        const coreVersion = "0.12.10";
+        const baseURL = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${coreVersion}/dist/umd`;
+        await ffmpeg.load({
+          coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
+          wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm")
+        });
+      }
+      const inputName = `input-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const outputName = `${file.name.replace(/\.[^.]+$/, "") || "audio"}-calcrule.mp3`;
+      await ffmpeg.writeFile(inputName, await fetchFile(file));
+      setStatus("오디오 트랙을 MP3로 변환하는 중입니다.");
+      await ffmpeg.exec(["-i", inputName, "-vn", "-codec:a", "libmp3lame", "-b:a", quality, outputName]);
+      const data = await ffmpeg.readFile(outputName);
+      const bytes = typeof data === "string" ? new TextEncoder().encode(data) : new Uint8Array(data);
+      const blob = new Blob([bytes.buffer as ArrayBuffer], { type: "audio/mpeg" });
+      if (resultUrl) URL.revokeObjectURL(resultUrl);
+      setResultUrl(URL.createObjectURL(blob));
+      setResultName(outputName);
+      setProgress(100);
+      setStatus(`변환 완료 · ${(blob.size / 1024 / 1024).toFixed(1)}MB · ${quality}`);
+      await ffmpeg.deleteFile(inputName);
+      await ffmpeg.deleteFile(outputName);
+    } catch (error) {
+      console.error(error);
+      setStatus("변환에 실패했습니다. 파일 형식이나 브라우저 메모리를 확인하세요.");
+    } finally {
+      setConverting(false);
+    }
+  };
+
+  const download = () => {
+    if (!resultUrl || !resultName) return;
+    const anchor = document.createElement("a");
+    anchor.href = resultUrl;
+    anchor.download = resultName;
+    anchor.click();
+  };
+
+  return <div>
+    <p className="text-sm font-extrabold text-brand">오디오 도구</p>
+    <h1 className="mt-2 text-2xl font-extrabold text-ink">MP4·영상 파일 → MP3 변환</h1>
+    <p className="mt-3 text-sm font-medium leading-6 text-slate-600">직접 보유하거나 변환 권한이 있는 영상 파일의 오디오 트랙을 MP3로 변환합니다. 파일은 서버로 업로드되지 않고 브라우저에서 처리됩니다.</p>
+    <label onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); selectFile(event.dataTransfer.files?.[0]); }} className="mt-6 flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand/40 bg-brand/5 p-5 text-center hover:bg-brand/10">
+      <input type="file" accept="video/*,audio/*" className="sr-only" onChange={(event) => selectFile(event.target.files?.[0])} />
+      <span className="text-3xl">🎧</span><span className="mt-2 text-sm font-extrabold text-ink">영상 또는 오디오 파일 선택</span><span className="mt-1 text-xs font-semibold text-slate-500">MP4·WebM·MOV·M4A · 브라우저에서만 처리</span>
+    </label>
+    <div className="mt-5 grid gap-4 sm:grid-cols-2"><FieldLabel label="MP3 비트레이트"><select value={quality} onChange={(event) => setQuality(event.target.value as typeof quality)} className="tool-input"><option value="128k">128 kbps · 용량 절약</option><option value="192k">192 kbps · 일반 권장</option><option value="320k">320 kbps · 고음질</option></select></FieldLabel><div className="flex items-end"><p className="text-sm font-semibold text-slate-500">{file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)}MB` : "파일을 선택하면 변환할 수 있습니다."}</p></div></div>
+    <div className="mt-5 flex flex-wrap items-center gap-3"><button type="button" onClick={convert} disabled={!file || converting} className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-40">{converting ? "변환 중…" : "MP3로 변환"}</button>{resultUrl && <button type="button" onClick={download} className="rounded-full border border-brand px-5 py-3 text-sm font-extrabold text-brand">MP3 다운로드</button>}<span className="text-sm font-semibold text-slate-500">{status}</span></div>
+    {converting && <div className="mt-4"><div className="h-2 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-brand transition-all" style={{ width: `${progress}%` }} /></div><p className="mt-2 text-xs font-semibold text-slate-500">진행률 {progress}%</p></div>}
+    {resultUrl && <div className="mt-6 rounded-2xl border border-brand/20 bg-brand/5 p-4"><p className="text-sm font-extrabold text-ink">변환 결과 미리듣기</p><audio controls src={resultUrl} className="mt-3 w-full" /><p className="mt-3 text-xs font-semibold text-slate-500">{resultName}</p></div>}
+    <p className="mt-5 rounded-2xl bg-paper p-4 text-xs font-semibold leading-5 text-slate-500">저작권이 있는 콘텐츠나 다운로드 권한이 없는 영상의 변환·재배포는 금지될 수 있습니다. YouTube 링크를 입력해 다운로드하는 기능은 제공하지 않습니다.</p>
+  </div>;
 }
 
 function ImageMetadataPanel() {

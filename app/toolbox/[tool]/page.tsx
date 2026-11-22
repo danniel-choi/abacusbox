@@ -11,7 +11,8 @@ const toolPages = {
   "drawing-board": { active: "drawing", title: "브라우저 그림판", description: "설치 없이 브라우저에서 펜, 도형, 텍스트로 그림과 주석을 만들고 PNG로 저장하는 무료 그림판입니다.", keywords: ["온라인 그림판", "브라우저 그림판", "웹 그림판", "그림판 PNG 저장"] },
   "youtube-thumbnail": { active: "youtube", title: "유튜브 썸네일 추출", description: "유튜브 영상 URL을 입력해 공개된 해상도별 썸네일을 확인하고 저장하는 무료 웹툴입니다.", keywords: ["유튜브 썸네일 추출", "유튜브 썸네일 다운로드", "유튜브 이미지 추출"] },
   "image-metadata": { active: "metadata", title: "이미지 정보 확인", description: "이미지 파일의 가로·세로 크기, 비율과 파일 용량을 브라우저에서 확인하는 무료 웹툴입니다.", keywords: ["이미지 크기 확인", "이미지 용량 확인", "사진 비율 확인", "이미지 메타데이터"] },
-  "developer-tools": { active: "developer", title: "전문가용 개발자 도구", description: "JWT 헤더·페이로드 확인, Unix timestamp 변환, Base64·URL 인코딩을 브라우저에서 처리하는 무료 개발자 도구입니다.", keywords: ["JWT 디코더", "Unix timestamp 변환", "Base64 인코더", "URL 인코더", "개발자 도구"] }
+  "developer-tools": { active: "developer", title: "전문가용 개발자 도구", description: "JWT 헤더·페이로드 확인, Unix timestamp 변환, Base64·URL 인코딩을 브라우저에서 처리하는 무료 개발자 도구입니다.", keywords: ["JWT 디코더", "Unix timestamp 변환", "Base64 인코더", "URL 인코더", "개발자 도구"] },
+  "audio-converter": { active: "audio", title: "MP4·영상 파일 MP3 변환", description: "직접 보유하거나 변환 권한이 있는 MP4·WebM·MOV 파일의 오디오 트랙을 브라우저에서 MP3로 변환하는 무료 웹툴입니다.", keywords: ["MP4 MP3 변환", "영상 MP3 변환", "동영상 음원 추출", "WebM MP3 변환", "오디오 추출"] }
 } as const satisfies Record<string, { active: ToolboxTool; title: string; description: string; keywords: string[] }>;
 
 export function generateStaticParams() {

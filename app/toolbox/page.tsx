@@ -9,7 +9,8 @@ const tools = [
   ["drawing-board", "브라우저 그림판", "펜, 도형, 텍스트로 메모를 만들고 PNG로 저장"],
   ["youtube-thumbnail", "유튜브 썸네일 추출", "유튜브 영상 URL에서 공개 썸네일 확인"],
   ["image-metadata", "이미지 정보 확인", "이미지의 크기, 비율과 파일 용량 확인"],
-  ["developer-tools", "개발자 도구", "JWT·Unix timestamp·Base64·URL 인코딩 처리"]
+  ["developer-tools", "개발자 도구", "JWT·Unix timestamp·Base64·URL 인코딩 처리"],
+  ["audio-converter", "MP4→MP3 변환", "내 영상·오디오 파일을 브라우저에서 MP3로 변환"]
 ] as const;
 
 export const metadata: Metadata = {
