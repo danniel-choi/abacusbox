@@ -50,7 +50,16 @@ async function googleRequest(url, token, options = {}) {
     ...options,
     headers: { authorization: `Bearer ${token}`, ...(options.headers || {}) }
   });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  if (!response.ok) {
+    let reason = "";
+    try {
+      const body = await response.json();
+      reason = body?.error?.status || body?.error?.message || "";
+    } catch {
+      reason = "";
+    }
+    throw new Error(`HTTP ${response.status}${reason ? ` (${reason})` : ""}`);
+  }
   return response.json();
 }
 
