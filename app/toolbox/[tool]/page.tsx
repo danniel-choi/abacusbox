@@ -10,7 +10,8 @@ const toolPages = {
   "text-counter": { active: "text", title: "텍스트 글자 수 세기", description: "입력한 텍스트의 글자 수, 공백 제외 글자 수, 단어 수와 줄 수를 바로 확인하는 무료 웹툴입니다.", keywords: ["글자 수 세기", "글자수 계산기", "단어 수 세기", "텍스트 카운터"] },
   "drawing-board": { active: "drawing", title: "브라우저 그림판", description: "설치 없이 브라우저에서 펜, 도형, 텍스트로 그림과 주석을 만들고 PNG로 저장하는 무료 그림판입니다.", keywords: ["온라인 그림판", "브라우저 그림판", "웹 그림판", "그림판 PNG 저장"] },
   "youtube-thumbnail": { active: "youtube", title: "유튜브 썸네일 추출", description: "유튜브 영상 URL을 입력해 공개된 해상도별 썸네일을 확인하고 저장하는 무료 웹툴입니다.", keywords: ["유튜브 썸네일 추출", "유튜브 썸네일 다운로드", "유튜브 이미지 추출"] },
-  "image-metadata": { active: "metadata", title: "이미지 정보 확인", description: "이미지 파일의 가로·세로 크기, 비율과 파일 용량을 브라우저에서 확인하는 무료 웹툴입니다.", keywords: ["이미지 크기 확인", "이미지 용량 확인", "사진 비율 확인", "이미지 메타데이터"] }
+  "image-metadata": { active: "metadata", title: "이미지 정보 확인", description: "이미지 파일의 가로·세로 크기, 비율과 파일 용량을 브라우저에서 확인하는 무료 웹툴입니다.", keywords: ["이미지 크기 확인", "이미지 용량 확인", "사진 비율 확인", "이미지 메타데이터"] },
+  "developer-tools": { active: "developer", title: "전문가용 개발자 도구", description: "JWT 헤더·페이로드 확인, Unix timestamp 변환, Base64·URL 인코딩을 브라우저에서 처리하는 무료 개발자 도구입니다.", keywords: ["JWT 디코더", "Unix timestamp 변환", "Base64 인코더", "URL 인코더", "개발자 도구"] }
 } as const satisfies Record<string, { active: ToolboxTool; title: string; description: string; keywords: string[] }>;
 
 export function generateStaticParams() {

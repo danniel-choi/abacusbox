@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent, ReactNode } from "react";
 
 type ImageTool = "compress" | "resize" | "crop";
-export type ToolboxTool = "image" | "json" | "text" | "drawing" | "youtube" | "metadata";
+export type ToolboxTool = "image" | "json" | "text" | "drawing" | "youtube" | "metadata" | "developer";
 
 async function copyToClipboard(value: string, onSuccess: () => void, onFailure: () => void) {
   try {
@@ -27,6 +27,7 @@ export function ToolboxClient({ initialActive = "image" }: { initialActive?: Too
         {active === "drawing" && <DrawingToolPanel />}
         {active === "youtube" && <YoutubeThumbnailPanel />}
         {active === "metadata" && <ImageMetadataPanel />}
+        {active === "developer" && <DeveloperToolsPanel />}
       </section>
       <aside className="h-fit rounded-[28px] border border-line bg-white p-5 shadow-panel">
         <p className="text-sm font-extrabold text-brand">브라우저에서 바로 처리</p>
@@ -39,6 +40,7 @@ export function ToolboxClient({ initialActive = "image" }: { initialActive?: Too
           <ToolTab active={active === "drawing"} onClick={() => setActive("drawing")} title="브라우저 그림판" description="그리기·주석·PNG 저장" />
           <ToolTab active={active === "youtube"} onClick={() => setActive("youtube")} title="유튜브 썸네일" description="영상 URL에서 이미지 추출" />
           <ToolTab active={active === "metadata"} onClick={() => setActive("metadata")} title="이미지 정보" description="크기·비율·용량 확인" />
+          <ToolTab active={active === "developer"} onClick={() => setActive("developer")} title="개발자 도구" description="JWT·타임스탬프·인코딩" />
         </div>
         <div className="mt-5 rounded-2xl bg-paper p-4 text-xs font-semibold leading-5 text-slate-500">OCR, 배경 제거, 웹사이트 캡처는 브라우저 권한과 별도 모델이 필요해 후속 도구로 확장합니다.</div>
       </aside>
@@ -381,6 +383,144 @@ function YoutubeThumbnailPanel() {
 
 function ThumbnailCard({ src, label }: { src: string; label: string }) {
   return <div className="overflow-hidden rounded-2xl border border-line bg-paper"><img src={src} alt={`${label} 유튜브 썸네일`} className="aspect-video w-full object-cover" /><div className="flex flex-wrap items-center justify-between gap-2 p-3"><span className="text-xs font-extrabold text-slate-500">{label}</span><div className="flex gap-2"><button type="button" onClick={() => copyToClipboard(src, () => undefined, () => undefined)} className="rounded-full border border-line px-3 py-1.5 text-xs font-extrabold text-ink">URL 복사</button><a href={src} target="_blank" rel="noreferrer" className="rounded-full bg-ink px-3 py-1.5 text-xs font-extrabold text-white">열기</a></div></div></div>;
+}
+
+function decodeBase64Url(value: string) {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
+  const binary = atob(normalized);
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function encodeBase64(value: string) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+  return btoa(binary);
+}
+
+function formatDateTimeLocal(date: Date) {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function decodeBase64(value: string) {
+  const binary = atob(value);
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function DeveloperToolsPanel() {
+  const [jwt, setJwt] = useState("");
+  const [jwtHeader, setJwtHeader] = useState("");
+  const [jwtPayload, setJwtPayload] = useState("");
+  const [jwtMessage, setJwtMessage] = useState("");
+  const [timestamp, setTimestamp] = useState(() => Math.floor(Date.now() / 1000).toString());
+  const [timestampDate, setTimestampDate] = useState("");
+  const [timestampMessage, setTimestampMessage] = useState("");
+  const [encodingValue, setEncodingValue] = useState("");
+  const [encodingMode, setEncodingMode] = useState<"base64" | "url">("base64");
+  const [encodingAction, setEncodingAction] = useState<"encode" | "decode">("encode");
+  const [encodingResult, setEncodingResult] = useState("");
+  const [encodingMessage, setEncodingMessage] = useState("");
+
+  const decodeJwt = () => {
+    const parts = jwt.trim().split(".");
+    if (parts.length !== 3) {
+      setJwtHeader("");
+      setJwtPayload("");
+      setJwtMessage("JWT는 헤더·페이로드·서명 3개 영역이어야 합니다.");
+      return;
+    }
+    try {
+      const header = JSON.parse(decodeBase64Url(parts[0]));
+      const payload = JSON.parse(decodeBase64Url(parts[1]));
+      setJwtHeader(JSON.stringify(header, null, 2));
+      setJwtPayload(JSON.stringify(payload, null, 2));
+      setJwtMessage("헤더와 페이로드를 해석했습니다. 서명 검증은 수행하지 않습니다.");
+    } catch {
+      setJwtHeader("");
+      setJwtPayload("");
+      setJwtMessage("JWT 형식 또는 Base64URL 인코딩을 확인하세요.");
+    }
+  };
+
+  const convertTimestamp = () => {
+    const seconds = Number(timestamp.trim());
+    if (!Number.isFinite(seconds)) {
+      setTimestampMessage("유효한 Unix timestamp를 입력하세요.");
+      return;
+    }
+    const date = new Date(seconds * 1000);
+    if (Number.isNaN(date.getTime())) {
+      setTimestampMessage("날짜로 변환할 수 없는 값입니다.");
+      return;
+    }
+    setTimestampDate(formatDateTimeLocal(date));
+    setTimestampMessage(`${date.toLocaleString("ko-KR")} · ${date.toISOString()}`);
+  };
+
+  const setCurrentTimestamp = () => {
+    setTimestamp(Math.floor(Date.now() / 1000).toString());
+    setTimestampMessage("");
+  };
+
+  const convertDateToTimestamp = () => {
+    const date = new Date(timestampDate);
+    if (!timestampDate || Number.isNaN(date.getTime())) {
+      setTimestampMessage("변환할 날짜와 시간을 선택하세요.");
+      return;
+    }
+    setTimestamp(Math.floor(date.getTime() / 1000).toString());
+    setTimestampMessage("선택한 날짜를 Unix timestamp로 변환했습니다.");
+  };
+
+  const transformEncoding = () => {
+    try {
+      const result = encodingMode === "base64"
+        ? encodingAction === "encode" ? encodeBase64(encodingValue) : decodeBase64(encodingValue.trim())
+        : encodingAction === "encode" ? encodeURIComponent(encodingValue) : decodeURIComponent(encodingValue);
+      setEncodingResult(result);
+      setEncodingMessage("변환했습니다.");
+    } catch {
+      setEncodingResult("");
+      setEncodingMessage("입력값의 인코딩 형식을 확인하세요.");
+    }
+  };
+
+  return <div>
+    <p className="text-sm font-extrabold text-brand">개발·운영 도구</p>
+    <h1 className="mt-2 text-2xl font-extrabold text-ink">전문가용 개발자 도구</h1>
+    <p className="mt-3 text-sm font-medium leading-6 text-slate-600">JWT 구조 확인, Unix timestamp 변환, Base64·URL 인코딩을 브라우저에서 처리합니다. 입력값은 서버로 전송되지 않습니다.</p>
+
+    <section className="mt-6 rounded-2xl border border-line p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-extrabold text-ink">JWT 디코더</h2><span className="text-xs font-semibold text-slate-500">서명 검증 없음</span></div>
+      <p className="mt-2 text-sm font-medium leading-6 text-slate-500">토큰의 헤더와 페이로드만 읽습니다. 비밀번호·운영 토큰은 입력하지 마세요.</p>
+      <textarea value={jwt} onChange={(event) => setJwt(event.target.value)} placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." spellCheck={false} className="mt-4 min-h-28 w-full rounded-xl border border-line bg-paper p-3 font-mono text-sm outline-none focus:border-brand" />
+      <div className="mt-3 flex flex-wrap items-center gap-3"><button type="button" onClick={decodeJwt} disabled={!jwt.trim()} className="rounded-full bg-brand px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-40">디코드</button><span className="text-sm font-semibold text-slate-500">{jwtMessage}</span></div>
+      {(jwtHeader || jwtPayload) && <div className="mt-4 grid gap-3 lg:grid-cols-2"><CodeOutput label="Header" value={jwtHeader} /><CodeOutput label="Payload" value={jwtPayload} /></div>}
+    </section>
+
+    <section className="mt-5 rounded-2xl border border-line p-5">
+      <h2 className="text-lg font-extrabold text-ink">Unix timestamp 변환기</h2>
+      <p className="mt-2 text-sm font-medium leading-6 text-slate-500">초 단위 Unix timestamp와 한국 시간 기준 날짜를 서로 변환합니다.</p>
+      <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]"><input value={timestamp} onChange={(event) => setTimestamp(event.target.value)} inputMode="numeric" className="tool-input" /><div className="flex flex-wrap gap-2"><button type="button" onClick={convertTimestamp} className="rounded-full bg-brand px-4 py-2.5 text-sm font-extrabold text-white">날짜로 변환</button><button type="button" onClick={setCurrentTimestamp} className="rounded-full border border-line px-4 py-2.5 text-sm font-extrabold text-ink">현재 시각</button></div></div>
+      <div className="mt-3 flex flex-wrap items-center gap-3"><input type="datetime-local" value={timestampDate} onChange={(event) => setTimestampDate(event.target.value)} className="tool-input" /><button type="button" onClick={convertDateToTimestamp} disabled={!timestampDate} className="rounded-full border border-line px-4 py-2.5 text-sm font-extrabold text-ink disabled:opacity-40">timestamp로 변환</button></div>
+      <p className="mt-3 text-sm font-semibold text-slate-500">{timestampMessage}</p>
+    </section>
+
+    <section className="mt-5 rounded-2xl border border-line p-5">
+      <h2 className="text-lg font-extrabold text-ink">Base64·URL 인코더</h2>
+      <div className="mt-4 flex flex-wrap gap-3"><select value={encodingMode} onChange={(event) => setEncodingMode(event.target.value as typeof encodingMode)} className="tool-input w-auto"><option value="base64">Base64</option><option value="url">URL encoding</option></select><select value={encodingAction} onChange={(event) => setEncodingAction(event.target.value as typeof encodingAction)} className="tool-input w-auto"><option value="encode">인코딩</option><option value="decode">디코딩</option></select></div>
+      <textarea value={encodingValue} onChange={(event) => setEncodingValue(event.target.value)} placeholder="변환할 값을 입력하세요." spellCheck={false} className="mt-4 min-h-24 w-full rounded-xl border border-line bg-paper p-3 font-mono text-sm outline-none focus:border-brand" />
+      <div className="mt-3 flex flex-wrap items-center gap-3"><button type="button" onClick={transformEncoding} disabled={!encodingValue} className="rounded-full bg-brand px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-40">변환</button>{encodingResult && <button type="button" onClick={() => copyToClipboard(encodingResult, () => setEncodingMessage("결과를 복사했습니다."), () => setEncodingMessage("클립보드 권한을 사용할 수 없습니다."))} className="rounded-full border border-line px-4 py-2.5 text-sm font-extrabold text-ink">결과 복사</button>}<span className="text-sm font-semibold text-slate-500">{encodingMessage}</span></div>
+      {encodingResult && <textarea readOnly value={encodingResult} className="mt-4 min-h-24 w-full rounded-xl border border-brand/30 bg-brand/5 p-3 font-mono text-sm outline-none" />}
+    </section>
+  </div>;
+}
+
+function CodeOutput({ label, value }: { label: string; value: string }) {
+  return <div><div className="mb-2 flex items-center justify-between"><span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">{label}</span><button type="button" onClick={() => copyToClipboard(value, () => undefined, () => undefined)} className="text-xs font-extrabold text-brand">복사</button></div><textarea readOnly value={value} className="min-h-48 w-full rounded-xl border border-line bg-paper p-3 font-mono text-xs outline-none" /></div>;
 }
 
 function ImageMetadataPanel() {
