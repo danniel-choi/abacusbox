@@ -299,9 +299,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   );
   const isTarotBirthCard = activeCalculator.slug === "tarot-birth-card-calculator";
   const isSamjae = activeCalculator.slug === "samjae-calculator";
+  const isKoreanZodiac = activeCalculator.slug === "korean-zodiac";
   const isManseRyeok = activeCalculator.slug === "manse-ryeok";
   const isSunriseSunset = activeCalculator.slug === "sunrise-sunset-calculator";
-  const usesUnifiedBirthDateInput = isTarotBirthCard || isSamjae || isManseRyeok || isSunriseSunset;
+  const usesUnifiedBirthDateInput = isTarotBirthCard || isSamjae || isKoreanZodiac || isManseRyeok || isSunriseSunset;
   const diablo2AttackSkillOptions = useMemo(() => {
     if (activeCalculator.slug !== "diablo2-attack-speed") return [];
     return getDiablo2AttackSkillOptions(Number(values.combatant ?? 0));
@@ -536,11 +537,11 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           </div>
         </div>
         <div className="grid gap-5">
-          {usesUnifiedBirthDateInput && (isSunriseSunset || isSamjae || isTarotBirthCard) && (
+          {usesUnifiedBirthDateInput && (isSunriseSunset || isSamjae || isKoreanZodiac || isTarotBirthCard) && (
             <label className="grid gap-2">
               <span className="flex items-center justify-between text-sm font-extrabold text-ink">
                 {isSunriseSunset ? t("calculator.calculationDate") : "출생일"}
-                <span className="font-bold text-slate-400">{t("calculator.solar")}</span>
+                <span className="font-bold text-slate-400">{isSunriseSunset ? t("calculator.solar") : birthDateBasis}</span>
               </span>
               <input
                 className="h-12 w-full min-w-0 rounded-2xl border border-line bg-paper px-4 font-bold text-ink outline-none transition focus:border-brand focus:bg-white"

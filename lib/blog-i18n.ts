@@ -57,7 +57,7 @@ const TOKEN_LABELS: Record<string, LocalizedText> = {
 
 function humanizeSlug(slug: string, locale: "en" | "ja") {
   const words = slug
-    .replace(/-\d{8}-\d{2}-hourly$/, "")
+    .replace(/-\d{8}-\d{2}(?:-hourly)?$/, "")
     .split("-")
     .filter((word) => !/^\d+$/.test(word))
     .map((word) => TOKEN_LABELS[word]?.[locale] ?? word);

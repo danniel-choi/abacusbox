@@ -71,11 +71,11 @@ export default function HomePage() {
               <Link href="#directory" className="min-h-12 w-full rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72] sm:w-auto">
                 {t("home.findCalculator")}
               </Link>
-              <Link href="/calculators" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
-                {t("home.allCalculators")}
+              <Link href="/tarot" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
+                오늘의 운세
               </Link>
-              <Link href="/resources" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
-                {t("home.viewResources")}
+              <Link href="/calculators/mbti-compatibility" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
+                MBTI 궁합 보기
               </Link>
               <Link href="/calculators/net-salary" className="min-h-12 w-full rounded-full border border-white/15 px-5 py-3 text-sm font-extrabold text-white/88 transition hover:border-brand hover:text-brand sm:w-auto">
                 연봉 실수령액

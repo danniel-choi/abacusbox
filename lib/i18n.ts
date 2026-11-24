@@ -14,6 +14,7 @@ export const localeLabels: Record<Locale, { native: string; short: string; htmlL
 const ko = {
   "nav.calculators": "계산기",
   "nav.tax": "세금",
+  "nav.realEstate": "부동산",
   "nav.stock": "주식",
   "nav.health": "건강",
   "nav.daily": "일상",
@@ -288,6 +289,7 @@ const ko = {
 const en: Record<keyof typeof ko, string> = {
   "nav.calculators": "Calculators",
   "nav.tax": "Tax",
+  "nav.realEstate": "Property",
   "nav.stock": "Stocks",
   "nav.health": "Health",
   "nav.daily": "Daily",
@@ -562,6 +564,7 @@ const en: Record<keyof typeof ko, string> = {
 const ja: Record<keyof typeof ko, string> = {
   "nav.calculators": "計算機",
   "nav.tax": "税金",
+  "nav.realEstate": "不動産",
   "nav.stock": "株式",
   "nav.health": "健康",
   "nav.daily": "日常",

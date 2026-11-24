@@ -257,6 +257,20 @@ export default async function CalculatorPage({ params }: Props) {
             <p className="mt-4 text-sm font-semibold leading-6 text-slate-500">
               <LocalizedCalculatorCopy id="guideIntro" />
             </p>
+            {calculator.slug === "alcohol-metabolism-time-calculator" && (
+              <div className="mt-5 rounded-[18px] border border-amber-200 bg-amber-50 p-5" aria-labelledby="alcohol-formula-title">
+                <h3 id="alcohol-formula-title" className="text-lg font-extrabold text-ink">계산 공식과 공식 풀이</h3>
+                <p className="mt-3 rounded-xl bg-white px-4 py-3 text-center font-mono text-sm font-extrabold text-[#8a4b00] sm:text-base">
+                  예상 분해 시간(시간) = 현재 BAC(%) ÷ 시간당 평균 분해율(0.015)
+                </p>
+                <div className="mt-3 grid gap-2 text-sm font-medium leading-7 text-slate-700">
+                  <p>1. 현재 측정된 BAC를 입력합니다.</p>
+                  <p>2. 평균 분해율인 시간당 0.015%포인트로 나눕니다.</p>
+                  <p>3. 예를 들어 BAC 0.08%라면 0.08 ÷ 0.015 = 5.33시간입니다.</p>
+                  <p>4. 0.33시간에 60분을 곱하면 약 20분이므로 약 5시간 20분으로 표시합니다.</p>
+                </div>
+              </div>
+            )}
             <div className="mt-5 grid gap-4 text-base font-medium leading-8 text-slate-700">
               {calculator.guide.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>

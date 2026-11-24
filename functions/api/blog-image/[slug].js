@@ -84,10 +84,10 @@ async function getPost(env, slug) {
   }
 }
 
-function renderSvg({ slug, title, excerpt, publishedAt }) {
+function renderSvg({ slug, title, excerpt, publishedAt, variant = "0" }) {
   const theme = pickTheme(title, excerpt);
   const lines = splitTitle(title);
-  const viralCopy = buildViralCopy(title, excerpt);
+  const viralCopy = variant === "1" ? "핵심 기준" : variant === "2" ? "비교 포인트" : buildViralCopy(title, excerpt);
   const date = String(publishedAt || "").slice(0, 10) || "계산의정석";
   const canonical = `${SITE_URL}/blog/${encodeURIComponent(slug)}`;
 
@@ -127,11 +127,13 @@ export async function onRequestGet(context) {
   const post = await getPost(context.env, slug);
   const title = post?.title || "계산 전에 저장해두는 핵심 가이드";
   const excerpt = post?.excerpt || "숫자를 넣기 전에 기준을 먼저 정리해 두면 결과 해석이 쉬워집니다.";
+  const variant = new URL(context.request.url).searchParams.get("variant") || "0";
   const svg = renderSvg({
     slug,
     title,
     excerpt,
-    publishedAt: post?.published_at
+    publishedAt: post?.published_at,
+    variant
   });
 
   return new Response(svg, {

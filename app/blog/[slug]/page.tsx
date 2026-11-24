@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AdSenseAd } from "@/components/AdSenseAd";
-import { blogPosts, getBlogPost, getLatestBlogPosts, type BlogVisual } from "@/lib/content";
+import { blogPosts, getBlogPost, getLatestBlogPosts, getCanonicalBlogSlug, getLegacyHourlyBlogSlugs, type BlogVisual } from "@/lib/content";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { getCalculator } from "@/lib/calculators";
 import { LocalizedBlogHeader } from "@/components/LocalizedBlogHeader";
@@ -17,7 +17,10 @@ type Props = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return blogPosts.map((post) => ({ slug: post.slug }));
+  return [
+    ...blogPosts.map((post) => ({ slug: post.slug })),
+    ...getLegacyHourlyBlogSlugs().map((slug) => ({ slug }))
+  ];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -66,6 +69,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
+  const canonicalSlug = getCanonicalBlogSlug(slug);
+  if (canonicalSlug !== slug) redirect(`/blog/${canonicalSlug}`);
   const post = getBlogPost(slug);
   if (!post) notFound();
 
@@ -118,6 +123,8 @@ export default async function BlogPostPage({ params }: Props) {
         )}
 
         {post.visual && <BlogVisualBlock visual={post.visual} />}
+
+        {post.visual && <BlogAutoImages slug={post.slug} title={post.title} />}
 
         <section className="mt-7 grid gap-3 sm:grid-cols-3" aria-label="글 핵심 요약">
           {post.content.slice(0, 3).map((paragraph, index) => (
@@ -261,5 +268,23 @@ function BlogVisualBlock({ visual }: { visual: BlogVisual }) {
         </div>
       </div>
     </section>
+  );
+}
+
+function BlogAutoImages({ slug, title }: { slug: string; title: string }) {
+  return (
+    <div className="mt-6 grid gap-4 sm:grid-cols-2" aria-label="본문 요약 이미지">
+      {[1, 2].map((variant) => (
+        <figure key={`${slug}-image-${variant}`} className="overflow-hidden rounded-[20px] border border-line bg-paper">
+          <img
+            src={`/api/blog-image/${encodeURIComponent(slug)}.svg?variant=${variant}`}
+            alt={`${title} 요약 이미지 ${variant}`}
+            loading="lazy"
+            className="block w-full"
+          />
+          <figcaption className="px-3 py-2 text-xs font-bold text-slate-500">{title} 핵심 요약 {variant}</figcaption>
+        </figure>
+      ))}
+    </div>
   );
 }

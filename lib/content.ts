@@ -823,8 +823,21 @@ const hourlyAutoBlogSlugs = [
   "unit-converter-comparison-20260924-00-hourly"
 ];
 
+const legacyHourlyBlogSlugMap = Object.fromEntries(
+  hourlyAutoBlogSlugs.map((slug) => [slug, slug.replace(/-hourly$/, "")])
+);
+
+export function getCanonicalBlogSlug(slug: string) {
+  return legacyHourlyBlogSlugMap[slug] || slug;
+}
+
+export function getLegacyHourlyBlogSlugs() {
+  return Object.keys(legacyHourlyBlogSlugMap);
+}
+
 function buildHourlyAutoBlogPost(slug: string): BlogPost {
-  const match = slug.match(/^(.+)-(guide|checklist|mistakes|comparison|scenario)-(\d{8})-(\d{2})-hourly$/);
+  const canonicalSlug = getCanonicalBlogSlug(slug);
+  const match = canonicalSlug.match(/^(.+)-(guide|checklist|mistakes|comparison|scenario)-(\d{8})-(\d{2})$/);
   const calculatorSlug = match?.[1] || "";
   const templateKey = (match?.[2] || "guide") as keyof typeof hourlyTemplateMeta;
   const dateCode = match?.[3] || "20260926";
@@ -867,7 +880,7 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
   const visual = buildHourlyAutoBlogVisual(meta, template);
 
   return {
-    slug,
+    slug: canonicalSlug,
     title: `${plainTitle} ${template.suffix}`,
     excerpt: `${meta.title}를 쓰기 전에 ${template.focus}을 정리해 실제 판단에 필요한 숫자를 놓치지 않도록 돕습니다.`,
     category: meta.category,
@@ -876,8 +889,32 @@ function buildHourlyAutoBlogPost(slug: string): BlogPost {
     tags: meta.tags,
     calculatorSlug,
     visual,
-    content
+    content: fitAutoBlogContent(content, meta)
   };
+}
+
+function autoBlogContentCharacterCount(items: string[]) {
+  return items.join("").replace(/\s/g, "").length;
+}
+
+function fitAutoBlogContent(content: string[], meta: AutoBlogMeta) {
+  const additions = [
+    `${meta.title} 결과를 나중에 다시 비교하려면 계산일, 기준 단위, 포함한 항목과 제외한 항목을 함께 기록해 두는 것이 좋습니다. 입력 기준이 달라지면 같은 계산기에서도 숫자의 의미가 달라질 수 있습니다.`,
+    `결과를 실제 판단에 활용하기 전에는 공식 안내, 계약서, 명세서, 패치노트 등 원자료를 다시 대조하세요. 계산기는 빠른 비교를 돕지만 개인 조건과 최신 기준까지 대신 판단하지는 않습니다.`,
+    "한 줄로 정리하면, 결과값만 저장하기보다 입력 조건과 적용 기준을 함께 남겨야 다음 판단에서도 계산 결과를 정확하게 재사용할 수 있습니다."
+  ];
+  const result = [...content];
+  for (const addition of additions) {
+    if (autoBlogContentCharacterCount(result) >= 1500) break;
+    result.push(addition);
+  }
+  if (autoBlogContentCharacterCount(result) > 2000) {
+    const current = autoBlogContentCharacterCount(result);
+    const overflow = current - 2000;
+    const lastIndex = result.length - 1;
+    result[lastIndex] = result[lastIndex].slice(0, Math.max(0, result[lastIndex].length - overflow)).trim();
+  }
+  return result.filter(Boolean);
 }
 
 function buildHourlyAutoBlogVisual(meta: AutoBlogMeta, template: (typeof hourlyTemplateMeta)[keyof typeof hourlyTemplateMeta]): BlogVisual {
@@ -1299,7 +1336,8 @@ export const communityPosts: CommunityPost[] = [
 ];
 
 export function getBlogPost(slug: string) {
-  return blogPosts.find((post) => post.slug === slug);
+  const canonicalSlug = getCanonicalBlogSlug(slug);
+  return blogPosts.find((post) => post.slug === canonicalSlug);
 }
 
 export function getCommunityPost(slug: string) {

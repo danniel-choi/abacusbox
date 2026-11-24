@@ -690,6 +690,33 @@ function buildBody(meta, profile, templateKey, relatedCalculators) {
   ]);
 }
 
+function bodyCharacterCount(value) {
+  return String(value || "")
+    .replace(/[`#>*_\[\]()!\-]/g, "")
+    .replace(/\s/g, "")
+    .length;
+}
+
+function fitAutoBlogBody(body, meta, profile) {
+  const additions = [
+    `## 입력값을 기록해 두면 좋은 이유\n${meta.title} 결과를 나중에 다시 비교하려면 계산일, 기준 단위, 포함한 비용과 제외한 비용을 함께 적어 두는 것이 좋습니다. 같은 계산기라도 입력 기준이 달라지면 숫자의 의미가 달라질 수 있기 때문입니다.`,
+    `## 결과를 활용하기 전 마지막 확인\n${profile.documents.join(", ")} 같은 원자료를 다시 대조하고, ${profile.checkpoints.join(" ")} 중요한 계약·신고·구매·정산에 사용할 때는 계산 결과를 확정값으로 보지 말고 공식 안내와 개인 조건을 함께 확인하세요.`,
+    "## 한 줄 요약\n계산 결과는 빠른 비교를 위한 참고값이고, 실제 판단에서는 입력 기준과 적용 조건을 함께 확인하는 것이 핵심입니다."
+  ];
+  let result = String(body || "").trim();
+  for (const addition of additions) {
+    if (bodyCharacterCount(result) >= 1500) break;
+    result = `${result}\n\n${addition}`;
+  }
+
+  if (bodyCharacterCount(result) > 2000) {
+    const sliced = result.slice(0, 2100);
+    const boundary = sliced.lastIndexOf(".");
+    result = sliced.slice(0, boundary >= 1500 ? boundary + 1 : 2000).trim();
+  }
+  return result;
+}
+
 export function getAutoBlogOptions() {
   return {
     calculators: Object.entries(CALCULATOR_BLOG_META).map(([slug, item]) => ({
@@ -723,6 +750,7 @@ export function buildAutoBlogDraft(calculatorSlug, templateKey = "guide", option
   // Keep new URLs descriptive and stable. The old hourly suffix was an internal
   // scheduling detail that should not be exposed as part of the public URL.
   const slug = customSlug || `${calculatorSlug}-${templateKey}-${buildDateCodeFromNow()}`;
+  const body = fitAutoBlogBody(buildBody(metaWithSlug, profile, templateKey, relatedCalculators), metaWithSlug, profile);
 
   return {
     type: "blog",
@@ -732,7 +760,7 @@ export function buildAutoBlogDraft(calculatorSlug, templateKey = "guide", option
     title,
     slug,
     excerpt: normalizeAutoDraftText(buildExcerpt(metaWithSlug, profile, templateKey)),
-    body_md: normalizeAutoDraftText(buildBody(metaWithSlug, profile, templateKey, relatedCalculators)),
+    body_md: normalizeAutoDraftText(body),
     coverImageUrl: `/api/blog-image/${slug}.svg`,
     calculatorSlug,
     tags: customTags.length > 0

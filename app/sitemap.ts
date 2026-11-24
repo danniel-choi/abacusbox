@@ -20,9 +20,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...hubOrder.map((key) => ({
       url: `${SITE_URL}${hubContents[key].path}`
     })),
-    ...["calculators", "toolbox", "resources", "about", "editorial-policy", "privacy", "terms", "contact", "blog"].map((path) => ({
+    ...["calculators", "toolbox", "resources", "about", "editorial-policy", "privacy", "terms", "contact", "blog", "real-estate"].map((path) => ({
       url: `${SITE_URL}/${path}`
     })),
+    { url: `${SITE_URL}/tarot` },
     ...["image-tools", "json-formatter", "text-counter", "drawing-board", "youtube-thumbnail", "image-metadata", "developer-tools", "audio-converter"].map((tool) => ({
       url: `${SITE_URL}/toolbox/${tool}`
     }))

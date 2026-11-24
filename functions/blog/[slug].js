@@ -533,6 +533,10 @@ function markdownToParagraphs(value, title = "") {
     .filter(Boolean);
 }
 
+function inlineBlogImages(slug, title) {
+  return [1, 2].map((variant) => `<figure class="inline-image"><img src="/api/blog-image/${encodeURIComponent(slug)}.svg?variant=${variant}" alt="${escapeHtml(title)} 요약 이미지 ${variant}" loading="lazy"><figcaption>${escapeHtml(title)} 핵심 요약 ${variant}</figcaption></figure>`).join("");
+}
+
 function renderD1BlogHtml(post) {
   const title = escapeHtml(`${post.title} | 계산의정석`);
   const description = escapeHtml(post.excerpt || "");
@@ -541,7 +545,8 @@ function renderD1BlogHtml(post) {
   const imagePath = post.cover_image_url || `/api/blog-image/${post.slug}.svg`;
   const imageUrl = imagePath.startsWith("http") ? imagePath : `${SITE_URL}${imagePath}`;
   const tagText = post.tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join("");
-  const paragraphs = markdownToParagraphs(post.body_md, post.title).map((paragraph) => `<p>${paragraph}</p>`).join("");
+  const bodyParagraphs = markdownToParagraphs(post.body_md, post.title);
+  const paragraphs = bodyParagraphs.map((paragraph, index) => `${index === 1 ? inlineBlogImages(post.slug, post.title) : ""}<p>${paragraph}</p>${index === 3 ? inlineBlogImages(post.slug, post.title) : ""}`).join("");
   const publishedAt = String(post.published_at || "").slice(0, 10) || new Date().toISOString().slice(0, 10);
   const jsonLd = {
     "@context": "https://schema.org",
@@ -605,6 +610,9 @@ function renderD1BlogHtml(post) {
     .button { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--brand); color: #fff; font-weight: 900; padding: 12px 18px; }
     .content { display: grid; gap: 18px; margin-top: 28px; color: #334155; font-size: 17px; font-weight: 550; }
     .content p { margin: 0; }
+    .inline-image { margin: 8px 0; }
+    .inline-image img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 18px; }
+    .inline-image figcaption { margin-top: 6px; color: var(--muted); font-size: 12px; font-weight: 750; }
     .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
     footer { padding: 0 0 48px; color: var(--muted); font-size: 13px; }
     @media (max-width: 640px) { header div, main, footer { width: min(100% - 24px, 960px); } article { border-radius: 18px; padding: 20px; } }
@@ -712,7 +720,7 @@ function renderBlogHtml(post) {
   const imageUrl = `${SITE_URL}${imagePath}`;
   const calculatorUrl = `/calculators/${encodeURIComponent(post.calculatorSlug)}`;
   const tagText = post.tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join("");
-  const paragraphs = post.content.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("");
+  const paragraphs = post.content.map((paragraph, index) => `${index === 1 ? inlineBlogImages(post.slug, post.title) : ""}<p>${escapeHtml(paragraph)}</p>${index === 3 ? inlineBlogImages(post.slug, post.title) : ""}`).join("");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -775,6 +783,9 @@ function renderBlogHtml(post) {
     .button { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--brand); color: #fff; font-weight: 900; padding: 12px 18px; }
     .content { display: grid; gap: 18px; margin-top: 28px; color: #334155; font-size: 17px; font-weight: 550; }
     .content p { margin: 0; }
+    .inline-image { margin: 8px 0; }
+    .inline-image img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 18px; }
+    .inline-image figcaption { margin-top: 6px; color: var(--muted); font-size: 12px; font-weight: 750; }
     .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
     footer { padding: 0 0 48px; color: var(--muted); font-size: 13px; }
     @media (max-width: 640px) { header div, main, footer { width: min(100% - 24px, 960px); } article, .related { border-radius: 18px; padding: 20px; } }

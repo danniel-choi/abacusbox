@@ -1,6 +1,6 @@
 import type { CalculatorGroup } from "@/lib/calculator-directory";
 
-export type HubKey = "tax" | "labor" | "loan" | "stock" | "health" | "daily" | "life" | "game" | "saju" | "business" | "math" | "science";
+export type HubKey = "tax" | "labor" | "loan" | "real-estate" | "stock" | "health" | "daily" | "life" | "game" | "saju" | "business" | "math" | "science";
 
 export type HubContent = {
   key: HubKey;
@@ -90,6 +90,31 @@ export const hubContents: Record<HubKey, HubContent> = {
       }
     ],
     checklist: ["상환방식별 총이자 비교", "DSR과 LTV를 분리해 확인", "중도상환수수료와 대환 비용 반영", "취득세와 보유세를 함께 점검"]
+  },
+  "real-estate": {
+    key: "real-estate",
+    group: "loan",
+    path: "/real-estate",
+    eyebrow: "부동산 의사결정 허브",
+    title: "집을 사고·팔고·보유할 때 필요한 부동산 계산기",
+    description: "매수·매도·보유·대출·전월세 단계별로 필요한 세금, 자금, 대출, 임대 비용 계산기를 한곳에서 비교하세요.",
+    featuredSlugs: ["real-estate-acquisition-tax", "capital-gains-tax", "property-tax", "loan-dsr", "jeonse-vs-monthly-rent", "real-estate-brokerage-fee"],
+    blogSlugs: ["loan-interest-scenario-20261108-01", "dsr-ltv-practical-difference", "loan-prepayment-before-refinance", "property-tax-holding-cost-guide"],
+    sections: [
+      {
+        title: "부동산 계산은 거래 단계부터 나누어야 합니다.",
+        body: "집을 살 때는 취득세·중개보수·대출 한도, 팔 때는 양도차익·세금·대출 상환, 보유할 때는 재산세·관리비·임대 현금흐름을 따로 계산해야 실제 필요한 자금이 보입니다."
+      },
+      {
+        title: "매매가격 외의 비용까지 한 번에 비교하세요.",
+        body: "취득·양도 비용, 보증금, 이자, 수리비, 공실과 같은 부대비용을 놓치면 매수·매도·임대 판단이 달라질 수 있습니다. 각 계산기의 입력 기준과 제외 항목을 함께 확인하세요."
+      },
+      {
+        title: "공식 기준과 개인 조건을 마지막에 재확인하세요.",
+        body: "세금과 대출 규정은 기준일·지역·주택 수·보유·거주 요건에 따라 달라집니다. 결과는 신고·계약·대출 실행 전 검토용 참고값으로 활용하세요."
+      }
+    ],
+    checklist: ["매수·매도·보유 단계 구분", "세금과 금융비용을 분리해 입력", "보증금·중개보수·수리비 포함 여부 확인", "계약 전 공식 기관과 전문가에게 재확인"]
   },
   stock: {
     key: "stock",

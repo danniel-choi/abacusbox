@@ -13,9 +13,9 @@ import type { TranslationKey } from "@/lib/i18n";
 const navItems: { href: string; labelKey: TranslationKey }[] = [
   { href: "/calculators", labelKey: "nav.calculators" },
   { href: "/tax", labelKey: "nav.tax" },
+  { href: "/real-estate", labelKey: "nav.realEstate" },
   { href: "/stock", labelKey: "nav.stock" },
   { href: "/health", labelKey: "nav.health" },
-  { href: "/daily", labelKey: "nav.daily" },
   { href: "/game", labelKey: "nav.game" },
   { href: "/saju", labelKey: "nav.saju" },
   { href: "/toolbox", labelKey: "nav.toolbox" },

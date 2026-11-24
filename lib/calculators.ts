@@ -23,6 +23,7 @@ export type CalculatorSlug =
   | "earned-income-tax"
   | "year-end-tax-settlement"
   | "inheritance-tax"
+  | "capital-gains-tax"
   | "compound-interest"
   | "wealth-planning-calculator"
   | "inflation-calculator"
@@ -34,6 +35,7 @@ export type CalculatorSlug =
   | "daily-intake"
   | "ovulation-calculator"
   | "pregnancy-week-calculator"
+  | "alcohol-metabolism-time-calculator"
   | "pet-age"
   | "korean-age"
   | "anniversary-calculator"
@@ -74,6 +76,7 @@ export type CalculatorSlug =
   | "pyeong-converter"
   | "random-number"
   | "draw-probability"
+  | "game-item-sale-tax"
   | "lineage-classic-lucky-character"
   | "lineage-classic-hunting-efficiency"
   | "blox-fruits-calculator"
@@ -164,6 +167,8 @@ export type CalculatorSlug =
   | "ipchun-calculator"
   | "saju-day-master"
   | "yearly-fortune-keyword"
+  | "new-year-fortune"
+  | "tojeong-bigyeol"
   | "saju-time-pillar"
   | "manse-ryeok"
   | "birth-tree"
@@ -172,6 +177,7 @@ export type CalculatorSlug =
   | "yeokmasal-calculator"
   | "banansal-calculator"
   | "zodiac-compatibility"
+  | "mbti-compatibility"
   | "jangseongsal-calculator"
   | "taegeuk-gwiin-calculator"
   | "gwimungwan-sal-calculator"
@@ -1537,6 +1543,7 @@ function calculateTarotBirthCard(values: Record<string, number>): CalculatorResu
 function usesSajuBirthDateBasis(mode: string) {
   return [
     "manse",
+    "zodiac",
     "samjae",
     "jisal",
     "geopsal",
@@ -2101,6 +2108,161 @@ function makeSajuCalculator(config: {
   };
 }
 
+function fortuneSeed(values: Record<string, number>, targetYear: number) {
+  const year = Math.floor(values.year ?? 1990);
+  const month = Math.floor(values.month ?? 1);
+  const day = Math.floor(values.day ?? 1);
+  return Math.abs(year * 31 + month * 17 + day * 13 + targetYear * 7);
+}
+
+function fortuneScore(seed: number, offset: number) {
+  return 60 + positiveMod(seed + offset * 19, 36);
+}
+
+function calculateNewYearFortune(values: Record<string, number>): CalculatorResult {
+  const targetYear = Math.floor(values.targetYear ?? new Date().getFullYear());
+  const seed = fortuneSeed(values, targetYear);
+  const keywords = ["정리와 회복", "관계 확장", "도전과 실행", "학습과 준비", "재정 점검", "이동과 변화", "집중과 성취", "휴식과 균형"];
+  const keyword = keywords[positiveMod(seed, keywords.length)];
+  const scores = [fortuneScore(seed, 1), fortuneScore(seed, 2), fortuneScore(seed, 3), fortuneScore(seed, 4)];
+  const labels = ["전체 흐름", "금전·소비", "일·학습", "관계·소통"];
+  const dateBasis = Math.floor(values.dateBasis ?? 0) === 1 ? "음력" : "양력";
+  const average = Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length);
+  return {
+    headline: `${targetYear}년 신년운세 키워드는 '${keyword}'`,
+    subline: `${dateBasis} 생년월일과 기준연도를 조합한 오락·참고용 결과입니다.`,
+    rows: [
+      { label: "기준 생년월일", value: `${dateBasis} ${Math.floor(values.year ?? 1990)}년 ${Math.floor(values.month ?? 1)}월 ${Math.floor(values.day ?? 1)}일` },
+      { label: "확인 연도", value: `${targetYear}년` },
+      { label: "핵심 키워드", value: keyword, tone: "strong" },
+      { label: "종합 흐름", value: `${average}점` },
+      ...labels.slice(1).map((label, index) => ({ label, value: `${scores[index + 1]}점` }))
+    ],
+    chart: labels.map((name, index) => ({ name, value: scores[index] }))
+  };
+}
+
+function calculateTojeongBigyeol(values: Record<string, number>): CalculatorResult {
+  const targetYear = Math.floor(values.targetYear ?? new Date().getFullYear());
+  const seed = fortuneSeed(values, targetYear);
+  const monthlyScores = Array.from({ length: 12 }, (_, index) => fortuneScore(seed + index * 23, index + 1));
+  const bestMonth = monthlyScores.indexOf(Math.max(...monthlyScores)) + 1;
+  const cautionMonth = monthlyScores.indexOf(Math.min(...monthlyScores)) + 1;
+  const average = Math.round(monthlyScores.reduce((sum, score) => sum + score, 0) / monthlyScores.length);
+  const phase = average >= 78 ? "상승 흐름" : average >= 68 ? "완만한 흐름" : "점검이 필요한 흐름";
+  const dateBasis = Math.floor(values.dateBasis ?? 0) === 1 ? "음력" : "양력";
+  return {
+    headline: `${targetYear}년 토정비결 흐름은 '${phase}'입니다`,
+    subline: `${dateBasis} 생년월일을 바탕으로 월별 키워드를 단순화한 오락·참고용 결과입니다.`,
+    rows: [
+      { label: "기준 생년월일", value: `${dateBasis} ${Math.floor(values.year ?? 1990)}년 ${Math.floor(values.month ?? 1)}월 ${Math.floor(values.day ?? 1)}일` },
+      { label: "확인 연도", value: `${targetYear}년` },
+      { label: "연간 평균 흐름", value: `${average}점`, tone: "strong" },
+      { label: "상대적으로 좋은 달", value: `${bestMonth}월 · ${monthlyScores[bestMonth - 1]}점` },
+      { label: "주의해서 점검할 달", value: `${cautionMonth}월 · ${monthlyScores[cautionMonth - 1]}점` },
+      { label: "활용 방법", value: "월별 일정과 소비 계획을 점검하는 참고 자료로 활용" }
+    ],
+    chart: monthlyScores.map((value, index) => ({ name: `${index + 1}월`, value }))
+  };
+}
+
+function makeAnnualFortuneCalculator(config: {
+  slug: "new-year-fortune" | "tojeong-bigyeol";
+  title: string;
+  description: string;
+  badge: string;
+  keywords: string[];
+  calculate: (values: Record<string, number>) => CalculatorResult;
+}): CalculatorConfig {
+  const base = makeSajuCalculator({
+    slug: config.slug,
+    title: config.title,
+    description: config.description,
+    badge: config.badge,
+    mode: "fortune",
+    extraFields: [{ name: "targetYear", label: "확인 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }],
+    keywords: config.keywords
+  });
+  return {
+    ...base,
+    actionLabel: `${config.badge} 확인하기`,
+    guideTitle: `${config.title} 이용 기준`,
+    guide: [
+      "양력 또는 음력 생년월일과 확인 연도를 입력해 결과를 확인합니다.",
+      "신년운세는 분야별 점수와 핵심 키워드, 토정비결은 1월부터 12월까지의 흐름을 보여줍니다.",
+      "이 페이지의 결과는 전통 운세를 현대적인 입력·표시 방식으로 단순화한 오락·참고용 콘텐츠입니다.",
+      "재정, 건강, 진로와 같은 중요한 결정은 실제 상황과 전문가의 조언을 함께 고려하세요."
+    ],
+    checkpoints: ["양력·음력 기준 확인", "음력은 평달·윤달 여부 확인", "확인 연도 입력", "결과를 중요한 의사결정의 단독 근거로 사용하지 않기"],
+    faqs: [
+      { question: "음력 생년월일도 입력할 수 있나요?", answer: "네. 양력 또는 음력을 선택할 수 있으며 음력을 선택하면 평달·윤달 여부를 함께 확인해야 합니다." },
+      { question: "토정비결 결과가 실제 미래를 예측하나요?", answer: "아니요. 전통적인 운세 형식을 참고해 만든 간이 콘텐츠이며 미래의 사건이나 결과를 보장하거나 예측하지 않습니다." },
+      { question: "확인 연도는 바꿀 수 있나요?", answer: "네. 1900년부터 2100년 사이의 연도를 입력해 원하는 연도의 참고 흐름을 확인할 수 있습니다." }
+    ],
+    calculate: config.calculate
+  };
+}
+
+const MBTI_TYPES = [
+  { code: "ISTJ", name: "현실적인 관리자" },
+  { code: "ISFJ", name: "따뜻한 수호자" },
+  { code: "INFJ", name: "통찰력 있는 조언자" },
+  { code: "INTJ", name: "전략적인 설계자" },
+  { code: "ISTP", name: "유연한 해결사" },
+  { code: "ISFP", name: "감각적인 모험가" },
+  { code: "INFP", name: "가치 중심의 이상가" },
+  { code: "INTP", name: "논리적인 탐구자" },
+  { code: "ESTP", name: "현실적인 실행가" },
+  { code: "ESFP", name: "즐거운 분위기 메이커" },
+  { code: "ENFP", name: "열정적인 아이디어 메이커" },
+  { code: "ENTP", name: "재치 있는 발명가" },
+  { code: "ESTJ", name: "추진력 있는 관리자" },
+  { code: "ESFJ", name: "다정한 협력자" },
+  { code: "ENFJ", name: "사람을 이끄는 조율자" },
+  { code: "ENTJ", name: "목표 지향 리더" }
+] as const;
+
+function calculateMbtiCompatibility(values: Record<string, number>): CalculatorResult {
+  const first = MBTI_TYPES[Math.min(Math.max(Math.floor(values.firstMbti ?? 0), 0), MBTI_TYPES.length - 1)];
+  const second = MBTI_TYPES[Math.min(Math.max(Math.floor(values.secondMbti ?? 1), 0), MBTI_TYPES.length - 1)];
+  const firstType = first.code;
+  const secondType = second.code;
+  const dimensions = [0, 1, 2, 3].map((index) => firstType[index] === secondType[index]);
+  const sameCount = dimensions.filter(Boolean).length;
+  const oppositeCount = 4 - sameCount;
+  const score = Math.min(96, 50 + sameCount * 8 + oppositeCount * 6 + (firstType[2] === secondType[2] ? 3 : 0));
+  const level = score >= 85 ? "아주 좋은 조화" : score >= 75 ? "좋은 균형" : score >= 65 ? "맞춰 가는 궁합" : "차이를 이해하면 좋아지는 궁합";
+  const strengths = sameCount >= 3
+    ? "생각의 방향과 생활 리듬이 비슷해 서로의 의도를 빠르게 이해할 수 있습니다."
+    : "서로 다른 관점이 새로운 아이디어와 행동 변화를 만들어 낼 수 있습니다.";
+  const caution = sameCount <= 1
+    ? "결정 속도와 감정 표현 방식이 다를 수 있으니 상대의 침묵이나 직설을 단정하지 않는 것이 좋습니다."
+    : "비슷한 방식으로 판단하는 만큼 서로의 전제를 당연하게 여기지 않도록 구체적으로 확인해 주세요.";
+  const dateAdvice = firstType[0] === secondType[0]
+    ? "함께 편한 장소에서 각자의 속도로 대화하는 시간을 만들어 보세요."
+    : "한 사람은 즉흥적인 선택을, 다른 사람은 미리 정한 약속을 맡는 식으로 역할을 나눠 보세요.";
+
+  return {
+    headline: `${firstType} × ${secondType} 궁합 ${score}점`,
+    subline: `${level} · MBTI 네 가지 선호 지표를 비교한 재미용 참고 결과입니다.`,
+    rows: [
+      { label: "남자 MBTI", value: `${firstType} · ${first.name}`, tone: "strong" },
+      { label: "여자 MBTI", value: `${secondType} · ${second.name}`, tone: "strong" },
+      { label: "궁합 점수", value: `${score}점 / 100점`, tone: "strong" },
+      { label: "같은 선호 지표", value: `${sameCount}개` },
+      { label: "다른 선호 지표", value: `${oppositeCount}개` },
+      { label: "잘 맞는 부분", value: strengths },
+      { label: "주의할 부분", value: caution },
+      { label: "관계 팁", value: dateAdvice }
+    ],
+    chart: [
+      { name: "궁합 점수", value: score },
+      { name: "같은 지표", value: sameCount * 25 },
+      { name: "다른 지표", value: oppositeCount * 25 }
+    ]
+  };
+}
+
 const sajuCalculators: CalculatorConfig[] = [
   {
     slug: "tarot-birth-card-calculator",
@@ -2154,7 +2316,7 @@ const sajuCalculators: CalculatorConfig[] = [
     ],
     calculate: calculateTarotBirthCard
   },
-  makeSajuCalculator({ slug: "korean-zodiac", title: "띠 계산기", description: "태어난 해를 기준으로 쥐띠부터 돼지띠까지 내 띠와 연도 간지를 계산합니다.", badge: "띠", mode: "zodiac", keywords: ["띠 계산", "태어난 해 띠"] }),
+  makeSajuCalculator({ slug: "korean-zodiac", title: "띠 계산기", description: "양력 또는 음력 생년월일을 기준으로 쥐띠부터 돼지띠까지 내 띠와 연도 간지를 계산합니다.", badge: "띠", mode: "zodiac", keywords: ["띠 계산", "태어난 해 띠", "음력 띠 계산"] }),
   makeSajuCalculator({ slug: "samjae-calculator", title: "삼재 계산기", description: "태어난 해와 확인 연도를 기준으로 들삼재, 눌삼재, 날삼재 여부를 계산합니다.", badge: "삼재", mode: "samjae", extraFields: [{ name: "targetYear", label: "확인 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }] }),
   makeSajuCalculator({ slug: "sexagenary-cycle", title: "육십갑자(간지) 계산기", description: "생년 또는 날짜 기준 연도 간지와 60갑자 순번을 계산합니다.", badge: "간지", mode: "ganji" }),
   makeSajuCalculator({ slug: "lunar-leap-month", title: "평달 윤달 계산기", description: "입력한 날짜의 월이 평달인지 윤달 가능성이 있는지 간단히 확인합니다.", badge: "윤달", mode: "leap-month" }),
@@ -2162,6 +2324,8 @@ const sajuCalculators: CalculatorConfig[] = [
   makeSajuCalculator({ slug: "ipchun-calculator", title: "입춘 계산기", description: "입춘 기준 사주 연도와 생년 적용 기준을 계산합니다.", badge: "입춘", mode: "ipchun" }),
   makeSajuCalculator({ slug: "saju-day-master", title: "사주 일간 계산기", description: "생년월일로 나의 일간과 일주를 계산합니다.", badge: "일간", mode: "day-master" }),
   makeSajuCalculator({ slug: "yearly-fortune-keyword", title: "올해 운세 키워드 계산기", description: "입춘 기준 세운과 일간을 조합해 올해 운세 키워드를 계산합니다.", badge: "운세", mode: "fortune", extraFields: [{ name: "targetYear", label: "확인 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }] }),
+  makeAnnualFortuneCalculator({ slug: "new-year-fortune", title: "신년운세 계산기", description: "생년월일과 확인 연도를 바탕으로 새해 운세 키워드와 분야별 흐름을 확인합니다.", badge: "신년운세", keywords: ["새해 운세", "신년 운세", "새해 운세 무료", "연도별 운세"], calculate: calculateNewYearFortune }),
+  makeAnnualFortuneCalculator({ slug: "tojeong-bigyeol", title: "토정비결 계산기", description: "생년월일과 확인 연도를 바탕으로 토정비결 형식의 월별 운세 흐름을 확인합니다.", badge: "토정비결", keywords: ["토정비결", "토정비결 무료", "월별 운세", "연간 운세"], calculate: calculateTojeongBigyeol }),
   makeSajuCalculator({ slug: "saju-time-pillar", title: "사주 시간 계산기", description: "출생시각을 기준으로 시지와 시주를 계산합니다.", badge: "시주", mode: "time", includeHour: true }),
   makeSajuCalculator({ slug: "manse-ryeok", title: "만세력 계산기", description: "생년월일시로 연주·월주·일주·시주 사주팔자를 계산합니다.", badge: "만세력", mode: "manse", includeHour: true }),
   makeSajuCalculator({ slug: "birth-tree", title: "탄생목 계산기", description: "생일을 기준으로 탄생목과 간단한 성향 키워드를 확인합니다.", badge: "탄생목", mode: "tree" }),
@@ -2170,6 +2334,49 @@ const sajuCalculators: CalculatorConfig[] = [
   makeSajuCalculator({ slug: "yeokmasal-calculator", title: "역마살 계산기", description: "생년월일시를 기준으로 역마살 위치를 계산합니다.", badge: "역마", mode: "yeokma", includeHour: true }),
   makeSajuCalculator({ slug: "banansal-calculator", title: "반안살 계산기", description: "생년월일과 출생시간으로 반안살 위치를 계산합니다.", badge: "반안", mode: "banan", includeHour: true }),
   makeSajuCalculator({ slug: "zodiac-compatibility", title: "별자리 궁합 계산기", description: "생년월일과 상대 생일을 기준으로 별자리 궁합 점수를 계산합니다.", badge: "궁합", mode: "compatibility", extraFields: [{ name: "partnerMonth", label: "상대 생월", type: "number", unit: "월", min: 1, max: 12, step: 1, defaultValue: 7 }, { name: "partnerDay", label: "상대 생일", type: "number", unit: "일", min: 1, max: 31, step: 1, defaultValue: 15 }] }),
+  {
+    slug: "mbti-compatibility",
+    title: "MBTI 궁합 계산기",
+    description: "두 사람의 MBTI 유형을 선택해 궁합 점수, 잘 맞는 부분, 주의할 부분과 관계 팁을 확인합니다.",
+    category: "사주",
+    keywords: ["MBTI 궁합", "MBTI 궁합 계산기", "엠비티아이 궁합", "MBTI 유형 궁합", "커플 궁합"],
+    badge: "MBTI 궁합",
+    audience: "두 사람의 MBTI 유형을 비교해 관계의 강점과 소통 포인트를 가볍게 확인하려는 사용자",
+    fields: [
+      {
+        name: "firstMbti",
+        label: "남자 MBTI",
+        type: "select",
+        defaultValue: 6,
+        options: MBTI_TYPES.map((item, index) => ({ label: `${item.code} · ${item.name}`, value: index }))
+      },
+      {
+        name: "secondMbti",
+        label: "여자 MBTI",
+        type: "select",
+        defaultValue: 14,
+        options: MBTI_TYPES.map((item, index) => ({ label: `${item.code} · ${item.name}`, value: index }))
+      }
+    ],
+    actionLabel: "MBTI 궁합 계산하기",
+    guideTitle: "MBTI 궁합 계산 기준",
+    guide: [
+      "두 사람의 MBTI 네 글자를 비교해 같은 선호 지표와 다른 선호 지표의 수를 계산합니다.",
+      "같은 성향은 서로를 빠르게 이해하는 데 도움이 되고, 다른 성향은 새로운 관점과 역할 분담의 장점이 될 수 있습니다.",
+      "궁합 점수는 MBTI 유형 조합을 재미로 비교하기 위한 참고값이며 실제 관계의 만족도나 미래를 예측하지 않습니다."
+    ],
+    checkpoints: [
+      "검사 결과가 아니라 평소 실제 행동과 소통 방식을 함께 고려하세요.",
+      "같은 유형이어도 가치관, 생활 습관, 관계 경험에 따라 대화 방식은 달라질 수 있습니다.",
+      "점수보다 잘 맞는 부분과 주의할 부분의 설명을 관계 대화 소재로 활용하세요."
+    ],
+    faqs: [
+      { question: "MBTI 궁합 점수는 과학적으로 검증된 수치인가요?", answer: "아니요. 네 가지 선호 지표를 비교해 만든 재미용 참고 점수이며 실제 관계를 진단하거나 보장하는 결과가 아닙니다." },
+      { question: "같은 MBTI끼리 궁합이 가장 좋은가요?", answer: "반드시 그렇지는 않습니다. 같은 점은 이해의 장점이 될 수 있고, 다른 점은 서로 보완하는 장점이 될 수 있습니다." },
+      { question: "연인 외에 친구나 동료도 계산할 수 있나요?", answer: "네. 연인뿐 아니라 친구·가족·동료 등 두 사람의 관계를 가볍게 비교하는 용도로 사용할 수 있습니다." }
+    ],
+    calculate: calculateMbtiCompatibility
+  },
   makeSajuCalculator({ slug: "jangseongsal-calculator", title: "장성살 계산기", description: "생년월일시로 장성살 위치와 기운을 계산합니다.", badge: "장성", mode: "jangseong", includeHour: true }),
   makeSajuCalculator({ slug: "taegeuk-gwiin-calculator", title: "태극귀인 계산기", description: "내 사주 태극귀인 여부와 선택 연도 운을 계산합니다.", badge: "태극", mode: "taegeuk", includeHour: true }),
   makeSajuCalculator({ slug: "gwimungwan-sal-calculator", title: "귀문관살 계산기", description: "생년월일로 귀문관살 조합과 위치를 확인합니다.", badge: "귀문", mode: "gwimun" }),
@@ -2778,6 +2985,62 @@ const astronomyCalculators: CalculatorConfig[] = [
 export const calculators: CalculatorConfig[] = [
   ...sajuCalculators,
   ...astronomyCalculators,
+  {
+    slug: "alcohol-metabolism-time-calculator",
+    title: "알코올 분해 시간 계산기",
+    description: "현재 혈중알코올농도(BAC)를 입력해 0.00%에 가까워질 때까지 필요한 예상 분해 시간을 계산합니다.",
+    category: "생활",
+    keywords: ["알코올 분해 시간", "술 깨는 시간 계산기", "혈중알코올농도", "BAC 계산기", "음주 후 시간"],
+    badge: "건강·안전",
+    audience: "음주 후 알코올이 분해되는 데 필요한 평균 시간을 참고하려는 사용자",
+    fields: [
+      { name: "currentBac", label: "현재 혈중알코올농도(BAC)", type: "number", unit: "%", min: 0, max: 0.5, step: 0.001, defaultValue: 0.08, help: "측정기 또는 공식 검사 결과가 있다면 그 값을 입력하세요. 모르는 값을 음주량만으로 정확히 추정하는 계산기가 아닙니다." }
+    ],
+    actionLabel: "분해 시간 계산하기",
+    guideTitle: "알코올 분해 시간 계산 기준",
+    guide: [
+      "입력한 현재 BAC를 평균 분해율 시간당 0.015%포인트로 나누어 0.00%에 가까워질 때까지의 예상 시간을 계산합니다.",
+      "예를 들어 BAC가 0.08%라면 0.08 ÷ 0.015 = 약 5.33시간, 즉 약 5시간 20분으로 계산됩니다.",
+      "개인별 분해 속도는 간 기능, 체격, 성별, 음식, 약물과 건강 상태에 따라 달라질 수 있어 실제 시간과 차이가 납니다."
+    ],
+    checkpoints: [
+      "이 계산기는 측정된 BAC를 입력할 때 가장 의미가 있는 평균 추정 도구입니다.",
+      "커피, 물, 음식, 샤워가 혈중알코올농도를 빠르게 낮추지는 않으며 시간만이 알코올을 분해합니다.",
+      "운전이나 기계 조작 가능 여부를 판단하는 근거로 사용하지 말고, 조금이라도 의심되면 운전하지 마세요."
+    ],
+    faqs: [
+      { question: "BAC를 모르면 음주량만으로 계산할 수 있나요?", answer: "음주량만으로 개인의 BAC를 정확히 알기는 어렵습니다. 체중, 성별, 음식, 음주 속도와 시간에 따라 결과가 크게 달라지므로 측정값 없이 계산한 시간은 신뢰하기 어렵습니다." },
+      { question: "커피나 물을 마시면 더 빨리 분해되나요?", answer: "아니요. 커피나 물은 느낌이나 탈수 상태에 영향을 줄 수 있지만 혈중알코올농도를 빠르게 낮추지는 않습니다. 알코올 분해에는 시간이 필요합니다." },
+      { question: "계산된 시간이 지나면 운전해도 되나요?", answer: "아니요. 평균값 기반 추정치일 뿐 개인별 실제 BAC를 보장하지 않습니다. 운전 여부 판단에 사용하지 말고 대중교통·대리운전 등 안전한 방법을 이용하세요." }
+    ],
+    calculate(values) {
+      const currentBac = Math.min(Math.max(values.currentBac, 0), 0.5);
+      const averageRate = 0.015;
+      const estimatedHours = currentBac / averageRate;
+      const totalMinutes = Math.max(0, Math.round(estimatedHours * 60));
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      const slowHours = currentBac / 0.012;
+      const fastHours = currentBac / 0.02;
+      const caution = currentBac >= 0.3 ? "높은 BAC 입력값입니다. 즉시 안전한 장소에서 도움을 요청하세요." : currentBac >= 0.08 ? "판단력과 반응 속도가 저하될 수 있는 수준으로 볼 수 있습니다." : "개인차가 있으므로 수치만으로 안전 여부를 판단하지 마세요.";
+      return {
+        headline: `${hours}시간 ${minutes}분`,
+        subline: `현재 BAC ${formatNumber(currentBac, 3)}% · 평균 분해율 시간당 0.015%포인트`,
+        rows: [
+          { label: "현재 BAC", value: `${formatNumber(currentBac, 3)}%`, tone: "strong" },
+          { label: "평균 예상 시간", value: `${formatNumber(estimatedHours, 2)}시간`, tone: "strong" },
+          { label: "시간·분 환산", value: `${hours}시간 ${minutes}분` },
+          { label: "개인차 반영 참고 범위", value: `${formatNumber(fastHours, 2)}~${formatNumber(slowHours, 2)}시간` },
+          { label: "주의", value: caution }
+        ],
+        chart: [
+          { name: "입력 BAC×1000", value: currentBac * 1000 },
+          { name: "평균 분해시간", value: estimatedHours },
+          { name: "느린 경우", value: slowHours }
+        ]
+      };
+    }
+  },
   {
     slug: "graphing-calculator",
     title: "그래핑 계산기",
@@ -4782,6 +5045,92 @@ export const calculators: CalculatorConfig[] = [
           { name: "과세가액", value: taxableEstate },
           { name: "공제", value: deductions },
           { name: "납부세액", value: finalTax }
+        ]
+      };
+    }
+  },
+  {
+    slug: "capital-gains-tax",
+    title: "양도소득세 계산기",
+    description: "양도가액, 취득가액, 필요경비와 공제 항목을 입력해 양도소득세와 지방소득세를 간이 추정합니다.",
+    category: "세금",
+    keywords: ["양도소득세 계산기", "양도세 계산기", "양도차익 계산", "부동산 양도세", "양도소득세율"],
+    badge: "일반 누진세율 간이 추정",
+    audience: "부동산·자산 매도 전 예상 세액을 확인하려는 사용자",
+    fields: [
+      {
+        name: "assetType",
+        label: "자산 유형",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "부동산 일반 참고", value: 0 },
+          { label: "1세대 1주택 검토", value: 1 },
+          { label: "다주택·주택 중과 검토", value: 2 },
+          { label: "토지·기타자산 참고", value: 3 }
+        ],
+        help: "자산 유형은 결과 안내용이며 비과세·중과 여부를 자동 판정하지 않습니다."
+      },
+      { name: "transferPrice", label: "양도가액", type: "number", unit: "원", min: 0, max: 100000000000, step: 1000000, defaultValue: 1000000000 },
+      { name: "acquisitionPrice", label: "취득가액", type: "number", unit: "원", min: 0, max: 100000000000, step: 1000000, defaultValue: 600000000 },
+      { name: "necessaryExpenses", label: "필요경비", type: "number", unit: "원", min: 0, max: 30000000000, step: 100000, defaultValue: 30000000, help: "취득·양도 관련 수수료, 자본적 지출 등 증빙 가능한 필요경비를 입력합니다." },
+      { name: "holdingYears", label: "보유기간", type: "number", unit: "년", min: 0, max: 100, step: 1, defaultValue: 5 },
+      { name: "longTermDeductionRate", label: "장기보유특별공제율", type: "number", unit: "%", min: 0, max: 80, step: 1, defaultValue: 0, help: "적용 요건을 확인한 뒤 직접 입력합니다. 자동으로 공제율을 판정하지 않습니다." },
+      { name: "nonTaxableGain", label: "비과세·감면 적용 양도차익", type: "number", unit: "원", min: 0, max: 100000000000, step: 1000000, defaultValue: 0, help: "비과세 또는 감면 요건을 확인한 경우에만 해당 금액을 입력합니다." },
+      { name: "basicDeduction", label: "양도소득 기본공제", type: "number", unit: "원", min: 0, max: 100000000, step: 10000, defaultValue: 2500000, help: "양도소득 기본공제는 자산별·연도별 적용 여부를 확인하세요." }
+    ],
+    guideTitle: "양도소득세 간이 계산 기준",
+    guide: [
+      "양도차익은 양도가액에서 취득가액과 증빙 가능한 필요경비를 뺀 금액으로 단순 계산합니다.",
+      "양도소득금액은 양도차익에서 사용자가 입력한 장기보유특별공제와 비과세·감면 적용 금액을 차감한 뒤, 기본공제를 빼 과세표준을 추정합니다.",
+      "과세표준에는 소득세법상 일반 누진세율을 적용하고 지방소득세는 국세의 10%로 별도 표시합니다. 세율 근거는 국가법령정보센터 소득세법 제104조를 확인하세요.",
+      "1세대 1주택 비과세, 다주택 중과, 조정대상지역, 단기보유, 토지·주식 등 자산별 세율과 감면은 요건이 복잡하므로 이 계산기는 해당 여부를 자동 판정하지 않습니다."
+    ],
+    checkpoints: [
+      "양도가액·취득가액이 계약서 기준인지 확인",
+      "필요경비에 포함할 수 있는 항목의 증빙 준비",
+      "장기보유특별공제율과 비과세·감면 금액을 별도로 확인",
+      "1세대1주택·다주택·단기보유 중과 여부를 세무 기준으로 재확인"
+    ],
+    faqs: [
+      { question: "1세대 1주택이면 자동으로 세금이 0원이 되나요?", answer: "아니요. 보유·거주기간, 양도가액, 주택 범위와 시점별 요건을 함께 확인해야 하므로 이 계산기는 비과세 여부를 자동 판정하지 않습니다." },
+      { question: "장기보유특별공제율을 자동으로 계산하나요?", answer: "아니요. 자산 유형과 보유·거주 요건에 따라 달라질 수 있어 적용 가능한 공제율을 확인한 뒤 직접 입력하도록 구성했습니다." },
+      { question: "실제 신고세액과 같은가요?", answer: "아니요. 기본 누진세율 중심의 간이 추정치입니다. 중과세율, 감면, 예정신고, 다른 양도소득, 세액공제와 가산세는 별도 검토가 필요합니다." }
+    ],
+    calculate(values) {
+      const transferPrice = Math.max(values.transferPrice || 0, 0);
+      const acquisitionPrice = Math.max(values.acquisitionPrice || 0, 0);
+      const necessaryExpenses = Math.max(values.necessaryExpenses || 0, 0);
+      const holdingYears = Math.max(values.holdingYears || 0, 0);
+      const longTermRate = Math.min(Math.max(values.longTermDeductionRate || 0, 0), 80);
+      const nonTaxableGain = Math.max(values.nonTaxableGain || 0, 0);
+      const basicDeduction = Math.max(values.basicDeduction || 0, 0);
+      const transferGain = Math.max(transferPrice - acquisitionPrice - necessaryExpenses, 0);
+      const longTermDeduction = Math.min(transferGain, transferGain * (longTermRate / 100));
+      const taxableGain = Math.max(transferGain - longTermDeduction - nonTaxableGain, 0);
+      const taxBase = Math.max(taxableGain - basicDeduction, 0);
+      const nationalTax = comprehensiveIncomeTax(taxBase);
+      const localTax = nationalTax * 0.1;
+      const totalTax = nationalTax + localTax;
+      const assetTypeLabels = ["부동산 일반 참고", "1세대 1주택 검토", "다주택·주택 중과 검토", "토지·기타자산 참고"];
+      return {
+        headline: formatWon(totalTax),
+        subline: `${assetTypeLabels[Math.round(values.assetType || 0)] || assetTypeLabels[0]} · 양도소득세 ${formatWon(nationalTax)} + 지방소득세 ${formatWon(localTax)}`,
+        rows: [
+          { label: "양도차익", value: formatWon(transferGain), tone: "strong" },
+          { label: "보유기간", value: `${holdingYears}년` },
+          { label: "장기보유특별공제", value: `${formatWon(longTermDeduction)} (${longTermRate}%)` },
+          { label: "비과세·감면 적용액", value: formatWon(nonTaxableGain) },
+          { label: "양도소득 과세표준", value: formatWon(taxBase) },
+          { label: "양도소득세", value: formatWon(nationalTax), tone: "strong" },
+          { label: "지방소득세", value: formatWon(localTax) },
+          { label: "합계 참고세액", value: formatWon(totalTax), tone: "strong" }
+        ],
+        chart: [
+          { name: "양도차익", value: transferGain },
+          { name: "공제·감면", value: longTermDeduction + nonTaxableGain + basicDeduction },
+          { name: "국세", value: nationalTax },
+          { name: "지방세", value: localTax }
         ]
       };
     }
@@ -9080,6 +9429,83 @@ export const calculators: CalculatorConfig[] = [
           name: `${count}회`,
           value: binomialAtLeastProbability(count, 1, probability) * 100
         }))
+      };
+    }
+  },
+  {
+    slug: "game-item-sale-tax",
+    title: "게임 아이템 판매 세금 계산기",
+    description: "게임 아이템 판매 매출, 플랫폼 수수료, 취득·제작 원가와 기존 과세표준을 반영해 추가 세금을 간이 추정합니다.",
+    category: "게임",
+    keywords: ["게임 아이템 판매 세금", "아이템 판매 세금 계산기", "게임 재화 세금", "아이템 거래 세금", "게임 부업 세금"],
+    badge: "아이템 판매 수익",
+    audience: "게임 아이템·게임머니·재화를 판매하고 수익과 세금 부담을 비교하려는 사용자",
+    fields: [
+      {
+        name: "incomeType",
+        label: "판매 활동 유형",
+        type: "select",
+        defaultValue: 0,
+        options: [
+          { label: "일회성·비정기 판매 참고", value: 0 },
+          { label: "반복적·영리 목적 판매 참고", value: 1 }
+        ],
+        help: "소득 구분은 거래 횟수·규모·영리성 등 실제 사실관계로 판단되며 자동 확정되지 않습니다."
+      },
+      { name: "annualRevenue", label: "연간 아이템 판매금액", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 3000000 },
+      { name: "platformFees", label: "플랫폼 수수료", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 300000 },
+      { name: "acquisitionCost", label: "아이템 취득·제작 원가", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 800000 },
+      { name: "withdrawalFees", label: "출금·결제 수수료", type: "number", unit: "원", min: 0, max: 1000000000, step: 10000, defaultValue: 50000 },
+      { name: "otherExpenses", label: "기타 증빙 가능 비용", type: "number", unit: "원", min: 0, max: 10000000000, step: 10000, defaultValue: 0 },
+      { name: "existingTaxBase", label: "기존 종합소득 과세표준", type: "number", unit: "원", min: 0, max: 3000000000, step: 100000, defaultValue: 0, help: "아이템 판매 전 이미 발생한 종합소득 과세표준을 입력합니다. 신고 전 단계의 참고값입니다." }
+    ],
+    guideTitle: "게임 아이템 판매 세금 계산 기준",
+    guide: [
+      "판매금액에서 플랫폼 수수료, 취득·제작 원가, 출금 수수료와 입력한 비용을 차감해 아이템 판매 순수익을 계산합니다.",
+      "순수익을 기존 종합소득 과세표준에 더한 뒤, 합산 전후 세액의 차이를 추가 소득세로 표시합니다. 지방소득세는 추가 소득세의 10%로 별도 표시합니다.",
+      "일회성인지 반복적·영리 목적 활동인지에 따라 기타소득 또는 사업소득 등 소득 구분 검토가 필요하며, 이 계산기는 소득 구분을 자동 확정하지 않습니다.",
+      "게임 운영사 약관, 거래 플랫폼 수수료·정산서, 아이템 취득 원가와 비용 증빙을 실제 신고 전에 함께 확인하세요."
+    ],
+    checkpoints: ["판매금액과 실제 입금액 구분", "수수료·취득원가·출금비용 증빙 확인", "반복적·영리 목적 활동 여부 검토", "기존 과세표준과 다른 소득의 합산 여부 확인"],
+    faqs: [
+      { question: "게임 아이템을 팔면 무조건 세금을 내나요?", answer: "아니요. 거래의 반복성·영리성·규모와 소득의 실질, 비용과 증빙 등 사실관계에 따라 소득 구분과 신고 여부를 판단해야 합니다." },
+      { question: "아이템 판매금액 전체에 세율을 곱하나요?", answer: "이 계산기는 판매금액에서 입력한 수수료·원가·비용을 차감한 순수익을 기존 과세표준에 더해 추가 세액을 추정합니다. 비용 인정 여부는 실제 증빙과 세법 판단에 따라 달라질 수 있습니다." },
+      { question: "사업자 등록을 해야 하나요?", answer: "반복성·영리성·거래 규모 등 구체적인 사실관계에 따라 달라질 수 있습니다. 계산 결과만으로 의무를 확정하지 말고 국세청 또는 세무 전문가에게 확인하세요." }
+    ],
+    calculate(values) {
+      const annualRevenue = Math.max(values.annualRevenue || 0, 0);
+      const platformFees = Math.max(values.platformFees || 0, 0);
+      const acquisitionCost = Math.max(values.acquisitionCost || 0, 0);
+      const withdrawalFees = Math.max(values.withdrawalFees || 0, 0);
+      const otherExpenses = Math.max(values.otherExpenses || 0, 0);
+      const existingTaxBase = Math.max(values.existingTaxBase || 0, 0);
+      const deductibleCosts = platformFees + acquisitionCost + withdrawalFees + otherExpenses;
+      const netProfit = Math.max(annualRevenue - deductibleCosts, 0);
+      const taxBefore = comprehensiveIncomeTax(existingTaxBase);
+      const taxAfter = comprehensiveIncomeTax(existingTaxBase + netProfit);
+      const additionalNationalTax = Math.max(taxAfter - taxBefore, 0);
+      const localTax = additionalNationalTax * 0.1;
+      const totalTax = additionalNationalTax + localTax;
+      const incomeType = Math.round(values.incomeType || 0) === 1 ? "반복적·영리 목적 판매 참고" : "일회성·비정기 판매 참고";
+      return {
+        headline: formatWon(totalTax),
+        subline: `${incomeType} · 추가 소득세 ${formatWon(additionalNationalTax)} + 지방소득세 ${formatWon(localTax)}`,
+        rows: [
+          { label: "연간 판매금액", value: formatWon(annualRevenue) },
+          { label: "차감 비용 합계", value: formatWon(deductibleCosts) },
+          { label: "아이템 판매 순수익", value: formatWon(netProfit), tone: "strong" },
+          { label: "기존 과세표준", value: formatWon(existingTaxBase) },
+          { label: "합산 후 과세표준 참고", value: formatWon(existingTaxBase + netProfit) },
+          { label: "추가 소득세 참고", value: formatWon(additionalNationalTax), tone: "strong" },
+          { label: "지방소득세 참고", value: formatWon(localTax) },
+          { label: "예상 추가 세금 합계", value: formatWon(totalTax), tone: "strong" }
+        ],
+        chart: [
+          { name: "판매금액", value: annualRevenue },
+          { name: "차감 비용", value: deductibleCosts },
+          { name: "순수익", value: netProfit },
+          { name: "추가 세금", value: totalTax }
+        ]
       };
     }
   },
