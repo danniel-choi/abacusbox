@@ -1,31 +1,65 @@
 # AI Preview 사전 검증
 
-- 생성 시각: 2026-11-22T08:46:48.122Z
+- 생성 시각: 2026-11-24T18:54:17.742Z
 - 기준 ref: HEAD~1
 - 상태: READY
+- 보호 경로 자동 배포 승인: 활성화
 
 ## 변경 파일
 
-- .github/dependabot.yml
 - .github/workflows/ai-quality.yml
-- components/AdSenseAd.tsx
-- components/AdSenseLoader.tsx
-- docs/ai-auto-upgrade.md
+- app/admin/automation/page.tsx
+- app/blog/[slug]/page.tsx
+- app/calculators/[slug]/page.tsx
+- app/globals.css
+- app/loan/page.tsx
+- app/page.tsx
+- app/real-estate/page.tsx
+- app/saju/page.tsx
+- app/sitemap.ts
+- app/tarot/page.tsx
+- components/AdminAccessClient.tsx
+- components/AdminAutomationClient.tsx
+- components/AdminModerationClient.tsx
+- components/CalculatorClient.tsx
+- components/DailyTarotClient.tsx
+- components/Header.tsx
+- components/HubPage.tsx
+- components/InquiryBoardClient.tsx
 - docs/ai-data-contract.md
 - docs/ai-preflight.md
 - docs/ai-seo-check.md
 - docs/ai-site-audit.md
-- package.json
-- scripts/ai-change-plan.mjs
+- functions/_lib/blog-auto.js
+- functions/_lib/posts.js
+- functions/api/admin/session.js
+- functions/api/blog-image/[slug].js
+- functions/api/contact/[slug].js
+- functions/api/contact/index.js
+- functions/blog/[slug].js
+- lib/blog-i18n.ts
+- lib/calculator-directory.ts
+- lib/calculator-seo.ts
+- lib/calculators.ts
+- lib/content.ts
+- lib/hub-content.ts
+- lib/i18n.ts
+- migrations/0017_contact_visibility.sql
+- migrations/0018_preserve_existing_inquiry_privacy.sql
 - scripts/ai-preflight.mjs
 
 ## 보호 경로 변경
 
-없음
+- functions/api/admin/session.js
+- functions/api/contact/[slug].js
+- functions/api/contact/index.js
+- lib/calculators.ts
+- migrations/0017_contact_visibility.sql
+- migrations/0018_preserve_existing_inquiry_privacy.sql
 
 ## 운영 원칙
 
-- 보호 경로가 변경되면 사람의 검토 후에만 Preview 또는 운영 배포를 진행합니다.
+- 보호 경로가 변경되면 기본적으로 사람의 검토가 필요하며, 명시적인 자동 배포 승인 플래그가 있을 때만 CI가 계속 진행합니다.
 - 환경변수와 Secret 파일은 커밋하지 않습니다.
 - 이 검사는 배포 권한을 부여하거나 외부 계정 설정을 변경하지 않습니다.
 

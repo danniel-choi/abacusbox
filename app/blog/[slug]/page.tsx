@@ -272,17 +272,18 @@ function BlogVisualBlock({ visual }: { visual: BlogVisual }) {
 }
 
 function BlogAutoImages({ slug, title }: { slug: string; title: string }) {
+  const imageRoles = ["핵심 입력값", "비교 포인트", "실행 순서"];
   return (
-    <div className="mt-6 grid gap-4 sm:grid-cols-2" aria-label="본문 요약 이미지">
-      {[1, 2].map((variant) => (
+    <div className="mt-6 grid gap-4 sm:grid-cols-3" aria-label="본문 주제 설명 이미지">
+      {[1, 2, 3].map((variant) => (
         <figure key={`${slug}-image-${variant}`} className="overflow-hidden rounded-[20px] border border-line bg-paper">
           <img
             src={`/api/blog-image/${encodeURIComponent(slug)}.svg?variant=${variant}`}
-            alt={`${title} 요약 이미지 ${variant}`}
+            alt={`${title} ${imageRoles[variant - 1]} 이미지`}
             loading="lazy"
             className="block w-full"
           />
-          <figcaption className="px-3 py-2 text-xs font-bold text-slate-500">{title} 핵심 요약 {variant}</figcaption>
+          <figcaption className="px-3 py-2 text-xs font-bold text-slate-500">{title} · {imageRoles[variant - 1]}</figcaption>
         </figure>
       ))}
     </div>

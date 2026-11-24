@@ -537,7 +537,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
           </div>
         </div>
         <div className="grid gap-5">
-          {usesUnifiedBirthDateInput && (isSunriseSunset || isSamjae || isKoreanZodiac || isTarotBirthCard) && (
+          {usesUnifiedBirthDateInput && isSunriseSunset && (
             <label className="grid gap-2">
               <span className="flex items-center justify-between text-sm font-extrabold text-ink">
                 {isSunriseSunset ? t("calculator.calculationDate") : "출생일"}

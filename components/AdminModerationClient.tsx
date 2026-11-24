@@ -207,8 +207,38 @@ export function AdminModerationClient() {
   const [savingEditPost, setSavingEditPost] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const isReady = true;
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const isReady = authenticated === true;
   const previewBlocks = useMemo(() => buildPreviewBlocks(editBody), [editBody]);
+
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/admin/session", {
+      credentials: "same-origin",
+      cache: "no-store",
+      headers: { accept: "application/json" }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!active) return;
+        if (data?.authenticated) {
+          setAuthenticated(true);
+          return;
+        }
+        setAuthenticated(false);
+        router.replace(`/admin?next=${encodeURIComponent("/admin/moderation")}`);
+      })
+      .catch(() => {
+        if (active) {
+          setAuthenticated(false);
+          setNotice("관리자 세션을 확인하지 못했습니다. 다시 로그인해 주세요.");
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [router]);
 
   function applyEditDraftState(draft: EditDraft) {
     setEditTitle(draft.title ?? "");
@@ -927,6 +957,16 @@ export function AdminModerationClient() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
+              onClick={() => {
+                setActiveView("automation");
+                void fetchAutoBlogOptions();
+              }}
+              className="rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#029b72]"
+            >
+              자동 블로그 생성
+            </button>
+            <button
+              type="button"
               onClick={async () => {
                 await fetch("/api/admin/session", { method: "DELETE", credentials: "same-origin" });
                 router.replace("/admin");
@@ -949,7 +989,7 @@ export function AdminModerationClient() {
           <AdminViewButton active={activeView === "comments"} label="댓글" onClick={() => setActiveView("comments")} />
           <AdminViewButton
             active={activeView === "automation"}
-            label="자동화"
+            label="자동 블로그 생성"
             onClick={() => {
               setActiveView("automation");
               void fetchVisitorStats();
@@ -1115,7 +1155,7 @@ export function AdminModerationClient() {
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button type="button" onClick={createAutoBlogDraft} disabled={creatingAutoBlog || loadingAutoBlogOptions} className="rounded-full bg-ink px-4 py-2 text-sm font-extrabold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-60">
-                {creatingAutoBlog ? "초안 생성 중..." : "초안 생성"}
+                {creatingAutoBlog ? "블로그 생성 중..." : "자동 생성·공개"}
               </button>
               <button type="button" onClick={createQuickSamplePost} disabled={creatingQuickPost} className="rounded-full border border-ink bg-white px-4 py-2 text-sm font-extrabold text-ink transition hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-60">
                 {creatingQuickPost ? "새 글 등록 중..." : "새 글 자동 등록"}

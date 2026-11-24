@@ -9,10 +9,6 @@ export async function onRequestGet(context) {
     const isAdmin = await requireAdmin(context.request, context.env);
     const ownerToken = context.request.headers.get("x-inquiry-token");
 
-    if (!isAdmin && !ownerToken) {
-      return json({ items: [], total: 0, page, limit });
-    }
-
     let result;
     if (isAdmin) {
       result = await listPosts(db, {
@@ -23,7 +19,7 @@ export async function onRequestGet(context) {
         limit,
         offset
       });
-    } else {
+    } else if (ownerToken) {
       const ownerTokenHash = await sha256Hex(ownerToken);
       const rows = await db.prepare(`
         SELECT
@@ -35,6 +31,7 @@ export async function onRequestGet(context) {
           p.excerpt,
           p.body_md,
           p.published_at,
+          p.visibility,
           p.featured,
           p.view_count,
           p.comment_count,
@@ -48,6 +45,7 @@ export async function onRequestGet(context) {
           AND p.board = 'qna'
           AND p.slug LIKE 'contact-%'
           AND ia.owner_token_hash = ?
+          AND COALESCE(p.visibility, 'public') = 'public'
         ORDER BY datetime(COALESCE(p.published_at, p.created_at)) DESC, p.id DESC
         LIMIT ? OFFSET ?
       `).bind(ownerTokenHash, limit, offset).all();
@@ -61,6 +59,7 @@ export async function onRequestGet(context) {
           AND p.board = 'qna'
           AND p.slug LIKE 'contact-%'
           AND ia.owner_token_hash = ?
+          AND COALESCE(p.visibility, 'public') = 'public'
       `).bind(ownerTokenHash).first();
 
       result = {
@@ -69,6 +68,16 @@ export async function onRequestGet(context) {
         page,
         limit
       };
+    } else {
+      result = await listPosts(db, {
+        type: "community",
+        board: "qna",
+        includeSlugPrefix: "contact-",
+        visibility: "public",
+        page,
+        limit,
+        offset
+      });
     }
 
     return json(result);
@@ -94,6 +103,7 @@ export async function onRequestPost(context) {
     const authorName = String(payload?.author_name || "").trim();
     const title = String(payload?.title || "").trim();
     const body = String(payload?.body || "").trim();
+    const visibility = payload?.visibility === "private" ? "private" : "public";
 
     if (!authorName || !title || !body) {
       return error("author_name, title, body are required", 400);
@@ -123,9 +133,9 @@ export async function onRequestPost(context) {
 
     const postResult = await db.prepare(`
       INSERT INTO posts (
-        type, board, slug, title, excerpt, body_md, status, author_id, published_at, featured
+        type, board, slug, title, excerpt, body_md, visibility, status, author_id, published_at, featured
       )
-      VALUES (?, ?, ?, ?, ?, ?, 'published', ?, ?, 0)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'published', ?, ?, 0)
     `).bind(
       "community",
       "qna",
@@ -133,6 +143,7 @@ export async function onRequestPost(context) {
       title,
       excerpt,
       body,
+      visibility,
       authorId,
       publishedAt
     ).run();

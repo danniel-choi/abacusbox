@@ -66,7 +66,7 @@ export function AdminAutomationClient() {
     setLoading(true);
     try {
       const [sessionResponse, runsResponse, postsResponse] = await Promise.all([
-        fetch("/api/admin/session", { credentials: "same-origin", headers: { accept: "application/json" } }),
+        fetch("/api/admin/session", { credentials: "same-origin", cache: "no-store", headers: { accept: "application/json" } }),
         fetch("/api/admin/scheduler-run", { credentials: "same-origin", headers: { accept: "application/json" } }),
         fetch("/api/admin/content?type=blog&status=published&sort=latest&page=1&limit=6", { credentials: "same-origin", headers: { accept: "application/json" } })
       ]);

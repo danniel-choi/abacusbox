@@ -12,6 +12,7 @@ type InquiryItem = {
   published_at: string | null;
   author_name: string | null;
   view_count: number;
+  visibility?: "public" | "private";
 };
 
 type Props = {
@@ -26,6 +27,7 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
   const [authorName, setAuthorName] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -83,7 +85,8 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
         body: JSON.stringify({
           author_name: trimmedAuthor,
           title: trimmedTitle,
-          body: trimmedBody
+          body: trimmedBody,
+          visibility
         })
       });
 
@@ -103,6 +106,7 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
       setAuthorName("");
       setTitle("");
       setBody("");
+      setVisibility("public");
       setNotice(t("contact.success"));
     } catch {
       setNotice(t("contact.failure"));
@@ -138,6 +142,7 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
                   <span className="rounded-full bg-brand/10 px-3 py-1 text-brand">{t("contact.register")}</span>
                   {item.published_at && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{formatDate(item.published_at, locale)}</span>}
                   {item.author_name && <span className="rounded-full bg-paper px-3 py-1 text-slate-500">{item.author_name}</span>}
+                  {item.visibility === "private" && <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-700">관리자만 열람</span>}
                 </div>
                 <h2 className="mt-4 text-xl font-extrabold text-ink sm:text-2xl">{item.title}</h2>
                 <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{item.excerpt || ""}</p>
@@ -180,8 +185,20 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
             placeholder={t("contact.bodyPlaceholder")}
             className="rounded-2xl border border-line bg-paper px-4 py-3 font-medium text-ink outline-none transition focus:border-brand"
           />
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="grid gap-3 rounded-2xl border border-line bg-paper p-4">
             <p className="text-xs font-semibold text-slate-500">{t("contact.visibility")}</p>
+            <div className="flex flex-wrap gap-2">
+              <label className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-extrabold transition ${visibility === "public" ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-slate-600"}`}>
+                <input type="radio" name="contact-visibility" value="public" checked={visibility === "public"} onChange={() => setVisibility("public")} className="sr-only" />
+                {t("contact.public")}
+              </label>
+              <label className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-extrabold transition ${visibility === "private" ? "border-amber-500 bg-amber-50 text-amber-700" : "border-line bg-white text-slate-600"}`}>
+                <input type="radio" name="contact-visibility" value="private" checked={visibility === "private"} onChange={() => setVisibility("private")} className="sr-only" />
+                {t("contact.private")}
+              </label>
+            </div>
+          </div>
+          <div className="flex justify-end">
             <button
               type="button"
               onClick={handleSubmit}

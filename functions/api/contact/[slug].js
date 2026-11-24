@@ -1,4 +1,4 @@
-import { error, json, getD1Binding, isMissingTableError, requireAdmin, sha256Hex } from "../../_lib/http.js";
+import { error, json, getD1Binding, isMissingTableError, requireAdmin } from "../../_lib/http.js";
 import { getPostBySlug } from "../../_lib/posts.js";
 
 export async function onRequestGet(context) {
@@ -9,24 +9,18 @@ export async function onRequestGet(context) {
     if (!db) throw new Error("D1 binding is unavailable");
 
     const isAdmin = await requireAdmin(context.request, context.env);
-    const ownerToken = context.request.headers.get("x-inquiry-token");
-
     if (!isAdmin) {
-      if (!ownerToken) return error("Forbidden", 403);
-
-      const ownerTokenHash = await sha256Hex(ownerToken);
       const access = await db.prepare(`
         SELECT p.id
         FROM posts p
-        JOIN inquiry_access ia ON ia.post_id = p.id
         WHERE p.slug = ?
           AND p.status = 'published'
           AND p.type = 'community'
           AND p.board = 'qna'
           AND p.slug LIKE 'contact-%'
-          AND ia.owner_token_hash = ?
+          AND COALESCE(p.visibility, 'public') = 'public'
         LIMIT 1
-      `).bind(slug, ownerTokenHash).first();
+      `).bind(slug).first();
 
       if (!access) return error("Forbidden", 403);
     }

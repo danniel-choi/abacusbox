@@ -1615,6 +1615,8 @@ function makeSimpleSajuResult(title: string, values: Record<string, number>, mod
       headline: `${profile.year}년생은 ${animal}띠입니다`,
       subline: `${yearGanji}년 기준 지지는 ${earthlyBranches[profile.yearBranchIndex]}입니다.`,
       rows: [
+        { label: "생년월일 기준", value: birthBasisLabel, tone: "strong" },
+        ...(dateBasis === 1 ? [{ label: "변환 양력", value: convertedDateLabel, tone: "strong" as const }] : []),
         { label: "띠", value: `${animal}띠`, tone: "strong" },
         { label: "연도 간지", value: yearGanji },
         { label: "오행", value: branchElements[profile.yearBranchIndex] }
@@ -2316,7 +2318,7 @@ const sajuCalculators: CalculatorConfig[] = [
     ],
     calculate: calculateTarotBirthCard
   },
-  makeSajuCalculator({ slug: "korean-zodiac", title: "띠 계산기", description: "양력 또는 음력 생년월일을 기준으로 쥐띠부터 돼지띠까지 내 띠와 연도 간지를 계산합니다.", badge: "띠", mode: "zodiac", keywords: ["띠 계산", "태어난 해 띠", "음력 띠 계산"] }),
+  makeSajuCalculator({ slug: "korean-zodiac", title: "띠 계산기", description: "양력 또는 음력 생년월일을 입력해 쥐띠부터 돼지띠까지 내 띠와 연도 간지를 계산합니다.", badge: "띠", mode: "zodiac", keywords: ["띠 계산", "태어난 해 띠", "음력 띠 계산", "양력 띠 계산"] }),
   makeSajuCalculator({ slug: "samjae-calculator", title: "삼재 계산기", description: "태어난 해와 확인 연도를 기준으로 들삼재, 눌삼재, 날삼재 여부를 계산합니다.", badge: "삼재", mode: "samjae", extraFields: [{ name: "targetYear", label: "확인 연도", type: "number", unit: "년", min: 1900, max: 2100, step: 1, defaultValue: 2026 }] }),
   makeSajuCalculator({ slug: "sexagenary-cycle", title: "육십갑자(간지) 계산기", description: "생년 또는 날짜 기준 연도 간지와 60갑자 순번을 계산합니다.", badge: "간지", mode: "ganji" }),
   makeSajuCalculator({ slug: "lunar-leap-month", title: "평달 윤달 계산기", description: "입력한 날짜의 월이 평달인지 윤달 가능성이 있는지 간단히 확인합니다.", badge: "윤달", mode: "leap-month" }),

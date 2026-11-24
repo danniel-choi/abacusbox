@@ -11,7 +11,11 @@ import {
 
 export async function onRequestGet(context) {
   const authenticated = await hasValidAdminSession(context.request, context.env);
-  return json({ authenticated });
+  return json({ authenticated }, {
+    headers: {
+      "cache-control": "no-store, max-age=0"
+    }
+  });
 }
 
 export async function onRequestPost(context) {
@@ -36,7 +40,8 @@ export async function onRequestPost(context) {
     { ok: true, authenticated: true },
     {
       headers: {
-        "set-cookie": createAdminSessionCookie(sessionValue)
+        "set-cookie": createAdminSessionCookie(sessionValue),
+        "cache-control": "no-store, max-age=0"
       }
     }
   );
@@ -47,7 +52,8 @@ export async function onRequestDelete() {
     { ok: true, authenticated: false },
     {
       headers: {
-        "set-cookie": clearAdminSessionCookie()
+        "set-cookie": clearAdminSessionCookie(),
+        "cache-control": "no-store, max-age=0"
       }
     }
   );

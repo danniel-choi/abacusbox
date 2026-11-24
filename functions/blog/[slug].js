@@ -534,7 +534,8 @@ function markdownToParagraphs(value, title = "") {
 }
 
 function inlineBlogImages(slug, title) {
-  return [1, 2].map((variant) => `<figure class="inline-image"><img src="/api/blog-image/${encodeURIComponent(slug)}.svg?variant=${variant}" alt="${escapeHtml(title)} 요약 이미지 ${variant}" loading="lazy"><figcaption>${escapeHtml(title)} 핵심 요약 ${variant}</figcaption></figure>`).join("");
+  const roles = ["핵심 입력값", "비교 포인트", "실행 순서"];
+  return [1, 2, 3].map((variant) => `<figure class="inline-image"><img src="/api/blog-image/${encodeURIComponent(slug)}.svg?variant=${variant}" alt="${escapeHtml(title)} ${roles[variant - 1]} 이미지" loading="lazy"><figcaption>${escapeHtml(title)} · ${roles[variant - 1]}</figcaption></figure>`).join("");
 }
 
 function renderD1BlogHtml(post) {
@@ -546,7 +547,7 @@ function renderD1BlogHtml(post) {
   const imageUrl = imagePath.startsWith("http") ? imagePath : `${SITE_URL}${imagePath}`;
   const tagText = post.tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join("");
   const bodyParagraphs = markdownToParagraphs(post.body_md, post.title);
-  const paragraphs = bodyParagraphs.map((paragraph, index) => `${index === 1 ? inlineBlogImages(post.slug, post.title) : ""}<p>${paragraph}</p>${index === 3 ? inlineBlogImages(post.slug, post.title) : ""}`).join("");
+  const paragraphs = bodyParagraphs.map((paragraph, index) => `${index === 1 ? inlineBlogImages(post.slug, post.title) : ""}<p>${paragraph}</p>`).join("");
   const publishedAt = String(post.published_at || "").slice(0, 10) || new Date().toISOString().slice(0, 10);
   const jsonLd = {
     "@context": "https://schema.org",
@@ -720,7 +721,7 @@ function renderBlogHtml(post) {
   const imageUrl = `${SITE_URL}${imagePath}`;
   const calculatorUrl = `/calculators/${encodeURIComponent(post.calculatorSlug)}`;
   const tagText = post.tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join("");
-  const paragraphs = post.content.map((paragraph, index) => `${index === 1 ? inlineBlogImages(post.slug, post.title) : ""}<p>${escapeHtml(paragraph)}</p>${index === 3 ? inlineBlogImages(post.slug, post.title) : ""}`).join("");
+  const paragraphs = post.content.map((paragraph, index) => `${index === 1 ? inlineBlogImages(post.slug, post.title) : ""}<p>${escapeHtml(paragraph)}</p>`).join("");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",

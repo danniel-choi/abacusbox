@@ -7,6 +7,7 @@ const PUBLIC_POST_FIELDS = `
   p.excerpt,
   p.body_md,
   p.cover_image_url,
+  p.visibility,
   p.published_at,
   p.featured,
   p.view_count,
@@ -17,7 +18,7 @@ const PUBLIC_POST_FIELDS = `
 
 export async function listPosts(
   db,
-  { type, board, sort = "latest", page, limit, offset, includeSlugPrefix, excludeSlugPrefix }
+  { type, board, sort = "latest", page, limit, offset, includeSlugPrefix, excludeSlugPrefix, visibility }
 ) {
   const clauses = [`p.status = 'published'`];
   const params = [];
@@ -30,6 +31,11 @@ export async function listPosts(
   if (board) {
     clauses.push("p.board = ?");
     params.push(board);
+  }
+
+  if (visibility) {
+    clauses.push("COALESCE(p.visibility, 'public') = ?");
+    params.push(visibility);
   }
 
   if (includeSlugPrefix) {

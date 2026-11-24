@@ -27,6 +27,7 @@ export function AdminAccessClient() {
       try {
         const response = await fetch("/api/admin/session", {
           credentials: "same-origin",
+          cache: "no-store",
           headers: { accept: "application/json" }
         });
         const data = await response.json();
@@ -61,6 +62,7 @@ export function AdminAccessClient() {
       const response = await fetch("/api/admin/session", {
         method: "POST",
         credentials: "same-origin",
+        cache: "no-store",
         headers: {
           "content-type": "application/json",
           accept: "application/json"
