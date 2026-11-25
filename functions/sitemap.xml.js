@@ -39,6 +39,7 @@ async function loadDatabaseEntries(env) {
     WHERE type = 'blog'
       AND status = 'published'
       AND slug IS NOT NULL
+      AND slug NOT LIKE '%-hourly'
     ORDER BY datetime(COALESCE(updated_at, published_at)) DESC, id DESC
   `).all();
 

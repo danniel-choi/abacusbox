@@ -399,6 +399,13 @@ export async function onRequest(context) {
 
   const url = new URL(request.url);
   const slug = decodeURIComponent(url.pathname.replace(/^\/blog\//, "").replace(/\/$/, ""));
+  const canonicalSlug = slug.endsWith("-hourly") ? slug.replace(/-hourly$/, "") : null;
+  if (canonicalSlug) {
+    const canonicalPost = await getD1BlogPost(env, canonicalSlug);
+    if (canonicalPost) {
+      return Response.redirect(new URL(`/blog/${encodeURIComponent(canonicalSlug)}`, url), 308);
+    }
+  }
   const d1Post = await getD1BlogPost(env, slug);
 
   if (d1Post) {
