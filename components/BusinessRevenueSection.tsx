@@ -7,17 +7,20 @@ const offers = [
   {
     title: "계산기 위젯·맞춤 도구",
     text: "쇼핑몰, 커뮤니티, 사내 페이지에 필요한 계산 로직과 입력 화면을 정리해 임베드형 도구로 설계합니다.",
-    label: "위젯 문의"
+    label: "위젯 문의",
+    topic: "widget"
   },
   {
     title: "사업자용 계산 템플릿",
     text: "마진·부가세·손익분기·광고 효율을 반복해서 검토할 수 있는 실무용 표와 계산 기준을 구성합니다.",
-    label: "템플릿 문의"
+    label: "템플릿 문의",
+    topic: "template"
   },
   {
     title: "콘텐츠·제휴 검토",
     text: "계산 기준과 출처가 확인되는 서비스 소개, 공동 가이드, 도구 제휴 제안을 운영 기준에 따라 검토합니다.",
-    label: "제휴 문의"
+    label: "제휴 문의",
+    topic: "partnership"
   }
 ];
 
@@ -42,7 +45,7 @@ export function BusinessRevenueSection() {
               <h3 className="text-lg font-extrabold">{offer.title}</h3>
               <p className="mt-3 text-sm font-medium leading-6 text-white/65">{offer.text}</p>
               <Link
-                href="/contact"
+                href={`/contact?topic=${offer.topic}`}
                 onClick={() => openContact(offer.title)}
                 className="mt-5 inline-flex rounded-full bg-brand px-4 py-2 text-sm font-extrabold text-white transition hover:bg-white hover:text-navy"
               >

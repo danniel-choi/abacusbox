@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 type InquiryItem = {
   id: number;
@@ -30,6 +31,23 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [leadTopic, setLeadTopic] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const topic = new URLSearchParams(window.location.search).get("topic");
+      const subjectByTopic: Record<string, string> = {
+        widget: "계산기 위젯·맞춤 도구 문의",
+        template: "사업자용 계산 템플릿 문의",
+        partnership: "콘텐츠·제휴 검토 문의"
+      };
+      const initialTitle = topic ? subjectByTopic[topic] : undefined;
+      if (!initialTitle) return;
+      setLeadTopic(topic);
+      setTitle((current) => current || initialTitle);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -102,6 +120,8 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
         const data = await refresh.json();
         setItems(Array.isArray(data.items) ? data.items : []);
       }
+
+      if (leadTopic) trackAnalyticsEvent("business_lead_submit", { lead_topic: leadTopic });
 
       setAuthorName("");
       setTitle("");
