@@ -34,6 +34,13 @@ jobs:
           SEARCH_CONSOLE_SITE_URL: ${{ secrets.SEARCH_CONSOLE_SITE_URL || vars.SEARCH_CONSOLE_SITE_URL }}
           ADSENSE_ACCOUNT_ID: ${{ secrets.ADSENSE_ACCOUNT_ID || vars.ADSENSE_ACCOUNT_ID }}
         run: |
+          service_account_configured="no"
+          property_configured="no"
+          search_console_configured="no"
+          [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ] && service_account_configured="yes"
+          [ -n "$GA4_PROPERTY_ID" ] && property_configured="yes"
+          [ -n "$SEARCH_CONSOLE_SITE_URL" ] && search_console_configured="yes"
+          echo "Google measurement configuration: service-account=$service_account_configured, ga4-property=$property_configured, search-console=$search_console_configured"
           if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ] || [ -z "$GA4_PROPERTY_ID" ] || [ -z "$SEARCH_CONSOLE_SITE_URL" ]; then
             echo "Google 측정 시크릿 또는 속성값이 등록되지 않아 이번 실행은 대기 상태로 종료합니다."
             exit 0
