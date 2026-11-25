@@ -34,7 +34,10 @@ const brandRelatedLinks = [
   { href: "/calculators/lotto-probability", label: "복권 당첨 확률 계산기" },
   { href: "/calculators/lightning-strike-probability", label: "번개 맞을 확률 계산기" },
   { href: "/calculators/si-outsourcing-price", label: "SI 외주 개발 단가 계산기" }
-  ,{ href: "/side-income", label: "웹 부업·재테크 가이드" }
+  ,{ href: "/side-income", label: "웹 부업·재테크 가이드" },
+  { href: "/resources/business-template", label: "사업자 마진 템플릿" },
+  { href: "/business/widget-demo", label: "계산기 위젯 데모" },
+  { href: "/calculators/revenue-goal-planner", label: "월 수익 목표 플래너" }
 ];
 
 const laborFocusLinks = [
