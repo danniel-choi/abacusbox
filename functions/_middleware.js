@@ -10,7 +10,7 @@ export async function onRequest(context) {
   // domain and the www domain. Preserve the path and query string.
   if (url.hostname === "abacusbox.com") {
     url.hostname = "www.abacusbox.com";
-    return Response.redirect(url.toString(), 308);
+    return Response.redirect(url.toString(), 301);
   }
 
   if (!PROTECTED_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))) {

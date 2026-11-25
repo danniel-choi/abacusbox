@@ -96,6 +96,27 @@ AdSense API 호출 자체는 성공했지만 계정 목록 응답은 0개였다.
 4. Search Console에서 계산기·블로그의 노출이 생기는지 7~14일 관찰
 5. AdSense 계정 권한을 확인한 뒤 페이지 RPM과 예상 수입을 별도로 수집
 
+## 2026-11-25 20:07 UTC 재확인
+
+읽기 전용 스냅샷을 다시 실행해 최신 검색·사용 데이터를 확인했다.
+
+- Search Console 최근 28일: 클릭 4회, 노출 31회
+- GA4 최근 28일: 세션 64, 활성 사용자 55, 페이지뷰 424
+- GA4 주요 랜딩: `/calculators/lineage-classic-lucky-character` 세션 24, 홈페이지 세션 11
+- 계산기 이벤트: `calculator_start` 73회, `calculator_complete` 2회
+- 사이트맵: 오류 0개·경고 0개·대기 아님
+- AdSense API: 계정 목록 0개, 수익·RPM 미확인
+
+URL 검사 결과에서 다음 문제가 확인됐다.
+
+- `/calculators/minimum-wage`, `/calculators/bmi`: 크롤링됐지만 현재 색인되지 않음
+- `/calculators/severance`, `/calculators/net-salary`: Google이 `https://abacusbox.com/...`를 사용자 canonical과 다른 표준으로 선택
+- `/calculators/loan-dsr`: Google이 사용자 canonical과 동일한 URL을 선택했지만 아직 색인 상태는 별도 확인 필요
+- `/calculators/loan-interest`: 적절한 표준 태그가 포함된 대체 페이지
+- 새 블로그·템플릿·수익 플래너·위젯 데모: Google에 아직 알려지지 않은 URL
+
+코드의 canonical·sitemap은 `https://www.abacusbox.com`으로 통일되어 있다. apex 호스트는 `www`로 301 리디렉션하도록 유지해 두 호스트의 신호가 분산되지 않도록 한다. 리디렉션 변경만으로 색인이나 canonical 선택이 즉시 바뀐다고 보장하지 않으며, 다음 스냅샷에서 재검사한다.
+
 ## 데이터 사용 원칙
 
 이 문서의 수치는 확인한 API 응답의 기준선이며 목표나 예측이 아니다. 검색어, 개인 식별 정보, 서비스 계정 비밀값은 저장하지 않는다.
