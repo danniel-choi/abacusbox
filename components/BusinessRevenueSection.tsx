@@ -54,6 +54,9 @@ export function BusinessRevenueSection() {
             </div>
           ))}
         </div>
+        <Link href="/resources/business-template" onClick={() => trackAnalyticsEvent("template_sample_click", { template: "business_margin_csv" })} className="mt-5 inline-flex text-sm font-extrabold text-white underline decoration-brand decoration-2 underline-offset-4 transition hover:text-brand">
+          사업자 마진 템플릿 무료 샘플 보기 ↗
+        </Link>
       </div>
     </section>
   );
