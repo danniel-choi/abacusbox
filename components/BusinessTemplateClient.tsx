@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useRef, useState } from "react";
 import { trackAnalyticsEvent } from "@/lib/analytics";
 
 const csvContent = [
@@ -12,6 +13,22 @@ const csvContent = [
   .join("\n");
 
 export function BusinessTemplateClient() {
+  const [inputs, setInputs] = useState({ price: "100000", cost: "45000", ads: "10000", other: "5000" });
+  const previewStarted = useRef(false);
+  const values = useMemo(() => {
+    const price = toNumber(inputs.price);
+    const profit = price - toNumber(inputs.cost) - toNumber(inputs.ads) - toNumber(inputs.other);
+    return { profit, margin: price > 0 ? (profit / price) * 100 : 0 };
+  }, [inputs]);
+
+  function updateInput(key: keyof typeof inputs, value: string) {
+    setInputs((current) => ({ ...current, [key]: value.replace(/[^0-9]/g, "") }));
+    if (!previewStarted.current) {
+      previewStarted.current = true;
+      trackAnalyticsEvent("template_preview_start", { template: "business_margin_csv" });
+    }
+  }
+
   function downloadTemplate() {
     const blob = new Blob([`\uFEFF${csvContent}`], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -20,6 +37,7 @@ export function BusinessTemplateClient() {
     anchor.download = "abacusbox-business-margin-template.csv";
     anchor.click();
     URL.revokeObjectURL(url);
+    if (previewStarted.current) trackAnalyticsEvent("template_preview_complete", { template: "business_margin_csv" });
     trackAnalyticsEvent("template_download", { template: "business_margin_csv" });
   }
 
@@ -45,6 +63,45 @@ export function BusinessTemplateClient() {
           맞춤 템플릿 문의
         </Link>
       </aside>
+
+      <section className="rounded-[28px] border border-line bg-white p-6 shadow-panel sm:p-8 lg:col-span-2">
+        <div className="max-w-3xl">
+          <p className="text-sm font-extrabold text-brand">LIVE PREVIEW</p>
+          <h2 className="mt-2 text-2xl font-extrabold text-ink">다운로드 전에 마진을 바로 확인하세요</h2>
+          <p className="mt-3 text-sm font-medium leading-7 text-slate-600">입력값은 이 브라우저에서만 계산하며 서버로 보내지 않습니다. 부가세·세무 신고용 금액은 공식 기준과 전문가 확인이 필요합니다.</p>
+        </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <PreviewInput label="판매가" value={inputs.price} onChange={(value) => updateInput("price", value)} />
+          <PreviewInput label="원가" value={inputs.cost} onChange={(value) => updateInput("cost", value)} />
+          <PreviewInput label="광고비" value={inputs.ads} onChange={(value) => updateInput("ads", value)} />
+          <PreviewInput label="기타비용" value={inputs.other} onChange={(value) => updateInput("other", value)} />
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <Metric label="예상 매출총이익" value={`${Math.round(values.profit).toLocaleString("ko-KR")}원`} />
+          <Metric label="예상 마진율" value={`${values.margin.toFixed(1)}%`} />
+        </div>
+      </section>
     </div>
   );
+}
+
+function toNumber(value: string) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function PreviewInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="grid gap-2">
+      <span className="text-sm font-extrabold text-ink">{label}</span>
+      <div className="flex items-center rounded-2xl border border-line bg-paper px-4 focus-within:border-brand">
+        <input inputMode="numeric" value={Number(value || 0).toLocaleString("ko-KR")} onChange={(event) => onChange(event.target.value)} className="h-12 min-w-0 flex-1 bg-transparent text-right font-bold text-ink outline-none" aria-label={`${label} 원`} />
+        <span className="ml-2 text-sm font-bold text-slate-500">원</span>
+      </div>
+    </label>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-2xl bg-paper p-4"><p className="text-xs font-extrabold text-slate-500">{label}</p><p className="mt-2 text-2xl font-extrabold text-brand">{value}</p></div>;
 }
