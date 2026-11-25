@@ -13,8 +13,19 @@ export const metadata: Metadata = {
 };
 
 export default function BusinessTemplatePage() {
+  const faq = [
+    { question: "이 템플릿은 어떤 계산을 하나요?", answer: "판매가에서 원가·광고비·기타비용을 빼 상품별 매출총이익과 판매가 대비 마진율을 비교합니다." },
+    { question: "부가세 신고용으로 바로 사용할 수 있나요?", answer: "아닙니다. 이 샘플은 일반적인 사업 관리용 참고 자료이며, 세무 신고나 회계 자문을 대신하지 않습니다." },
+    { question: "항목을 업무에 맞게 바꿀 수 있나요?", answer: "무료 CSV 샘플을 복사해 항목을 추가할 수 있습니다. 맞춤 공식이나 출력표가 필요하면 문의를 통해 범위를 먼저 확인합니다." }
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } }))
+      }) }} />
       <div className="text-sm font-semibold text-slate-500">
         <Link href="/resources" className="hover:text-brand">참고 자료</Link><span className="mx-2">›</span><span>사업자 마진 템플릿</span>
       </div>
@@ -31,6 +42,27 @@ export default function BusinessTemplatePage() {
           <li className="rounded-2xl bg-paper p-4"><strong>2. 판매가·원가·광고비·기타비용을 입력합니다.</strong> 샘플 행을 복사해 상품을 추가할 수 있습니다.</li>
           <li className="rounded-2xl bg-paper p-4"><strong>3. 매출총이익과 마진율을 비교합니다.</strong> 세무 신고 금액은 공식 자료와 전문가 확인이 필요합니다.</li>
         </ol>
+      </section>
+      <section className="mt-8 rounded-[28px] border border-line bg-white p-6 shadow-panel sm:p-8">
+        <p className="text-sm font-extrabold text-brand">FAQ</p>
+        <h2 className="mt-2 text-2xl font-extrabold text-ink">사업자 마진 템플릿 자주 묻는 질문</h2>
+        <div className="mt-5 grid gap-3">
+          {faq.map((item) => (
+            <details key={item.question} className="rounded-2xl border border-line bg-paper p-4">
+              <summary className="cursor-pointer text-sm font-extrabold text-ink">{item.question}</summary>
+              <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+      <section className="mt-8 rounded-[28px] border border-line bg-white p-6 shadow-panel sm:p-8">
+        <p className="text-sm font-extrabold text-brand">RELATED CALCULATORS</p>
+        <h2 className="mt-2 text-2xl font-extrabold text-ink">함께 확인할 계산기</h2>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Link href="/calculators/seller-profit" className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink transition hover:border-brand hover:text-brand">판매 수익 계산기</Link>
+          <Link href="/calculators/break-even" className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink transition hover:border-brand hover:text-brand">손익분기점 계산기</Link>
+          <Link href="/business" className="rounded-full border border-line px-4 py-2 text-sm font-extrabold text-ink transition hover:border-brand hover:text-brand">사업·판매 계산기 모음</Link>
+        </div>
       </section>
     </main>
   );
