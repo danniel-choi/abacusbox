@@ -72,6 +72,20 @@ AdSense API 호출 자체는 성공했지만 계정 목록 응답은 0개였다.
 
 템플릿 페이지도 다음 URL 검사 실행 대상에 포함해 색인 상태를 확인한다: `/resources/business-template`.
 
+## 2026-11-25 15:28 UTC 재확인
+
+새 수익화 페이지까지 URL 검사 대상에 추가해 읽기 전용 점검을 실행했다.
+
+- Search Console 최근 28일: 클릭 4회, 노출 31회
+- GA4 최근 28일: 세션 61, 활성 사용자 53, 페이지뷰 414
+- `/resources/business-template`: `NEUTRAL`·`Google에는 아직 알려지지 않은 URL`
+- `/calculators/revenue-goal-planner`: `NEUTRAL`·`Google에는 아직 알려지지 않은 URL`
+- `/business/widget-demo`: `NEUTRAL`·`Google에는 아직 알려지지 않은 URL`
+- 사이트맵: 오류 0개·경고 0개·대기 아님
+- AdSense API: 계정 목록 0개, 수익·RPM 미확인
+
+세 URL 모두 운영 응답과 사이트맵 등록은 확인되지만, URL 검사 결과만으로 색인 생성을 보장할 수 없다. Search Console 쓰기 권한이 준비되면 사이트맵 제출과 각 URL 색인 생성 요청을 실행하고, 이후 재크롤링 결과를 다시 기록한다.
+
 2026-11-25 URL 검사에서 해당 페이지는 `NEUTRAL`·`Google에는 아직 알려지지 않은 URL`로 확인됐다. 최신 사이트맵 재제출을 시도했지만 Google API가 `HTTP 403`을 반환해 제출되지 않았다. 서비스 계정에 Search Console 속성의 사이트맵 제출 권한을 부여한 뒤 `AI_ALLOW_EXTERNAL_WRITE=1 npm run ai:submit-sitemap`을 다시 실행해야 한다. 제출 후에도 색인은 보장되지 않으므로 재크롤링 후 다시 검사한다.
 
 ## 우선순위

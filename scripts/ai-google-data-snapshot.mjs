@@ -110,7 +110,9 @@ async function run() {
       `${siteUrl.replace(/\/$/, "")}/calculators/loan-interest`,
       `${siteUrl.replace(/\/$/, "")}/calculators/bmi`,
       `${siteUrl.replace(/\/$/, "")}/blog/loan-prepayment-before-refinance`,
-      `${siteUrl.replace(/\/$/, "")}/resources/business-template`
+      `${siteUrl.replace(/\/$/, "")}/resources/business-template`,
+      `${siteUrl.replace(/\/$/, "")}/calculators/revenue-goal-planner`,
+      `${siteUrl.replace(/\/$/, "")}/business/widget-demo`
     ];
     const inspectionResults = [];
     for (const inspectionUrl of inspectionTargets) {
