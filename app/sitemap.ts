@@ -20,7 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...hubOrder.map((key) => ({
       url: `${SITE_URL}${hubContents[key].path}`
     })),
-    ...["calculators", "toolbox", "resources", "resources/business-template", "about", "editorial-policy", "privacy", "terms", "contact", "blog", "real-estate"].map((path) => ({
+    ...["calculators", "toolbox", "resources", "resources/business-template", "business/widget-demo", "about", "editorial-policy", "privacy", "terms", "contact", "blog", "real-estate"].map((path) => ({
       url: `${SITE_URL}/${path}`
     })),
     { url: `${SITE_URL}/tarot` },

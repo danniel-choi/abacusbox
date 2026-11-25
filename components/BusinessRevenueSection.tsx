@@ -57,6 +57,9 @@ export function BusinessRevenueSection() {
         <Link href="/resources/business-template" onClick={() => trackAnalyticsEvent("template_sample_click", { template: "business_margin_csv" })} className="mt-5 inline-flex text-sm font-extrabold text-white underline decoration-brand decoration-2 underline-offset-4 transition hover:text-brand">
           사업자 마진 템플릿 무료 샘플 보기 ↗
         </Link>
+        <Link href="/business/widget-demo" onClick={() => trackAnalyticsEvent("widget_demo_click", { widget: "seller_margin" })} className="ml-5 inline-flex text-sm font-extrabold text-white underline decoration-brand decoration-2 underline-offset-4 transition hover:text-brand">
+          계산기 위젯 데모 보기 ↗
+        </Link>
       </div>
     </section>
   );
