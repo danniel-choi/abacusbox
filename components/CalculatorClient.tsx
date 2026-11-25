@@ -228,12 +228,27 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const values = useWatch({ control });
   const activeCalculator = calculator;
   const localizedCalculator = getLocalizedCalculatorPresentation(activeCalculator, locale);
+  const calculatorInputStartedRef = useRef(false);
+  const initialValuesRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (startedCalculatorRef.current === slug) return;
     startedCalculatorRef.current = slug;
-    trackAnalyticsEvent("calculator_start", { calculator_slug: slug });
+    calculatorInputStartedRef.current = false;
+    initialValuesRef.current = null;
+    trackAnalyticsEvent("calculator_view", { calculator_slug: slug });
   }, [slug]);
+
+  useEffect(() => {
+    const serializedValues = JSON.stringify(values);
+    if (initialValuesRef.current === null) {
+      initialValuesRef.current = serializedValues;
+      return;
+    }
+    if (calculatorInputStartedRef.current || serializedValues === initialValuesRef.current) return;
+    calculatorInputStartedRef.current = true;
+    trackAnalyticsEvent("calculator_start", { calculator_slug: slug });
+  }, [slug, values]);
 
   useEffect(() => {
     reset(defaults);
@@ -688,7 +703,10 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
             </div>
             <button
               type="button"
-              onClick={() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              onClick={() => {
+                trackAnalyticsEvent("calculator_complete", { calculator_slug: activeCalculator.slug, completion_method: "view_result" });
+                resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
               className="w-full rounded-full bg-white px-4 py-3 text-xs font-extrabold text-brand shadow-sm transition hover:bg-brand hover:text-white sm:w-auto"
             >
               {t("calculator.viewResult")}

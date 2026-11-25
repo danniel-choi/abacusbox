@@ -1,6 +1,6 @@
 # AI Preview 사전 검증
 
-- 생성 시각: 2026-11-24T18:54:17.742Z
+- 생성 시각: 2026-11-25T04:29:44.949Z
 - 기준 ref: HEAD~1
 - 상태: READY
 - 보호 경로 자동 배포 승인: 활성화
@@ -8,41 +8,24 @@
 ## 변경 파일
 
 - .github/workflows/ai-quality.yml
-- app/admin/automation/page.tsx
 - app/blog/[slug]/page.tsx
-- app/calculators/[slug]/page.tsx
-- app/globals.css
-- app/loan/page.tsx
-- app/page.tsx
-- app/real-estate/page.tsx
-- app/saju/page.tsx
-- app/sitemap.ts
-- app/tarot/page.tsx
 - components/AdminAccessClient.tsx
 - components/AdminAutomationClient.tsx
 - components/AdminModerationClient.tsx
 - components/CalculatorClient.tsx
-- components/DailyTarotClient.tsx
-- components/Header.tsx
-- components/HubPage.tsx
 - components/InquiryBoardClient.tsx
 - docs/ai-data-contract.md
 - docs/ai-preflight.md
 - docs/ai-seo-check.md
 - docs/ai-site-audit.md
-- functions/_lib/blog-auto.js
+- docs/revenue-5m-plan.md
 - functions/_lib/posts.js
 - functions/api/admin/session.js
 - functions/api/blog-image/[slug].js
 - functions/api/contact/[slug].js
 - functions/api/contact/index.js
 - functions/blog/[slug].js
-- lib/blog-i18n.ts
-- lib/calculator-directory.ts
-- lib/calculator-seo.ts
 - lib/calculators.ts
-- lib/content.ts
-- lib/hub-content.ts
 - lib/i18n.ts
 - migrations/0017_contact_visibility.sql
 - migrations/0018_preserve_existing_inquiry_privacy.sql
