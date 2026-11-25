@@ -1,6 +1,6 @@
 # AI Preview 사전 검증
 
-- 생성 시각: 2026-11-25T09:02:04.981Z
+- 생성 시각: 2026-11-25T14:30:05.970Z
 - 기준 ref: HEAD~1
 - 상태: READY
 - 보호 경로 자동 배포 승인: 비활성화
@@ -8,8 +8,11 @@
 ## 변경 파일
 
 - .github/workflows/google-measurement.yml
-- docs/ai-auto-upgrade.md
+- docs/ai-agent-credentials.md
 - docs/analytics-baseline-2026-11-25.md
+- package.json
+- scripts/ai-google-data-snapshot.mjs
+- scripts/ai-submit-sitemap.mjs
 
 ## 보호 경로 변경
 
