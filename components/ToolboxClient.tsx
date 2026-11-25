@@ -1,5 +1,8 @@
 "use client";
 
+// Browser-generated blob URLs and user-selected external thumbnails cannot be optimized by next/image.
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent, ReactNode } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";

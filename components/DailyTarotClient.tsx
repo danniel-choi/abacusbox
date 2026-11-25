@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import Image from "next/image";
 
 type TarotCard = {
   name: string;
@@ -100,7 +101,7 @@ export function DailyTarotClient() {
               <span className="tarot-card-inner block h-full w-full">
                 <span className="tarot-card-face tarot-card-back flex h-full w-full items-center justify-center rounded-[14px] border border-white/10 bg-[radial-gradient(circle_at_30%_20%,#865dc5,#2b1d47_65%)] text-4xl text-[#e8d8ff] sm:rounded-[20px] sm:text-6xl">✦</span>
                 <span className="tarot-card-face tarot-card-front block h-full w-full overflow-hidden rounded-[14px] sm:rounded-[20px]">
-                  <img src={`/tarot-images/${cardSlots[index] === selected ? card.image : tarotCards[cardSlots[index]].image}`} alt={`${cardSlots[index] === selected ? card.name : tarotCards[cardSlots[index]].name} 타로 카드`} className="h-full w-full object-cover" />
+                  <Image src={`/tarot-images/${cardSlots[index] === selected ? card.image : tarotCards[cardSlots[index]].image}`} alt={`${cardSlots[index] === selected ? card.name : tarotCards[cardSlots[index]].name} 타로 카드`} width={240} height={360} className="h-full w-full object-cover" />
                 </span>
               </span>
             </button>
@@ -113,7 +114,7 @@ export function DailyTarotClient() {
       <section key={`tarot-result-${selected ?? dailyIndex}`} className="tarot-result-card rounded-[30px] border border-[#eadcff] bg-white p-6 shadow-panel sm:p-8" aria-live="polite">
         <p className="text-sm font-extrabold text-[#7040a4]">오늘의 종합운</p>
         <div className="mt-4 flex items-center gap-4">
-          <img src={`/tarot-images/${card.image}`} alt={`${card.name} 카드`} className="h-28 w-20 rounded-xl object-cover shadow-md sm:h-36 sm:w-24" />
+          <Image src={`/tarot-images/${card.image}`} alt={`${card.name} 카드`} width={96} height={144} className="h-28 w-20 rounded-xl object-cover shadow-md sm:h-36 sm:w-24" />
           <div>
             <h2 className="text-3xl font-black text-ink">{card.name}</h2>
             <p className="mt-2 text-sm font-extrabold text-[#7040a4]">{card.keyword}</p>

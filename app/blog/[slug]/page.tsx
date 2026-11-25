@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AdSenseAd } from "@/components/AdSenseAd";
@@ -277,10 +278,12 @@ function BlogAutoImages({ slug, title }: { slug: string; title: string }) {
     <div className="mt-6 grid gap-4 sm:grid-cols-3" aria-label="본문 주제 설명 이미지">
       {[1, 2, 3].map((variant) => (
         <figure key={`${slug}-image-${variant}`} className="overflow-hidden rounded-[20px] border border-line bg-paper">
-          <img
+          <Image
             src={`/api/blog-image/${encodeURIComponent(slug)}.svg?variant=${variant}`}
             alt={`${title} ${imageRoles[variant - 1]} 이미지`}
             loading="lazy"
+            width={640}
+            height={360}
             className="block w-full"
           />
           <figcaption className="px-3 py-2 text-xs font-bold text-slate-500">{title} · {imageRoles[variant - 1]}</figcaption>
