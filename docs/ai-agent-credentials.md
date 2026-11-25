@@ -52,3 +52,5 @@ npm run ai:integration-status
 ## 인증값 형식 검사
 
 값을 설정한 뒤 `npm run ai:credentials-check`를 실행하면 원문을 출력하지 않고 JSON 구조, 속성 URL, GA4 숫자 Property ID, AdSense 계정 ID 형식만 검사합니다.
+
+사이트맵 재제출은 읽기 전용 조회와 별개의 외부 쓰기 작업입니다. 현재 서비스 계정으로 `ai:submit-sitemap`을 실행했을 때 Search Console API가 HTTP 403을 반환했으므로, 속성의 사이트맵 제출 권한을 확인한 뒤 명시적으로 외부 쓰기를 다시 실행해야 합니다.

@@ -70,6 +70,10 @@ AdSense API 호출 자체는 성공했지만 계정 목록 응답은 0개였다.
 
 2026-11-25 08:51 UTC 재확인에서도 동일했다. Search Console은 클릭 4회·노출 31회, 신규 템플릿·B2B 이벤트는 0건, AdSense 계정 목록은 0개였다. 이벤트가 관측되기 전에는 유료 상품 판매량이나 월 매출을 역산하지 않는다.
 
+템플릿 페이지도 다음 URL 검사 실행 대상에 포함해 색인 상태를 확인한다: `/resources/business-template`.
+
+2026-11-25 URL 검사에서 해당 페이지는 `NEUTRAL`·`Google에는 아직 알려지지 않은 URL`로 확인됐다. 최신 사이트맵 재제출을 시도했지만 Google API가 `HTTP 403`을 반환해 제출되지 않았다. 서비스 계정에 Search Console 속성의 사이트맵 제출 권한을 부여한 뒤 `AI_ALLOW_EXTERNAL_WRITE=1 npm run ai:submit-sitemap`을 다시 실행해야 한다. 제출 후에도 색인은 보장되지 않으므로 재크롤링 후 다시 검사한다.
+
 ## 우선순위
 
 1. 공개 지표에서 관리자 경로 제거
