@@ -60,6 +60,9 @@ export function BusinessRevenueSection() {
         <Link href="/business/widget-demo" onClick={() => trackAnalyticsEvent("widget_demo_click", { widget: "seller_margin" })} className="ml-5 inline-flex text-sm font-extrabold text-white underline decoration-brand decoration-2 underline-offset-4 transition hover:text-brand">
           계산기 위젯 데모 보기 ↗
         </Link>
+        <Link href="/calculators/revenue-goal-planner" onClick={() => trackAnalyticsEvent("revenue_goal_planner_click", { source: "business_revenue_section" })} className="ml-5 inline-flex text-sm font-extrabold text-white underline decoration-brand decoration-2 underline-offset-4 transition hover:text-brand">
+          월 수익 목표 플래너 ↗
+        </Link>
       </div>
     </section>
   );

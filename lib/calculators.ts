@@ -53,6 +53,7 @@ export type CalculatorSlug =
   | "si-outsourcing-price"
   | "ad-performance-calculator"
   | "marketing-budget-calculator"
+  | "revenue-goal-planner"
   | "adsense-revenue"
   | "youtube-ad-revenue"
   | "military-discharge-date"
@@ -8048,6 +8049,80 @@ export const calculators: CalculatorConfig[] = [
           { label: "콘텐츠/CRM 배분", value: `${formatWon(allocations[3].amount)} (${formatPercent(allocations[3].rate * 100, 1)})` }
         ],
         chart: allocations.map((item) => ({ name: item.label, value: item.amount }))
+      };
+    }
+  },
+  {
+    slug: "revenue-goal-planner",
+    title: "월 수익 목표 플래너",
+    description: "월 수익 목표를 광고·디지털 상품·B2B로 나누고 필요한 페이지뷰, 판매량, 문의 계약 수를 역산합니다.",
+    category: "금융",
+    keywords: ["월 수익 목표 계산기", "수익 목표 플래너", "월 500만원 수익", "애드센스 목표 트래픽", "디지털 상품 판매량", "B2B 매출 목표"],
+    badge: "수익 목표 시뮬레이션",
+    audience: "광고·상품·서비스를 함께 운영하며 월 매출 목표를 수치로 쪼개고 싶은 운영자",
+    fields: [
+      { name: "monthlyTarget", label: "월 목표 수익", type: "number", unit: "원", min: 0, max: 100000000000, step: 100000, defaultValue: 5000000 },
+      { name: "adShare", label: "광고 수익 비중", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 30 },
+      { name: "adRpm", label: "광고 페이지 RPM", type: "number", unit: "원", min: 0, max: 1000000, step: 10, defaultValue: 3000, help: "실제 AdSense 보고서의 페이지 RPM을 입력하세요." },
+      { name: "digitalShare", label: "디지털 상품 비중", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 30 },
+      { name: "digitalPrice", label: "상품 1건 순매출", type: "number", unit: "원", min: 0, max: 100000000, step: 1000, defaultValue: 49000 },
+      { name: "digitalConversion", label: "상품 전환율", type: "number", unit: "%", min: 0.01, max: 100, step: 0.1, defaultValue: 1.5, help: "상품 페이지 방문자 중 구매자로 전환되는 비율을 입력하세요." },
+      { name: "b2bShare", label: "B2B 수익 비중", type: "number", unit: "%", min: 0, max: 100, step: 1, defaultValue: 40 },
+      { name: "b2bDealValue", label: "B2B 계약 1건 순매출", type: "number", unit: "원", min: 0, max: 1000000000, step: 10000, defaultValue: 1000000 }
+    ],
+    guideTitle: "월 수익 목표 플래너 계산 기준",
+    guide: [
+      "월 목표 수익을 광고, 디지털 상품, B2B 수익의 비중으로 배분한 뒤 각 수익원에 필요한 활동량을 역산합니다.",
+      "광고 페이지뷰는 목표 광고 수익 ÷ 페이지 RPM × 1,000으로 계산합니다. RPM은 사이트·국가·기기·주제에 따라 달라지므로 실제 보고서 값을 입력해야 합니다.",
+      "디지털 상품 판매량은 목표 상품 수익 ÷ 상품 1건 순매출, 필요한 상품 페이지 방문자는 판매량 ÷ 전환율로 계산합니다. B2B 계약 수는 목표 B2B 수익 ÷ 계약 1건 순매출을 올림합니다."
+    ],
+    checkpoints: [
+      "세 수익 비중의 합이 100%가 아니면 입력한 비율을 자동으로 100% 기준으로 정규화합니다.",
+      "광고 RPM·상품 전환율·B2B 계약 단가는 추정치가 아니라 실제 운영 데이터로 교체해야 합니다.",
+      "계산 결과는 목표 달성을 보장하는 예측이 아니라 실험 우선순위를 정하는 시나리오입니다.",
+      "상품 환불, 결제 수수료, 세금, B2B 영업 기간과 이탈은 별도 운영 지표로 확인해야 합니다."
+    ],
+    faqs: [
+      { question: "월 500만 원 목표를 바로 계산할 수 있나요?", answer: "네. 기본 목표가 500만 원으로 설정되어 있지만, 실제 목표와 측정된 RPM·전환율·계약 단가로 교체해 사용해야 합니다." },
+      { question: "광고만으로 필요한 트래픽을 계산할 수 있나요?", answer: "광고 비중을 100%로 입력하면 됩니다. 다만 RPM은 계정과 콘텐츠에 따라 달라지므로 실제 AdSense 페이지 RPM을 사용하세요." },
+      { question: "수익 비중 합계가 100%가 아니면 어떻게 되나요?", answer: "입력한 세 비중의 상대적인 크기를 유지하면서 합계가 100%가 되도록 정규화합니다. 비중을 0으로 입력한 수익원은 목표에서 제외됩니다." }
+    ],
+    calculate(values) {
+      const monthlyTarget = Math.max(values.monthlyTarget, 0);
+      const rawShares = [Math.max(values.adShare, 0), Math.max(values.digitalShare, 0), Math.max(values.b2bShare, 0)];
+      const shareTotal = rawShares.reduce((sum, value) => sum + value, 0);
+      const shares = shareTotal > 0 ? rawShares.map((value) => value / shareTotal) : [1, 0, 0];
+      const adTarget = monthlyTarget * shares[0];
+      const digitalTarget = monthlyTarget * shares[1];
+      const b2bTarget = monthlyTarget * shares[2];
+      const adRpm = Math.max(values.adRpm, 0);
+      const adPageViews = adRpm > 0 ? adTarget / adRpm * 1000 : 0;
+      const digitalPrice = Math.max(values.digitalPrice, 0);
+      const digitalSales = digitalPrice > 0 ? Math.ceil(digitalTarget / digitalPrice) : 0;
+      const conversionRate = Math.min(Math.max(values.digitalConversion, 0), 100) / 100;
+      const digitalVisitors = conversionRate > 0 ? Math.ceil(digitalSales / conversionRate) : 0;
+      const b2bDealValue = Math.max(values.b2bDealValue, 0);
+      const b2bDeals = b2bDealValue > 0 ? Math.ceil(b2bTarget / b2bDealValue) : 0;
+      const shareLabel = (value: number) => formatPercent(value * 100, 1);
+
+      return {
+        headline: formatWon(monthlyTarget),
+        subline: `광고 ${shareLabel(shares[0])} · 상품 ${shareLabel(shares[1])} · B2B ${shareLabel(shares[2])}`,
+        rows: [
+          { label: "월 목표 수익", value: formatWon(monthlyTarget), tone: "strong" },
+          { label: "광고 목표 수익", value: `${formatWon(adTarget)} (${shareLabel(shares[0])})` },
+          { label: "필요 광고 페이지뷰", value: `${formatNumber(adPageViews)} PV`, tone: "strong" },
+          { label: "디지털 상품 목표 수익", value: `${formatWon(digitalTarget)} (${shareLabel(shares[1])})` },
+          { label: "필요 상품 판매량", value: `${formatNumber(digitalSales)}건`, tone: "strong" },
+          { label: "필요 상품 페이지 방문자", value: `${formatNumber(digitalVisitors)}명` },
+          { label: "B2B 목표 수익", value: `${formatWon(b2bTarget)} (${shareLabel(shares[2])})` },
+          { label: "필요 B2B 계약 수", value: `${formatNumber(b2bDeals)}건`, tone: "strong" }
+        ],
+        chart: [
+          { name: "광고", value: adTarget },
+          { name: "상품", value: digitalTarget },
+          { name: "B2B", value: b2bTarget }
+        ]
       };
     }
   },

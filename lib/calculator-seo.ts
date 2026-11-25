@@ -11,6 +11,26 @@ export type CalculatorSeoContent = {
 };
 
 export const calculatorSeoContent: Partial<Record<CalculatorSlug, CalculatorSeoContent>> = {
+  "revenue-goal-planner": {
+    title: "월 수익 목표 플래너 | 광고·상품·B2B 매출 역산 계산기",
+    description: "월 목표 수익을 광고·디지털 상품·B2B로 배분하고 필요한 페이지뷰, 상품 판매량, B2B 계약 수를 입력값으로 역산하세요.",
+    keywords: ["월 수익 목표 계산기", "월 500만원 수익 계산", "애드센스 목표 페이지뷰", "디지털 상품 판매량 계산", "B2B 매출 목표"],
+    searchIntents: [
+      "월 목표 수익을 여러 수익원으로 나눠 운영 계획을 세울 때",
+      "애드센스 RPM 기준 필요한 페이지뷰를 역산할 때",
+      "디지털 상품 판매량과 B2B 계약 수를 목표 매출에서 계산할 때"
+    ],
+    sections: [
+      { title: "목표 금액을 활동량으로 바꿔 봅니다.", body: "광고·디지털 상품·B2B 수익 비중과 각 수익원의 실제 단가를 입력하면 필요한 페이지뷰, 상품 판매량, 상품 페이지 방문자, 계약 건수를 한 화면에서 비교할 수 있습니다." },
+      { title: "기본값은 사례일 뿐 실제 데이터가 아닙니다.", body: "기본 RPM·전환율·계약 단가는 예시 입력값입니다. Search Console, GA4, AdSense 보고서와 실제 판매·문의 기록에서 확인한 값으로 교체해야 의미 있는 운영 계획이 됩니다." },
+      { title: "수익 목표와 현금 매출은 구분하세요.", body: "환불, 결제 수수료, 세금, 광고 지급 보류, B2B 영업 기간과 유지보수 비용은 이 계산기에 포함되지 않습니다. 결과는 목표 시나리오로만 활용하세요." }
+    ],
+    internalLinks: [
+      { href: "/calculators/adsense-revenue", label: "애드센스 수익 계산기", text: "페이지뷰·RPM 또는 CTR·CPC 기준 광고 수익을 비교합니다." },
+      { href: "/calculators/marketing-budget-calculator", label: "마케팅 예산 계산기", text: "목표 고객과 채널별 예산 배분을 계획합니다." },
+      { href: "/business", label: "사업·판매 계산기", text: "판매 수익·손익분기와 사업자용 도구를 함께 확인합니다." }
+    ]
+  },
   "alcohol-metabolism-time-calculator": {
     title: "알코올 분해 시간 계산기 | 혈중알코올농도 BAC 해독 시간",
     description: "현재 혈중알코올농도(BAC)를 입력해 평균 분해율 기준 알코올 분해 예상 시간과 개인차 참고 범위를 확인하세요.",
