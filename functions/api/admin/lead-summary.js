@@ -1,4 +1,4 @@
-import { error, getD1Binding, isMissingTableError, json, requireAdmin, serviceUnavailable } from "../../../_lib/http.js";
+import { error, getD1Binding, isMissingTableError, json, requireAdmin, serviceUnavailable } from "../../_lib/http.js";
 
 const TOPICS = [
   { key: "widget", label: "계산기 위젯·맞춤 도구" },
