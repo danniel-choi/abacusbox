@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LocalizedResourcesHeader, LocalizedResourcesNotice, LocalizedSummaryTile } from "@/components/LocalizedDirectoryIntro";
 
 export const metadata: Metadata = {
@@ -187,6 +188,13 @@ export default function ResourcesPage() {
           <LocalizedSummaryTile kind="tax" value="6" />
           <LocalizedSummaryTile kind="finance" value="7" />
         </div>
+      </section>
+
+      <section className="mt-6 rounded-[28px] bg-navy p-6 text-white shadow-panel sm:p-8">
+        <p className="text-sm font-extrabold text-brand">BUSINESS TEMPLATE</p>
+        <h2 className="mt-2 text-2xl font-extrabold sm:text-3xl">사업자 마진 관리 무료 샘플</h2>
+        <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-white/70">판매가·원가·광고비·기타비용을 정리하고 상품별 매출총이익과 마진율을 비교할 수 있는 CSV 샘플입니다.</p>
+        <Link href="/resources/business-template" className="mt-5 inline-flex rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-white hover:text-navy">무료 샘플 보기 ↗</Link>
       </section>
 
       <div className="mt-8 grid gap-8">
