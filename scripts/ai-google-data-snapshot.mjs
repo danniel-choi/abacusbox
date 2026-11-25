@@ -140,7 +140,17 @@ async function run() {
       body: JSON.stringify({ dateRanges: [{ startDate: "28daysAgo", endDate: "yesterday" }], dimensions: [{ name: "landingPagePlusQueryString" }], metrics: [{ name: "sessions" }, { name: "activeUsers" }, { name: "screenPageViews" }], limit: "1000" })
     });
     const rows = (body.rows || []).map((row) => ({ landingPage: row.dimensionValues?.[0]?.value || "", sessions: Number(row.metricValues?.[0]?.value || 0), activeUsers: Number(row.metricValues?.[1]?.value || 0), screenPageViews: Number(row.metricValues?.[2]?.value || 0) })).sort((a, b) => b.sessions - a.sessions || b.screenPageViews - a.screenPageViews);
-    report.ga4 = { status: "PASS", ...summarize(rows, ["sessions", "activeUsers", "screenPageViews"]) };
+    let events = null;
+    try {
+      const eventBody = await request(`https://analyticsdata.googleapis.com/v1beta/properties/${encodeURIComponent(propertyId)}:runReport`, token, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ dateRanges: [{ startDate: "28daysAgo", endDate: "yesterday" }], dimensions: [{ name: "eventName" }], metrics: [{ name: "eventCount" }], limit: "100" })
+      });
+      events = (eventBody.rows || []).map((row) => ({ eventName: row.dimensionValues?.[0]?.value || "", eventCount: Number(row.metricValues?.[0]?.value || 0) })).sort((a, b) => b.eventCount - a.eventCount);
+    } catch (error) {
+      events = { status: "FAIL", reason: error.message };
+    }
+    report.ga4 = { status: "PASS", ...summarize(rows, ["sessions", "activeUsers", "screenPageViews"]), events };
   } catch (error) { report.ga4 = { status: "FAIL", reason: error.message }; }
 
   try {

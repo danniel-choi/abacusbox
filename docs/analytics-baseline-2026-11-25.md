@@ -42,6 +42,16 @@
 
 운영 HTML의 현재 canonical은 `https://www.abacusbox.com/...`로 확인되므로, `loan-interest`의 apex canonical 표시는 이전 크롤링 결과 또는 호스트 변형 신호로 보고 재검사를 진행한다. apex 요청이 www로 308 리디렉션되는지도 배포 후 재확인한다.
 
+## 호스트 통합 배포 확인
+
+2026-11-25 배포 후 직접 확인한 결과:
+
+- `https://abacusbox.com/calculators/loan-interest` → `308` 및 `https://www.abacusbox.com/...`로 이동
+- `https://www.abacusbox.com/calculators/loan-interest` → `200`
+- 비로그인 `https://www.abacusbox.com/admin/moderation` → `302` 및 관리자 로그인 화면으로 이동
+
+배포 직후 URL 검사에서는 Google이 기존 apex 표준 URL을 아직 유지하고 있었다. 이는 새 리디렉션을 Google이 다시 크롤링하기 전의 상태이므로, 7~14일 후 URL 검사를 다시 확인해야 한다.
+
 ### AdSense
 
 AdSense API 호출 자체는 성공했지만 계정 목록 응답은 0개였다. 이는 광고 수익이 0원이라는 뜻이 아니며, 서비스 계정에 AdSense 계정 조회 권한이 없거나 API 계정 식별자·연결 계정이 일치하지 않을 가능성을 먼저 확인해야 한다. 수익·RPM은 이 응답만으로 기록하지 않는다.
