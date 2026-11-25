@@ -18,7 +18,7 @@ const PUBLIC_POST_FIELDS = `
 
 export async function listPosts(
   db,
-  { type, board, sort = "latest", page, limit, offset, includeSlugPrefix, excludeSlugPrefix, visibility }
+  { type, board, sort = "latest", page, limit, offset, includeSlugPrefix, excludeSlugPrefix, excludeSlugSuffix, visibility }
 ) {
   const clauses = [`p.status = 'published'`];
   const params = [];
@@ -46,6 +46,11 @@ export async function listPosts(
   if (excludeSlugPrefix) {
     clauses.push("p.slug NOT LIKE ?");
     params.push(`${excludeSlugPrefix}%`);
+  }
+
+  if (excludeSlugSuffix) {
+    clauses.push("p.slug NOT LIKE ?");
+    params.push(`%${excludeSlugSuffix}`);
   }
 
   const where = clauses.join(" AND ");

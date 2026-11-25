@@ -11,7 +11,8 @@ export async function onRequestGet(context) {
       type: "blog",
       page,
       limit,
-      offset
+      offset,
+      excludeSlugSuffix: "-hourly"
     });
 
     return json(result);
