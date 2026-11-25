@@ -392,14 +392,18 @@ const staticBlogPosts = {
 
 export async function onRequest(context) {
   const { request, env } = context;
+  const url = new URL(request.url);
+  const slug = decodeURIComponent(url.pathname.replace(/^\/blog\//, "").replace(/\/$/, ""));
+  const canonicalSlug = slug.endsWith("-hourly") ? slug.replace(/-hourly$/, "") : null;
+  if (canonicalSlug && /^.+-(guide|checklist|mistakes|comparison|scenario)-\d{8}-\d{2}$/.test(canonicalSlug)) {
+    return Response.redirect(new URL(`/blog/${encodeURIComponent(canonicalSlug)}${url.search}`, url), 308);
+  }
+
   const assetResponse = await fetchBlogAsset(env, request);
   if (assetResponse.status !== 404) {
     return assetResponse;
   }
 
-  const url = new URL(request.url);
-  const slug = decodeURIComponent(url.pathname.replace(/^\/blog\//, "").replace(/\/$/, ""));
-  const canonicalSlug = slug.endsWith("-hourly") ? slug.replace(/-hourly$/, "") : null;
   if (canonicalSlug) {
     const canonicalPost = await getD1BlogPost(env, canonicalSlug);
     if (canonicalPost) {
