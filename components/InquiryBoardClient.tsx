@@ -104,7 +104,8 @@ export function InquiryBoardClient({ fallbackItems = [] }: Props) {
           author_name: trimmedAuthor,
           title: trimmedTitle,
           body: trimmedBody,
-          visibility
+          visibility,
+          lead_topic: leadTopic
         })
       });
 

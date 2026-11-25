@@ -1,6 +1,8 @@
 import { error, json, getPagination, getD1Binding, isMissingTableError, readJson, requireAdmin, sha256Hex } from "../../_lib/http.js";
 import { listPosts } from "../../_lib/posts.js";
 
+const BUSINESS_LEAD_TOPICS = new Set(["widget", "template", "partnership"]);
+
 export async function onRequestGet(context) {
   try {
     const db = getD1Binding(context.env);
@@ -104,6 +106,8 @@ export async function onRequestPost(context) {
     const title = String(payload?.title || "").trim();
     const body = String(payload?.body || "").trim();
     const visibility = payload?.visibility === "private" ? "private" : "public";
+    const requestedLeadTopic = String(payload?.lead_topic || "").trim();
+    const leadTopic = BUSINESS_LEAD_TOPICS.has(requestedLeadTopic) ? requestedLeadTopic : null;
 
     if (!authorName || !title || !body) {
       return error("author_name, title, body are required", 400);
@@ -133,9 +137,9 @@ export async function onRequestPost(context) {
 
     const postResult = await db.prepare(`
       INSERT INTO posts (
-        type, board, slug, title, excerpt, body_md, visibility, status, author_id, published_at, featured
+        type, board, slug, title, excerpt, body_md, visibility, status, author_id, published_at, featured, lead_topic
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'published', ?, ?, 0)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'published', ?, ?, 0, ?)
     `).bind(
       "community",
       "qna",
@@ -145,7 +149,8 @@ export async function onRequestPost(context) {
       body,
       visibility,
       authorId,
-      publishedAt
+      publishedAt,
+      leadTopic
     ).run();
 
     const postId = postResult.meta?.last_row_id || null;

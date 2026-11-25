@@ -26,6 +26,13 @@ type AdminPost = {
   view_count: number;
 };
 
+type BusinessLeadSummary = {
+  key: string;
+  label: string;
+  count: number;
+  latest_at: string | null;
+};
+
 const nodes = [
   { id: "trigger", eyebrow: "01 · Trigger", title: "예약 실행 / 수동 실행", detail: "외부 Cron, 관리자 수동 실행, 예약 발행 요청", icon: "⚡" },
   { id: "generate", eyebrow: "02 · Generate", title: "자동 블로그 생성", detail: "계산기 주제와 글 유형을 선택해 제목·본문·태그 생성", icon: "✦" },
@@ -54,6 +61,8 @@ export function AdminAutomationClient() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [runs, setRuns] = useState<SchedulerRun[]>([]);
   const [posts, setPosts] = useState<AdminPost[]>([]);
+  const [leadSummary, setLeadSummary] = useState<BusinessLeadSummary[]>([]);
+  const [leadTotal, setLeadTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -65,10 +74,11 @@ export function AdminAutomationClient() {
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      const [sessionResponse, runsResponse, postsResponse] = await Promise.all([
+      const [sessionResponse, runsResponse, postsResponse, leadResponse] = await Promise.all([
         fetch("/api/admin/session", { credentials: "same-origin", cache: "no-store", headers: { accept: "application/json" } }),
         fetch("/api/admin/scheduler-run", { credentials: "same-origin", headers: { accept: "application/json" } }),
-        fetch("/api/admin/content?type=blog&status=published&sort=latest&page=1&limit=6", { credentials: "same-origin", headers: { accept: "application/json" } })
+        fetch("/api/admin/content?type=blog&status=published&sort=latest&page=1&limit=6", { credentials: "same-origin", headers: { accept: "application/json" } }),
+        fetch("/api/admin/lead-summary", { credentials: "same-origin", headers: { accept: "application/json" } })
       ]);
 
       const session = await sessionResponse.json().catch(() => null);
@@ -78,12 +88,15 @@ export function AdminAutomationClient() {
         return;
       }
 
-      if (!runsResponse.ok || !postsResponse.ok) throw new Error("dashboard request failed");
+      if (!runsResponse.ok || !postsResponse.ok || !leadResponse.ok) throw new Error("dashboard request failed");
       const runsData = await runsResponse.json();
       const postsData = await postsResponse.json();
+      const leadData = await leadResponse.json();
       setAuthenticated(true);
       setRuns(Array.isArray(runsData.items) ? runsData.items : []);
       setPosts(Array.isArray(postsData.items) ? postsData.items : []);
+      setLeadSummary(Array.isArray(leadData.items) ? leadData.items : []);
+      setLeadTotal(Number(leadData.total || 0));
       setNotice(null);
     } catch {
       setNotice("자동화 상태를 불러오지 못했습니다. 관리자 세션과 Functions 연결을 확인하세요.");
@@ -153,6 +166,26 @@ export function AdminAutomationClient() {
         <Metric label="최근 자동 글" value={latestRun?.draft_slug || "없음"} hint={latestRun?.draft_created ? "공개 처리" : "생성 기록 없음"} compact />
         <Metric label="최근 로그" value={`${runs.length}건`} hint={`정상 ${successfulRuns}건`} />
         <Metric label="공개 블로그" value={`${posts.length}건`} hint="최근 목록 기준" />
+      </section>
+
+      <section className="mt-6 rounded-[28px] border border-line bg-white p-5 shadow-panel sm:p-7">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-extrabold text-brand">BUSINESS LEADS</p>
+            <h2 className="mt-1 text-2xl font-extrabold text-ink">수익화 문의 현황</h2>
+          </div>
+          <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-extrabold text-brand">누적 {leadTotal}건</span>
+        </div>
+        <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">사업 문의 유형별 접수 건수만 집계합니다. 문의 본문·작성자 정보는 이 화면에 표시하지 않습니다.</p>
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {leadSummary.map((lead) => (
+            <div key={lead.key} className="rounded-2xl border border-line bg-paper p-4">
+              <p className="text-sm font-extrabold text-ink">{lead.label}</p>
+              <p className="mt-3 text-3xl font-extrabold text-brand">{lead.count}<span className="ml-1 text-sm text-slate-500">건</span></p>
+              <p className="mt-2 text-xs font-semibold text-slate-500">최근 접수 {formatDate(lead.latest_at)}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="mt-6 rounded-[28px] border border-line bg-white p-5 shadow-panel sm:p-7">
