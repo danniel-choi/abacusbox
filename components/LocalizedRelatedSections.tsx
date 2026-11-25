@@ -7,6 +7,7 @@ import { getLocalizedCalculatorPresentation } from "@/lib/calculator-i18n";
 import { getCalculatorGroup, getCalculatorIcon, getLocalizedGroupMeta } from "@/lib/calculator-directory";
 import type { CalculatorCategory, CalculatorSlug } from "@/lib/calculators";
 import type { BlogPost } from "@/lib/content";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 type RelatedCalculator = Pick<
   { slug: CalculatorSlug; title: string; description: string; category: CalculatorCategory; badge: string; audience: string },
@@ -35,7 +36,12 @@ export function LocalizedRelatedCalculatorSection({ items }: { items: RelatedCal
           const presentation = getLocalizedCalculatorPresentation(item, locale);
           const group = getLocalizedGroupMeta(locale, getCalculatorGroup(item.slug));
           return (
-            <Link key={item.slug} href={`/calculators/${item.slug}`} className="rounded-[20px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white">
+            <Link
+              key={item.slug}
+              href={`/calculators/${item.slug}`}
+              onClick={() => trackAnalyticsEvent("related_calculator_click", { calculator_slug: item.slug })}
+              className="rounded-[20px] border border-line bg-paper p-5 transition hover:border-brand hover:bg-white"
+            >
               <div className="flex items-start justify-between gap-3">
                 <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg ${group.softClass} ${group.accentClass}`}>{getCalculatorIcon(item.slug)}</span>
                 <span className="rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-slate-500">{group.label}</span>

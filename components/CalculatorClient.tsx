@@ -57,6 +57,34 @@ type ActionPlan = {
   }[];
 };
 
+type CalculatorQuickPreset = {
+  label: string;
+  values: Record<string, number>;
+};
+
+const CALCULATOR_QUICK_PRESETS: Partial<Record<CalculatorSlug, CalculatorQuickPreset[]>> = {
+  "minimum-wage": [
+    { label: "주 40시간 기본", values: { monthlyComparableWage: 2156880, weeklyHours: 40, weeklyPaidHolidayHours: 8, probationDiscount: 0 } },
+    { label: "주 20시간", values: { monthlyComparableWage: 1100000, weeklyHours: 20, weeklyPaidHolidayHours: 4, probationDiscount: 0 } }
+  ],
+  severance: [
+    { label: "3년·월 300만 원", values: { monthlyPay: 3000000, months: 36 } },
+    { label: "5년·월 400만 원", values: { monthlyPay: 4000000, months: 60 } }
+  ],
+  "loan-dsr": [
+    { label: "연소득 7천·주택 6억", values: { income: 70000000, homePrice: 600000000, loan: 300000000, rate: 4.2, years: 30, dsrLimit: 40, ltvLimit: 70 } },
+    { label: "연소득 1억·주택 8억", values: { income: 100000000, homePrice: 800000000, loan: 400000000, rate: 3.8, years: 30, dsrLimit: 40, ltvLimit: 70 } }
+  ],
+  "net-salary": [
+    { label: "연봉 4천만 원", values: { payType: 0, grossPay: 40000000, taxFreeMonthly: 200000, dependents: 1, children: 0, retirementIncluded: 0, withholdingRate: 100 } },
+    { label: "연봉 6천만 원", values: { payType: 0, grossPay: 60000000, taxFreeMonthly: 200000, dependents: 1, children: 1, retirementIncluded: 0, withholdingRate: 100 } }
+  ],
+  "loan-interest": [
+    { label: "1억·4%·30년", values: { principal: 100000000, rate: 4, years: 30, repaymentType: 0 } },
+    { label: "3억·3.5%·20년", values: { principal: 300000000, rate: 3.5, years: 20, repaymentType: 0 } }
+  ]
+};
+
 type TarotCardVisual = {
   number: number;
   ko: string;
@@ -308,6 +336,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     () => locale === "ko" ? getNextActions(activeCalculator.slug) : getLocalizedNextActions(locale, localizedCalculator.title),
     [activeCalculator.slug, locale, localizedCalculator.title]
   );
+  const quickPresets = CALCULATOR_QUICK_PRESETS[activeCalculator.slug] || [];
   const actionPlan = useMemo(
     () => locale === "ko" ? getActionPlan(activeCalculator.slug) : getLocalizedActionPlan(locale, localizedCalculator.title),
     [activeCalculator.slug, locale, localizedCalculator.title]
@@ -551,6 +580,29 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
             </button>
           </div>
         </div>
+        {quickPresets.length > 0 && (
+          <div className="mb-6 rounded-[18px] border border-brand/20 bg-brand/5 p-4" aria-label="빠른 계산 예시">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-extrabold text-ink">빠른 예시로 시작하기</p>
+              <span className="text-xs font-semibold text-slate-500">입력값을 불러온 뒤 직접 수정할 수 있습니다.</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {quickPresets.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => {
+                    Object.entries(preset.values).forEach(([fieldName, value]) => setValue(fieldName, value, { shouldDirty: true }));
+                    trackAnalyticsEvent("calculator_preset_select", { calculator_slug: activeCalculator.slug, preset_label: preset.label });
+                  }}
+                  className="rounded-full border border-brand/30 bg-white px-3 py-2 text-xs font-extrabold text-brand transition hover:bg-brand hover:text-white"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="grid gap-5">
           {usesUnifiedBirthDateInput && isSunriseSunset && (
             <label className="grid gap-2">

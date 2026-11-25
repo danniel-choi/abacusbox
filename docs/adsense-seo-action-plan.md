@@ -59,6 +59,16 @@ Search Console 데이터를 받은 뒤 최대 3~5개로 확정한다.
 
 계산 로직은 변경하지 않았으며, 정적 HTML 생성 결과와 canonical을 확인했다.
 
+이번 2단계 실행에서는 검색 실적을 확인할 수 없으므로 사용 의도가 명확하고 광고·유료 상품으로 확장하기 쉬운 5개 계산기를 임시 핵심군으로 선정했다.
+
+- `/calculators/minimum-wage`
+- `/calculators/severance`
+- `/calculators/loan-dsr`
+- `/calculators/net-salary`
+- `/calculators/loan-interest`
+
+위 페이지에는 대표 입력값을 한 번에 불러오는 빠른 예시 버튼을 추가하고, 예시 선택·계산기 진입·입력 시작·결과 보기·관련 계산기 클릭을 GA4 이벤트로 구분한다. 이는 검색량이나 수익이 높다는 의미가 아니라, 실제 사용 데이터가 쌓인 뒤 비교할 수 있도록 만든 운영 가설이다.
+
 각 페이지에 추가할 내용:
 
 - 사용 목적
