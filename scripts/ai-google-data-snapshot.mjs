@@ -103,8 +103,11 @@ async function run() {
 
     const inspectionTargets = [
       `${siteUrl.replace(/\/$/, "")}/`,
+      `${siteUrl.replace(/\/$/, "")}/calculators/minimum-wage`,
+      `${siteUrl.replace(/\/$/, "")}/calculators/severance`,
+      `${siteUrl.replace(/\/$/, "")}/calculators/net-salary`,
+      `${siteUrl.replace(/\/$/, "")}/calculators/loan-dsr`,
       `${siteUrl.replace(/\/$/, "")}/calculators/loan-interest`,
-      `${siteUrl.replace(/\/$/, "")}/calculators/loan-amortization`,
       `${siteUrl.replace(/\/$/, "")}/calculators/bmi`,
       `${siteUrl.replace(/\/$/, "")}/blog/loan-prepayment-before-refinance`
     ];
