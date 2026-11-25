@@ -1,44 +1,19 @@
 # AI Preview 사전 검증
 
-- 생성 시각: 2026-11-25T04:29:44.949Z
+- 생성 시각: 2026-11-25T09:02:04.981Z
 - 기준 ref: HEAD~1
 - 상태: READY
-- 보호 경로 자동 배포 승인: 활성화
+- 보호 경로 자동 배포 승인: 비활성화
 
 ## 변경 파일
 
-- .github/workflows/ai-quality.yml
-- app/blog/[slug]/page.tsx
-- components/AdminAccessClient.tsx
-- components/AdminAutomationClient.tsx
-- components/AdminModerationClient.tsx
-- components/CalculatorClient.tsx
-- components/InquiryBoardClient.tsx
-- docs/ai-data-contract.md
-- docs/ai-preflight.md
-- docs/ai-seo-check.md
-- docs/ai-site-audit.md
-- docs/revenue-5m-plan.md
-- functions/_lib/posts.js
-- functions/api/admin/session.js
-- functions/api/blog-image/[slug].js
-- functions/api/contact/[slug].js
-- functions/api/contact/index.js
-- functions/blog/[slug].js
-- lib/calculators.ts
-- lib/i18n.ts
-- migrations/0017_contact_visibility.sql
-- migrations/0018_preserve_existing_inquiry_privacy.sql
-- scripts/ai-preflight.mjs
+- .github/workflows/google-measurement.yml
+- docs/ai-auto-upgrade.md
+- docs/analytics-baseline-2026-11-25.md
 
 ## 보호 경로 변경
 
-- functions/api/admin/session.js
-- functions/api/contact/[slug].js
-- functions/api/contact/index.js
-- lib/calculators.ts
-- migrations/0017_contact_visibility.sql
-- migrations/0018_preserve_existing_inquiry_privacy.sql
+없음
 
 ## 운영 원칙
 

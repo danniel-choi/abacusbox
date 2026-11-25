@@ -40,4 +40,8 @@ Repository 또는 `production` Environment에 다음 값을 등록합니다.
 - `NEXT_PUBLIC_ADSENSE_IN_ARTICLE_SLOT`
 - `NEXT_PUBLIC_ADSENSE_BOTTOM_SLOT`
 
+## Google 측정 자동화
+
+`.github/workflows/google-measurement.yml`이 매일 읽기 전용 Search Console·GA4·AdSense 스냅샷을 시도한다. `GOOGLE_SERVICE_ACCOUNT_JSON`, `GA4_PROPERTY_ID`, `SEARCH_CONSOLE_SITE_URL`이 GitHub production environment에 없으면 실패하지 않고 측정 대기 상태로 종료한다. 수집된 결과는 30일 보관 artifact로만 저장하며 소스 코드나 로그에 인증값을 기록하지 않는다.
+
 공개 측정 ID와 광고 슬롯은 Variables에 넣고, 서비스 계정 JSON·API 토큰은 반드시 Secrets에 넣습니다.

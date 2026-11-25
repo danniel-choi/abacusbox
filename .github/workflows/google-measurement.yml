@@ -1,0 +1,49 @@
+name: Google measurement snapshot
+
+on:
+  schedule:
+    - cron: "15 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    name: Read-only Google data snapshot
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Collect read-only snapshot
+        env:
+          AI_ALLOW_EXTERNAL_READ: "1"
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID || vars.GA4_PROPERTY_ID }}
+          SEARCH_CONSOLE_SITE_URL: ${{ secrets.SEARCH_CONSOLE_SITE_URL || vars.SEARCH_CONSOLE_SITE_URL }}
+          ADSENSE_ACCOUNT_ID: ${{ secrets.ADSENSE_ACCOUNT_ID || vars.ADSENSE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ] || [ -z "$GA4_PROPERTY_ID" ] || [ -z "$SEARCH_CONSOLE_SITE_URL" ]; then
+            echo "Google 측정 시크릿 또는 속성값이 등록되지 않아 이번 실행은 대기 상태로 종료합니다."
+            exit 0
+          fi
+          npm run ai:google-data-snapshot
+
+      - name: Upload sanitized snapshot artifact
+        if: hashFiles('.ai-reports/google-data-*.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-measurement-${{ github.run_id }}
+          path: .ai-reports/google-data-*.json
+          retention-days: 30
