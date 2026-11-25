@@ -56,6 +56,18 @@
 
 AdSense API 호출 자체는 성공했지만 계정 목록 응답은 0개였다. 이는 광고 수익이 0원이라는 뜻이 아니며, 서비스 계정에 AdSense 계정 조회 권한이 없거나 API 계정 식별자·연결 계정이 일치하지 않을 가능성을 먼저 확인해야 한다. 수익·RPM은 이 응답만으로 기록하지 않는다.
 
+## 2026-11-25 재확인
+
+무료 사업자 템플릿 배포 후 읽기 전용 스냅샷을 다시 실행했다.
+
+- Search Console 합계: 노출 31회, 클릭 4회
+- GA4 확인 이벤트: `page_view` 351회, `ad_slot_view` 178회, `calculator_start` 63회
+- 신규 전환 이벤트: `template_download`, `template_lead_click`, `business_lead_submit` 모두 아직 관측되지 않음
+- AdSense API: 호출 성공, 계정 목록 0개, 수익·RPM 미확인
+- 사이트맵: `https://www.abacusbox.com/sitemap.xml`, 오류 0개·경고 0개
+
+신규 이벤트가 없다는 것은 사용자가 없다고 단정하는 근거가 아니다. 배포 후 실제 방문과 이벤트 전송이 발생했는지 7일 이상 관찰하고, GA4 DebugView 또는 이벤트 보고서에서 수집 여부를 다시 확인한다.
+
 ## 우선순위
 
 1. 공개 지표에서 관리자 경로 제거
