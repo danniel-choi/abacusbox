@@ -47,10 +47,24 @@ jobs:
           fi
           npm run ai:google-data-snapshot
 
+      - name: Generate revenue KPI report
+        if: hashFiles('.ai-reports/google-data-*.json') != ''
+        run: npm run ai:revenue-report
+
       - name: Upload sanitized snapshot artifact
         if: hashFiles('.ai-reports/google-data-*.json') != ''
         uses: actions/upload-artifact@v4
         with:
           name: google-measurement-${{ github.run_id }}
           path: .ai-reports/google-data-*.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload revenue KPI report
+        if: hashFiles('.ai-reports/revenue-kpi-*.md') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: revenue-kpi-${{ github.run_id }}
+          path: .ai-reports/revenue-kpi-*.md
+          if-no-files-found: error
           retention-days: 30
