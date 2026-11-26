@@ -60,7 +60,7 @@ ${list(ga4?.top?.slice(0, 10), (item) => `- \`${item.landingPage}\`: 세션 ${nu
 
 ## 이벤트 발생량
 
-${list(ga4?.events?.filter((item) => ["calculator_view", "calculator_start", "calculator_complete", "template_download", "business_lead_submit", "ad_slot_view"].includes(item.eventName)), (item) => `- \`${item.eventName}\`: ${number(item.eventCount)}`)}
+${list(ga4?.events?.filter((item) => ["calculator_view", "calculator_start", "calculator_result_view", "calculator_complete", "template_download", "business_lead_submit", "ad_slot_view"].includes(item.eventName)), (item) => `- \`${item.eventName}\`: ${number(item.eventCount)}`)}
 
 ## 색인 점검
 

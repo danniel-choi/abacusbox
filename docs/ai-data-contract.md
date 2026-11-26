@@ -1,6 +1,6 @@
 # 분석 데이터 계약 점검
 
-- 생성 시각: 2026-11-25T19:05:35.910Z
+- 생성 시각: 2026-11-26T14:51:15.595Z
 - 상태: PASS
 - 외부 API 호출: 수행하지 않음
 
@@ -9,6 +9,7 @@
 | 이벤트 | 소스 계측 | 허용 매개변수 |
 | --- | --- | --- |
 | `calculator_start` | 확인됨 | calculator_slug, completion_method, share_method |
+| `calculator_result_view` | 확인됨 | calculator_slug, completion_method, share_method |
 | `calculator_complete` | 확인됨 | calculator_slug, completion_method, share_method |
 | `share_click` | 확인됨 | calculator_slug, completion_method, share_method |
 

@@ -20,7 +20,7 @@
 | 영역 | 확인할 실제 지표 | 다음 행동을 결정하는 기준 |
 | --- | --- | --- |
 | 검색 | 노출, 클릭, CTR, 평균 순위, 페이지별 유입 | 노출이 생긴 URL부터 제목·설명·내부 링크를 개선 |
-| 계산기 | `calculator_view`, `calculator_start`, `calculator_complete` | 조회는 있으나 시작이 낮으면 입력 UI와 첫 화면 개선 |
+| 계산기 | `calculator_view`, `calculator_start`, `calculator_result_view`, `calculator_complete` | 시작은 있으나 결과 확인이 낮으면 결과 이동 버튼과 입력 흐름 개선 |
 | 광고 | 광고 노출수, 페이지 RPM, 슬롯별 가시성, CLS | 정책을 지키면서 가시성과 레이아웃 이동을 점검 |
 | 무료 상품 | `template_download`, `template_preview_start` | 다운로드가 생기면 맞춤 항목 수요와 후속 문의를 비교 |
 | B2B | `business_lead_submit`, 문의 유형, 데모 클릭 | 문의가 생긴 유형부터 요구사항·범위·견적을 검증 |
@@ -68,7 +68,7 @@
 
 ## 5. 현재 확인된 출발점
 
-2026-11-26 Google 읽기 전용 스냅샷 기준 최근 28일 Search Console은 클릭 4회, 노출 31회였다. GA4는 세션 64, 활성 사용자 55, 페이지 조회 424로 확인됐다. 이벤트는 `ad_slot_view` 203, `calculator_start` 73, `calculator_view` 8, `calculator_complete` 2였다. 무료 템플릿·B2B 전환 이벤트는 아직 관측되지 않았고, AdSense API에서는 계정 목록이 확인되지 않아 RPM·수익을 산정하지 않았다.
+2026-11-26 Google 읽기 전용 스냅샷 기준 최근 28일 Search Console은 클릭 4회, 노출 31회였다. GA4는 세션 64, 활성 사용자 55, 페이지 조회 424로 확인됐다. 이벤트는 `ad_slot_view` 203, `calculator_start` 73, `calculator_view` 8, `calculator_complete` 2였다. `calculator_result_view`는 이번 배포부터 관찰한다. 무료 템플릿·B2B 전환 이벤트는 아직 관측되지 않았고, AdSense API에서는 계정 목록이 확인되지 않아 RPM·수익을 산정하지 않았다.
 
 읽기 전용 Google 데이터 수집과 KPI 리포트 생성은 GitHub Actions에서 성공했으며, 스냅샷과 리포트 아티팩트를 30일 보관한다. Search Console 사이트맵 제출 쓰기 요청은 HTTP 403으로 남아 있으므로 제출 성공이나 색인 요청 성공으로 기록하지 않는다.
 
@@ -82,7 +82,7 @@
 기간:
 Search Console 클릭 / 노출 / CTR / 평균순위:
 GA4 세션 / 활성 사용자 / 페이지 조회:
-calculator_view / start / complete:
+calculator_view / start / result_view / complete:
 template_download / business_lead_submit:
 AdSense 페이지 RPM / 실제 수익:
 상품 순매출:

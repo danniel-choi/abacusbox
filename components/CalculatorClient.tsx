@@ -239,6 +239,8 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   const [savedResults, setSavedResults] = useState<SavedCalculatorResult[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const startedCalculatorRef = useRef<CalculatorSlug | null>(null);
+  const resultViewTrackedRef = useRef(false);
+  const resultElementVisibleRef = useRef(false);
   const defaults = useMemo(() => {
     return Object.fromEntries(
       calculator.fields.map((field) => {
@@ -264,6 +266,8 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     startedCalculatorRef.current = slug;
     calculatorInputStartedRef.current = false;
     initialValuesRef.current = null;
+    resultViewTrackedRef.current = false;
+    resultElementVisibleRef.current = false;
     trackAnalyticsEvent("calculator_view", { calculator_slug: slug });
   }, [slug]);
 
@@ -276,6 +280,9 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     if (calculatorInputStartedRef.current || serializedValues === initialValuesRef.current) return;
     calculatorInputStartedRef.current = true;
     trackAnalyticsEvent("calculator_start", { calculator_slug: slug });
+    if (!resultElementVisibleRef.current || resultViewTrackedRef.current) return;
+    resultViewTrackedRef.current = true;
+    trackAnalyticsEvent("calculator_result_view", { calculator_slug: slug });
   }, [slug, values]);
 
   useEffect(() => {
@@ -427,6 +434,24 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   }, [activeCalculator.fields, slug, values]);
 
   useEffect(() => {
+    const resultElement = resultRef.current;
+    if (!resultElement || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        resultElementVisibleRef.current = Boolean(entry?.isIntersecting);
+        if (!entry?.isIntersecting || !calculatorInputStartedRef.current || resultViewTrackedRef.current) return;
+        resultViewTrackedRef.current = true;
+        trackAnalyticsEvent("calculator_result_view", { calculator_slug: activeCalculator.slug });
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(resultElement);
+    return () => observer.disconnect();
+  }, [activeCalculator.slug, resultNonce]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
     const raw = window.localStorage.getItem(RECENT_CALCULATORS_STORAGE_KEY);
@@ -569,15 +594,27 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
             <p className="text-sm font-extrabold text-brand">{t("calculator.inputEyebrow")}</p>
             <h2 className="mt-1 text-xl font-extrabold text-ink sm:text-2xl">{t("calculator.inputTitle")}</h2>
           </div>
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="rounded-full bg-paper px-3 py-1 text-xs font-extrabold text-slate-500">{t("calculator.autoCalculate")}</span>
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={resetToDefaults}
-              className="rounded-full border border-line px-3 py-1 text-xs font-extrabold text-slate-500 transition hover:border-brand hover:text-brand"
+              onClick={() => {
+                trackAnalyticsEvent("calculator_complete", { calculator_slug: activeCalculator.slug, completion_method: "view_result_top" });
+                resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="rounded-full bg-brand px-3 py-2 text-xs font-extrabold text-white transition hover:bg-[#029b72] sm:hidden"
             >
-              {t("calculator.resetDefaults")}
+              {t("calculator.viewResult")}
             </button>
+            <div className="hidden items-center gap-2 sm:flex">
+              <span className="rounded-full bg-paper px-3 py-1 text-xs font-extrabold text-slate-500">{t("calculator.autoCalculate")}</span>
+              <button
+                type="button"
+                onClick={resetToDefaults}
+                className="rounded-full border border-line px-3 py-1 text-xs font-extrabold text-slate-500 transition hover:border-brand hover:text-brand"
+              >
+                {t("calculator.resetDefaults")}
+              </button>
+            </div>
           </div>
         </div>
         {quickPresets.length > 0 && (

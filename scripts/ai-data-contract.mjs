@@ -4,7 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const source = fs.readFileSync(path.join(root, "components", "CalculatorClient.tsx"), "utf8");
 const reportPath = path.join(root, "docs", "ai-data-contract.md");
-const requiredEvents = ["calculator_start", "calculator_complete", "share_click"];
+const requiredEvents = ["calculator_start", "calculator_result_view", "calculator_complete", "share_click"];
 const eventResults = requiredEvents.map((eventName) => ({ eventName, present: source.includes(`trackAnalyticsEvent(\"${eventName}\"`) }));
 const forbiddenParameterNames = ["input", "input_value", "result", "result_value", "salary", "birth_date", "email", "phone"];
 const eventCalls = [...source.matchAll(/trackAnalyticsEvent\("[^"]+",\s*\{([^}]*)\}/g)].map((match) => match[1]);

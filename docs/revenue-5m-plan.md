@@ -36,7 +36,7 @@ AdSense만으로 목표를 달성할 수 있는지는 실제 페이지뷰와 페
 - Search Console과 AdSense의 실제 데이터가 없다는 사실을 운영 문서에 명시
 - 월별 KPI 표를 만들고 추정값과 실제값을 분리
 
-이번 단계에서 계산기 페이지는 `calculator_view`, `calculator_start`, `calculator_complete` 이벤트를 사용한다. 개인정보·입력 원문·검색어는 이벤트에 보내지 않는다.
+이번 단계에서 계산기 페이지는 `calculator_view`, `calculator_start`, `calculator_result_view`, `calculator_complete` 이벤트를 사용한다. 결과 영역을 실제로 본 시점을 별도로 기록해 입력 시작 대비 결과 확인 흐름을 구분한다. 개인정보·입력 원문·검색어는 이벤트에 보내지 않는다.
 
 ### 2단계 — 고의도 계산기 20개 집중 개선
 
@@ -95,7 +95,7 @@ AdSense만으로 목표를 달성할 수 있는지는 실제 페이지뷰와 페
 
 ## 6. 다음 실행 순서
 
-1. 배포 후 GA4에서 `calculator_view/start/complete` 수집 여부 확인
+1. 배포 후 GA4에서 `calculator_view/start/result_view/complete` 수집 여부 확인
 2. 7일간 실제 데이터를 쌓고 상위 진입·사용 계산기 선정
 3. 선정된 3~5개 계산기의 콘텐츠·내부 링크·결과 공유 개선
 4. 무료 템플릿 1개를 공개하고 유료 수요를 측정
@@ -116,7 +116,7 @@ AdSense만으로 목표를 달성할 수 있는지는 실제 페이지뷰와 페
 
 기본 입력값은 사례용이며 사이트의 실제 RPM, 전환율, 계약 단가나 매출을 의미하지 않는다. 실제 데이터가 확보되면 이 플래너의 입력값을 월별 측정값으로 교체하고, 결과와 실제 매출의 차이를 별도 기록한다.
 
-2026-11-26 자동 측정 실행 결과, 최근 28일 Search Console은 클릭 4회·노출 31회, GA4는 세션 64·활성 사용자 55·페이지 조회 424로 확인됐다. GA4 이벤트는 `ad_slot_view` 203회, `calculator_start` 73회, `calculator_view` 8회, `calculator_complete` 2회였다. 이 수치는 수익이나 전환율을 의미하지 않으며, 표본이 작으므로 우선순위 판단용 출발점으로만 사용한다.
+2026-11-26 자동 측정 실행 결과, 최근 28일 Search Console은 클릭 4회·노출 31회, GA4는 세션 64·활성 사용자 55·페이지 조회 424로 확인됐다. GA4 이벤트는 `ad_slot_view` 203회, `calculator_start` 73회, `calculator_view` 8회, `calculator_complete` 2회였다. 새 `calculator_result_view` 이벤트는 배포 후부터 관찰한다. 이 수치는 수익이나 전환율을 의미하지 않으며, 표본이 작으므로 우선순위 판단용 출발점으로만 사용한다.
 
 Google 서비스 계정 기반 읽기 전용 스냅샷과 KPI 리포트는 GitHub Actions에서 자동 생성·보관되도록 연결했다. AdSense API 계정 목록은 여전히 확인되지 않아 광고 RPM·수익은 산정하지 않았다. Search Console 사이트맵 제출 쓰기 요청은 HTTP 403이므로 사이트맵 제출 상태 변경이나 색인 요청 성공으로 해석하지 않는다. 신규 무료 템플릿·B2B 전환 이벤트도 아직 관측되지 않았다.
 
