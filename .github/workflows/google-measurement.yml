@@ -58,6 +58,7 @@ jobs:
           name: google-measurement-${{ github.run_id }}
           path: .ai-reports/google-data-*.json
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
 
       - name: Upload revenue KPI report
@@ -67,4 +68,5 @@ jobs:
           name: revenue-kpi-${{ github.run_id }}
           path: .ai-reports/revenue-kpi-*.md
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
