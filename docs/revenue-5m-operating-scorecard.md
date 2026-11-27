@@ -68,7 +68,7 @@
 
 ## 5. 현재 확인된 출발점
 
-2026-11-26 Google 읽기 전용 스냅샷 기준 최근 28일 Search Console은 클릭 4회, 노출 31회였다. GA4는 세션 64, 활성 사용자 55, 페이지 조회 424로 확인됐다. 이벤트는 `ad_slot_view` 203, `calculator_start` 73, `calculator_view` 8, `calculator_complete` 2였다. `calculator_result_view`는 이번 배포부터 관찰한다. 무료 템플릿·B2B 전환 이벤트는 아직 관측되지 않았고, AdSense API에서는 계정 목록이 확인되지 않아 RPM·수익을 산정하지 않았다.
+2026-11-27 Google 읽기 전용 스냅샷 기준 최근 28일 Search Console은 클릭 4회, 노출 29회였다. GA4는 세션 74, 활성 사용자 62, 페이지 조회 516으로 확인됐다. 이벤트는 `ad_slot_view` 232, `calculator_start` 79, `calculator_view` 17, `calculator_complete` 6이었다. 페이지별로 리니지 클래식 축캐 계산기 시작 27·완료 6, MBTI 궁합 계산기 시작 7이 확인됐다. `calculator_result_view`는 배포 시점 이후부터 관찰한다. 무료 템플릿·B2B 전환 이벤트는 아직 관측되지 않았고, AdSense API 응답의 계정 수가 0으로 확인되어 RPM·수익을 산정하지 않았다.
 
 읽기 전용 Google 데이터 수집과 KPI 리포트 생성은 GitHub Actions에서 성공했으며, 스냅샷과 리포트 아티팩트를 30일 보관한다. Search Console 사이트맵 제출 쓰기 요청은 HTTP 403으로 남아 있으므로 제출 성공이나 색인 요청 성공으로 기록하지 않는다.
 
