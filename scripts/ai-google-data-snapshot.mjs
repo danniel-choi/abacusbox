@@ -156,7 +156,7 @@ async function run() {
       body: JSON.stringify({ dateRanges: [{ startDate: "28daysAgo", endDate: "yesterday" }], dimensions: [{ name: "landingPagePlusQueryString" }], metrics: [{ name: "sessions" }, { name: "activeUsers" }, { name: "screenPageViews" }], limit: "1000" })
     });
     const rows = (body.rows || []).map((row) => ({ landingPage: row.dimensionValues?.[0]?.value || "", sessions: Number(row.metricValues?.[0]?.value || 0), activeUsers: Number(row.metricValues?.[1]?.value || 0), screenPageViews: Number(row.metricValues?.[2]?.value || 0) })).sort((a, b) => b.sessions - a.sessions || b.screenPageViews - a.screenPageViews);
-    const trackedEventNames = ["calculator_view", "calculator_start", "calculator_result_view", "calculator_complete", "template_download", "business_lead_submit", "ad_slot_view"];
+    const trackedEventNames = ["calculator_view", "calculator_start", "calculator_result_view", "calculator_complete", "share_click", "template_download", "business_lead_submit", "ad_slot_view"];
     let events = null;
     let eventPages = null;
     try {

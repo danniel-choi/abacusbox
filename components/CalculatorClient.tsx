@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent, ReactNode } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -257,6 +257,11 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   });
   const values = useWatch({ control });
   const activeCalculator = calculator;
+  const trackResultView = useCallback(() => {
+    if (resultViewTrackedRef.current) return;
+    resultViewTrackedRef.current = true;
+    trackAnalyticsEvent("calculator_result_view", { calculator_slug: activeCalculator.slug });
+  }, [activeCalculator.slug]);
   const localizedCalculator = getLocalizedCalculatorPresentation(activeCalculator, locale);
   const calculatorInputStartedRef = useRef(false);
   const initialValuesRef = useRef<string | null>(null);
@@ -280,10 +285,8 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
     if (calculatorInputStartedRef.current || serializedValues === initialValuesRef.current) return;
     calculatorInputStartedRef.current = true;
     trackAnalyticsEvent("calculator_start", { calculator_slug: slug });
-    if (!resultElementVisibleRef.current || resultViewTrackedRef.current) return;
-    resultViewTrackedRef.current = true;
-    trackAnalyticsEvent("calculator_result_view", { calculator_slug: slug });
-  }, [slug, values]);
+    if (resultElementVisibleRef.current) trackResultView();
+  }, [slug, trackResultView, values]);
 
   useEffect(() => {
     reset(defaults);
@@ -441,15 +444,14 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
       ([entry]) => {
         resultElementVisibleRef.current = Boolean(entry?.isIntersecting);
         if (!entry?.isIntersecting || !calculatorInputStartedRef.current || resultViewTrackedRef.current) return;
-        resultViewTrackedRef.current = true;
-        trackAnalyticsEvent("calculator_result_view", { calculator_slug: activeCalculator.slug });
+        trackResultView();
       },
       { threshold: 0.35 }
     );
 
     observer.observe(resultElement);
     return () => observer.disconnect();
-  }, [activeCalculator.slug, resultNonce]);
+  }, [activeCalculator.slug, resultNonce, trackResultView]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -466,6 +468,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
   }
 
   function saveCurrentResult() {
+    trackResultView();
     trackAnalyticsEvent("calculator_complete", { calculator_slug: activeCalculator.slug, completion_method: "save" });
     const snapshot: SavedCalculatorResult = {
       id: `${activeCalculator.slug}-${Date.now()}`,
@@ -598,6 +601,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
             <button
               type="button"
               onClick={() => {
+                trackResultView();
                 trackAnalyticsEvent("calculator_complete", { calculator_slug: activeCalculator.slug, completion_method: "view_result_top" });
                 resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
@@ -793,6 +797,7 @@ export function CalculatorClient({ slug }: { slug: CalculatorSlug }) {
             <button
               type="button"
               onClick={() => {
+                trackResultView();
                 trackAnalyticsEvent("calculator_complete", { calculator_slug: activeCalculator.slug, completion_method: "view_result" });
                 resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
