@@ -11,6 +11,7 @@ if (process.env.AI_ALLOW_EXTERNAL_READ !== "1") {
 const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON || "{}");
 const propertyId = process.env.GA4_PROPERTY_ID;
 const searchConsoleSiteUrl = process.env.SEARCH_CONSOLE_SITE_URL;
+const adsenseAccountId = String(process.env.ADSENSE_ACCOUNT_ID || "").trim().replace(/^accounts\//, "");
 
 function base64Url(value) {
   return Buffer.from(value).toString("base64url");
@@ -98,7 +99,18 @@ async function run() {
 
   try {
     const body = await googleRequest("https://adsense.googleapis.com/v2/accounts?pageSize=10", token);
-    results.push(["AdSense", "PASS", `계정 API 응답 확인, 계정 ${Array.isArray(body.accounts) ? body.accounts.length : 0}개`]);
+    const accounts = Array.isArray(body.accounts) ? body.accounts : [];
+    const accountName = adsenseAccountId ? `accounts/${adsenseAccountId}` : accounts[0]?.name;
+    if (!accountName) {
+      results.push(["AdSense", "REVIEW", `계정 API 응답 확인, 계정 ${accounts.length}개`]);
+    } else {
+      try {
+        await googleRequest(`https://adsense.googleapis.com/v2/${encodeURIComponent(accountName)}`, token);
+        results.push(["AdSense", "PASS", `계정 API 응답 확인, 계정 ${accounts.length}개, 지정 계정 접근 확인`]);
+      } catch (error) {
+        results.push(["AdSense", "REVIEW", `목록 ${accounts.length}개, 지정 계정 접근 확인 필요 (${error.message})`]);
+      }
+    }
   } catch (error) {
     results.push(["AdSense", "FAIL", error.message]);
   }

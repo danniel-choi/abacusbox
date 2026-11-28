@@ -13,6 +13,7 @@ if (process.env.AI_ALLOW_EXTERNAL_READ !== "1") {
 const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON || "{}");
 const propertyId = process.env.GA4_PROPERTY_ID;
 const siteUrl = process.env.SEARCH_CONSOLE_SITE_URL;
+const configuredAdsenseAccountId = String(process.env.ADSENSE_ACCOUNT_ID || "").trim().replace(/^accounts\//, "");
 const reportDir = path.join(process.cwd(), ".ai-reports");
 const reportPath = path.join(reportDir, `google-data-${new Date().toISOString().slice(0, 10)}.json`);
 
@@ -65,6 +66,18 @@ function summarize(rows, keys) {
     totals: Object.fromEntries(keys.map((key) => [key, rows.reduce((total, row) => total + Number(row[key] || 0), 0)])),
     top: rows.slice(0, 20)
   };
+}
+
+function dateParts(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  return { year: String(year), month: String(month), day: String(day) };
+}
+
+function summarizeAdsenseReport(body) {
+  const headers = Array.isArray(body.headers) ? body.headers : [];
+  const cells = body.totals?.cells || body.rows?.[0]?.cells || [];
+  const totals = Object.fromEntries(headers.map((header, index) => [header.name, cells[index]?.value ?? null]));
+  return { headers: headers.map((header) => header.name), totals };
 }
 
 async function run() {
@@ -167,7 +180,44 @@ async function run() {
 
   try {
     const body = await request("https://adsense.googleapis.com/v2/accounts?pageSize=10", token);
-    report.adsense = { status: "PASS", accounts: (body.accounts || []).length };
+    const accounts = Array.isArray(body.accounts) ? body.accounts : [];
+    const accountName = configuredAdsenseAccountId
+      ? `accounts/${configuredAdsenseAccountId}`
+      : accounts[0]?.name;
+    if (!accountName) {
+      report.adsense = {
+        status: "PASS",
+        accounts: accounts.length,
+        report: { status: "REVIEW_REQUIRED", reason: "AdSense account list is empty" }
+      };
+    } else {
+      const start = dateParts(startDate);
+      const end = dateParts(endDate);
+      const query = new URLSearchParams();
+      ["PAGE_VIEWS", "IMPRESSIONS", "CLICKS", "ESTIMATED_EARNINGS", "PAGE_VIEWS_RPM"].forEach((metric) => query.append("metrics", metric));
+      query.set("dateRange", "CUSTOM");
+      query.set("startDate.year", start.year);
+      query.set("startDate.month", start.month);
+      query.set("startDate.day", start.day);
+      query.set("endDate.year", end.year);
+      query.set("endDate.month", end.month);
+      query.set("endDate.day", end.day);
+      query.set("currencyCode", "KRW");
+      try {
+        const reportBody = await request(`https://adsense.googleapis.com/v2/${encodeURIComponent(accountName)}/reports:generate?${query.toString()}`, token);
+        report.adsense = {
+          status: "PASS",
+          accounts: accounts.length,
+          report: { status: "PASS", currencyCode: "KRW", ...summarizeAdsenseReport(reportBody) }
+        };
+      } catch (error) {
+        report.adsense = {
+          status: "PASS",
+          accounts: accounts.length,
+          report: { status: "REVIEW_REQUIRED", reason: error.message }
+        };
+      }
+    }
   } catch (error) { report.adsense = { status: "FAIL", reason: error.message }; }
 
   fs.mkdirSync(reportDir, { recursive: true });

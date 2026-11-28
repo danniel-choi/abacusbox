@@ -33,6 +33,7 @@ function list(items, render) {
 const search = snapshot.searchConsole;
 const ga4 = snapshot.ga4;
 const adsense = snapshot.adsense;
+const adsenseReport = adsense?.report;
 const inspection = snapshot.urlInspection?.items || [];
 const indexIssues = inspection.filter((item) => item.verdict !== "PASS");
 
@@ -52,7 +53,9 @@ const markdown = `# AbacusBox 수익화 KPI 자동 보고서
 | GA4 활성 사용자 | ${value(ga4?.totals?.activeUsers !== undefined ? number(ga4.totals.activeUsers) : null)} |
 | GA4 페이지 조회 | ${value(ga4?.totals?.screenPageViews !== undefined ? number(ga4.totals.screenPageViews) : null)} |
 | AdSense 계정 응답 | ${value(adsense?.accounts !== undefined ? number(adsense.accounts) : null)}개 |
-| AdSense 수익·RPM | 별도 보고서 확인 필요 |
+| AdSense 보고서 상태 | ${value(adsenseReport?.status)} |
+| AdSense 예상 수입 | ${value(adsenseReport?.totals?.ESTIMATED_EARNINGS, " KRW")} |
+| AdSense 페이지 RPM | ${value(adsenseReport?.totals?.PAGE_VIEWS_RPM, " KRW")} |
 
 ## GA4 주요 랜딩 페이지
 
